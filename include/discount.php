@@ -9,7 +9,7 @@ $arDiscPrFilter = array(
 	"filtered", 
 	array(
 		"IBLOCK_TYPE" => "catalog",
-		"IBLOCK_ID" => "15",
+		"IBLOCK_ID" => "24",
 		"ELEMENT_SORT_FIELD" => "RAND",
 		"ELEMENT_SORT_ORDER" => "ASC",
 		"ELEMENT_SORT_FIELD2" => "",
@@ -99,8 +99,9 @@ $arDiscPrFilter = array(
 		"DISPLAY_IMG_WIDTH" => "178",
 		"DISPLAY_IMG_HEIGHT" => "178",
 		"PROPERTY_CODE_MOD" => array(
-			0 => "GUARANTEE",
-			1 => "",
+			0 => "",
+			1 => "GUARANTEE",
+			2 => "",
 		),
 		"COMPONENT_TEMPLATE" => "filtered",
 		"SECTION_USER_FIELDS" => array(

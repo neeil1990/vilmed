@@ -3,7 +3,7 @@
 if(!CModule::IncludeModule("iblock"))
 	return;	
 
-$arParams["IBLOCK_ID"] = "15";
+$arParams["IBLOCK_ID"] = "24";
 $arParams["DEPTH_LEVEL"] = "4";
 $arParams["CACHE_TIME"] = "36000000";
 

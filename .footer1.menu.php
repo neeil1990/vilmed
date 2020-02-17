@@ -1,4 +1,5 @@
-<?$aMenuLinks = Array(
+<?
+$aMenuLinks = Array(
 	Array(
 		"Как купить", 
 		"/howtobuy/", 
@@ -21,13 +22,6 @@
 		"" 
 	),
 	Array(
-		"Кредит", 
-		"/credit/", 
-		Array(), 
-		Array(), 
-		"" 
-	),
-	Array(
 		"Гарантия", 
 		"/warranty/", 
 		Array(), 
@@ -35,17 +29,11 @@
 		"" 
 	),
 	Array(
-		"Возврат и обмен", 
-		"/returns/", 
-		Array(), 
-		Array(), 
-		"" 
-	),
-	Array(
 		"Вопросы и ответы", 
-		"/faq/", 
+		"/about/informatsiya-dlya-pokupateley/", 
 		Array(), 
 		Array(), 
 		"" 
 	)
-);?>
+);
+?>

@@ -8,6 +8,7 @@ if(count($arResult["ITEMS"]) < 1)
 <div class="payment_methods">
 	<div class="h3"><?=GetMessage("PAYMENT_METHODS")?></div>
 	<ul>
+
 		<?foreach($arResult["ITEMS"] as $arItem):?>
 			<li>
 				<?if(!empty($arItem["DISPLAY_PROPERTIES"]["URL"])):?>
