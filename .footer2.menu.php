@@ -1,65 +1,53 @@
-<?$aMenuLinks = Array(
+<?
+$aMenuLinks = Array(
 	Array(
-		"Каталог продукции", 
+		"Популярные направления", 
 		"/catalog/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"Электроинструменты", 
-		"/catalog/elektroinstrumenty/", 
+		"Ларингоскопы", 
+		"/catalog/laringoskopy/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"Садовая техника", 
-		"/catalog/sadovaya_tekhnika/", 
+		"ЛОР оборудование, инструменты", 
+		"/catalog/lor-oborudovanie-instrumenty/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"Климатическая техника", 
-		"/catalog/klimaticheskaya_tekhnika/", 
+		"Офтальмология", 
+		"/catalog/oftalmologiya/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"Ручной инструмент", 
-		"/catalog/ruchnoy_instrument/", 
+		"Светильники медицинские", 
+		"/catalog/svetilniki-meditsinskie/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"Строительная техника", 
-		"/catalog/stroitelnaya_tekhnika/", 
+		"Проктология", 
+		"/catalog/proktologiya/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"Строительные материалы", 
-		"/catalog/stroitelnye_materialy/", 
-		Array(), 
-		Array(), 
-		"" 
-	),
-	Array(
-		"Электротехника", 
-		"/catalog/elektrotekhnika/", 
-		Array(), 
-		Array(), 
-		"" 
-	),
-	Array(
-		"Станки", 
-		"/catalog/stanki/", 
+		"Гинекология", 
+		"/catalog/ginekologiya/", 
 		Array(), 
 		Array(), 
 		"" 
 	)
-);?>
+);
+?>

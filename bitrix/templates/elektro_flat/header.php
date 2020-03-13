@@ -6,10 +6,7 @@ Loc::loadMessages(__FILE__);?>
 <html lang="<?=LANGUAGE_ID?>">
 <head>
 	<link rel="shortcut icon" type="image/x-icon" href="<?=SITE_TEMPLATE_PATH?>/favicon.ico" />
-	<link rel="apple-touch-icon" sizes="57x57" href="<?=SITE_TEMPLATE_PATH?>/images/apple-touch-icon-114.png" />
-	<link rel="apple-touch-icon" sizes="114x114" href="<?=SITE_TEMPLATE_PATH?>/images/apple-touch-icon-114.png" />
-	<link rel="apple-touch-icon" sizes="72x72" href="<?=SITE_TEMPLATE_PATH?>/images/apple-touch-icon-144.png" />
-	<link rel="apple-touch-icon" sizes="144x144" href="<?=SITE_TEMPLATE_PATH?>/images/apple-touch-icon-144.png" />
+
 	<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 	<title><?$APPLICATION->ShowTitle()?></title>
 	<meta property="og:title" content="<?=$APPLICATION->ShowTitle();?>"/>
@@ -22,7 +19,6 @@ Loc::loadMessages(__FILE__);?>
 	<link rel='image_src' href="<?=$APPLICATION->ShowProperty("ogimage")?>" />
 	<?$APPLICATION->SetPageProperty("ogtype", "website");
 	$APPLICATION->ShowProperty('google_prev_next');
-	$APPLICATION->SetPageProperty("ogimage", (CMain::IsHTTPS()? 'https' : 'http')."://".SITE_SERVER_NAME.SITE_TEMPLATE_PATH."/images/apple-touch-icon-144.png");
 	$APPLICATION->SetPageProperty("ogimagewidth", "144");
 	$APPLICATION->SetPageProperty("ogimageheight", "144");
 	Asset::getInstance()->addCss("https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
@@ -78,8 +74,8 @@ Loc::loadMessages(__FILE__);?>
 	    CElektroinstrument::getBackground(SITE_ID);
         CElektroinstrument::SetCannonicalURL($APPLICATION->GetCurPageParam());
     }?>
-   <script type="text/javascript" src="http://incut.prime-ltd.su/incut/incut.js" async></script>
-    <link rel="stylesheet" href="http://incut.prime-ltd.su/incut/incut.css">
+   <script type="text/javascript" src="https://incut.prime-ltd.su/incut/incut.js" async></script>
+    <link rel="stylesheet" href="https://incut.prime-ltd.su/incut/incut.css">
 </head>
 <body  <?=$APPLICATION->ShowProperty("bgClass")?><?=$APPLICATION->ShowProperty("backgroundColor")?><?=$APPLICATION->ShowProperty("backgroundImage")?>>
 	<?global $arSetting;?>

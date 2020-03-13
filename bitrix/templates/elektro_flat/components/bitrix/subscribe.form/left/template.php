@@ -11,9 +11,9 @@ $this->setFrameMode(true);?>
 </form>
 <div class="label">
 				При отправке данной формы Вы подтверждаете свою согласие на 
-<a href="/about/agreement/" target="_blank">обработку персональных данных</a> 
+<a href="/upload/compliance.pdf" target="_blank">обработку персональных данных</a> 
 и согласие с
-<a href="/about/agreement/" target="_blank">политикой конфиденциальности</a>.
+<a href="/upload/politics.pdf" target="_blank">политикой конфиденциальности</a>.
 			</div>
 
 

@@ -4,10 +4,12 @@ $arDiscPrFilter = array(
     "!PROPERTY_DISCOUNT" => false,
 	"PROPERTY_THIS_COLLECTION" => false
 );?>
-<?$APPLICATION->IncludeComponent("bitrix:catalog.section", "slider_left",
+<?$APPLICATION->IncludeComponent(
+	"bitrix:catalog.section", 
+	"slider_left", 
 	array(
 		"IBLOCK_TYPE" => "catalog",
-		"IBLOCK_ID" => "15",
+		"IBLOCK_ID" => "24",
 		"ELEMENT_SORT_FIELD" => "RAND",
 		"ELEMENT_SORT_ORDER" => "ASC",
 		"ELEMENT_SORT_FIELD2" => "",
@@ -17,8 +19,8 @@ $arDiscPrFilter = array(
 			1 => "SALELEADER",
 			2 => "DISCOUNT",
 		),
-		"SET_META_KEYWORDS" => "N",		
-		"SET_META_DESCRIPTION" => "N",		
+		"SET_META_KEYWORDS" => "N",
+		"SET_META_DESCRIPTION" => "N",
 		"SET_BROWSER_TITLE" => "N",
 		"SET_LAST_MODIFIED" => "N",
 		"INCLUDE_SUBSECTIONS" => "Y",
@@ -49,8 +51,8 @@ $arDiscPrFilter = array(
 		"SHOW_PRICE_COUNT" => "1",
 		"PRICE_VAT_INCLUDE" => "Y",
 		"USE_PRODUCT_QUANTITY" => "Y",
-		"ADD_PROPERTIES_TO_BASKET" => "",
-		"PARTIAL_PRODUCT_PROPERTIES" => "",
+		"ADD_PROPERTIES_TO_BASKET" => "N",
+		"PARTIAL_PRODUCT_PROPERTIES" => "N",
 		"PRODUCT_PROPERTIES" => "",
 		"DISPLAY_TOP_PAGER" => "N",
 		"DISPLAY_BOTTOM_PAGER" => "N",
@@ -68,7 +70,10 @@ $arDiscPrFilter = array(
 			1 => "PROP2",
 			2 => "PROP3",
 		),
-		"OFFERS_FIELD_CODE" => array(),
+		"OFFERS_FIELD_CODE" => array(
+			0 => "",
+			1 => "",
+		),
 		"OFFERS_PROPERTY_CODE" => array(
 			0 => "COLOR",
 			1 => "PROP2",
@@ -87,15 +92,34 @@ $arDiscPrFilter = array(
 		"CONVERT_CURRENCY" => "N",
 		"CURRENCY_ID" => "",
 		"HIDE_NOT_AVAILABLE" => "N",
-		"ADD_SECTIONS_CHAIN" => "N",		
+		"ADD_SECTIONS_CHAIN" => "N",
 		"COMPARE_PATH" => "",
 		"BACKGROUND_IMAGE" => "",
-		"DISABLE_INIT_JS_IN_COMPONENT" => "",
-		"DISPLAY_IMG_WIDTH"	 =>	"178",
-		"DISPLAY_IMG_HEIGHT" =>	"178",
+		"DISABLE_INIT_JS_IN_COMPONENT" => "N",
+		"DISPLAY_IMG_WIDTH" => "178",
+		"DISPLAY_IMG_HEIGHT" => "178",
 		"PROPERTY_CODE_MOD" => array(
 			0 => "GUARANTEE",
-		)
+		),
+		"COMPONENT_TEMPLATE" => "slider_left",
+		"SECTION_USER_FIELDS" => array(
+			0 => "",
+			1 => "",
+		),
+		"CUSTOM_FILTER" => "",
+		"HIDE_NOT_AVAILABLE_OFFERS" => "N",
+		"SEF_MODE" => "N",
+		"AJAX_MODE" => "N",
+		"AJAX_OPTION_JUMP" => "N",
+		"AJAX_OPTION_STYLE" => "Y",
+		"AJAX_OPTION_HISTORY" => "N",
+		"AJAX_OPTION_ADDITIONAL" => "",
+		"BROWSER_TITLE" => "-",
+		"META_KEYWORDS" => "-",
+		"META_DESCRIPTION" => "-",
+		"COMPOSITE_FRAME_MODE" => "A",
+		"COMPOSITE_FRAME_TYPE" => "AUTO",
+		"COMPATIBLE_MODE" => "Y"
 	),
 	false
 );?>

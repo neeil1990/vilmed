@@ -1,4 +1,6 @@
-<?$APPLICATION->IncludeComponent("bitrix:news.list", "slider", 
+<?$APPLICATION->IncludeComponent(
+	"bitrix:news.list", 
+	"slider", 
 	array(
 		"IBLOCK_TYPE" => "content",
 		"IBLOCK_ID" => "21",
@@ -8,9 +10,13 @@
 		"SORT_BY2" => "ACTIVE_FROM",
 		"SORT_ORDER2" => "DESC",
 		"FILTER_NAME" => "",
-		"FIELD_CODE" => array(),
+		"FIELD_CODE" => array(
+			0 => "",
+			1 => "",
+		),
 		"PROPERTY_CODE" => array(
-			0 => "URL"
+			0 => "URL",
+			1 => "",
 		),
 		"CHECK_DATES" => "Y",
 		"DETAIL_URL" => "",
@@ -42,7 +48,27 @@
 		"PAGER_DESC_NUMBERING" => "N",
 		"PAGER_DESC_NUMBERING_CACHE_TIME" => "3600",
 		"PAGER_SHOW_ALL" => "N",
-		"AJAX_OPTION_ADDITIONAL" => ""
+		"AJAX_OPTION_ADDITIONAL" => "",
+		"COMPONENT_TEMPLATE" => "slider",
+		"SET_BROWSER_TITLE" => "Y",
+		"SET_META_KEYWORDS" => "Y",
+		"SET_META_DESCRIPTION" => "Y",
+		"SET_LAST_MODIFIED" => "N",
+		"INCLUDE_SUBSECTIONS" => "Y",
+		"STRICT_SECTION_CHECK" => "N",
+		"SLIDER_AUTOPLAY" => "Y",
+		"SLIDER_DELAY" => "6000",
+		"SLIDER_ASPECT_RATIO" => "DEFAULT",
+		"PRICE_CODE" => array(
+		),
+		"PRICE_VAT_INCLUDE" => "Y",
+		"CONVERT_CURRENCY" => "N",
+		"COMPOSITE_FRAME_MODE" => "A",
+		"COMPOSITE_FRAME_TYPE" => "AUTO",
+		"PAGER_TITLE" => "Новости",
+		"PAGER_BASE_LINK_ENABLE" => "N",
+		"SHOW_404" => "N",
+		"MESSAGE_404" => ""
 	),
 	false
 );?>

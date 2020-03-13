@@ -41,7 +41,7 @@ use \Bitrix\Main\Localization\Loc;?>
 			<?//ARTICLE//
 			if($inArticle) {?>
 				<div class="article">
-					<?=Loc::getMessage("CT_BCS_BIGDATA_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?>
+					<?=Loc::getMessage("CT_BCS_BIGDATA_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?>
 				</div>
 			<?}
 			//RATING//
