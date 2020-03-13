@@ -1,6 +1,6 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
 
-  
+
 global $arSetting;
 $isPreviewImg = is_array($arResult["PREVIEW_IMG"]);
 $isDetailImg = is_array($arResult["DETAIL_IMG"]);
@@ -22,7 +22,7 @@ $arItemIDs = array(
 	"PRICE" => $strMainID."_price",
 	"BUY" => $strMainID."_buy",
 	"SUBSCRIBE" => $strMainID."_subscribe",
-	"DELAY" => $strMainID."_delay",	
+	"DELAY" => $strMainID."_delay",
 	"DELIVERY" => $strMainID."_geolocation_delivery",
 	"ARTICLE" => $strMainID."_article",
 	"MAIN_PROPERTIES" => $strMainID."_main_properties",
@@ -39,7 +39,7 @@ $arItemIDs = array(
 );
 $strObName = "ob".preg_replace("/[^a-zA-Z0-9_]/", "x", $strMainID);
 
-$templateData = array(	
+$templateData = array(
 	"CURRENCIES" => CUtil::PhpToJSObject($arResult["CURRENCIES"], false, true, true),
 	"JS_OBJ" => $strObName
 );
@@ -55,7 +55,7 @@ $templateData = array(
 			//DETAIL_GEOLOCATION_DELIVERY//
 			if(!!BX("geolocation-delivery-from"))
 				BX("<?=$arItemIDs['DELIVERY']?>").appendChild(BX.style(BX("geolocation-delivery-from"), "display", ""));
-			
+
 			//OFFERS_LIST_PROPS//
 			<?if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"]) && $arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {
 				foreach($arResult["OFFERS"] as $key_off => $arOffer) {?>
@@ -77,11 +77,11 @@ $templateData = array(
 					}
 				<?}
 			}?>
-			
+
 			//DETAIL_CONSTRUCTOR//
 			if(!!BX("set-constructor-from"))
 				BX("<?=$arItemIDs['CONSTRUCTOR']?>").appendChild(BX.style(BX("set-constructor-from"), "display", ""));
-			
+
 			//COLLECTION//
 			if(!!BX("collection-to"))
 				BX("collection-to").appendChild(BX.style(BX("collection-from"), "display", ""));
@@ -97,11 +97,11 @@ $templateData = array(
 			if(!!catalogReviewsList)
 				var catalogReviewsCount = catalogReviewsList.getAttribute("data-count");
 			tabReviewsCount.innerHTML = "(" + (!!catalogReviewsCount ? catalogReviewsCount : 0) + ")";
-			
+
 			//STORES//
 			if(!!BX("catalog-detail-stores-from"))
 				BX("<?=$arItemIDs['STORE']?>").appendChild(BX.style(BX("catalog-detail-stores-from"), "display", ""));
-			
+
 			//FANCYBOX//
 			$(".fancybox").fancybox({
 				"transitionIn": "elastic",
@@ -114,7 +114,7 @@ $templateData = array(
 				"titlePosition": "over",
 				"onComplete": function() {
 					$("#fancybox-title").css({"top":"100%", "bottom":"auto"});
-				} 
+				}
 			});
 		});
 	<?} elseif($arParams["AJAX_OPTION_HISTORY"] !== "Y" && $arParams["AJAX_MODE"] == "Y") {?>
@@ -122,15 +122,15 @@ $templateData = array(
 			//DETAIL_SUBSCRIBE//
 			if(!!BX("catalog-subscribe-from"))
 				BX("subscribe-to").appendChild(BX.style(BX("catalog-subscribe-from"), "display", ""));
-			
+
 			//DETAIL_GEOLOCATION_DELIVERY//
 			if(!!BX("geolocation-delivery-from"))
 				BX("delivery-to").appendChild(BX.style(BX("geolocation-delivery-from"), "display", ""));
-			
+
 			//DETAIL_CONSTRUCTOR//
 			if(!!BX("set-constructor-from"))
 				BX("constructor-to").appendChild(BX.style(BX("set-constructor-from"), "display", ""));
-			
+
 			//COLLECTION//
 			if(!!BX("collection-to"))
 				BX("collection-to").appendChild(BX.style(BX("collection-from"), "display", ""));
@@ -146,11 +146,11 @@ $templateData = array(
 			if(!!catalogReviewsList)
 				var catalogReviewsCount = catalogReviewsList.getAttribute("data-count");
 			tabReviewsCount.innerHTML = "(" + (!!catalogReviewsCount ? catalogReviewsCount : 0) + ")";
-			
+
 			//STORES//
 			if(!!BX("catalog-detail-stores-from"))
 				BX("stores-to").appendChild(BX.style(BX("catalog-detail-stores-from"), "display", ""));
-			
+
 			//FANCYBOX//
 			$(".fancybox").fancybox({
 				"transitionIn": "elastic",
@@ -163,7 +163,7 @@ $templateData = array(
 				"titlePosition": "over",
 				"onComplete": function() {
 					$("#fancybox-title").css({"top":"100%", "bottom":"auto"});
-				} 
+				}
 			});
 		});
 	<?} elseif($arParams["AJAX_MODE"] == "Y") {?>
@@ -171,12 +171,12 @@ $templateData = array(
 		var tabIndex = window.location.hash.replace("#tab", "") - 1;
 		if(tabIndex != -1)
 			$(".tabs__tab").eq(tabIndex).click();
-		
+
 		$(".tabs__tab a[href*=#tab]").click(function() {
 			var tabIndex = $(this).attr("href").replace(/(.*)#tab/, "") - 1;
 			$(".tabs__tab").eq(tabIndex).click();
 		});
-		
+
 		BX.ready(function() {
 			//FANCYBOX//
 			$(".fancybox").fancybox({
@@ -190,7 +190,7 @@ $templateData = array(
 				"titlePosition": "over",
 				"onComplete": function() {
 					$("#fancybox-title").css({"top":"100%", "bottom":"auto"});
-				} 
+				}
 			});
 		});
 	<?}
@@ -211,13 +211,13 @@ if(array_key_exists("PROPERTIES", $arResult) && is_array($arResult["PROPERTIES"]
 		$sticker .= "<span class='hit'>".GetMessage("CATALOG_ELEMENT_SALELEADER")."</span>";
 	//DISCOUNT//
 	if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {
-		if($arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {			
+		if($arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {
 			if($arResult["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"] > 0)
 				$sticker .= "<span class='discount'>-".$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"]."%</span>";
 			else
 				if(array_key_exists("DISCOUNT", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["DISCOUNT"]["VALUE"] == false)
 					$sticker .= "<span class='discount'>%</span>";
-		}	
+		}
 	} else {
 		if($arResult["MIN_PRICE"]["PERCENT"] > 0)
 			$sticker .= "<span class='discount'>-".$arResult["MIN_PRICE"]["PERCENT"]."%</span>";
@@ -275,7 +275,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									if($arOffer["MIN_PRICE"]["PERCENT"] > 0) {?>
 										<span class="discount">-<?=$arOffer["MIN_PRICE"]["PERCENT"]?>%</span>
 									<?} else {
-										if(array_key_exists("DISCOUNT", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["DISCOUNT"]["VALUE"] == false) {?>	
+										if(array_key_exists("DISCOUNT", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["DISCOUNT"]["VALUE"] == false) {?>
 											<span class="discount">%</span>
 										<?}
 									}?>
@@ -290,11 +290,11 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 						<?}
 						unset($offerName, $isOfferDetailImg);
 					//DETAIL_PICTURE//
-					} else {?>	
+					} else {?>
 						<div class="detail_picture">
 							<meta content="<?=($isDetailImg ? $arResult['DETAIL_PICTURE']['SRC'] : SITE_TEMPLATE_PATH.'/images/no-photo.jpg');?>" itemprop="image" />
 							<?if($isDetailImg) {?>
-								<a rel="lightbox" class="catalog-detail-images fancybox" href="<?=$arResult['DETAIL_PICTURE']['SRC']?>"> 
+								<a rel="lightbox" class="catalog-detail-images fancybox" href="<?=$arResult['DETAIL_PICTURE']['SRC']?>">
 									<img src="<?=$arResult['DETAIL_IMG']['SRC']?>" width="<?=$arResult['DETAIL_IMG']['WIDTH']?>" height="<?=$arResult['DETAIL_IMG']['HEIGHT']?>" alt="<?=$strAlt?>" title="<?=$strTitle?>" />
 							<?} else {?>
 								<div class="catalog-detail-images">
@@ -311,8 +311,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								<img class="manufacturer" src="<?=$arVendor['PREVIEW_PICTURE']['SRC']?>" width="<?=$arVendor['PREVIEW_PICTURE']['WIDTH']?>" height="<?=$arVendor['PREVIEW_PICTURE']['HEIGHT']?>" alt="<?=$arVendor['NAME']?>" title="<?=$arVendor['NAME']?>" />
 							<?}
 							unset($arVendor);?>
-							<?=($isDetailImg ? "</a>" : "</div>");?>							
-						</div>					
+							<?=($isDetailImg ? "</a>" : "</div>");?>
+						</div>
 					<?}?>
 				</div>
 				<?//DETAIL_VIDEO_MORE_PHOTO//
@@ -371,7 +371,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 				<?}?>
 			</div>
 		</div>
-		<div class="column second">			
+		<div class="column second">
 			<div class="catalog-detail">
 				<?if(!$arResult["COLLECTION"]["THIS"]) {?>
 					<div class="article_rating">
@@ -422,19 +422,19 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							<?}?>
 							<meta content="0" itemprop="worstRating" />
 							<meta content="5" itemprop="bestRating" />
-						</div>				
+						</div>
 					</div>
 					<?//DETAIL_PREVIEW_TEXT//
-					if(!empty($arResult["PREVIEW_TEXT"])) {?>				
+					if(!empty($arResult["PREVIEW_TEXT"])) {?>
 						<div class="catalog-detail-preview-text" itemprop="description">
 							<?=$arResult["PREVIEW_TEXT"]?>
 						</div>
 					<?}
-					//DETAIL_GIFT//					
+					//DETAIL_GIFT//
 					if(!empty($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"])) {?>
 						<div class="catalog-detail-gift">
 							<div class="h3"><?=$arResult["PROPERTIES"]["GIFT"]["NAME"]?></div>
-							<?foreach($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"] as $key => $arGift) {?>							
+							<?foreach($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"] as $key => $arGift) {?>
 								<div class="gift-item">
 									<div class="gift-image-cont">
 										<div class="gift-image">
@@ -465,7 +465,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										$arSkuProps[] = array(
 											"ID" => $arProp["ID"],
 											"SHOW_MODE" => $arProp["SHOW_MODE"]
-										);?>						
+										);?>
 										<div class="offer_block" id="<?=$arItemIDs['PROP'].$arProp['ID'];?>_cont">
 											<div class="h3"><?=htmlspecialcharsex($arProp["NAME"]);?></div>
 											<ul id="<?=$arItemIDs['PROP'].$arProp['ID'];?>_list" class="<?=$arProp['CODE']?><?=$arProp['SHOW_MODE'] == 'PICT' ? ' COLOR' : '';?>">
@@ -551,15 +551,15 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {
 								if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST") {
 									foreach($arResult["OFFERS"] as $key => $arOffer) {?>
-										<div id="detail_price_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" class="detail_price<?=($key == $arResult['OFFERS_SELECTED'] ? '' : ' hidden');?>">											
-											<?if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>										
+										<div id="detail_price_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" class="detail_price<?=($key == $arResult['OFFERS_SELECTED'] ? '' : ' hidden');?>">
+											<?if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
 												<span class="catalog-detail-item-no-price">
 													<?=GetMessage("CATALOG_ELEMENT_NO_PRICE")?>
 													<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arOffer["CATALOG_MEASURE_RATIO"] : "1")." ".$arOffer["CATALOG_MEASURE_NAME"];?>
-												</span>																	
+												</span>
 											<?} else {
 												if($arOffer["MIN_PRICE"]["RATIO_PRICE"] < $arOffer["MIN_PRICE"]["RATIO_BASE_PRICE"]) {?>
-													<span class="catalog-detail-item-price-old">											
+													<span class="catalog-detail-item-price-old">
 														<?=$arOffer["MIN_PRICE"]["PRINT_RATIO_BASE_PRICE"];?>
 													</span>
 													<span class="catalog-detail-item-price-percent">
@@ -594,7 +594,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 																	break;
 																}
 															}
-															
+
 															if($itemPrice) {?>
 																<div class="catalog-detail-price-ranges__row">
 																	<div class="catalog-detail-price-ranges__sort">
@@ -635,7 +635,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 															<div class="catalog-detail-price-ranges__dots"></div>
 															<?if($countRange > 1) {?>
 																<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM");?></span>
-															<?}?>	
+															<?}?>
 															<div class="catalog-detail-price-ranges__price"><?=$oneRange["DISCOUNT_PRICE"]?></div>
 															<span class="unit"><?=$oneRange["PRINT_CURRENCY"]?></span>
 															<?if($countRange > 1):?>
@@ -649,30 +649,30 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 														</div>
 														<?unset($countRange);
 													}?>
-												</div>	
+												</div>
 											<?}
 											//OFFERS_AVAILABILITY//?>
 											<div class="available">
 												<?if($arOffer["CAN_BUY"]) {?>
-                                                   <?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') {?>                                          
+                                                   <?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') {?>
                                                         <div class="avl">
                                                             <i class="fa fa-check-circle"></i>
                                                             <span>
                                                                 <?=(!empty($arParams["MESS_SHOW_MAX_QUANTITY"]) ? $arParams["MESS_SHOW_MAX_QUANTITY"] : GetMessage("CATALOG_ELEMENT_AVAILABLE") ).' ';
                                                                 if($arParams['SHOW_MAX_QUANTITY'] === 'M') {
-                                                                    if($arOffer["CHECK_QUANTITY"] && $inProductQnt) { 
+                                                                    if($arOffer["CHECK_QUANTITY"] && $inProductQnt) {
                                                                         if($arParams['RELATIVE_QUANTITY_FACTOR']>$arOffer["CATALOG_QUANTITY"])
                                                                             echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_FEW");
                                                                         else
                                                                             echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_MANY");
-                                                                    }    
-                                                                }else{                                                                      
+                                                                    }
+                                                                }else{
 													                if($arOffer["CHECK_QUANTITY"] && $inProductQnt)
 																        echo " ".$arOffer["CATALOG_QUANTITY"];
                                                                 }?>
                                                             </span>
-                                                        </div>                                                                   
-                                                   <?}?>    
+                                                        </div>
+                                                   <?}?>
 												<?}elseif(!$arOffer["CAN_BUY"]) {?>
 													<meta content="OutOfStock" itemprop="availability" />
 													<div class="not_avl">
@@ -690,7 +690,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											<span class="catalog-detail-item-no-price">
 												<?=GetMessage("CATALOG_ELEMENT_NO_PRICE")?>
 												<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"]." ".$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?>
-											</span>									
+											</span>
 										<?} else {
 											if($arResult["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] < $arResult["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_BASE_PRICE"]) {?>
 												<span class="catalog-detail-item-price-old">
@@ -702,10 +702,10 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											<?}?>
 											<span class="catalog-detail-item-price">
 												<?=($arResult["TOTAL_OFFERS"]["FROM"] == "Y" ? "<span class='from'>".GetMessage("CATALOG_ELEMENT_FROM")."</span> " : "").$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["PRINT_RATIO_PRICE"];?>
-												<span class="unit">													
+												<span class="unit">
 													<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"] : "1")." ".$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?>
 												</span>
-											</span>											
+											</span>
 											<?if($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"])) {?>
 												<span class="catalog-detail-item-price-reference">
 													<?=CCurrencyLang::CurrencyFormat($arResult["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CURRENCY"], true);?>
@@ -716,40 +716,40 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										<meta itemprop="priceCurrency" content="<?=$arResult['TOTAL_OFFERS']['MIN_PRICE']['CURRENCY']?>" />
 										<?//OFFERS_LIST_AVAILABILITY//?>
 										<div class="available">
-											<?if($arResult["TOTAL_OFFERS"]["QUANTITY"] > 0 || !$arResult["CHECK_QUANTITY"]) {?>					
+											<?if($arResult["TOTAL_OFFERS"]["QUANTITY"] > 0 || !$arResult["CHECK_QUANTITY"]) {?>
 												<?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') {?>
                                                     <meta content="InStock" itemprop="availability" />
                                                     <div class="avl">
                                                         <i class="fa fa-check-circle"></i>
                                                         <span>
                                                             <?=(!empty($arParams["MESS_SHOW_MAX_QUANTITY"]) ? $arParams["MESS_SHOW_MAX_QUANTITY"] : GetMessage("CATALOG_ELEMENT_AVAILABLE") ).' ';
-                                                            if($arParams['SHOW_MAX_QUANTITY'] === 'M') {                                  
+                                                            if($arParams['SHOW_MAX_QUANTITY'] === 'M') {
                                                                 if($arResult["TOTAL_OFFERS"]["QUANTITY"] > 0 && $inProductQnt) {
                                                                     if($arParams['RELATIVE_QUANTITY_FACTOR']>$arResult["TOTAL_OFFERS"]["QUANTITY"])
                                                                         echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_FEW");
                                                                     else
                                                                         echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_MANY");
-                                                                } 
-                                                            }else{                                                                                 
+                                                                }
+                                                            }else{
 												                if($arResult["TOTAL_OFFERS"]["QUANTITY"] > 0 && $inProductQnt)
 													                echo " ".$arResult["TOTAL_OFFERS"]["QUANTITY"];
                                                             }?>
                                                         </span>
                                                     </div>
-                                               <?}?>  
+                                               <?}?>
 											<?} else {?>
 												<meta content="OutOfStock" itemprop="availability" />
 												<div class="not_avl">
 													<i class="fa fa-times-circle"></i>
 													<span><?=GetMessage("CATALOG_ELEMENT_NOT_AVAILABLE")?></span>
 												</div>
-											<?}?>											
-										</div>								
-									</div>						
-								<?}						
-								//OFFERS_TIME_BUY_QUANTITY//								
+											<?}?>
+										</div>
+									</div>
+								<?}
+								//OFFERS_TIME_BUY_QUANTITY//
 								if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
-									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {								
+									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
 										if($arResult["TOTAL_OFFERS"]["QUANTITY"] > 0) {
 											$startQnt = $arResult["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] ? $arResult["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] : $arResult["TOTAL_OFFERS"]["QUANTITY"];
 											$currQnt = $arResult["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arResult["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arResult["TOTAL_OFFERS"]["QUANTITY"];
@@ -757,7 +757,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										} else {
 											$currQntPercent = 100;
 										}?>
-										
+
 										<div class="progress_bar_block">
 											<span class="progress_bar_title"><?=GetMessage("CATALOG_ELEMENT_QUANTITY_PERCENT")?></span>
 											<div class="progress_bar_cont">
@@ -771,14 +771,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								}
 							//DETAIL_PRICE//
 							} else {
-								if($arResult["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>										
+								if($arResult["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
 									<span class="catalog-detail-item-no-price">
 										<?=GetMessage("CATALOG_ELEMENT_NO_PRICE")?>
 										<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arResult["CATALOG_MEASURE_RATIO"] : "1")." ".$arResult["CATALOG_MEASURE_NAME"];?>
-									</span>																	
+									</span>
 								<?} else {
 									if($arResult["MIN_PRICE"]["RATIO_PRICE"] < $arResult["MIN_PRICE"]["RATIO_BASE_PRICE"]) {?>
-										<span class="catalog-detail-item-price-old">											
+										<span class="catalog-detail-item-price-old">
 											<?=$arResult["MIN_PRICE"]["PRINT_RATIO_BASE_PRICE"];?>
 										</span>
 										<span class="catalog-detail-item-price-percent">
@@ -789,7 +789,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										<span class="catalog-detail-item-price-current">
 											<?if($arResult["COLLECTION"]["THIS"]) {?>
 												<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM");?></span>
-											<?}?>	
+											<?}?>
 											<?=$arResult["MIN_PRICE"]["PRINT_RATIO_PRICE"]?>
 										</span>
 										<span class="unit">
@@ -803,7 +803,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									<?}
 								}?>
 								<meta itemprop="price" content="<?=$arResult['MIN_PRICE']['RATIO_PRICE']?>" />
-								<meta itemprop="priceCurrency" content="<?=$arResult['MIN_PRICE']['CURRENCY']?>" />								
+								<meta itemprop="priceCurrency" content="<?=$arResult['MIN_PRICE']['CURRENCY']?>" />
 								<?//DETAIL_PRICE_RANGES//
 								if($arParams["USE_PRICE_COUNT"] && count($arResult["ITEM_QUANTITY_RANGES"]) > 1) {?>
 									<div class="catalog-detail-price-ranges">
@@ -856,7 +856,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 												<div class="catalog-detail-price-ranges__dots"></div>
 												<?if($countRange > 1) {?>
 													<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM");?></span>
-												<?}?>	
+												<?}?>
 												<div class="catalog-detail-price-ranges__price"><?=$oneRange["DISCOUNT_PRICE"]?></div>
 												<span class="unit"><?=$oneRange["PRINT_CURRENCY"]?></span>
 												<?if($countRange > 1):?>
@@ -881,15 +881,15 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										<div class="avl">
 											<i class="fa fa-check-circle"></i>
 											<span>
-                                                <?=(!empty($arParams["MESS_SHOW_MAX_QUANTITY"]) ? $arParams["MESS_SHOW_MAX_QUANTITY"] : GetMessage("CATALOG_ELEMENT_AVAILABLE") ).' '; 												
-												if($arParams['SHOW_MAX_QUANTITY'] === 'M') { 
+                                                <?=(!empty($arParams["MESS_SHOW_MAX_QUANTITY"]) ? $arParams["MESS_SHOW_MAX_QUANTITY"] : GetMessage("CATALOG_ELEMENT_AVAILABLE") ).' ';
+												if($arParams['SHOW_MAX_QUANTITY'] === 'M') {
                                                     if($arResult["CHECK_QUANTITY"] && $inProductQnt && !$arResult["COLLECTION"]["THIS"]) {
                                                         if($arParams['RELATIVE_QUANTITY_FACTOR']>$arResult["CATALOG_QUANTITY"])
                                                             echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_FEW");
                                                         else
-                                                            echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_MANY");                       
+                                                            echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_MANY");
                                                     }
-                                                }else{   
+                                                }else{
                                                     if($arResult["CHECK_QUANTITY"] && $inProductQnt && !$arResult["COLLECTION"]["THIS"])
 	                                                    echo " ".$arResult["CATALOG_QUANTITY"];
                                                 }?>
@@ -903,14 +903,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											<span><?=GetMessage("CATALOG_ELEMENT_NOT_AVAILABLE")?></span>
 										</div>
 									<?}?>
-								</div>						
+								</div>
 								<?//DETAIL_TIME_BUY_QUANTITY//
 								if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
 									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
 										if($arResult["CAN_BUY"]) {
 											if($arResult["CHECK_QUANTITY"]) {
 												$startQnt = $arResult["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] ? $arResult["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] : $arResult["CATALOG_QUANTITY"];
-												$currQnt = $arResult["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arResult["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arResult["CATALOG_QUANTITY"];			
+												$currQnt = $arResult["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arResult["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arResult["CATALOG_QUANTITY"];
 												$currQntPercent = round($currQnt * 100 / $startQnt);
 											} else {
 												$currQntPercent = 100;
@@ -927,24 +927,24 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											</div>
 										<?}
 									}
-								}										
+								}
 							}?>
 						</div>
 						<?//OFFERS_DETAIL_TIME_BUY_TIMER_BUY//?>
 						<div class="catalog-detail-buy" id="<?=$arItemIDs['BUY'];?>">
-							<?if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {						
+							<?if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {
 								//OFFERS_TIME_BUY_TIMER//
 								if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
-									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {								
+									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
 										$new_date = ParseDateTime($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
-										<script type="text/javascript">												
-											$(function() {														
+										<script type="text/javascript">
+											$(function() {
 												$("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
 													until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
 													format: "DHMS",
 													expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
 												});
-											});												
+											});
 										</script>
 										<div class="time_buy_cont">
 											<div class="time_buy_clock">
@@ -953,7 +953,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											<div class="time_buy_timer" id="time_buy_timer_<?=$arItemIDs['ID']?>"></div>
 										</div>
 									<?}
-								}						
+								}
 								//OFFERS_BUY//
 								if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST") {
 									foreach($arResult["OFFERS"] as $key => $arOffer) {?>
@@ -966,10 +966,10 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											}
 											$properties = implode("; ", $properties);
 											$elementName = !empty($properties) ? $offerName." (".$properties.")" : $offerName;
-											if($arOffer["CAN_BUY"]) {												
+											if($arOffer["CAN_BUY"]) {
 												if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
 													//OFFERS_ASK_PRICE//?>
-													<form action="javascript:void(0)">										
+													<form action="javascript:void(0)">
 														<input type="hidden" name="ACTION" value="ask_price" />
 														<input type="hidden" name="NAME" value="<?=$elementName?>" />
 														<button type="button" id="<?=$arItemIDs['POPUP_BTN'].'_'.$arOffer['ID']?>" class="btn_buy apuo_detail"><i class="fa fa-comment-o"></i><span><?=GetMessage("CATALOG_ELEMENT_ASK_PRICE")?></span></button>
@@ -984,12 +984,12 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 															</div>
 															<input type="hidden" name="ID" class="offer_id" value="<?=$arOffer['ID']?>" />
 															<?$props = array();
-															if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {		
+															if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 																$props[] = array(
 																	"NAME" => $arOffer["PROPERTIES"]["ARTNUMBER"]["NAME"],
 																	"CODE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["CODE"],
 																	"VALUE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-																);																
+																);
 															}
 															foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
 																if($propOffer["PROPERTY_TYPE"] != "S") {
@@ -1004,16 +1004,16 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 															<input type="hidden" name="PROPS" id="props_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" value="<?=$props?>" />
 															<?if(!empty($arResult["SELECT_PROPS"])) {?>
 																<input type="hidden" name="SELECT_PROPS" id="select_props_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" value="" />
-															<?}?>															
+															<?}?>
 															<button  type="button" class="btn_buy detail" name="add2basket"><i class="fa fa-shopping-cart"></i><span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span></button>
 														</form>
 														<?//OFFERS_BUY_ONE_CLICK//
 														if($inBtnBoc) {?>
 															<button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage('CATALOG_ELEMENT_BOC')?></span></button>
 														<?}
-														//OFFERS_CHEAPER					
+														//OFFERS_CHEAPER
 														if($inBtnCheaper) {?>
-															<form action="javascript:void(0)" class="cheaper_form">										
+															<form action="javascript:void(0)" class="cheaper_form">
 																<input type="hidden" name="ACTION" value="cheaper" />
 																<input type="hidden" name="NAME" value="<?=$elementName?>" />
 																<input type="hidden" name="PRICE" value="<?=$arOffer['MIN_PRICE']['PRINT_RATIO_PRICE']?>" />
@@ -1024,22 +1024,22 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 												<?}
 											} elseif(!$arOffer["CAN_BUY"]) {
 												//OFFERS_UNDER_ORDER?>
-												<form action="javascript:void(0)" class="apuo_form">										
+												<form action="javascript:void(0)" class="apuo_form">
 													<input type="hidden" name="ACTION" value="under_order" />
 													<input type="hidden" name="NAME" value="<?=$elementName?>" />
 													<button type="button" id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail"><i class="fa fa-clock-o"></i><span class="short"><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></button>
 												</form>
-											<?}?>								
+											<?}?>
 										</div>
 									<?}?>
-								<div id="<?=$arItemIDs['BTN_BUY']?>"  class="hidden_btn_offer_prediction"></div>	
-									
+								<div id="<?=$arItemIDs['BTN_BUY']?>"  class="hidden_btn_offer_prediction"></div>
+
 								<?//OFFERS_LIST_BUY//
 								} elseif($arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {?>
-									<div class="buy_more_detail">								
+									<div class="buy_more_detail">
 										<script type="text/javascript">
 											$(function() {
-												$("button[name=choose_offer]").click(function() {											
+												$("button[name=choose_offer]").click(function() {
 													var destination = $("#catalog-detail-offers-list").offset().top;
 													$("html:not(:animated),body:not(:animated)").animate({scrollTop: destination}, 500);
 													return false;
@@ -1047,22 +1047,22 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											});
 										</script>
 										<button class="btn_buy detail" name="choose_offer"><?=GetMessage('CATALOG_ELEMENT_CHOOSE_OFFER')?></button>
-									</div>							
+									</div>
 								<?}
-							} else {						
+							} else {
 								//DETAIL_TIME_BUY_TIMER//
 								if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
 									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
 										if($arResult["CAN_BUY"]) {
 											$new_date = ParseDateTime($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
-											<script type="text/javascript">												
-												$(function() {														
+											<script type="text/javascript">
+												$(function() {
 													$("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
 														until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
 														format: "DHMS",
 														expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
 													});
-												});												
+												});
 											</script>
 											<div class="time_buy_cont">
 												<div class="time_buy_clock">
@@ -1073,8 +1073,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										<?}
 									}
 								}
-								//DETAIL_BUY//?>						
-								<div class="buy_more_detail">							
+								//DETAIL_BUY//?>
+								<div class="buy_more_detail">
 									<?if($arResult["CAN_BUY"]) {
 										if($arResult["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
 											//DETAIL_ASK_PRICE//?>
@@ -1087,10 +1087,10 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 														<input type="text" id="quantity_<?=$arItemIDs['ID']?>" name="quantity" class="quantity" value="<?=(!empty($arResult['MIN_PRICE']["QUANTITY_FROM"])? $arResult['MIN_PRICE']["QUANTITY_FROM"] : $arResult['MIN_PRICE']['MIN_QUANTITY'])?>"/>
 														<a href="javascript:void(0)" class="plus" id="quantity_plus_<?=$arItemIDs['ID']?>"><span>+</span></a>
 													</div>
-												<?}?>	
+												<?}?>
 												<input type="hidden" name="ID" class="id" value="<?=$arResult['ID']?>" />
 												<?$props = array();
-												if(!empty($arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {				
+												if(!empty($arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 													$props[] = array(
 														"NAME" => $arResult["PROPERTIES"]["ARTNUMBER"]["NAME"],
 														"CODE" => $arResult["PROPERTIES"]["ARTNUMBER"]["CODE"],
@@ -1115,14 +1115,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 															$("html:not(:animated),body:not(:animated)").animate({scrollTop: destination-70}, 500);
 															return false;
 														}
-													</script>	
-												<?}?>	
-											</form>									
+													</script>
+												<?}?>
+											</form>
 											<?//DETAIL_BUY_ONE_CLICK//
 											if($inBtnBoc && !$arResult["COLLECTION"]["THIS"]) {?>
 												<button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage('CATALOG_ELEMENT_BOC')?></span></button>
 											<?}
-											//DETAIL_CHEAPER					
+											//DETAIL_CHEAPER
 											if($inBtnCheaper) {?>
 												<a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo cheaper_anch" href="javascript:void(0)" rel="nofollow" data-action="cheaper"><i class="fa fa-commenting-o"></i><span><?=GetMessage('CATALOG_ELEMENT_CHEAPER')?></span></a>
 											<?}
@@ -1130,7 +1130,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									} elseif(!$arResult["CAN_BUY"]) {
 										//DETAIL_UNDER_ORDER//?>
 										<a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></a>
-									<?}?>										
+									<?}?>
 								</div>
 							<?}?>
 						</div>
@@ -1141,9 +1141,9 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							<?}?>
 							<?if($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y") {
 								if(isset($arResult["JS_OFFERS"]) && !empty($arResult["JS_OFFERS"])):
-									if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):		
+									if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):
 										$arOffer = $arResult["JS_OFFERS"][$arResult["OFFERS_SELECTED"]];
-										if(!$arOffer["CAN_BUY"] && $arResult["CATALOG_SUBSCRIBE"] == 'Y'):?>		
+										if(!$arOffer["CAN_BUY"] && $arResult["CATALOG_SUBSCRIBE"] == 'Y'):?>
 											<div id="catalog-subscribe-from" class="catalog-subscribe-from">
 												<?$APPLICATION->includeComponent("bitrix:catalog.product.subscribe", "",
 													array(
@@ -1192,12 +1192,12 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											foreach($arResult["OFFERS"] as $key => $arOffer) {
 												if($arOffer["CAN_BUY"] && $arOffer["MIN_PRICE"]["RATIO_PRICE"] > 0) {
 													$props = array();
-													if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {		
+													if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 														$props[] = array(
 															"NAME" => $arOffer["PROPERTIES"]["ARTNUMBER"]["NAME"],
 															"CODE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["CODE"],
 															"VALUE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-														);																
+														);
 													}
 													foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
 														if($propOffer["PROPERTY_TYPE"] != "S") {
@@ -1219,7 +1219,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									} else {
 										if($arResult["CAN_BUY"] && $arResult["MIN_PRICE"]["RATIO_PRICE"] > 0) {
 											$props = array();
-											if(!empty($arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {				
+											if(!empty($arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 												$props[] = array(
 													"NAME" => $arResult["PROPERTIES"]["ARTNUMBER"]["NAME"],
 													"CODE" => $arResult["PROPERTIES"]["ARTNUMBER"]["CODE"],
@@ -1234,11 +1234,11 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									}?>
 								</div>
 							</div>
-						<?}?>	
+						<?}?>
 						<?//DETAIL_DELIVERY//
 						if(!empty($arResult["PROPERTIES"]["DELIVERY"]["VALUE"])) {?>
 							<div class="catalog-detail-delivery">
-								<span class="name"><?=$arResult["PROPERTIES"]["DELIVERY"]["NAME"]?></span> 
+								<span class="name"><?=$arResult["PROPERTIES"]["DELIVERY"]["NAME"]?></span>
 								<span class="val"><?=$arResult["PROPERTIES"]["DELIVERY"]["VALUE"]?></span>
 							</div>
 						<?}
@@ -1247,9 +1247,9 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 						$arPayIcFilter = array(
 							"!PROPERTY_SHOW_PRODUCT_DETAIL" => false,
 							"HIDE_ICONS" => "Y"
-						);?>					
+						);?>
 						<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/payments_icons.php"), false, array("HIDE_ICONS" => "Y"));?>
-						<?//DETAIL_BUTTONS//					
+						<?//DETAIL_BUTTONS//
 						if($inBtnPayments || $inBtnCredit) {?>
 							<div class="catalog-detail-buttons">
 								<?if($inBtnPayments) {?>
@@ -1274,7 +1274,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											if($arOffer["CAN_BUY"] && $arOffer["ITEM_PRICES"][$arOffer["ITEM_PRICE_SELECTED"]]["RATIO_PRICE"] > 0):?>
 												<div id="geolocation-delivery-from" class="geolocation-delivery-from">
 													<?$APPLICATION->IncludeComponent("altop:geolocation.delivery", "",
-														array(			
+														array(
 															"ELEMENT_ID" => $arOffer["ID"],
 															"ELEMENT_COUNT" => $arOffer["ITEM_PRICES"][$arOffer["ITEM_PRICE_SELECTED"]]["MIN_QUANTITY"],
 															"CACHE_TYPE" => $arParams["CACHE_TYPE"],
@@ -1288,9 +1288,9 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										endif;
 									else:
 										if($arResult["CAN_BUY"] && $arResult["MIN_PRICE"]["RATIO_PRICE"] > 0):?>
-											<div id="geolocation-delivery-from" class="geolocation-delivery-from">		
+											<div id="geolocation-delivery-from" class="geolocation-delivery-from">
 												<?$APPLICATION->IncludeComponent("altop:geolocation.delivery", "",
-													array(			
+													array(
 														"ELEMENT_ID" => $arResult["ID"],
 														"ELEMENT_COUNT" => $arResult["MIN_PRICE"]["MIN_QUANTITY"],
 														"CACHE_TYPE" => $arParams["CACHE_TYPE"],
@@ -1298,7 +1298,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 													),
 													$component,
 													array("HIDE_ICONS" => "Y")
-												);?>	
+												);?>
 											</div>
 										<?endif;
 									endif;
@@ -1310,14 +1310,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							<div class="catalog-detail-buttons">
 								<a rel="nofollow" target="_blank" href="<?=!empty($arParams['BUTTON_DELIVERY_HREF']) ? $arParams['BUTTON_DELIVERY_HREF'] : 'javascript:void(0)'?>" class="btn_buy apuo pcd"><i class="fa fa-truck"></i><span><?=GetMessage('CATALOG_ELEMENT_BUTTON_DELIVERY')?></span></a>
 							</div>
-						<?}?>							
-					</div>					
+						<?}?>
+					</div>
 					<?if($arResult["COLLECTION"]["THIS"]) {
-						//DETAIL_GIFT//					
+						//DETAIL_GIFT//
 						if(!empty($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"])) {?>
 							<div class="catalog-detail-gift">
 								<div class="h3"><?=$arResult["PROPERTIES"]["GIFT"]["NAME"]?></div>
-								<?foreach($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"] as $key => $arGift) {?>							
+								<?foreach($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"] as $key => $arGift) {?>
 									<div class="gift-item">
 										<div class="gift-image-cont">
 											<div class="gift-image">
@@ -1388,11 +1388,29 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							);?>
 						<?}
 					}?>
+
+                    <?if($arResult["MANAGER_PRODUCT"]):?>
+                        <div class="manager">
+                            <div class="man_img">
+                                <img src="<?=$arResult["MANAGER_PRODUCT"]['PHOTO']?>" alt="<?=$arResult["MANAGER_PRODUCT"]['NAME']?>">
+                            </div>
+                            <div class="man_body">
+                                <div class="man_main">
+                                    <?=$arResult["MANAGER_PRODUCT"]['NAME']?>
+                                </div>
+                                <div class="man_bottom">
+                                    <p><?=$arResult["MANAGER_PRODUCT"]['PROFESSION']?></p>
+                                    <p><?=$arResult["MANAGER_PRODUCT"]['PHONE']?></p>
+                                    <p><?=$arResult["MANAGER_PRODUCT"]['EMAIL']?></p>
+                                </div>
+                            </div>
+                        </div>
+                    <?endif;?>
 				</div>
 			</div>
 			<?if(!$arResult["COLLECTION"]["THIS"]) {
 				//OFFERS_DETAIL_PROPERTIES//?>
-				<div id="<?=$arItemIDs['MAIN_PROPERTIES']?>">					
+				<div id="<?=$arItemIDs['MAIN_PROPERTIES']?>">
 					<?$strMainOffersProps = false;
 					if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"]) && $arSetting["OFFERS_VIEW"]["VALUE"] != "LIST") {
 						foreach($arResult["OFFERS"] as $key => $arOffer) {
@@ -1402,7 +1420,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							}
 						}
 					}
-				
+
 					if(!empty($arResult["DISPLAY_MAIN_PROPERTIES"]) || $strMainOffersProps) {?>
 						<div class="catalog-detail-properties">
 							<div class="h4"><?=GetMessage("CATALOG_ELEMENT_MAIN_PROPERTIES")?></div>
@@ -1484,10 +1502,10 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 						<meta content="0" itemprop="ratingCount" />
 					<?}?>
 					<meta content="0" itemprop="worstRating" />
-					<meta content="5" itemprop="bestRating" />			
-				</div>				
+					<meta content="5" itemprop="bestRating" />
+				</div>
 				<?//DETAIL_PREVIEW_TEXT//
-				if(!empty($arResult["PREVIEW_TEXT"])) {?>				
+				if(!empty($arResult["PREVIEW_TEXT"])) {?>
 					<div class="catalog-detail-preview-text" itemprop="description">
 						<?=$arResult["PREVIEW_TEXT"]?>
 					</div>
@@ -1512,7 +1530,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					unset($k, $v);
 				}?>
 			</div>
-		</div>	
+		</div>
 	<?}?>
 	<?//OFFERS_LIST//
 	if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"]) && $arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {?>
@@ -1522,12 +1540,12 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 				<div class="thead">
 					<div class="offers-items-image"><?=GetMessage("CATALOG_ELEMENT_OFFERS_LIST_IMAGE")?></div>
 					<div class="offers-items-name"><?=GetMessage("CATALOG_ELEMENT_OFFERS_LIST_NAME")?></div>
-					<?$i = 1;						
+					<?$i = 1;
 					foreach($arResult["SKU_PROPS"] as $arProp) {
 						if(!isset($arResult["OFFERS_PROP"][$arProp["CODE"]]))
 							continue;
 						if($i > 3)
-							continue;?>						
+							continue;?>
 						<div class="offers-items-prop"><?=htmlspecialcharsex($arProp["NAME"]);?></div>
 						<?$i++;
 					}?>
@@ -1538,12 +1556,12 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					<?foreach($arResult["OFFERS"] as $keyOffer => $arOffer) {
 						$sticker = "";
 						if($arOffer["MIN_PRICE"]["PERCENT"] > 0) {
-							$sticker .= "<span class='discount'>-".$arOffer["MIN_PRICE"]["PERCENT"]."%</span>";	
+							$sticker .= "<span class='discount'>-".$arOffer["MIN_PRICE"]["PERCENT"]."%</span>";
 						}
 						$isOfferPreviewImg = is_array($arOffer["PREVIEW_IMG"]);
 						$offerName = isset($arOffer["NAME"]) && !empty($arOffer["NAME"]) ? $arOffer["NAME"] : $arResult["NAME"];?>
 						<div class="catalog-item" id="catalog-offer-item-<?=$arItemIDs['ID'].'-'.$arOffer['ID']?>" data-offer-num="<?=$keyOffer?>" data-link="<?=$arOffer['ID']?>">
-							<div class="catalog-item-info">							
+							<div class="catalog-item-info">
 								<?//OFFERS_LIST_IMAGE//?>
 								<div class="catalog-item-image-cont">
 									<div class="catalog-item-image">
@@ -1552,7 +1570,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										<?} else {?>
 											<div>
 										<?}
-										if($isOfferPreviewImg) {?>					
+										if($isOfferPreviewImg) {?>
 											<img src="<?=$arOffer['PREVIEW_IMG']['SRC']?>" width="<?=$arOffer['PREVIEW_IMG']['WIDTH']?>" height="<?=$arOffer['PREVIEW_IMG']['HEIGHT']?>" alt="<?=$offerName?>" title="<?=$offerName?>" />
 										<?} elseif($isPreviewImg) {?>
 											<img src="<?=$arResult['PREVIEW_IMG']['SRC']?>" width="<?=$arResult['PREVIEW_IMG']['WIDTH']?>" height="<?=$arResult['PREVIEW_IMG']['HEIGHT']?>" alt="<?=$strAlt?>" title="<?=$strTitle?>" />
@@ -1574,7 +1592,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									<span class="name"><?=$offerName?></span>
 									<?//OFFERS_LIST_ARTNUMBER//?>
 									<span class="article"><?=GetMessage("CATALOG_ELEMENT_ARTNUMBER")?><?=!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?></span>
-								</div>								
+								</div>
 								<?//OFFERS_LIST_PROPS//
 								$i = 1;
 								foreach($arResult["SKU_PROPS"] as $arProp) {
@@ -1613,7 +1631,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									if($arCurFormat["HIDE_ZERO"] == "Y") {
 										if($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"])) {
 											if(round($arOffer["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arCurFormat["DECIMALS"]) == round($arOffer["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], 0)) {
-												$arCurFormat["REFERENCE_DECIMALS"] = 0;													
+												$arCurFormat["REFERENCE_DECIMALS"] = 0;
 											}
 										}
 										if(round($arOffer["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"]) == round($arOffer["MIN_PRICE"]["RATIO_PRICE"], 0)) {
@@ -1622,7 +1640,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									}
 									$currency = str_replace("# ", " ", $arCurFormat["FORMAT_STRING"]);
 
-									if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>							
+									if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
 										<span class="catalog-item-no-price">
 											<span class="unit">
 												<?=GetMessage("CATALOG_ELEMENT_NO_PRICE")?>
@@ -1634,8 +1652,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										<span class="catalog-item-price">
 											<?if(count($arOffer["ITEM_QUANTITY_RANGES"]) > 1) {?>
 												<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM")?></span>
-											<?}											
-											echo number_format($arOffer["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);											
+											<?}
+											echo number_format($arOffer["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);
 											if($arParams["USE_PRICE_COUNT"] && count($arOffer["ITEM_QUANTITY_RANGES"]) > 1) {?>
 												<span class="catalog-item-price-ranges-wrap">
 													<a class="catalog-item-price-ranges" href="javascript:void(0);"><i class="fa fa-question-circle-o"></i></a>
@@ -1677,39 +1695,39 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								<div class="buy_more<?=(!$inBtnBoc) ? " no-one-click" : ""?>">
 									<?//OFFERS_LIST_AVAILABILITY//?>
 									<div class="available">
-										<?if($arOffer["CAN_BUY"]) {?>													
+										<?if($arOffer["CAN_BUY"]) {?>
 											<?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') {?>
                                                 <div class="avl">
                                                     <i class="fa fa-check-circle"></i>
                                                     <span>
                                                         <?=(!empty($arParams["MESS_SHOW_MAX_QUANTITY"]) ? $arParams["MESS_SHOW_MAX_QUANTITY"] : GetMessage("CATALOG_ELEMENT_AVAILABLE") ).' ';
                                                         if($arParams['SHOW_MAX_QUANTITY'] === 'M') {
-                                                            if($arOffer["CHECK_QUANTITY"] && $inProductQnt){ 
+                                                            if($arOffer["CHECK_QUANTITY"] && $inProductQnt){
                                                                 if($arParams['RELATIVE_QUANTITY_FACTOR']>$arOffer["CATALOG_QUANTITY"])
                                                                     echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_FEW");
                                                                 else
                                                                     echo GetMessage("CT_BCE_CATALOG_RELATIVE_QUANTITY_MANY");
                                                             }
-                                                        }else{                    
+                                                        }else{
 													        if($arOffer["CHECK_QUANTITY"] && $inProductQnt)
 														        echo " ".$arOffer["CATALOG_QUANTITY"];
                                                         }?>
                                                     </span>
                                                 </div>
-                                            <?}?>    
-										<?} elseif(!$arOffer["CAN_BUY"]) {?>													
+                                            <?}?>
+										<?} elseif(!$arOffer["CAN_BUY"]) {?>
 											<div class="not_avl">
 												<i class="fa fa-times-circle"></i>
 												<span><?=GetMessage("CATALOG_ELEMENT_NOT_AVAILABLE")?></span>
 											</div>
 										<?}?>
 									</div>
-									<div class="clr"></div>											
+									<div class="clr"></div>
 									<?//OFFERS_LIST_BUY//
 									if($arOffer["CAN_BUY"]) {
 										if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
 											//OFFERS_LIST_ASK_PRICE//?>
-											<form action="javascript:void(0)" class="apuo_form">										
+											<form action="javascript:void(0)" class="apuo_form">
 												<input type="hidden" name="ACTION" value="ask_price" />
 												<?$properties = array();
 												foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
@@ -1723,7 +1741,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											</form>
 										<?} else {
 											$props = array();
-											if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {	
+											if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 												$props[] = array(
 													"NAME" => $arOffer["PROPERTIES"]["ARTNUMBER"]["NAME"],
 													"CODE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["CODE"],
@@ -1763,12 +1781,12 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 												<?//OFFERS_LIST_BUY_ONE_CLICK//?>
 												<?if($inBtnBoc){?>
 													<button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage("CATALOG_ELEMENT_BOC_SHORT")?></span></button>
-												<?}?>	
+												<?}?>
 											</div>
 										<?}
 									} elseif(!$arOffer["CAN_BUY"]) {
 										//OFFERS_LIST_UNDER_ORDER//?>
-										<form action="javascript:void(0)" class="apuo_form">										
+										<form action="javascript:void(0)" class="apuo_form">
 											<input type="hidden" name="ACTION" value="under_order" />
 											<?$properties = array();
 											foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
@@ -1780,16 +1798,16 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											<input type="hidden" name="NAME" value="<?=$elementName?>" />
 											<button type="button" id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo"><i class="fa fa-clock-o"></i><span class="short"><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER_SHORT")?></span></button>
 										</form>
-									<?}?>										
-								</div>										
+									<?}?>
+								</div>
 							</div>
-						</div>							
+						</div>
 					<?}?>
 				</div>
-			</div>				
+			</div>
 		</div>
-	<?}	
-	if($arResult["CATALOG"] && $arParams["USE_GIFTS_DETAIL"] == "Y" && \Bitrix\Main\ModuleManager::isModuleInstalled("sale")) {?>	
+	<?}
+	if($arResult["CATALOG"] && $arParams["USE_GIFTS_DETAIL"] == "Y" && \Bitrix\Main\ModuleManager::isModuleInstalled("sale")) {?>
 		<?$APPLICATION->IncludeComponent("bitrix:sale.products.gift", ".default",
 			array(
 				"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
@@ -1804,7 +1822,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 				"ELEMENT_SORT_ORDER" => "ASC",
 				"ELEMENT_SORT_FIELD2" => "",
 				"ELEMENT_SORT_ORDER2" => "",
-				"DETAIL_URL" => "",				
+				"DETAIL_URL" => "",
 				"DEFERRED_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false}]",
 				"DEFERRED_PAGE_ELEMENT_COUNT" => 4,
 				"SHOW_PRODUCTS_".$arParams["IBLOCK_ID"] => "Y",
@@ -1821,17 +1839,17 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 				"USE_PRICE_COUNT" => $arParams["USE_PRICE_COUNT"],
 				"SHOW_PRICE_COUNT" => $arParams["SHOW_PRICE_COUNT"],
 				"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"],
-				"USE_PRODUCT_QUANTITY" => $arParams["USE_PRODUCT_QUANTITY"],			
+				"USE_PRODUCT_QUANTITY" => $arParams["USE_PRODUCT_QUANTITY"],
 				"BASKET_URL" => $arParams["BASKET_URL"],
 				"ACTION_VARIABLE" => $arParams["ACTION_VARIABLE"],
-				"PRODUCT_ID_VARIABLE" => $arParams["PRODUCT_ID_VARIABLE"],			
+				"PRODUCT_ID_VARIABLE" => $arParams["PRODUCT_ID_VARIABLE"],
 				"PRODUCT_QUANTITY_VARIABLE" => $arParams["PRODUCT_QUANTITY_VARIABLE"],
 				"ADD_PROPERTIES_TO_BASKET" => isset($arParams["ADD_PROPERTIES_TO_BASKET"]) ? $arParams["ADD_PROPERTIES_TO_BASKET"] : "",
 				"PRODUCT_PROPS_VARIABLE" => $arParams["PRODUCT_PROPS_VARIABLE"],
 				"PARTIAL_PRODUCT_PROPERTIES" => isset($arParams["PARTIAL_PRODUCT_PROPERTIES"]) ? $arParams["PARTIAL_PRODUCT_PROPERTIES"] : "",
 				"PRODUCT_PROPERTIES" => $arParams["PRODUCT_PROPERTIES"],
 				"CACHE_TYPE" => $arParams["CACHE_TYPE"],
-				"CACHE_TIME" => $arParams["CACHE_TIME"],			
+				"CACHE_TIME" => $arParams["CACHE_TIME"],
 				"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
 				"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
 				"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
@@ -1911,8 +1929,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								<?$price = CCurrencyLang::GetCurrencyFormat($arItem["PRICE_CURRENCY"], LANGUAGE_ID);
 								if(empty($price["THOUSANDS_SEP"])) {
 									$price["THOUSANDS_SEP"] = " ";
-								}								
-								if($price["HIDE_ZERO"] == "Y") {									
+								}
+								if($price["HIDE_ZERO"] == "Y") {
 									if(round($arItem["PRICE_DISCOUNT_VALUE"], $price["DECIMALS"]) == round($arItem["PRICE_DISCOUNT_VALUE"], 0)) {
 										$price["DECIMALS"] = 0;
 									}
@@ -1948,7 +1966,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 			<div class="clr"></div>
 		</div>
 	<?}
-	//DETAIL_CONSTRUCTOR//?>	
+	//DETAIL_CONSTRUCTOR//?>
 	<div id="<?=$arItemIDs['CONSTRUCTOR']?>">
 		<?if($arParams["AJAX_MODE"] == "Y") {?>
 			<div id="constructor-to"></div>
@@ -1956,14 +1974,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 		<?if($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y") {
 			//SET_CONSTRUCTOR//
 			if(isset($arResult["JS_OFFERS"]) && !empty($arResult["JS_OFFERS"])):
-				if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):		
-					$arOffer = $arResult["JS_OFFERS"][$arResult["OFFERS_SELECTED"]];?>		
+				if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):
+					$arOffer = $arResult["JS_OFFERS"][$arResult["OFFERS_SELECTED"]];?>
 					<div id="set-constructor-from" class="set-constructor-from">
 						<?$APPLICATION->IncludeComponent("bitrix:catalog.set.constructor", "",
 							array(
 								"IBLOCK_TYPE_ID" => $arParams["IBLOCK_TYPE"],
-								"IBLOCK_ID" => $arResult["OFFERS_IBLOCK"],						
-								"ELEMENT_ID" => $arOffer["ID"],		
+								"IBLOCK_ID" => $arResult["OFFERS_IBLOCK"],
+								"ELEMENT_ID" => $arOffer["ID"],
 								"BASKET_URL" => $arParams["BASKET_URL"],
 								"PRICE_CODE" => $arParams["PRICE_CODE"],
 								"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"] == 1 ? "Y" : "N",
@@ -1986,7 +2004,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 						array(
 							"IBLOCK_TYPE_ID" => $arParams["IBLOCK_TYPE"],
 							"IBLOCK_ID" => $arParams["IBLOCK_ID"],
-							"ELEMENT_ID" => $arResult["ID"],		
+							"ELEMENT_ID" => $arResult["ID"],
 							"BASKET_URL" => $arParams["BASKET_URL"],
 							"PRICE_CODE" => $arParams["PRICE_CODE"],
 							"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"] == 1 ? "Y" : "N",
@@ -2005,7 +2023,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 			<?endif;
 		}?>
 	</div>
-	
+
 	<?
 	//PREDICTION
 	if ($arResult['CATALOG']  && \Bitrix\Main\ModuleManager::isModuleInstalled('sale')){
@@ -2044,7 +2062,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					<a href="<?=($arParams["AJAX_OPTION_HISTORY"] !== "Y") ? "#tab".$i : "javascript:void(0)"?>"><span><?=GetMessage("CATALOG_ELEMENT_COLLECTION")?></span></a>
 				</li>
 				<?$i++;
-			}?>	
+			}?>
 			<li class="tabs__tab<?=(!$arResult["COLLECTION"]["THIS"]) ? " current" : ""?>">
 				<a href="<?=($arParams["AJAX_OPTION_HISTORY"] !== "Y") ? "#tab".$i : "javascript:void(0)"?>"><span><?=GetMessage("CATALOG_ELEMENT_FULL_DESCRIPTION")?></span></a>
 			</li>
@@ -2108,8 +2126,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								"ELEMENT_SORT_FIELD2" => "SORT",
 								"ELEMENT_SORT_ORDER2" => "ASC",
 								"PROPERTY_CODE" => $arParams["PROPERTY_CODE"],
-								"SET_META_KEYWORDS" => "N",		
-								"SET_META_DESCRIPTION" => "N",		
+								"SET_META_KEYWORDS" => "N",
+								"SET_META_DESCRIPTION" => "N",
 								"SET_BROWSER_TITLE" => "N",
 								"SET_LAST_MODIFIED" => "N",
 								"INCLUDE_SUBSECTIONS" => "Y",
@@ -2168,7 +2186,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								"CONVERT_CURRENCY" => $arParams["CONVERT_CURRENCY"],
 								"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 								"HIDE_NOT_AVAILABLE" => "N",
-								"ADD_SECTIONS_CHAIN" => "N",		
+								"ADD_SECTIONS_CHAIN" => "N",
 								"COMPARE_PATH" => $arParams["COMPARE_PATH"],
 								"BACKGROUND_IMAGE" => "",
 								"DISABLE_INIT_JS_IN_COMPONENT" => "",
@@ -2185,7 +2203,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							array("HIDE_ICONS" => "Y")
 						);?>
 					</div>
-				<?}?>	
+				<?}?>
 			</div>
 		<?}
 		//DESCRIPTION_TAB//?>
@@ -2200,9 +2218,9 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 		</div>
 		<?//PROPERTIES_TAB//
 		if(!$arResult["COLLECTION"]["THIS"] && (!empty($arResult["DISPLAY_PROPERTIES"]) || $strMainOffersProps)) {?>
-			<div class="tabs__box">					
+			<div class="tabs__box">
 				<div id="<?=$arItemIDs['PROPERTIES']?>">
-					<div class="catalog-detail-properties">								
+					<div class="catalog-detail-properties">
 						<?//DETAIL_PROPERTIES//
 						if(!empty($arResult["DISPLAY_PROPERTIES"])) {
 							foreach($arResult["DISPLAY_PROPERTIES"] as $k => $v) {?>
@@ -2242,7 +2260,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							<?}
 						}?>
 					</div>
-				</div>					
+				</div>
 			</div>
 		<?} elseif($arResult["COLLECTION"]["THIS"] && !empty($arResult["DISPLAY_PROPERTIES"])) {?>
 			<div class="tabs__box">
@@ -2276,7 +2294,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					<div id="accessories-from" class="accessories">
 						<?if(!empty($arResult["PROPERTY_ACCESSORIES_ID"])):
 							global $arAcsPrFilter;
-							$arAcsPrFilter["ID"] = $arResult["PROPERTY_ACCESSORIES_ID"];?>		
+							$arAcsPrFilter["ID"] = $arResult["PROPERTY_ACCESSORIES_ID"];?>
 							<?$APPLICATION->IncludeComponent("bitrix:catalog.section", "filtered",
 								array(
 									"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
@@ -2286,8 +2304,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									"ELEMENT_SORT_FIELD2" => "",
 									"ELEMENT_SORT_ORDER2" => "",
 									"PROPERTY_CODE" => "",
-									"SET_META_KEYWORDS" => "N",		
-									"SET_META_DESCRIPTION" => "N",		
+									"SET_META_KEYWORDS" => "N",
+									"SET_META_DESCRIPTION" => "N",
 									"SET_BROWSER_TITLE" => "N",
 									"SET_LAST_MODIFIED" => "N",
 									"INCLUDE_SUBSECTIONS" => "Y",
@@ -2348,7 +2366,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 									"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
 									"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
-									"ADD_SECTIONS_CHAIN" => "N",		
+									"ADD_SECTIONS_CHAIN" => "N",
 									"COMPARE_PATH" => "",
 									"BACKGROUND_IMAGE" => "",
 									"DISABLE_INIT_JS_IN_COMPONENT" => (isset($arParams["DISABLE_INIT_JS_IN_COMPONENT"]) ? $arParams["DISABLE_INIT_JS_IN_COMPONENT"] : ""),
@@ -2366,7 +2384,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							);?>
 						<?endif;?>
 					</div>
-				<?}?>	
+				<?}?>
 			</div>
 		<?}
 		//FILES_DOCS_TAB//
@@ -2400,7 +2418,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									<span class="files-docs-size"><?=GetMessage("CATALOG_ELEMENT_SIZE").$arDoc["SIZE"]?></span>
 								</div>
 							</a>
-						</div><!--	
+						</div><!--
 				---><?}?><!--
 			---></div>
 			</div>
@@ -2449,7 +2467,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 												"USE_STORE_PHONE" => $arParams["USE_STORE_PHONE"],
 												"SCHEDULE" => $arParams["USE_STORE_SCHEDULE"],
 												"USE_MIN_AMOUNT" => $arParams["USE_MIN_AMOUNT"],
-												"MIN_AMOUNT" => $arParams["MIN_AMOUNT"],									
+												"MIN_AMOUNT" => $arParams["MIN_AMOUNT"],
 												"STORES" => $arParams["STORES"],
 												"SHOW_EMPTY_STORE" => $arParams["SHOW_EMPTY_STORE"],
 												"SHOW_GENERAL_STORE_INFORMATION" => $arParams["SHOW_GENERAL_STORE_INFORMATION"],
@@ -2483,14 +2501,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										$component,
 										array("HIDE_ICONS" => "Y")
 									);?>
-								</div>						
+								</div>
 							<?endif;
 						endif;
 					}?>
 				</div>
 			</div>
 		<?}?>
-	</div>	
+	</div>
 	<div class="clr"></div>
 </div>
 
@@ -2535,7 +2553,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 		"OFFERS" => $arResult["JS_OFFERS"],
 		"OFFER_SELECTED" => $arResult["OFFERS_SELECTED"],
 		"TREE_PROPS" => $arSkuProps
-	);	
+	);
 } else {
 	$arJSParams = array(
 		"CONFIG" => array(
@@ -2544,7 +2562,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 			"USE_GEOLOCATION" => $arSetting["USE_GEOLOCATION"]["VALUE"],
 			"GEOLOCATION_DELIVERY" => $arSetting["GEOLOCATION_DELIVERY"]["VALUE"],
 		),
-		"PRODUCT_TYPE" => $arResult["CATALOG_TYPE"],	
+		"PRODUCT_TYPE" => $arResult["CATALOG_TYPE"],
 		"VISUAL" => array(
 			"ID" => $arItemIDs["ID"],
 			"POPUP_BTN_ID" => $arItemIDs["POPUP_BTN"],
@@ -2568,7 +2586,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 			"PRICE_MATRIX" => $arResult["PRICE_MATRIX_SHOW"]["MATRIX"],
             "MIN_QUANTITY"=>$arResult['MIN_PRICE']["QUANTITY_FROM"],
 		)
-	);	
+	);
 }
 
 if(isset($arResult["SELECT_PROPS"]) && !empty($arResult["SELECT_PROPS"])) {
@@ -2581,12 +2599,12 @@ $signer = new \Bitrix\Main\Security\Sign\Signer;
 $signedParams = $signer->sign(base64_encode(serialize($arResult["ORIGINAL_PARAMETERS"])), "catalog.element");
 $signedSetting = $signer->sign(base64_encode(serialize($arSetting)), "settings");?>
 
-<script type="text/javascript">	
-	BX.message({			
+<script type="text/javascript">
+	BX.message({
 		DETAIL_ELEMENT_SKIDKA: "<?=GetMessageJS('CATALOG_ELEMENT_SKIDKA')?>",
 		DETAIL_ELEMENT_FROM: "<?=GetMessageJS('CATALOG_ELEMENT_FROM')?>",
 		DETAIL_ADDITEMINCART_ADDED: "<?=GetMessageJS('CATALOG_ELEMENT_ADDED')?>",
-		DETAIL_POPUP_WINDOW_TITLE: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_TITLE')?>",			
+		DETAIL_POPUP_WINDOW_TITLE: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_TITLE')?>",
 		DETAIL_POPUP_WINDOW_BTN_CLOSE: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_BTN_CLOSE')?>",
 		DETAIL_POPUP_WINDOW_BTN_ORDER: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_BTN_ORDER')?>",
 		DETAIL_SITE_ID: "<?=SITE_ID;?>",
@@ -2599,28 +2617,28 @@ $signedSetting = $signer->sign(base64_encode(serialize($arSetting)), "settings")
 
 	//SHOW_DETAIL_PROPERTY_FILTER_HINT//
 	if(!window.showDetailPropertyFilterHint) {
-		function showDetailPropertyFilterHint(target, hint) {		
+		function showDetailPropertyFilterHint(target, hint) {
 			BX.DetailPropertyFilterHint = {
 				popup: null
 			};
 			BX.DetailPropertyFilterHint.popup = BX.PopupWindowManager.create("detailPropertyFilterHint", null, {
 				autoHide: true,
 				offsetLeft: 0,
-				offsetTop: 0,				
+				offsetTop: 0,
 				draggable: false,
 				closeByEsc: false,
 				className: "pop-up filter-hint",
-				closeIcon: { right : "-10px", top : "-10px"},			
+				closeIcon: { right : "-10px", top : "-10px"},
 				titleBar: false
 			});
 			BX.DetailPropertyFilterHint.popup.setContent(hint);
 
 			var close = BX.findChild(BX("detailPropertyFilterHint"), {className: "popup-window-close-icon"}, true, false);
 			if(!!close)
-				close.innerHTML = "<i class='fa fa-times'></i>";			
-			
+				close.innerHTML = "<i class='fa fa-times'></i>";
+
 			target.parentNode.appendChild(BX("detailPropertyFilterHint"));
-			
+
 			BX.DetailPropertyFilterHint.popup.show();
 		}
 	}
