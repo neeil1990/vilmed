@@ -1391,9 +1391,11 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 
                     <?if($arResult["MANAGER_PRODUCT"]):?>
                         <div class="manager">
+                            <?if($arResult["MANAGER_PRODUCT"]['PHOTO']):?>
                             <div class="man_img">
                                 <img src="<?=$arResult["MANAGER_PRODUCT"]['PHOTO']?>" alt="<?=$arResult["MANAGER_PRODUCT"]['NAME']?>">
                             </div>
+                            <?endif;?>
                             <div class="man_body">
                                 <div class="man_main">
                                     <?=$arResult["MANAGER_PRODUCT"]['NAME']?>

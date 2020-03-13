@@ -1414,7 +1414,10 @@ if($arResult["MODULES"]["currency"]) {
 
 //MANAGER_PRODUCT//
 $arResult["MANAGER_PRODUCT"] = array();
-if($arResult['PROPERTIES']['MANAGER_PRODUCT']['VALUE']){
+$arValues = unserialize(COption::GetOptionString("altop.elektroinstrument", "OPTIONS", serialize(array()), SITE_ID));
+$arResult['PROPERTIES']['MANAGER_PRODUCT']['VALUE'] = ($arResult['PROPERTIES']['MANAGER_PRODUCT']['VALUE']) ?: $arValues['MANAGER_PRODUCT'];
+
+if($arResult['PROPERTIES']['MANAGER_PRODUCT']['VALUE'] && $arResult['PROPERTIES']['MANAGER_PRODUCT']['VALUE'] > 0){
     $rsUser = CUser::GetByID($arResult['PROPERTIES']['MANAGER_PRODUCT']['VALUE']);
     if($arUser = $rsUser->Fetch()){
 		$arResult["MANAGER_PRODUCT"]["PHOTO"] = CFile::GetPath($arUser['PERSONAL_PHOTO']);

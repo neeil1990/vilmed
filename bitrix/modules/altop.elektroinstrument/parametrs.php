@@ -15,9 +15,9 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "N"
 			),
 			"COLOR_SCHEME" => array(
-				"TITLE" => GetMessage("COLOR_SCHEME"), 
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TITLE" => GetMessage("COLOR_SCHEME"),
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"MAROON" => array("COLOR" => "#b21001", "TITLE" => GetMessage("COLOR_SCHEME_MAROON")),
 					"ORANGE" => array("COLOR" => "#ff6634", "TITLE" => GetMessage("COLOR_SCHEME_ORANGE")),
 					"YELLOW" => array("COLOR" => "#fde138", "TITLE" => GetMessage("COLOR_SCHEME_YELLOW")),
@@ -36,8 +36,8 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "Y"
 			),
 			"COLOR_SCHEME_CUSTOM" => array(
-				"TITLE" => GetMessage("COLOR_SCHEME_CUSTOM"), 
-				"TYPE" => "text", 
+				"TITLE" => GetMessage("COLOR_SCHEME_CUSTOM"),
+				"TYPE" => "text",
 				"DEFAULT" => "#fde037",
 				"IN_SETTINGS_PANEL" => "Y"
 			),
@@ -48,15 +48,15 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "Y"
 			),
 			"SITE_BACKGROUND_COLOR" => array(
-				"TITLE" => GetMessage("SITE_BACKGROUND_COLOR"), 
-				"TYPE" => "text", 
+				"TITLE" => GetMessage("SITE_BACKGROUND_COLOR"),
+				"TYPE" => "text",
 				"DEFAULT" => "#edeef8",
 				"IN_SETTINGS_PANEL" => "N"
 			),
 			"SITE_BACKGROUND_PICTURE" => array(
 				"TITLE" => GetMessage("SITE_BACKGROUND_PICTURE"),
 				"TYPE" => "file",
-				"DEFAULT" => COption::GetOptionString($moduleID, "SITE_BACKGROUND_TREE"),				
+				"DEFAULT" => COption::GetOptionString($moduleID, "SITE_BACKGROUND_TREE"),
 				"IN_SETTINGS_PANEL" => "N"
 			),
 			"SITE_BACKGROUND_REPEAT_X" => array(
@@ -79,8 +79,8 @@ $moduleClass::$arParametrsList = array(
 			),
 			"CATALOG_LOCATION" => array(
 				"TITLE" => GetMessage("CATALOG_LOCATION"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"LEFT" => GetMessage("CATALOG_LOCATION_LEFT"),
 					"HEADER" => GetMessage("CATALOG_LOCATION_HEADER")
 				),
@@ -89,8 +89,8 @@ $moduleClass::$arParametrsList = array(
 			),
 			"CATALOG_VIEW" => array(
 				"TITLE" => GetMessage("CATALOG_VIEW"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"TWO_LEVELS" => GetMessage("CATALOG_VIEW_TWO_LEVELS"),
 					"FOUR_LEVELS" => GetMessage("CATALOG_VIEW_FOUR_LEVELS")
 				),
@@ -99,8 +99,8 @@ $moduleClass::$arParametrsList = array(
 			),
 			"CART_LOCATION" => array(
 				"TITLE" => GetMessage("CART_LOCATION"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"BOTTOM" => GetMessage("CART_LOCATION_BOTTOM"),
 					"TOP" => GetMessage("CART_LOCATION_TOP"),
 					"RIGHT" => GetMessage("CART_LOCATION_RIGHT"),
@@ -112,11 +112,11 @@ $moduleClass::$arParametrsList = array(
 			"HOME_PAGE" => array(
 				"TITLE" => GetMessage("HOME_PAGE"),
 				"TYPE" => "multiselectbox",
-				"LIST" => array(					
+				"LIST" => array(
 					"SLIDER" => GetMessage("HOME_PAGE_SLIDER"),
 					"ADVANTAGES" => GetMessage("HOME_PAGE_ADVANTAGES"),
 					"PROMOTIONS" => GetMessage("HOME_PAGE_PROMOTIONS"),
-					"BANNERS" => GetMessage("HOME_PAGE_BANNERS"),					
+					"BANNERS" => GetMessage("HOME_PAGE_BANNERS"),
 					"TABS" => GetMessage("HOME_PAGE_TABS"),
 					"RECOMMEND" => GetMessage("HOME_PAGE_RECOMMEND"),
 					"CONTENT" => GetMessage("HOME_PAGE_CONTENT"),
@@ -145,8 +145,8 @@ $moduleClass::$arParametrsList = array(
             ),
 			"SMART_FILTER_LOCATION" => array(
 				"TITLE" => GetMessage("SMART_FILTER_LOCATION"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"VERTICAL" => GetMessage("SMART_FILTER_LOCATION_VERTICAL"),
 					"HORIZONTAL" => GetMessage("SMART_FILTER_LOCATION_HORIZONTAL")
 				),
@@ -155,8 +155,8 @@ $moduleClass::$arParametrsList = array(
 			),
 			"SMART_FILTER_VISIBILITY" => array(
 				"TITLE" => GetMessage("SMART_FILTER_VISIBILITY"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"EXPAND" => GetMessage("SMART_FILTER_VISIBILITY_EXPAND"),
 					"COLLAPSE" => GetMessage("SMART_FILTER_VISIBILITY_COLLAPSE"),
 					"DISABLE" => GetMessage("SMART_FILTER_VISIBILITY_DISABLE")
@@ -194,8 +194,8 @@ $moduleClass::$arParametrsList = array(
 			),
 			"OFFERS_VIEW" => array(
 				"TITLE" => GetMessage("OFFERS_VIEW"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"PROPS" => GetMessage("OFFERS_VIEW_PROPS"),
 					"LIST" => GetMessage("OFFERS_VIEW_LIST")
 				),
@@ -204,19 +204,19 @@ $moduleClass::$arParametrsList = array(
 			),
 			"VENDORS_VIEW" => array(
 				"TITLE" => GetMessage("VENDORS_VIEW"),
-				"TYPE" => "selectbox", 
-				"LIST" => array(					
+				"TYPE" => "selectbox",
+				"LIST" => array(
 					"PRODUCTS" => GetMessage("VENDORS_VIEW_PRODUCTS"),
 					"SECTIONS_PRODUCTS" => GetMessage("VENDORS_VIEW_SECTIONS_PRODUCTS"),
 					"SECTIONS" => GetMessage("VENDORS_VIEW_SECTIONS")
 				),
 				"DEFAULT" => "SECTIONS",
 				"IN_SETTINGS_PANEL" => "Y"
-			),		
+			),
 			"GENERAL_SETTINGS" => array(
 				"TITLE" => GetMessage("GENERAL_SETTINGS"),
 				"TYPE" => "multiselectbox",
-				"LIST" => array(					
+				"LIST" => array(
 					"PRODUCT_QUANTITY" => GetMessage("GENERAL_SETTINGS_PRODUCT_QUANTITY"),
 					"BUTTON_BOC" => GetMessage("GENERAL_SETTINGS_BUTTON_BOC"),
 					"PRICE_RATIO" => GetMessage("GENERAL_SETTINGS_PRICE_RATIO"),
@@ -232,8 +232,8 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "Y"
 			),
             "ORDER_MIN_PRICE" => array(
-				"TITLE" => GetMessage("ORDER_MIN_PRICE"), 
-				"TYPE" => "number", 
+				"TITLE" => GetMessage("ORDER_MIN_PRICE"),
+				"TYPE" => "number",
 				"DEFAULT" => "",
 				"IN_SETTINGS_PANEL" => "N"
 			),
@@ -244,14 +244,14 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "N"
 			),
 			"REFERENCE_PRICE_COEF" => array(
-				"TITLE" => GetMessage("REFERENCE_PRICE_COEF"), 
-				"TYPE" => "number", 
+				"TITLE" => GetMessage("REFERENCE_PRICE_COEF"),
+				"TYPE" => "number",
 				"DEFAULT" => "10000",
 				"IN_SETTINGS_PANEL" => "N"
 			),
             "NAME_BUTTON_TO_CART" => array(
 				"TITLE" => GetMessage("NAME_BUTTON_TO_CART"),
-				"TYPE" => "text", 
+				"TYPE" => "text",
 				"DEFAULT" => GetMessage("BUTTON_TO_CART"),
 				"IN_SETTINGS_PANEL" => "N"
 			),
@@ -288,7 +288,7 @@ $moduleClass::$arParametrsList = array(
 	),
 	"FORMS" => array(
 		"TITLE" => GetMessage("FORMS_OPTIONS"),
-		"OPTIONS" => array(			
+		"OPTIONS" => array(
 			"FORMS_USE_CAPTCHA" => array(
 				"TITLE" => GetMessage("FORMS_USE_CAPTCHA"),
 				"TYPE" => "checkbox",
@@ -296,10 +296,10 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "N"
 			),
 			"FORMS_PHONE_MASK" => array(
-				"TITLE" => GetMessage("FORMS_PHONE_MASK"),				
+				"TITLE" => GetMessage("FORMS_PHONE_MASK"),
 				"TYPE" => "text",
 				"DEFAULT" => "+9{1,3} (9{2,3}) 999-99-99",
-				"IN_SETTINGS_PANEL" => "N"				
+				"IN_SETTINGS_PANEL" => "N"
 			),
 			"FORMS_VALIDATE_PHONE_MASK" => array(
 				"TITLE" => GetMessage("FORMS_VALIDATE_PHONE_MASK"),
@@ -334,5 +334,16 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "N"
 			)
 		)
-	) 
+	),
+    "MANAGER" => array(
+        "TITLE" => GetMessage("MANAGER_OPTIONS"),
+        "OPTIONS" => array(
+            "MANAGER_PRODUCT" => array(
+                "TITLE" => GetMessage("MANAGER_PRODUCT_TITLE"),
+				"TYPE" => "number",
+				"DEFAULT" => "0",
+				"IN_SETTINGS_PANEL" => "N"
+            ),
+        )
+    )
 );?>
