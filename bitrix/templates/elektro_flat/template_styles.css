@@ -2052,6 +2052,7 @@ button[name="banners-main__item-button"]:after{
 	float:left;
 	margin:0px;
 	padding:0px;
+	min-height: 23px;
 }
 
 .catalog-item-card .buy_more .avl,
