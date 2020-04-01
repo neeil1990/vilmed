@@ -230,7 +230,7 @@ Loc::loadMessages(__FILE__);?>
 
 <style>
     img.lazy-fadein {opacity: 0;}
-    img.lazy-fadein:not(.initial) {transition: opacity 1s;}
+    img.lazy-fadein:not(.initial) {transition: opacity 2s;}
     img.lazy-fadein.initial,img.lazy-fadein.loaded,img.lazy-fadein.error {opacity: 1;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@12.0.0/dist/lazyload.min.js"></script>
