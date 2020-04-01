@@ -36,6 +36,9 @@
     text-decoration: none;
 	opacity: 0;
 	transition: opacity 2s;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size:cover;
 }
 .anythingContainer ul.anythingSlider li a[data-was-processed="true"] {
 	opacity: 1;
