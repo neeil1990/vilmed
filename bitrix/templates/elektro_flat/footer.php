@@ -236,6 +236,11 @@ Loc::loadMessages(__FILE__);?>
 <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@12.0.0/dist/lazyload.min.js"></script>
 <script>
     $(function(){
+
+        if($(window).width() < 787){
+            $('.panel_1 .catalog-section-child a .child .graph').remove();
+        }
+
         $('img').each(function(li,el){
             $(el).addClass('lazy-fadein');
             var src = $(el).attr('src');
