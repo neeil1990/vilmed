@@ -240,6 +240,7 @@ Loc::loadMessages(__FILE__);?>
         if($(window).width() < 787){
             $('.panel_1 .catalog-section-child a .child .graph').remove();
             $('.left-column, .top-catalog').remove();
+            $('.tabs-main').remove();
         }
 
         $('img').each(function(li,el){
