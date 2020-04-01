@@ -69,7 +69,10 @@ $arRecomPrFilter = array(
 			1 => "PROP2",
 			2 => "PROP3",
 		),
-		"OFFERS_FIELD_CODE" => "",
+		"OFFERS_FIELD_CODE" => array(
+			0 => "",
+			1 => "",
+		),
 		"OFFERS_PROPERTY_CODE" => array(
 			0 => "COLOR",
 			1 => "PROP2",
@@ -103,7 +106,7 @@ $arRecomPrFilter = array(
 		),
 		"BIG_DATA_RCM_TYPE" => "any",
 		"BIG_DATA_TITLE" => "N",
-		"SHOW_MAX_QUANTITY" => "M",
+		"SHOW_MAX_QUANTITY" => "N",
 		"MESS_SHOW_MAX_QUANTITY" => "В наличии",
 		"RELATIVE_QUANTITY_FACTOR" => "5",
 		"MESS_RELATIVE_QUANTITY_MANY" => "много",
@@ -122,7 +125,9 @@ $arRecomPrFilter = array(
 		"BROWSER_TITLE" => "-",
 		"META_KEYWORDS" => "-",
 		"META_DESCRIPTION" => "-",
-		"COMPATIBLE_MODE" => "Y"
+		"COMPATIBLE_MODE" => "Y",
+		"COMPOSITE_FRAME_MODE" => "A",
+		"COMPOSITE_FRAME_TYPE" => "AUTO"
 	),
 	false
 );?>

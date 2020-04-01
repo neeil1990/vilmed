@@ -21,9 +21,12 @@ $APPLICATION->SetTitle("Способы оплаты");?><?$APPLICATION->IncludeC
 	)
 );?>
 <p>
-	Для заказа Вы можете прислать список оборудования на почту: <a href="mailto:info@vilmed.ru">info@vilmed.ru</a>&nbsp;или самостоятельно сформировать заявку через сайт (добавляя товары в корзину).&nbsp;
+	 Для заказа Вы можете прислать список оборудования на почту: <a href="mailto:info@vilmed.ru">info@vilmed.ru</a>&nbsp;или самостоятельно сформировать заявку через сайт (добавляя товары в корзину).&nbsp;
 </p>
 <p>
-	Далее на электронную почту придет письмо с сформированным КП или счетом от нашего менеджера.
+	 Далее на электронную почту придет письмо с сформированным КП или счетом от нашего менеджера.
 </p>
- <br><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
+<br>
+<p>
+	 В случае оплаты счета без заключения индивидуального договора, вы соглашаетесь с условиями договора оферты: <a target="_blank" href="https://vilmed.ru/upload/oferta.pdf">https://vilmed.ru/upload/oferta.pdf</a> <br>
+</p><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

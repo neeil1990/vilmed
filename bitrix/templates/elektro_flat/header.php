@@ -5,7 +5,7 @@ Loc::loadMessages(__FILE__);?>
 <!DOCTYPE html>
 <html lang="<?=LANGUAGE_ID?>">
 <head>
-	<link rel="shortcut icon" type="image/x-icon" href="<?=SITE_TEMPLATE_PATH?>/favicon.ico" />
+	<link rel="shortcut icon" type="image/x-icon" href="<?=SITE_TEMPLATE_PATH?>/favicon.ico" type="image/x-icon">
 
 	<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 	<title><?$APPLICATION->ShowTitle()?></title>
