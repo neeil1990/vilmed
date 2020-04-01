@@ -12,11 +12,11 @@ if(count($arResult["ITEMS"]) < 1) return;
 				$locationProduct = ($arItem['PROPERTIES']['PRODUCT_LOCATION']['VALUE_XML_ID'] == 'right'? 'right': 'left');
 				?>
 				<li class="anythingSliderLi anythingSliderLi_<?=$arParams['SLIDER_ASPECT_RATIO']?>">
-					<a 
-						href="<?=(!empty($arItem['PROPERTIES']['URL']['VALUE'])? $arItem['PROPERTIES']['URL']['VALUE']: 'javascript:void(0)')?>" 
+					<a
+						href="<?=(!empty($arItem['PROPERTIES']['URL']['VALUE'])? $arItem['PROPERTIES']['URL']['VALUE']: 'javascript:void(0)')?>"
 						<?=(!empty($arItem['PROPERTIES']['URL']['VALUE']) && !empty($arItem['PROPERTIES']['OPEN_URL']['VALUE'])? 'target="_blank"': '')?>
 						<?if(!empty($arItem['PROPERTIES']['BACKGROUND_DIM_COLOR']['VALUE'])) {?>
-							style="background-color: #<?=$arItem['PROPERTIES']['BACKGROUND_DIM_COLOR']['VALUE']?>" 
+							style="background-color: #<?=$arItem['PROPERTIES']['BACKGROUND_DIM_COLOR']['VALUE']?>"
 						<?}?>
 					>
 						<?
@@ -26,29 +26,29 @@ if(count($arResult["ITEMS"]) < 1) return;
 									<div class=\"slide-info\">
 										<div class=\"slide-info-title\">{$arItem['NAME']}</div>
 						";
-						
+
 						if(!empty($arItem['PREVIEW_TEXT']))
 							$sBlockInfo .= "
 								<div class=\"slide-info-text\">{$arItem['PREVIEW_TEXT']}</div>
 							";
-						
+
 						if(!empty($arItem["SETTING"]["URL"]))
 							$sBlockInfo .= "
 								<div class=\"slide-info-button\">
-									<button class=\"btn_buy\"><i class=\"fa fa-angle-right\" aria-hidden=\"true\"></i><span>Подробнее</span></button>
+									<button class=\"btn_buy\"><i class=\"fa fa-angle-right\" aria-hidden=\"true\"></i><span>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</span></button>
 								</div>
 							";
-						
+
 						$sBlockInfo .= "
 									</div>
 								</div>
 							</div>
 						";
-						
+
 						if($locationProduct == 'right') {
 							echo $sBlockInfo;
 						}
-						
+
 						$APPLICATION->IncludeComponent(
 							"bitrix:catalog.element",
 							"slide",
@@ -73,14 +73,14 @@ if(count($arResult["ITEMS"]) < 1) return;
 							false,
 							array("HIDE_ICONS" => "Y")
 						);
-						
+
 						if($locationProduct != 'right') {
 							echo $sBlockInfo;
 						}?>
-						<span 
+						<span
 							class="slide-bg"
 							<?if(!empty($arItem['PICTURE_PREVIEW']['SRC'])) {?>
-								style="background: url(<?=$arItem['PICTURE_PREVIEW']['SRC']?>) center center / cover no-repeat; height: 100%;<?=(!empty($arItem['PROPERTIES']['BACKGROUND_DIM_COLOR']['VALUE'])? ' opacity: 0.15': '')?>" 
+								style="background: url(<?=$arItem['PICTURE_PREVIEW']['SRC']?>) center center / cover no-repeat; height: 100%;<?=(!empty($arItem['PROPERTIES']['BACKGROUND_DIM_COLOR']['VALUE'])? ' opacity: 0.15': '')?>"
 							<?}?>
 						></span>
 					</a>
@@ -92,9 +92,9 @@ if(count($arResult["ITEMS"]) < 1) return;
 				?>
 				<li class="anythingSliderLi anythingSliderLi_<?=$arParams['SLIDER_ASPECT_RATIO']?>" <?=(!empty($arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE'])? " data-prop=\"{idVideo: 'video_{$arItem['ID']}', autoPlay: {$sAutoPlay}, autoPlaySlide: {$sAutoPlaySlide}}\"": '')?>>
 					<?if(!empty($arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE'])) {?>
-						<div 
-							id="video_<?=$arItem['ID']?>_load" 
-							class="video-slide-overlay-load" 
+						<div
+							id="video_<?=$arItem['ID']?>_load"
+							class="video-slide-overlay-load"
 							<?=($sAutoPlay == 'true'? 'style="display:none;"': '')?>
 						>
 							<span class="video-icon-loading">
@@ -103,34 +103,34 @@ if(count($arResult["ITEMS"]) < 1) return;
 								<i class="fa fa-circle" aria-hidden="true"></i>
 							</span>
 						</div>
-						<div 
-							id="video_<?=$arItem['ID']?>_play" 
-							class="video-slide-overlay" 
-							onclick="$('#video_<?=$arItem['ID']?>').YTPPlay();" 
+						<div
+							id="video_<?=$arItem['ID']?>_play"
+							class="video-slide-overlay"
+							onclick="$('#video_<?=$arItem['ID']?>').YTPPlay();"
 							style="display:none;"
 						>
 							<span class="video-icon-play"><i class="fa fa-play-circle-o" aria-hidden="true"></i></span>
 						</div>
 						<div id="video_<?=$arItem['ID']?>_vob" class="video-options-buttons" style="display:none;">
-							<button 
-								id="video_<?=$arItem['ID']?>_pause" 
-								class="btn-video-pause" 
-								onclick="$('#video_<?=$arItem['ID']?>').YTPPause();" 
+							<button
+								id="video_<?=$arItem['ID']?>_pause"
+								class="btn-video-pause"
+								onclick="$('#video_<?=$arItem['ID']?>').YTPPause();"
 							>
 								<i class="fa fa-pause" aria-hidden="true"></i>
 							</button>
 							<?if(empty($arItem['PROPERTIES']['MUTE_AUDIO']['VALUE'])) {?>
-								<button 
-									id="video_<?=$arItem['ID']?>_mute" 
-									class="btn-video-mute" 
+								<button
+									id="video_<?=$arItem['ID']?>_mute"
+									class="btn-video-mute"
 									onclick="$('#video_<?=$arItem['ID']?>').YTPMute();"
 								>
 									<i class="fa fa-volume-up" aria-hidden="true"></i>
 								</button>
-								<button 
-									id="video_<?=$arItem['ID']?>_unmute" 
-									class="btn-video-unmute" 
-									onclick="$('#video_<?=$arItem['ID']?>').YTPUnmute();" 
+								<button
+									id="video_<?=$arItem['ID']?>_unmute"
+									class="btn-video-unmute"
+									onclick="$('#video_<?=$arItem['ID']?>').YTPUnmute();"
 									style="display:none;"
 								>
 									<i class="fa fa-volume-off" aria-hidden="true"></i>
@@ -138,15 +138,16 @@ if(count($arResult["ITEMS"]) < 1) return;
 							<?}?>
 						</div>
 					<?}?>
-					<a 
-						<?=(!empty($arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE'])? "id=\"video_{$arItem['ID']}\"": '')?> 
-						href="<?=(!empty($arItem['PROPERTIES']['URL']['VALUE'])? $arItem['PROPERTIES']['URL']['VALUE']: 'javascript:void(0)')?>" 
-						<?=(!empty($arItem['PROPERTIES']['URL']['VALUE']) && !empty($arItem["PROPERTIES"]["OPEN_URL"]['VALUE'])? 'target="_blank"': '')?> 
+					<a
+						<?=(!empty($arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE'])? "id=\"video_{$arItem['ID']}\"": '')?>
+						href="<?=(!empty($arItem['PROPERTIES']['URL']['VALUE'])? $arItem['PROPERTIES']['URL']['VALUE']: 'javascript:void(0)')?>"
+						<?=(!empty($arItem['PROPERTIES']['URL']['VALUE']) && !empty($arItem["PROPERTIES"]["OPEN_URL"]['VALUE'])? 'target="_blank"': '')?>
 						<?if(!empty($sImgUrl)) {?>
-							style="background:url(<?=$sImgUrl?>) center center no-repeat; background-size:cover;" 
+                            class="lazy-fadein"
+                            data-src="<?=$sImgUrl?>"
 						<?}?>
 						<?if(!empty($arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE'])) {?>
-							data-property="{videoURL: '<?=$arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE']?>', mute: <?=(!empty($arItem['PROPERTIES']['MUTE_AUDIO']['VALUE'])? 'true': 'false')?>, showControls: false, quality: 'default', opacity: 1, containment: 'self', optimizeDisplay: true, loop: <?=($sAutoPlay == 'true'? 'true': 1)?>, startAt: 0, remember_last_time: false, autoPlay: <?=$sAutoPlay?>, addRaster: false, gaTrack: false}" 
+							data-property="{videoURL: '<?=$arItem['PROPERTIES']['CODE_YOUTUBE']['VALUE']?>', mute: <?=(!empty($arItem['PROPERTIES']['MUTE_AUDIO']['VALUE'])? 'true': 'false')?>, showControls: false, quality: 'default', opacity: 1, containment: 'self', optimizeDisplay: true, loop: <?=($sAutoPlay == 'true'? 'true': 1)?>, startAt: 0, remember_last_time: false, autoPlay: <?=$sAutoPlay?>, addRaster: false, gaTrack: false}"
 						<?}?>
 					></a>
 				</li>
