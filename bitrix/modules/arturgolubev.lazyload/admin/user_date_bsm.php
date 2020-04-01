@@ -1,1 +1,0 @@
-<?define("arturgolubev_lazyload_TEMPORARY_CACHE", "IWAGXHthCAM+BX9gUWACegAg");?>
