@@ -239,8 +239,13 @@ Loc::loadMessages(__FILE__);?>
 
         $('img').each(function(li,el){
             $(el).addClass('lazy-fadein');
+            var alt = $(el).attr('alt');
             var src = $(el).attr('src');
+            $(el).removeAttr( "alt" );
+            $(el).removeAttr( "title" );
             $(el).removeAttr( "src" );
+
+            $(el).attr('data-alt',alt);
             $(el).attr('data-src',src);
         });
 
@@ -252,6 +257,11 @@ Loc::loadMessages(__FILE__);?>
         var lazyLoadInstance = new LazyLoad({
             elements_selector: ".lazy-fadein",
             threshold: 0,
+            callback_enter: function(el) {
+                $img = $(el);
+                $img.attr('alt', $img.attr('data-alt'));
+                $img.attr('title', $img.attr('data-alt'));
+            }
         });
 
         if (lazyLoadInstance) {
