@@ -237,12 +237,6 @@ Loc::loadMessages(__FILE__);?>
 <script>
     $(function(){
 
-        if($(window).width() < 787){
-            $('.panel_1 .catalog-section-child a .child .graph').remove();
-            $('.left-column, .top-catalog').remove();
-            $('.tabs-main').remove();
-        }
-
         $('img').each(function(li,el){
             $(el).addClass('lazy-fadein');
             var src = $(el).attr('src');

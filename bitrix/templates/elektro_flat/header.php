@@ -32,6 +32,17 @@ Loc::loadMessages(__FILE__);?>
 	Asset::getInstance()->addCss(SITE_TEMPLATE_PATH."/js/fancybox/jquery.fancybox-1.3.1.css");
 	Asset::getInstance()->addCss(SITE_TEMPLATE_PATH."/js/spectrum/spectrum.css");
 	CJSCore::Init(array("jquery", "popup"));
+	?>
+    <script>
+        $(function(){
+            if($(window).width() < 787){
+                $('.panel_1 .catalog-section-child a .child .graph').remove();
+                $('.left-column, .top-catalog').remove();
+                $('.tabs-main').remove();
+            }
+        });
+    </script>
+    <?
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/js/jquery.cookie.js");
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/js/moremenu.js");
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/js/jquery.inputmask.bundle.min.js");
@@ -549,7 +560,7 @@ Loc::loadMessages(__FILE__);?>
 										<script src="//yastatic.net/es5-shims/0.0.2/es5-shims.min.js"></script>
 <script src="//yastatic.net/share2/share.js"></script>
 <div class="ya-share2" data-services="vkontakte,facebook,odnoklassniki,viber,whatsapp,telegram" data-size="s"></div>
-																						
+
 										</div>
 									</div>
 									<h1 id="pagetitle"><?=$APPLICATION->ShowTitle(false);?></h1>
