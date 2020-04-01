@@ -1419,6 +1419,11 @@ ul.new_leader_disc li a .icon:after{
 .promotions__item-image{
 	width:100%;
 	display:table-cell;
+	opacity: 0;
+	transition: opacity 2s;
+}
+.promotions__item-image[data-was-processed="true"]{
+	opacity: 1;
 }
 
 .promotions__item-image-wrap .time_buy_cont{
