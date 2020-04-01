@@ -1,10 +1,4 @@
 $(function() {
-	if($(window).width() < 787){
-		$('.panel_1 .catalog-section-child a .child .graph').remove();
-		$('.left-column, .top-catalog').remove();
-		$('.tabs-main').remove();
-	}
-	
 	//SCROLL_UP//
 	var top_show = 150,
 		delay = 500;

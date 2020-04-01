@@ -244,6 +244,11 @@ Loc::loadMessages(__FILE__);?>
             $(el).attr('data-src',src);
         });
 
+        if($(window).width() < 787){
+            $('.panel_1 .catalog-section-child a .child .graph').remove();
+            $('.left-column, .top-catalog').remove();
+        }
+
         var lazyLoadInstance = new LazyLoad({
             elements_selector: ".lazy-fadein",
             threshold: 0,

@@ -8,7 +8,7 @@ if(count($arResult) < 1)
 global $arSetting;?>
 
 <ul class="left-menu">
-	<?$previousLevel = 0;	
+	<?$previousLevel = 0;
 	foreach($arResult as $arItem) {
 		if($previousLevel && $arItem["DEPTH_LEVEL"] < $previousLevel) {
 			echo str_repeat("</div></li>", ($previousLevel - $arItem["DEPTH_LEVEL"]));
@@ -31,7 +31,7 @@ global $arSetting;?>
 						<span class="graph">
 							<?if(!empty($arItem["PARAMS"]["ICON"])) {?>
 								<i class="<?=$arItem['PARAMS']['ICON']?>" aria-hidden="true"></i>
-							<?} elseif(is_array($arItem["PICTURE"])) {?>								
+							<?} elseif(is_array($arItem["PICTURE"])) {?>
 								<img src="<?=$arItem['PICTURE']['SRC']?>" width="<?=$arItem['PICTURE']['WIDTH']?>" height="<?=$arItem['PICTURE']['HEIGHT']?>" alt="<?=$arItem['TEXT']?>" title="<?=$arItem['TEXT']?>" />
 							<?} else {?>
 								<img src="<?=SITE_TEMPLATE_PATH?>/images/no-photo.jpg" width="50" height="50" alt="<?=$arItem['TEXT']?>" title="<?=$arItem['TEXT']?>" />
@@ -46,7 +46,7 @@ global $arSetting;?>
 		<?} else {
 			continue;
 		}
-		$previousLevel = $arItem["DEPTH_LEVEL"];		
+		$previousLevel = $arItem["DEPTH_LEVEL"];
 	}
 	if($previousLevel > 1) {
 		echo str_repeat("</div></li>", ($previousLevel-1));
@@ -56,7 +56,7 @@ global $arSetting;?>
 <script type="text/javascript">
 	//<![CDATA[
 	$(function() {
-		<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?>			
+		<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?>
 			$(".top-catalog ul.left-menu").moreMenu();
 		<?endif;?>
 		$("ul.left-menu").children(".parent").on({
