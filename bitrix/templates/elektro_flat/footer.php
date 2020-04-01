@@ -16,7 +16,7 @@ Loc::loadMessages(__FILE__);?>
                                 );?>
 					    	<?endif;?>
 						</div>
-						
+
 						<?if(!CSite::InDir('/news/')):?>
 							<?$APPLICATION->IncludeComponent("bitrix:main.include", "",
 								array(
@@ -42,9 +42,9 @@ Loc::loadMessages(__FILE__);?>
 							);?>
 						<?endif;?>
 					</div>
-					<?$APPLICATION->IncludeComponent("bitrix:subscribe.form", "bottom", 
+					<?$APPLICATION->IncludeComponent("bitrix:subscribe.form", "bottom",
 						array(
-							"USE_PERSONALIZATION" => "Y",	
+							"USE_PERSONALIZATION" => "Y",
 							"PAGE" => SITE_DIR."personal/mailings/",
 							"SHOW_HIDDEN" => "N",
 							"CACHE_TYPE" => "A",
@@ -52,7 +52,7 @@ Loc::loadMessages(__FILE__);?>
 							"CACHE_NOTES" => ""
 						),
 						false
-					);?>					
+					);?>
 				</div>
 			</div>
 			<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/viewed_products.php"), false);?>
@@ -60,7 +60,7 @@ Loc::loadMessages(__FILE__);?>
 				<div class="center<?=($arSetting['SITE_BACKGROUND']['VALUE'] == 'Y' ? ' inner' : '');?>">
 					<div class="footer_menu_soc_pay">
 						<div class="footer_menu">
-							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom", 
+							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom",
 								array(
 									"ROOT_MENU_TYPE" => "footer1",
 									"MENU_CACHE_TYPE" => "A",
@@ -75,7 +75,7 @@ Loc::loadMessages(__FILE__);?>
 								),
 								false
 							);?>
-							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom", 
+							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom",
 								array(
 									"ROOT_MENU_TYPE" => "footer2",
 									"MENU_CACHE_TYPE" => "A",
@@ -90,7 +90,7 @@ Loc::loadMessages(__FILE__);?>
 								),
 								false
 							);?>
-							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom", 
+							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom",
 								array(
 									"ROOT_MENU_TYPE" => "footer3",
 									"MENU_CACHE_TYPE" => "A",
@@ -105,7 +105,7 @@ Loc::loadMessages(__FILE__);?>
 								),
 								false
 							);?>
-							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom", 
+							<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom",
 								array(
 									"ROOT_MENU_TYPE" => "footer4",
 									"MENU_CACHE_TYPE" => "A",
@@ -134,14 +134,14 @@ Loc::loadMessages(__FILE__);?>
 							</div>
 						</div>
 					</div>
-					<div class="footer-bottom">						
+					<div class="footer-bottom">
 						<div class="footer-bottom__blocks">
 							<div class="footer-bottom__block-wrap fb-left">
 								<div class="footer-bottom__block footer-bottom__copyright">
 									<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/copyright.php"), false);?>
 								</div>
 								<div class="footer-bottom__block footer-bottom__links">
-									<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom", 
+									<?$APPLICATION->IncludeComponent("bitrix:menu", "bottom",
 										array(
 											"ROOT_MENU_TYPE" => "bottom",
 											"MENU_CACHE_TYPE" => "A",
@@ -159,7 +159,7 @@ Loc::loadMessages(__FILE__);?>
 								</div>
 							</div>
 						</div>
-						<div class="footer-bottom__blocks">							
+						<div class="footer-bottom__blocks">
 							<div class="footer-bottom__block-wrap fb-right">
 								<div class="footer-bottom__block footer-bottom__counter">
 									<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/counter_1.php"), false);?>
@@ -171,15 +171,15 @@ Loc::loadMessages(__FILE__);?>
 									<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/developer.php"), false);?>
 								</div>
 							</div>
-						</div>						
+						</div>
 					</div>
-			
+
 				</div>
 			</footer>
 			<?if($arSetting["SITE_BACKGROUND"]["VALUE"] == "Y"){?>
 				</div>
 			<?}else{?>
-			    </div> 
+			    </div>
 			<?}?>
 		</div>
 	</div>
@@ -192,20 +192,20 @@ Loc::loadMessages(__FILE__);?>
 										"REGISTER_URL" => SITE_DIR."personal/private/",
 										"FORGOT_PASSWORD_URL" => SITE_DIR."personal/private/",
 										"PROFILE_URL" => SITE_DIR."personal/private/",
-										"SHOW_ERRORS" => "N" 
+										"SHOW_ERRORS" => "N"
 									 ),
 									 false,
 									 array("HIDE_ICONS" => "Y")
 								);?>
-								<?$APPLICATION->IncludeComponent("bitrix:main.include", "", 
+								<?$APPLICATION->IncludeComponent("bitrix:main.include", "",
 									array(
-										"AREA_FILE_SHOW" => "file", 
+										"AREA_FILE_SHOW" => "file",
 										"PATH" => SITE_DIR."include/footer_compare.php"
 									),
 									false,
 									array("HIDE_ICONS" => "Y")
 								);?>
-								<?$APPLICATION->IncludeComponent("altop:sale.basket.delay", ".default", 
+								<?$APPLICATION->IncludeComponent("altop:sale.basket.delay", ".default",
 									array(
 										"PATH_TO_DELAY" => SITE_DIR."personal/cart/?delay=Y",
 									),
@@ -214,7 +214,7 @@ Loc::loadMessages(__FILE__);?>
 								);?>
 							</div>
 							<div class="foot_panel_2">
-								<?$APPLICATION->IncludeComponent("bitrix:sale.basket.basket.line", ".default", 
+								<?$APPLICATION->IncludeComponent("bitrix:sale.basket.basket.line", ".default",
 									array(
 										"PATH_TO_BASKET" => SITE_DIR."personal/cart/",
 										"PATH_TO_ORDER" => SITE_DIR."personal/order/make/",
@@ -222,10 +222,36 @@ Loc::loadMessages(__FILE__);?>
 									),
 									false,
 									array("HIDE_ICONS" => "Y")
-								);?>								
+								);?>
 							</div>
 						</div>
 					</div>
 					</div>
+
+<style>
+    img.lazy-fadein {opacity: 0;}
+    img.lazy-fadein:not(.initial) {transition: opacity 1s;}
+    img.lazy-fadein.initial,img.lazy-fadein.loaded,img.lazy-fadein.error {opacity: 1;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@12.0.0/dist/lazyload.min.js"></script>
+<script>
+    $(function(){
+        $('img').each(function(li,el){
+            $(el).addClass('lazy-fadein');
+            var src = $(el).attr('src');
+            $(el).removeAttr( "src" );
+            $(el).attr('data-src',src);
+        });
+
+        var lazyLoadInstance = new LazyLoad({
+            elements_selector: ".lazy-fadein",
+            threshold: 0,
+        });
+
+        if (lazyLoadInstance) {
+            lazyLoadInstance.update();
+        }
+    });
+</script>
 </body>
 </html>
