@@ -1,13 +1,13 @@
 <?$APPLICATION->IncludeComponent(
-	"bitrix:catalog.section.list", 
-	"panel", 
+	"bitrix:catalog.section.list",
+	"panel",
 	array(
 		"IBLOCK_TYPE" => "catalog",
 		"IBLOCK_ID" => "24",
 		"CACHE_TYPE" => "A",
 		"CACHE_TIME" => "36000000",
 		"CACHE_GROUPS" => "Y",
-		"TOP_DEPTH" => "2",
+		"TOP_DEPTH" => "1",
 		"SECTION_FIELDS" => array(
 			0 => "",
 			1 => "",
