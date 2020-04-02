@@ -3,9 +3,16 @@
 if(count($arResult) < 1)
 	return;
 
-foreach($arResult as $key => $arItem) {	
+foreach($arResult as $key=>$arItem) {
+    if ($arItem["DEPTH_LEVEL"] > $arParams["MAX_LEVEL"]) {
+        unset($arResult[$key]);
+        continue;
+    }
+}
+
+foreach($arResult as $key => $arItem) {
 	if($arItem["DEPTH_LEVEL"] == 2) {
-		if($arItem["PARAMS"]["PICTURE"] > 0) {		
+		if($arItem["PARAMS"]["PICTURE"] > 0) {
 			$arFileTmp = CFile::ResizeImageGet(
 				$arItem["PARAMS"]["PICTURE"],
 				array("width" => 50, "height" => 50),
@@ -26,17 +33,17 @@ if($arParams["CACHE_SELECTED_ITEMS"] != "Y") {
 	$items = array();
 	$selectedItem = false;
 	foreach($arResult as $arItem) {
-		$items[] = $arItem;		
+		$items[] = $arItem;
 		if($arItem["SELECTED"]) {
 			$selectedItem = true;
 			break;
 		}
 	}
 	unset($arItem);
-	
+
 	if($selectedItem) {
 		krsort($items);
-		
+
 		foreach($items as $arItem) {
 			if($arItem["DEPTH_LEVEL"] == 1) {
 				$arResult[$arItem["ITEM_INDEX"]]["SELECTED"] = true;

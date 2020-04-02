@@ -14,7 +14,7 @@ global $arSetting;?>
 			echo str_repeat("</div></li>", ($previousLevel - $arItem["DEPTH_LEVEL"]));
 		}
 		if($arItem["DEPTH_LEVEL"] == 1) {
-			if($arItem["IS_PARENT"]) {?>
+			if(false) { //$arItem["IS_PARENT"]?>
 				<li class="parent<?=($arItem['SELECTED'] ? ' selected' : '')?>">
 					<a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"].($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT" ? "<span class='arrow'></span>" : "")?></a>
 					<?=($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER" ? "<span class='arrow'></span>" : "")?>
