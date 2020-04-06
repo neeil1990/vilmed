@@ -2,7 +2,7 @@
 <?$APPLICATION->IncludeComponent("bitrix:catalog.compare.list", ".default", Array(
 	"AJAX_MODE" => "N",
 	"IBLOCK_TYPE" => "catalog",
-	"IBLOCK_ID" => "15",
+	"IBLOCK_ID" => "24",
 	"DETAIL_URL" => "",
 	"COMPARE_URL" => SITE_DIR."catalog/compare/",
 	"NAME" => "CATALOG_COMPARE_LIST",

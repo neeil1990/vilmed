@@ -1532,7 +1532,6 @@ ul.new_leader_disc li a .icon:after{
 	left:0px;
 	top:0px;
 	opacity: 0;
-	transition: opacity 2s;
 }
 .banners-main__item-image[data-was-processed="true"] {
 	opacity: 1;
@@ -10214,10 +10213,6 @@ transform: translateX(-8px);
 	.anythingSlider-promotions-block .panel{
 		width:100% !important;
 		height:auto !important;
-	}
-
-	.anythingSlider-promotions-block .panel:nth-child(n + 4){
-		display:none;
 	}
 
 	.promotions__item{
