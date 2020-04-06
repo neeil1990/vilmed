@@ -4,8 +4,6 @@ target="_blank" rel="nofollow"><img src="https://informer.yandex.ru/informer/552
 style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)" class="ym-advanced-informer" data-cid="55225453" data-lang="ru" /></a>
 <!-- /Yandex.Metrika informer -->
 
-
-
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript" >
    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -15,8 +13,7 @@ style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" tit
    ym(55225453, "init", {
         clickmap:true,
         trackLinks:true,
-        accurateTrackBounce:true,
-        webvisor:true
+        accurateTrackBounce:true
    });
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/55225453" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
