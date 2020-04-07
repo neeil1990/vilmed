@@ -2,8 +2,8 @@
 $APPLICATION->SetTitle("Каталог товаров");?>
 
 <?$APPLICATION->IncludeComponent(
-	"bitrix:catalog", 
-	".default", 
+	"bitrix:catalog",
+	".default",
 	array(
 		"COMPONENT_TEMPLATE" => ".default",
 		"IBLOCK_TYPE" => "catalog",
@@ -104,14 +104,6 @@ $APPLICATION->SetTitle("Каталог товаров");?>
 			1 => "DISCOUNT",
 			2 => "CML2_ATTRIBUTES",
 			3 => "SALELEADER",
-			4 => "",
-			5 => "",
-			6 => "",
-			7 => "",
-			8 => "",
-			9 => "",
-			10 => "",
-			11 => "",
 		),
 		"COMPARE_OFFERS_FIELD_CODE" => array(
 			0 => "",

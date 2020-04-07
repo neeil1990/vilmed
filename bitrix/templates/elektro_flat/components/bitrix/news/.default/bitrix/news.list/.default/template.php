@@ -15,7 +15,7 @@ if(count($arResult["ITEMS"]) < 1)
 				<?if(!empty($arItem["DISPLAY_ACTIVE_FROM"]) || (isset($arItem["DISPLAY_DATE_CREATE"]) && !empty($arItem["DISPLAY_DATE_CREATE"]))):?>
 					<span class="news__item-date"><?=(!empty($arItem["DISPLAY_ACTIVE_FROM"]) ? $arItem["DISPLAY_ACTIVE_FROM"] : $arItem["DISPLAY_DATE_CREATE"]);?></span>
 				<?endif;?>
-				<span class="news__item-title"><?=$arItem["NAME"]?></span>				
+				<span class="news__item-title"><?=$arItem["NAME"]?></span>
 				<span class="news__item-text"><?=$arItem["PREVIEW_TEXT"]?></span>
 			</span>
 		</a>

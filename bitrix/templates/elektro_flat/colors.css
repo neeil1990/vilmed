@@ -1124,7 +1124,7 @@ a.promotions__item{
 	-webkit-transition:-webkit-transform 0.3s ease 0s;
 	-moz-transition:-moz-transform 0.3s ease 0s;
 	-o-transition:-o-transform 0.3s ease 0s;
-	transition:transform 0.3s ease 0s;
+	transition:opacity 2s, transform 0.3s ease 0s;
 }
 
 .promotions__item.completed .promotions__item-image{

@@ -6,32 +6,32 @@ if(count($arResult["ITEMS"]) < 1)
 use \Bitrix\Main\Localization\Loc;
 Loc::loadMessages(__FILE__);?>
 
-<div class="promotions-list">	
+<div class="promotions-list">
 	<?foreach($arResult["ITEMS"] as $arItem):
 		$arCompareDates = 1;
 		if(!empty($arItem["ACTIVE_TO"])):
 			$displayActiveToDate = $arItem["ACTIVE_TO"];
 			$displayCurrentDate = ConvertTimeStamp(false, "FULL");
 			$arCompareDates = $DB->CompareDates($displayActiveToDate, $displayCurrentDate);
-		endif;?>		
+		endif;?>
 		<a class="promotions__item<?=($arCompareDates <= 0 ? ' completed' : '');?>" href="<?=$arItem["DETAIL_PAGE_URL"]?>">
 			<span class="promotions__item-image-wrap">
-				<span class="promotions__item-image"<?=(is_array($arItem["PREVIEW_PICTURE"]) ? " style=\"background-image:url('".$arItem["PREVIEW_PICTURE"]["SRC"]."');\"" : "");?>></span>
+				<span class="promotions__item-image lazy-fadein" data-src="<?=(is_array($arItem["PREVIEW_PICTURE"]) ? $arItem["PREVIEW_PICTURE"]["SRC"] : "");?>"></span>
 				<?if($arItem["PROPERTIES"]["TIMER"]["VALUE"] != false && !empty($arItem["ACTIVE_TO"])):
 					$new_date = ParseDateTime($arItem["ACTIVE_TO"], FORMAT_DATETIME);
 					if(!$new_date["HH"])
 						$new_date["HH"] = 00;
 					if(!$new_date["MI"])
 						$new_date["MI"] = 00;?>
-					<script type="text/javascript">												
-						$(function() {														
+					<script type="text/javascript">
+						$(function() {
 							$("#time_buy_timer_<?=$arItem['ID']?>").countdown({
 								until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
 								format: "DHMS",
 								expiryText: "<span class='over'><?=GetMessage('PROMOTIONS_TIME_BUY_EXPIRY')?></span>",
 								alwaysExpire: true
 							});
-						});												
+						});
 					</script>
 					<span class="time_buy_cont">
 						<span class="time_buy_clock"><i class="fa fa-clock-o"></i></span>
