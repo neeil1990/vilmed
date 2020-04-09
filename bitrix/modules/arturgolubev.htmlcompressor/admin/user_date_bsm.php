@@ -1,1 +1,1 @@
-<?define("arturgolubev_htmlcompressor_TEMPORARY_CACHE", "fTZZBHlmAQNqUnhlC2AKfQEg");?>
+<?define("arturgolubev_htmlcompressor_TEMPORARY_CACHE", "fTZTBHlmAQNqU3hlC2AKfQYg");?>
