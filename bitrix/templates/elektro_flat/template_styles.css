@@ -10138,9 +10138,36 @@ transform: translateX(-8px);
 		margin:0px;
 	}
 
-	.left-column,
+	.left-column .h3,
+	.left-column .left-menu,
+	.left-column .new_leader_disc,
+	.left-column .vendors,
+	.left-column .subscribe,
+	.left-column .news-block,
+	.left-column .reviews-block,
 	.top-catalog{
 		display:none;
+	}
+
+	.left-column{
+		width: 100%;
+	}
+
+	.left-column .banners_left{
+		text-align: center;
+		margin: 10px auto;
+	}
+	.left-column .banners_left a{
+		max-width: 160px;
+		margin-right: 10px;
+		display: inline-block;
+	}
+	.left-column .banners_left a:nth-child(2n) {
+		margin-right: 0px;
+	}
+	.left-column .banners_left a img{
+		width: 100%;
+		height: auto;
 	}
 
 	.workarea{
