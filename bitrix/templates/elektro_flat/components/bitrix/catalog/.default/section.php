@@ -569,7 +569,18 @@ if($arCurSection["VIEW_COLLECTION"]) {
 
 <?//DESCRIPTION//
 if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>
-	<div class="catalog_preview"><?=(!empty($arCurSection["DESCRIPTION"]) && empty($pageSeo["SEO_TEXT"]) ? $arCurSection["DESCRIPTION"] : $pageSeo["SEO_TEXT"])?></div>
+	<div class="catalog_preview">
+	<?=(!empty($arCurSection["DESCRIPTION"]) && empty($pageSeo["SEO_TEXT"]) ? $arCurSection["DESCRIPTION"] : $pageSeo["SEO_TEXT"])?>
+	
+	<?
+		if(empty($arCurSection["DESCRIPTION"]) && empty($pageSeo["SEO_TEXT"])){
+			
+			$APPLICATION->IncludeFile("/include/section_desc.php", $arCurSection, [
+				'MODE' => 'php'
+			]);
+		}
+	?>
+	</div>
 <?}
 
 //FILTER_SEO_ADD_CHAIN//

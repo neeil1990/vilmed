@@ -213,6 +213,8 @@ if(!$inPriceRatio) {
 
 //MIN_QUANTITY//
 foreach($arResult["ITEMS"] as $key => $arElement) {
+	
+	$arResult["ITEMS"][$key]['NAME'] = html_entity_decode($arElement['NAME']);
     if(!array_key_exists("ZERO-INF",$arElement["PRICE_MATRIX"]["ROWS"])){
         foreach($arElement["ITEM_PRICES"] as $keyPrice => $itemPrice) {
             $arResult["ITEMS"][$key]["ITEM_PRICES"][$keyPrice]["MIN_QUANTITY"] =  $itemPrice["QUANTITY_FROM"];

@@ -150,5 +150,8 @@ $(function() {
             $("#catalog_wrap_btn .showfilter .fa-angle-up").css({"display":"block"});
      	}
     });
+	
+	var text = $('#pagetitle').text();
+    $('#pagetitle').text(text.replace(/&quot;/g, '')); 
 
 });

@@ -2234,7 +2234,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 										</div>
 									<?}?>
 									<div class="dots"></div>
-									<div class="val"><?=is_array($v["DISPLAY_VALUE"]) ? implode(", ", $v["DISPLAY_VALUE"]) : $v["DISPLAY_VALUE"];?></div>
+									<div class="val"><?=strip_tags(html_entity_decode(is_array($v["DISPLAY_VALUE"]) ? implode(", ", $v["DISPLAY_VALUE"]) : $v["DISPLAY_VALUE"]));?></div>
 								</div>
 							<?}
 							unset($k, $v);
