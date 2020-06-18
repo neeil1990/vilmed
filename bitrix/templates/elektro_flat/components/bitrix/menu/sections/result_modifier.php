@@ -3,8 +3,8 @@
 if(count($arResult) < 1)
 	return;
 
-foreach($arResult as $key=>$arItem) {
-    if ($arItem["DEPTH_LEVEL"] > $arParams["MAX_LEVEL"]) {
+foreach($arResult as $key => $arItem) {
+    if ($arItem["DEPTH_LEVEL"] > $arParams["MAX_LEVEL"] || $arItem['PARAMS']['HIDDEN']) {
         unset($arResult[$key]);
         continue;
     }

@@ -2,6 +2,14 @@
 
 $arSections = array();
 
+foreach($arResult["SECTIONS"] as $key => $arItem) {
+
+	if ($arItem['UF_HIDDEN']) {
+		unset($arResult["SECTIONS"][$key]);
+		continue;
+	}
+}
+
 foreach($arResult["SECTIONS"] as $key => $arSection):
 	if($arSection["IBLOCK_SECTION_ID"] > 0):
 		$arSections[$arSection["IBLOCK_SECTION_ID"]]["CHILDREN"][$arSection["ID"]] = $arSection;
@@ -10,10 +18,10 @@ foreach($arResult["SECTIONS"] as $key => $arSection):
 		$arSections[$arSection["ID"]] = $arSection;
 	endif;
 endforeach;
- 
+
 $arResult["SECTIONS"] = $arSections;
 
-foreach($arResult["SECTIONS"] as $key => $arSection):	
+foreach($arResult["SECTIONS"] as $key => $arSection):
 	if(isset($arSection["CHILDREN"]) && count($arSection["CHILDREN"]) > 0):
 		foreach($arSection["CHILDREN"] as $keyChild => $arChild):
 			if(is_array($arChild["PICTURE"])):

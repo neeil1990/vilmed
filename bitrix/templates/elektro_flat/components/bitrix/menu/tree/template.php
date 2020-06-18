@@ -8,8 +8,8 @@ if(count($arResult) < 1)
 global $arSetting;?>
 
 <ul class="left-menu">
-	<?$previousLevel = 0;	
-	foreach($arResult as $arItem):		
+	<?$previousLevel = 0;
+	foreach($arResult as $arItem):
 		if($previousLevel && $arItem["DEPTH_LEVEL"] < $previousLevel):
 			echo str_repeat("</ul></li>", ($previousLevel - $arItem["DEPTH_LEVEL"]));
 		endif;
@@ -17,15 +17,15 @@ global $arSetting;?>
 			<li class="parent<?if($arItem['SELECTED']):?> selected<?endif?>">
 				<a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?></a>
 				<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?><span class="arrow"></span><?endif;?>
-				<ul class="submenu">			
+				<ul class="submenu">
 		<?else:
 			if($arItem["PERMISSION"] > "D"):?>
 				<li<?if($arItem["SELECTED"]):?> class="selected"<?endif?>>
 					<a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?></a>
-				</li>				
+				</li>
 			<?endif;
 		endif;
-		$previousLevel = $arItem["DEPTH_LEVEL"];		
+		$previousLevel = $arItem["DEPTH_LEVEL"];
 	endforeach;
 	if($previousLevel > 1):
 		echo str_repeat("</ul></li>", ($previousLevel-1) );
@@ -35,7 +35,7 @@ global $arSetting;?>
 <script type="text/javascript">
 	//<![CDATA[
 	$(function() {
-		<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?>			
+		<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?>
 			$(".top-catalog ul.left-menu").moreMenu();
 		<?endif;?>
 		$("ul.left-menu").children(".parent").on({

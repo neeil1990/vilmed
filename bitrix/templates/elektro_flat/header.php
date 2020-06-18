@@ -31,6 +31,7 @@ Loc::loadMessages(__FILE__);?>
 	Asset::getInstance()->addCss(SITE_TEMPLATE_PATH."/js/custom-forms/custom-forms.css");
 	Asset::getInstance()->addCss(SITE_TEMPLATE_PATH."/js/fancybox/jquery.fancybox-1.3.1.css");
 	Asset::getInstance()->addCss(SITE_TEMPLATE_PATH."/js/spectrum/spectrum.css");
+	Asset::getInstance()->addCss("//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css");
 	CJSCore::Init(array("jquery", "popup"));
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/js/jquery.cookie.js");
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/js/moremenu.js");
@@ -66,6 +67,8 @@ Loc::loadMessages(__FILE__);?>
 			});
 		</script>
 	");
+
+	Asset::getInstance()->addJs("//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js");
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/js/main.js");
 	Asset::getInstance()->addJs(SITE_TEMPLATE_PATH."/script.js");
 	$APPLICATION->ShowHead();?>
@@ -552,6 +555,6 @@ Loc::loadMessages(__FILE__);?>
 
 										</div>
 									</div>
-									
+
 									<h1 id="pagetitle"><?=$APPLICATION->ShowTitle(false);?></h1>
 								<?endif;?>

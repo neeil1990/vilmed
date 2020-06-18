@@ -26,7 +26,7 @@ if(count($arResult["SECTIONS"]) < 1)
 									<span class="graph">
 										<?if(!empty($arChild["UF_ICON"])) {?>
 											<i class="<?=$arChild['UF_ICON']?>" aria-hidden="true"></i>
-										<?} elseif(is_array($arChild["PICTURE"])) {?>								
+										<?} elseif(is_array($arChild["PICTURE"])) {?>
 											<img src="<?=$arChild['PICTURE']['SRC']?>" width="<?=$arChild['PICTURE']['WIDTH']?>" height="<?=$arChild['PICTURE']['HEIGHT']?>" alt="<?=$arChild['NAME']?>" title="<?=$arChild['NAME']?>" />
 										<?} else {?>
 											<img src="<?=SITE_TEMPLATE_PATH?>/images/no-photo.jpg" width="50" height="50" alt="<?=$arChild['NAME']?>" title="<?=$arChild['NAME']?>" />
@@ -42,8 +42,8 @@ if(count($arResult["SECTIONS"]) < 1)
 					<div class="clr"></div>
 				</div>
 			<?}?>
-		</div>	
-	<?}?>	
+		</div>
+	<?}?>
 </div>
 
 <script type="text/javascript">
@@ -51,11 +51,11 @@ if(count($arResult["SECTIONS"]) < 1)
 	BX.ready(function() {
 		BX.bindDelegate(BX("catalog-section-list"), "click", {className: "showchild"}, function() {
 			BX.toggleClass(this.parentNode, ["active", ""]);
-			
+
 			var currIcon = BX.findChild(this, {tagName: "i"}, true, false);
 			if(!!currIcon)
 				BX.toggleClass(currIcon, ["fa-minus", "fa-plus"]);
-			
+
 			var currItemsCont = BX.findChild(this.parentNode.parentNode, {className: "catalog-section-childs"}, true, false);
 			if(!!currItemsCont)
 				$(currItemsCont).slideToggle();

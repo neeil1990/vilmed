@@ -10,10 +10,10 @@ use Bitrix\Main\Loader,
 if(!Loader::includeModule("iblock"))
 	return;
 
-Loc::loadMessages(__FILE__); 
+Loc::loadMessages(__FILE__);
 
 
-global $arSetting;  
+global $arSetting;
 
 //CURRENT_SECTION//
 $arFilter = array(
@@ -38,8 +38,8 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 	$rsSections = CIBlockSection::GetList(array(), $arFilter, false, $arSelect);
 	global $CACHE_MANAGER;
 	$CACHE_MANAGER->StartTagCache($cache_dir);
-	$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID"]);	
-	if($arSection = $rsSections->Fetch()) {		
+	$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID"]);
+	if($arSection = $rsSections->Fetch()) {
 		if(in_array($arSection["CODE"], $arproductType) || $arSection["ACTIVE"] == "Y" || $arSection["GLOBAL_ACTIVE"] == "Y") {
 			if(in_array($arSection["CODE"], $arproductType))
 				$arCurSection["PRODUCT_TYPE"] = true;
@@ -53,7 +53,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["BANNER"] = array(
 				"PICTURE" => $arSection["UF_BANNER"] > 0 ? CFile::GetFileArray($arSection["UF_BANNER"]) : "",
 				"URL" => $arSection["UF_BANNER_URL"]
-			);		
+			);
 			$arCurSection["PREVIEW"] = $arSection["UF_PREVIEW"];
 			if($arSection["UF_VIEW_COLLECTION"] > 0) {
 				$arCurSection["VIEW_COLLECTION"] = true;
@@ -79,19 +79,19 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 				}
 				if(!empty($parentSectionPathIds)) {
 					$rsSections = CIBlockSection::GetList(
-						array("DEPTH_LEVEL" => "DESC"),	
+						array("DEPTH_LEVEL" => "DESC"),
 						array("IBLOCK_ID" => $arSection["IBLOCK_ID"], "ACTIVE" => "Y", "GLOBAL_ACTIVE" => "Y", "ID" => $parentSectionPathIds),
 						false,
 						array("ID", "IBLOCK_ID", "DEPTH_LEVEL", "UF_BACKGROUND_IMAGE", "UF_VIEW", "UF_YOUTUBE_BG")
 					);
-					while($arSection = $rsSections->GetNext()) {						
+					while($arSection = $rsSections->GetNext()) {
 						if(!isset($arCurSection["BACKGROUND_IMAGE"]) && $arSection["UF_BACKGROUND_IMAGE"] > 0) {
 							$arCurSection["BACKGROUND_IMAGE"] = CFile::GetFileArray($arSection["UF_BACKGROUND_IMAGE"]);
 						}
 						if(!isset($arCurSection["VIEW"]) && $arSection["UF_VIEW"] > 0) {
 							$UserField = CUserFieldEnum::GetList(array(), array("ID" => $arSection["UF_VIEW"]));
 							if($UserFieldAr = $UserField->Fetch()) {
-								$arCurSection["VIEW"] = $UserFieldAr["XML_ID"];						
+								$arCurSection["VIEW"] = $UserFieldAr["XML_ID"];
 							}
 						}
 						if(!isset($arCurSection["BACKGROUND_YOUTUBE"]) && !empty($arSection["UF_YOUTUBE_BG"])) {
@@ -117,7 +117,7 @@ $arBtn=array();
 if($arParams["USE_FILTER_SEO"] == "Y" && !empty($arParams["USE_FILTER_SEO_IBLOCK"])) {
     $pageUrl = $APPLICATION->GetCurPage();
     $pageUrl = str_replace(" ","%20",$pageUrl);
-    $pageSeo = array();    
+    $pageSeo = array();
     $arSelectSeo = Array(
        "ID",
        "NAME",
@@ -167,7 +167,7 @@ if($arParams["USE_FILTER_SEO"] == "Y" && !empty($arParams["USE_FILTER_SEO_IBLOCK
     );
 
     $res = CIBlockElement::GetList(Array("SORT"=>"ASC"), $arFilterSeo, false, false, $arSelectSeo);
-	
+
     while($ob = $res->GetNextElement()) {
         $arFields = $ob->GetFields();
 
@@ -204,11 +204,12 @@ if(!empty($arCurSection)) {
 				"SECTION_CODE" => $arResult["VARIABLES"]["SECTION_CODE"],
 				"CACHE_TYPE" => $arParams["CACHE_TYPE"],
 				"CACHE_TIME" => $arParams["CACHE_TIME"],
-				"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],			
+				"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
 				"TOP_DEPTH" => "1",
 				"SECTION_FIELDS" => array(),
 				"SECTION_USER_FIELDS" => array(
-					0 => "UF_ICON"
+					0 => "UF_ICON",
+					1 => "UF_HIDDEN",
 				),
 				"SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
 				"ADD_SECTIONS_CHAIN" => (isset($arParams["ADD_SECTIONS_CHAIN"]) ? $arParams["ADD_SECTIONS_CHAIN"] : ""),
@@ -230,6 +231,31 @@ if(!empty($arCurSection)) {
         </div>
     <? } ?>
 
+    <div class="clear"></div>
+
+    <?
+    $rsParentSection = CIBlockSection::GetByID($arCurSection["ID"]);
+    if ($arParentSection = $rsParentSection->GetNext())
+    {
+        $arFilter = array('IBLOCK_ID' => $arParentSection['IBLOCK_ID'],'>LEFT_MARGIN' => $arParentSection['LEFT_MARGIN'],'<RIGHT_MARGIN' => $arParentSection['RIGHT_MARGIN'],'>DEPTH_LEVEL' => $arParentSection['DEPTH_LEVEL'], 'UF_HIDDEN' => 1);
+        $rsSect = CIBlockSection::GetList(array('left_margin' => 'asc'),$arFilter);
+        if($rsSect->SelectedRowsCount()){
+        ?>
+        <div class="subcategories">
+            <ul class="tag-slider sub-links-2">
+                <? while ($arSect = $rsSect->GetNext()) { ?>
+                <li><a href="<?=$arSect['SECTION_PAGE_URL']?>"><?=$arSect['NAME']?></a></li>
+                <? } ?>
+            </ul>
+            <div class="navi">
+                <span class="open">Показать все</span>
+                <span hidden class="close">Свернуть</span>
+            </div>
+        </div>
+        <?}
+    }
+    ?>
+
 	<?//PREVIEW//  else need for fast link
 	if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>
 		<div class="catalog_preview"><?=(!empty($arCurSection["PREVIEW"]) && empty($pageSeo["PREVIEW_TEXT"]) ? $arCurSection["PREVIEW"] : $pageSeo["PREVIEW_TEXT"])?></div>
@@ -249,7 +275,7 @@ if(!empty($arCurSection)) {
 				"CACHE_TIME" => $arParams["CACHE_TIME"],
 				"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
 				"SAVE_IN_SESSION" => "N",
-				"FILTER_VIEW_MODE" => "",			
+				"FILTER_VIEW_MODE" => "",
 				"XML_EXPORT" => "N",
 				"SECTION_TITLE" => "NAME",
 				"SECTION_DESCRIPTION" => "DESCRIPTION",
@@ -266,14 +292,14 @@ if(!empty($arCurSection)) {
 			),
 			$component,
 			array("HIDE_ICONS" => "Y")
-		);?>	
+		);?>
 
 		<div class="filter_indent<?=($arSetting['SMART_FILTER_LOCATION']['VALUE'] == 'VERTICAL') ? ' vertical' : '';?> clr"></div>
-		
+
 		<?global $arSmartFilter;
 	} else {
 		$arSmartFilter = array(
-			"IBLOCK_ID" => $arParams["IBLOCK_ID"],		
+			"IBLOCK_ID" => $arParams["IBLOCK_ID"],
 			"ACTIVE" => "Y",
 			"SECTION_GLOBAL_ACTIVE" => "Y"
 		);
@@ -281,7 +307,7 @@ if(!empty($arCurSection)) {
 			$arSmartFilter["SECTION_ID"] = $arCurSection["ID"];
 			$arSmartFilter["INCLUDE_SUBSECTIONS"] = "Y";
 		}
-		if($arCurSection["PRODUCT_TYPE"]) {			
+		if($arCurSection["PRODUCT_TYPE"]) {
 			$arSmartFilter["!PROPERTY_".strtoupper($arCurSection["CODE"])] = false;
 			$arSmartFilter["PROPERTY_THIS_COLLECTION"] = false;
 		} elseif($arCurSection["VIEW_COLLECTION"]) {
@@ -294,7 +320,7 @@ if(!empty($arCurSection)) {
 	$arCurSection["NAME"] = Loc::getMessage($arCurSection["CODE"]."_TITLE");
 	$arCurSection["SECTION_PAGE_URL"] = $arResult["FOLDER"].$arResult["VARIABLES"]["SECTION_CODE"]."/";
 	$arSmartFilter = array(
-		"IBLOCK_ID" => $arParams["IBLOCK_ID"],		
+		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
 		"ACTIVE" => "Y",
 		"SECTION_GLOBAL_ACTIVE" => "Y",
 		"!PROPERTY_".strtoupper($arCurSection["CODE"]) => false,
@@ -308,7 +334,7 @@ $cache_dir = "/catalog/amount";
 $obCache = new CPHPCache();
 if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 	$count = $obCache->GetVars();
-} elseif($obCache->StartDataCache()) {		
+} elseif($obCache->StartDataCache()) {
 	global $CACHE_MANAGER;
 	$CACHE_MANAGER->StartTagCache($cache_dir);
 	$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID"]);
@@ -322,7 +348,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 		<label><?=Loc::getMessage("COUNT_ITEMS")?></label>
 	<?} else {?>
 		<label><?=Loc::getMessage("COUNT_COLLECTION")?></label>
-	<?}?>	
+	<?}?>
 	<span><?=$count?></span>
 </div>
 
@@ -346,15 +372,15 @@ $sort = $APPLICATION->get_cookie("sort") ? $APPLICATION->get_cookie("sort") : $a
 if($arParams["AJAX_MODE"] == "Y") {
 	if($_REQUEST["sort"])
 		$_SESSION["sort"] = $_REQUEST["sort"];
-	
+
 	if($_SESSION["sort"])
 		$_REQUEST["sort"] = $_SESSION["sort"];
 }
 
 if($_REQUEST["sort"]) {
 	$sort = $arParams["ELEMENT_SORT_FIELD"];
-	$APPLICATION->set_cookie("sort", $sort, false, "/", SITE_SERVER_NAME); 
-} 
+	$APPLICATION->set_cookie("sort", $sort, false, "/", SITE_SERVER_NAME);
+}
 if($_REQUEST["sort"] == "price") {
 	$sort = "PROPERTY_MINIMUM_PRICE";
 	$APPLICATION->set_cookie("sort", $sort, false, "/", SITE_SERVER_NAME);
@@ -370,13 +396,13 @@ $sort_order = $APPLICATION->get_cookie("order") ? $APPLICATION->get_cookie("orde
 if($arParams["AJAX_MODE"] == "Y") {
 	if($_REQUEST["order"])
 		$_SESSION["order"] = $_REQUEST["order"];
-	
+
 	if($_SESSION["order"])
 		$_REQUEST["order"] = $_SESSION["order"];
 }
 
 if($_REQUEST["order"]) {
-	$sort_order = "asc";	
+	$sort_order = "asc";
 	$APPLICATION->set_cookie("order", $sort_order, false, "/", SITE_SERVER_NAME);
 }
 if($_REQUEST["order"] == "desc") {
@@ -388,7 +414,7 @@ if($_REQUEST["order"] == "desc") {
 	<label><span class="full"><?=Loc::getMessage("SECT_SORT_LABEL_FULL")?></span><span class="short"><?=Loc::getMessage("SECT_SORT_LABEL_SHORT")?></span>:</label>
 	<?foreach($arAvailableSort as $key => $val) {
 		$className = $sort == $val[0] ? "selected" : "";
-		if($className) 
+		if($className)
 			$className .= $sort_order == "asc" ? " asc" : " desc";
 		$newSort = $sort == $val[0] ? $sort_order == "desc" ? "asc" : "desc" : $arAvailableSort[$key][1];?>
 		<a href="<?=$APPLICATION->GetCurPageParam("sort=".$key."&amp;order=".$newSort, array("sort", "order"))?>" class="<?=$className?>" rel="nofollow"><?=Loc::getMessage("SECT_SORT_".$key)?></a>
@@ -405,18 +431,18 @@ if(!$arCurSection["VIEW_COLLECTION"]) {
 	if($arParams["AJAX_MODE"] == "Y") {
 		if($_REQUEST["view"])
 			$_SESSION["view"] = $_REQUEST["view"];
-		
+
 		if($_SESSION["view"])
 			$_REQUEST["view"] = $_SESSION["view"];
 	}
 
 	if($_REQUEST["view"]) {
-		$view = "table";	
+		$view = "table";
 		$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME);
 	}
 	if($_REQUEST["view"] == "list") {
 		$view = "list";
-		$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME); 
+		$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME);
 	}
 	if($_REQUEST["view"] == "price") {
 		$view = "price";
@@ -464,7 +490,7 @@ $arParams["LINE_ELEMENT_COUNT"] = !$arCurSection["VIEW_COLLECTION"] ? 4 : 3;
 
 CBitrixComponent::includeComponentClass("bitrix:catalog.section");
 
-if(!isset($arParams["LIST_PRODUCT_ROW_VARIANTS"]) || empty($arParams["LIST_PRODUCT_ROW_VARIANTS"])) {		
+if(!isset($arParams["LIST_PRODUCT_ROW_VARIANTS"]) || empty($arParams["LIST_PRODUCT_ROW_VARIANTS"])) {
 	$arParams["LIST_PRODUCT_ROW_VARIANTS"] = Bitrix\Main\Web\Json::encode(CatalogSectionComponent::predictRowVariants($arParams["LINE_ELEMENT_COUNT"], $arParams["PAGE_ELEMENT_COUNT"]));
 }
 if($arCurSection["VIEW_COLLECTION"]) {
@@ -523,7 +549,7 @@ if($arCurSection["VIEW_COLLECTION"]) {
 		"PAGER_SHOW_ALL" => $arParams["PAGER_SHOW_ALL"],
 		"PAGER_BASE_LINK_ENABLE" => $arParams["PAGER_BASE_LINK_ENABLE"],
 		"PAGER_BASE_LINK" => $arParams["PAGER_BASE_LINK"],
-		"PAGER_PARAMS_NAME" => $arParams["PAGER_PARAMS_NAME"],		
+		"PAGER_PARAMS_NAME" => $arParams["PAGER_PARAMS_NAME"],
 		"LAZY_LOAD" => (isset($arParams["LAZY_LOAD"]) ? $arParams["LAZY_LOAD"] : "Y"),
 		"MESS_BTN_LAZY_LOAD" => (isset($arParams["~MESS_BTN_LAZY_LOAD"]) ? $arParams["~MESS_BTN_LAZY_LOAD"] : ""),
 		"LOAD_ON_SCROLL" => (isset($arParams["LOAD_ON_SCROLL"]) ? $arParams["LOAD_ON_SCROLL"] : "Y"),
@@ -543,10 +569,10 @@ if($arCurSection["VIEW_COLLECTION"]) {
 		"CONVERT_CURRENCY" => $arParams["CONVERT_CURRENCY"],
 		"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 		"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
-		"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],		
+		"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
 		"PRODUCT_ROW_VARIANTS" => $arParams["LIST_PRODUCT_ROW_VARIANTS"],
 		"TYPE" => $view,
-		"ADD_SECTIONS_CHAIN" => "N",		
+		"ADD_SECTIONS_CHAIN" => "N",
 		"COMPARE_PATH" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["compare"],
 		"BACKGROUND_IMAGE" => (isset($arParams["SECTION_BACKGROUND_IMAGE"]) ? $arParams["SECTION_BACKGROUND_IMAGE"] : ""),
 		"DISABLE_INIT_JS_IN_COMPONENT" => (isset($arParams["DISABLE_INIT_JS_IN_COMPONENT"]) ? $arParams["DISABLE_INIT_JS_IN_COMPONENT"] : ""),
@@ -571,10 +597,10 @@ if($arCurSection["VIEW_COLLECTION"]) {
 if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>
 	<div class="catalog_preview">
 	<?=(!empty($arCurSection["DESCRIPTION"]) && empty($pageSeo["SEO_TEXT"]) ? $arCurSection["DESCRIPTION"] : $pageSeo["SEO_TEXT"])?>
-	
+
 	<?
 		if(empty($arCurSection["DESCRIPTION"]) && empty($pageSeo["SEO_TEXT"])){
-			
+
 			$APPLICATION->IncludeFile("/include/section_desc.php", $arCurSection, [
 				'MODE' => 'php'
 			]);
@@ -584,8 +610,8 @@ if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] 
 <?}
 
 //FILTER_SEO_ADD_CHAIN//
-if($arParams["USE_FILTER_SEO"] == "Y" && !empty($arParams["USE_FILTER_SEO_IBLOCK"]) && !empty($pageSeo["NAME"]))     
-     $APPLICATION->AddChainItem($pageSeo["NAME"]); 
+if($arParams["USE_FILTER_SEO"] == "Y" && !empty($arParams["USE_FILTER_SEO_IBLOCK"]) && !empty($pageSeo["NAME"]))
+     $APPLICATION->AddChainItem($pageSeo["NAME"]);
 
 //GIFTS//
 if($arParams["USE_GIFTS_SECTION"] == "Y" && ModuleManager::isModuleInstalled("sale")) {?>
@@ -605,7 +631,7 @@ if($arParams["USE_GIFTS_SECTION"] == "Y" && ModuleManager::isModuleInstalled("sa
 			"ELEMENT_SORT_ORDER2" => "",
 			"DETAIL_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["element"],
 			"PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false}]",
-			"PAGE_ELEMENT_COUNT" => 4,			
+			"PAGE_ELEMENT_COUNT" => 4,
 			"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
 			"OFFERS_FIELD_CODE" => $arParams["LIST_OFFERS_FIELD_CODE"],
 			"OFFERS_PROPERTY_CODE" => $arParams["LIST_OFFERS_PROPERTY_CODE"],
@@ -617,17 +643,17 @@ if($arParams["USE_GIFTS_SECTION"] == "Y" && ModuleManager::isModuleInstalled("sa
 			"USE_PRICE_COUNT" => $arParams["USE_PRICE_COUNT"],
 			"SHOW_PRICE_COUNT" => $arParams["SHOW_PRICE_COUNT"],
 			"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"],
-			"USE_PRODUCT_QUANTITY" => $arParams["USE_PRODUCT_QUANTITY"],			
+			"USE_PRODUCT_QUANTITY" => $arParams["USE_PRODUCT_QUANTITY"],
 			"BASKET_URL" => $arParams["BASKET_URL"],
 			"ACTION_VARIABLE" => $arParams["ACTION_VARIABLE"],
-			"PRODUCT_ID_VARIABLE" => $arParams["PRODUCT_ID_VARIABLE"],			
+			"PRODUCT_ID_VARIABLE" => $arParams["PRODUCT_ID_VARIABLE"],
 			"PRODUCT_QUANTITY_VARIABLE" => $arParams["PRODUCT_QUANTITY_VARIABLE"],
 			"ADD_PROPERTIES_TO_BASKET" => isset($arParams["ADD_PROPERTIES_TO_BASKET"]) ? $arParams["ADD_PROPERTIES_TO_BASKET"] : "",
 			"PRODUCT_PROPS_VARIABLE" => $arParams["PRODUCT_PROPS_VARIABLE"],
 			"PARTIAL_PRODUCT_PROPERTIES" => isset($arParams["PARTIAL_PRODUCT_PROPERTIES"]) ? $arParams["PARTIAL_PRODUCT_PROPERTIES"] : "",
 			"PRODUCT_PROPERTIES" => $arParams["PRODUCT_PROPERTIES"],
 			"CACHE_TYPE" => $arParams["CACHE_TYPE"],
-			"CACHE_TIME" => $arParams["CACHE_TIME"],			
+			"CACHE_TIME" => $arParams["CACHE_TIME"],
 			"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
 			"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
 			"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
@@ -664,7 +690,7 @@ if(ModuleManager::isModuleInstalled("sale") && (!isset($arParams["USE_BIG_DATA"]
 	$propCacheID = array("IBLOCK_ID" => $arParams["IBLOCK_ID"]);
 	$obCache = new CPHPCache();
 	if($obCache->InitCache($arParams["CACHE_TIME"], serialize($propCacheID), "/catalog/property")) {
-		$arProperty = $obCache->GetVars();	
+		$arProperty = $obCache->GetVars();
 	} elseif($obCache->StartDataCache()) {
 		$dbProperty = CIBlockProperty::GetPropertyEnum("THIS_COLLECTION", array(), array("IBLOCK_ID" => $arParams["IBLOCK_ID"]));
 		if($arProp = $dbProperty->GetNext()) {
@@ -688,8 +714,8 @@ if(ModuleManager::isModuleInstalled("sale") && (!isset($arParams["USE_BIG_DATA"]
 			"ELEMENT_SORT_FIELD2" => "",
 			"ELEMENT_SORT_ORDER2" => "",
 			"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
-			"SET_META_KEYWORDS" => "N",		
-			"SET_META_DESCRIPTION" => "N",		
+			"SET_META_KEYWORDS" => "N",
+			"SET_META_DESCRIPTION" => "N",
 			"SET_BROWSER_TITLE" => "N",
 			"SET_LAST_MODIFIED" => "N",
 			"INCLUDE_SUBSECTIONS" => $arParams["INCLUDE_SUBSECTIONS"],
@@ -773,7 +799,7 @@ if(ModuleManager::isModuleInstalled("sale") && (!isset($arParams["USE_BIG_DATA"]
 <?}
 
 //FILTER_SEO
-if(isset($pageSeo) && !empty($pageSeo)) {   
+if(isset($pageSeo) && !empty($pageSeo)) {
     $APPLICATION->SetTitle(!empty($pageSeo["HEADER"]) ? $pageSeo["HEADER"] : (!empty($pageSeo["NAME"]) ? $pageSeo["NAME"] : ""));
     $APPLICATION->SetPageProperty("title", !empty($pageSeo["TITLE"]) ? $pageSeo["TITLE"] : "");
     $APPLICATION->SetPageProperty("keywords", !empty($pageSeo["KEYWORDS"]) ? $pageSeo["KEYWORDS"] : "");
@@ -799,12 +825,12 @@ if(isset($pageSeo) && !empty($pageSeo)) {
     }
 }
 
-	
+
 //PAGEN_META_PROPERTY//
 if(!empty($_REQUEST["PAGEN_1"]) && $_REQUEST["PAGEN_1"] > 1) {
-    if($arParams["USE_FILTER_SEO"] == "Y" && !empty($arParams["USE_FILTER_SEO_IBLOCK"])  && !empty($pageSeo)) {	
+    if($arParams["USE_FILTER_SEO"] == "Y" && !empty($arParams["USE_FILTER_SEO_IBLOCK"])  && !empty($pageSeo)) {
        $APPLICATION->SetPageProperty("title", $pageSeo["NAME"]." | ".Loc::getMessage("SECT_TITLE")." ".$_REQUEST["PAGEN_1"]);
-    }else{  	
+    }else{
 	   $APPLICATION->SetPageProperty("title", (!empty($arCurSection["SECTION_TITLE_H1"]) ? $arCurSection["SECTION_TITLE_H1"] : (!empty($arCurSection["IPROPERTY_VALUES"]["SECTION_PAGE_TITLE"]) ? $arCurSection["IPROPERTY_VALUES"]["SECTION_PAGE_TITLE"] : $arCurSection["NAME"]))." | ".Loc::getMessage("SECT_TITLE")." ".$_REQUEST["PAGEN_1"]);
     }
 	$APPLICATION->SetPageProperty("keywords", "");

@@ -1,7 +1,7 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 if(!CModule::IncludeModule("iblock"))
-	return;	
+	return;
 
 $arParams["IBLOCK_ID"] = "24";
 $arParams["DEPTH_LEVEL"] = "4";
@@ -21,9 +21,9 @@ $arFilter = array(
 	"<="."DEPTH_LEVEL" => $arParams["DEPTH_LEVEL"],
 );
 
-$arSelect = array("ID", "IBLOCK_ID", "NAME", "PICTURE", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_ICON");
+$arSelect = array("ID", "IBLOCK_ID", "NAME", "PICTURE", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_ICON", "UF_HIDDEN");
 
-$rsSections = CIBlockSection::GetList($arOrder, $arFilter, false, $arSelect);		
+$rsSections = CIBlockSection::GetList($arOrder, $arFilter, false, $arSelect);
 
 while($arSection = $rsSections->GetNext()) {
 	$arResult["SECTIONS"][] = array(
@@ -32,7 +32,8 @@ while($arSection = $rsSections->GetNext()) {
 		"~NAME" => $arSection["~NAME"],
 		"~SECTION_PAGE_URL" => $arSection["~SECTION_PAGE_URL"],
 		"PICTURE" => $arSection["PICTURE"],
-		"ICON" => $arSection["UF_ICON"]
+		"ICON" => $arSection["UF_ICON"],
+		"HIDDEN" => $arSection["UF_HIDDEN"]
 	);
 	$arResult["ELEMENT_LINKS"][$arSection["ID"]] = array();
 }
@@ -55,7 +56,8 @@ foreach($arResult["SECTIONS"] as $arSection) {
 			"IS_PARENT" => false,
 			"DEPTH_LEVEL" => $arSection["DEPTH_LEVEL"],
 			"PICTURE" => $arSection["PICTURE"],
-			"ICON" => $arSection["ICON"]
+			"ICON" => $arSection["ICON"],
+			"HIDDEN" => $arSection["HIDDEN"]
 		)
 	);
 }
