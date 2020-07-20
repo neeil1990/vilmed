@@ -30,15 +30,15 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 			});
 			adjustItemHeight(itemsTable);
 		}
-		
+
 		//ITEMS_SECTION_CHILDS//
 		BX.bindDelegate(BX("items-sections"), "click", {className: "items-section__title-wrap"}, function() {
 			BX.toggleClass(this, ["active", ""]);
-			
+
 			var currIcon = BX.findChild(this, {tagName: "i"}, true, false);
 			if(!!currIcon)
 				BX.toggleClass(currIcon, ["fa-minus", "fa-plus"]);
-			
+
 			var currItemsCont = BX.findChild(this.parentNode, {className: "items-section__childs"}, true, false);
 			if(!!currItemsCont) {
 				$(currItemsCont).slideToggle(400, function() {
@@ -79,9 +79,9 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 				<div class="catalog-item-cards">
 					<?//ITEMS//
 					foreach($arSection["ITEMS"] as $key => $arElement) {
-                    
-                    
-                  
+
+
+
 						$arItemIDs = array(
 							"ID" => $arElement["STR_MAIN_ID"],
 							"PRICE_RANGES_BTN" => $arElement["STR_MAIN_ID"]."_price_ranges_btn",
@@ -107,8 +107,8 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 						if(empty($arCurFormat["THOUSANDS_SEP"]))
 							$arCurFormat["THOUSANDS_SEP"] = " ";
 						$currency = str_replace("# ", " ", $arCurFormat["FORMAT_STRING"]);
-						
-						//NEW_HIT_DISCOUNT_TIME_BUY//						
+
+						//NEW_HIT_DISCOUNT_TIME_BUY//
 						$sticker = "";
 						$timeBuy = "";
 						$class = "";
@@ -120,7 +120,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 							if(array_key_exists("SALELEADER", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["SALELEADER"]["VALUE"] == false)
 								$sticker .= "<span class='hit'>".GetMessage("CATALOG_ELEMENT_SALELEADER")."</span>";
 							//DISCOUNT//
-							if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {						
+							if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 								if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"] > 0)
 									$sticker .= "<span class='discount'>-".$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"]."%</span>";
 								else
@@ -135,7 +135,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 							}
 							//TIME_BUY//
 							if(array_key_exists("TIME_BUY", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
-								if(!empty($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {						
+								if(!empty($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
 									if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 										$class = " item-tb";
 										$timeBuy = "<div class='time_buy_sticker'><span class='time_buy_figure'></span><span class='time_buy_text'>".GetMessage("CATALOG_ELEMENT_TIME_BUY")."</span></div>";
@@ -148,7 +148,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 								}
 							}
 						}
-						
+
 						//PRICE_MATRIX//
 						if(count($arElement["PRICE_MATRIX_SHOW"]["COLS"]) > 1 && empty($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
 							$class = " item-pm";
@@ -184,14 +184,14 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 											<?} else {?>
 												<img class="item_img" src="<?=SITE_TEMPLATE_PATH?>/images/no-photo.jpg" width="150" height="150" alt="<?=$strAlt?>" title="<?=$strTitle?>" />
 											<?}?>
-											<?=$timeBuy?>									
+											<?=$timeBuy?>
 											<span class="sticker">
 												<?=$sticker?>
 											</span>
 											<?if(is_array($arElement["PROPERTIES"]["MANUFACTURER"]["PREVIEW_PICTURE"])) {?>
 												<img class="manufacturer" src="<?=$arElement['PROPERTIES']['MANUFACTURER']['PREVIEW_PICTURE']['SRC']?>" width="<?=$arElement['PROPERTIES']['MANUFACTURER']['PREVIEW_PICTURE']['WIDTH']?>" height="<?=$arElement['PROPERTIES']['MANUFACTURER']['PREVIEW_PICTURE']['HEIGHT']?>" alt="<?=$arElement['PROPERTIES']['MANUFACTURER']['NAME']?>" title="<?=$arElement['PROPERTIES']['MANUFACTURER']['NAME']?>" />
 											<?}?>
-										</a>									
+										</a>
 									</div>
 								</div>
 								<?//ITEM_TITLE//?>
@@ -206,7 +206,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 										<?//ARTICLE//
 										if($inArticle) {?>
 											<div class="article">
-												<?=GetMessage("CATALOG_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?>
+												<?=GetMessage("CATALOG_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?>
 											</div>
 										<?}
 										//RATING//
@@ -216,7 +216,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 													$ratingAvg = round($arElement["PROPERTIES"]["vote_sum"]["VALUE"] / $arElement["PROPERTIES"]["vote_count"]["VALUE"], 2);
 												else
 													$ratingAvg = 0;
-												if($ratingAvg) {									
+												if($ratingAvg) {
 													for($i = 0; $i <= 4; $i++) {?>
 														<div class="star<?=($ratingAvg > $i ? ' voted' : ' empty');?>" title="<?=$i+1?>"><i class="fa fa-star"></i></div>
 													<?}
@@ -237,22 +237,22 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 									</div>
 								<?}
 								//TOTAL_OFFERS_ITEM_PRICE//?>
-								<div class="item-price-cont<?=(!$inOldPrice && !$inPercentPrice ? ' one' : '').(($inOldPrice && !$inPercentPrice) || (!$inOldPrice && $inPercentPrice) ? ' two' : '').($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"]) ? ' reference' : '');?>">								
+								<div class="item-price-cont<?=(!$inOldPrice && !$inPercentPrice ? ' one' : '').(($inOldPrice && !$inPercentPrice) || (!$inOldPrice && $inPercentPrice) ? ' two' : '').($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"]) ? ' reference' : '');?>">
 									<?//TOTAL_OFFERS_PRICE//
 									if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 										if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
-											<div class="item-no-price">																	
+											<div class="item-no-price">
 												<span class="unit">
 													<?=GetMessage("CATALOG_ELEMENT_NO_PRICE")?>
 													<span><?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"] : "1")." ".$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?></span>
 												</span>
 											</div>
-										<?} else {?>										
+										<?} else {?>
 											<div class="item-price">
 												<?if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] < $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_BASE_PRICE"]) {
 													if($inOldPrice) {?>
 														<span class="catalog-item-price-old">
-															<?=$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PRINT_RATIO_BASE_PRICE"];?>					
+															<?=$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PRINT_RATIO_BASE_PRICE"];?>
 														</span>
 													<?}
 													if($inPercentPrice) {?>
@@ -278,12 +278,12 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 														<?=CCurrencyLang::CurrencyFormat($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CURRENCY"], true);?>
 													</span>
 												<?}?>
-											</div>									
+											</div>
 										<?}
 									//ITEM_PRICE//
 									} else {
 										if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
-											<div class="item-no-price">														
+											<div class="item-no-price">
 												<span class="unit">
 													<?=GetMessage("CATALOG_ELEMENT_NO_PRICE")?>
 													<span><?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arElement["CATALOG_MEASURE_RATIO"] : "1")." ".$arElement["CATALOG_MEASURE_NAME"];?></span>
@@ -323,7 +323,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 														<?=CCurrencyLang::CurrencyFormat($arElement["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arElement["MIN_PRICE"]["CURRENCY"], true);?>
 													</span>
 												<?}?>
-											</div>												
+											</div>
 										<?}
 									}?>
 								</div>
@@ -343,7 +343,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 													<div class="catalog-detail-price-ranges__dots"></div>
 													<?if($countRange > 1) {?>
 														<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM");?></span>
-													<?}?>	
+													<?}?>
 													<div class="catalog-detail-price-ranges__price"><?=$oneRange["DISCOUNT_PRICE"]?></div>
 													<span class="unit"><?=$oneRange["PRINT_CURRENCY"]?></span>
 													<?if($countRange > 1):?>
@@ -374,7 +374,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 													<div class="catalog-detail-price-ranges__dots"></div>
 													<?if($countRange > 1) {?>
 														<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM");?></span>
-													<?}?>	
+													<?}?>
 													<div class="catalog-detail-price-ranges__price"><?=$oneRange["DISCOUNT_PRICE"]?></div>
 													<span class="unit"><?=$oneRange["PRINT_CURRENCY"]?></span>
 													<?if($countRange > 1):?>
@@ -390,16 +390,16 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 											?>
 										</div>
 									<?}
-								}?>		
+								}?>
 								<?//TIME_BUY//
 								if(array_key_exists("TIME_BUY", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
 									if(!empty($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
-										$showBar = false;													
+										$showBar = false;
 										if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 											if($arElement["TOTAL_OFFERS"]["QUANTITY"] > 0) {
-												$showBar = true;									
-												$startQnt = $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];	
-												$currQnt = $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];		
+												$showBar = true;
+												$startQnt = $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];
+												$currQnt = $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];
 												$currQntPercent = round($currQnt * 100 / $startQnt);
 											} else {
 												$showBar = true;
@@ -431,14 +431,14 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 														<span class="progress_bar_percent"><?=$currQntPercent?>%</span>
 													</div>
 													<?$new_date = ParseDateTime($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
-													<script type="text/javascript">												
-														$(function() {														
+													<script type="text/javascript">
+														$(function() {
 															$("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
 																until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
 																format: "DHMS",
 																expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
 															});
-														});												
+														});
 													</script>
 													<div class="time_buy_cont">
 														<div class="time_buy_clock">
@@ -456,9 +456,9 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 									<?//OFFERS_AVAILABILITY_BUY//
 									if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 										//TOTAL_OFFERS_AVAILABILITY//?>
-										<div class="available">										
+										<div class="available">
 											<?if($arElement["TOTAL_OFFERS"]["QUANTITY"] > 0 || !$arElement["CHECK_QUANTITY"]) {?>
-												 <?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') { ?>                      
+												 <?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') { ?>
                                                     <div class="avl">
                                                         <i class="fa fa-check-circle"></i>
                                                         <span>
@@ -478,7 +478,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
                                                             }?>
                                                         </span>
                                                     </div>
-                                              <?}?>                                       
+                                              <?}?>
 											<?} else {?>
 												<div class="not_avl">
 													<i class="fa fa-times-circle"></i>
@@ -486,7 +486,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 												</div>
 											<?}?>
 										</div>
-										<?//OFFERS_BUY//?>									
+										<?//OFFERS_BUY//?>
 										<div class="add2basket_block">
 											<form action="<?=$curPage?>" class="add2basket_form">
 												<a href="javascript:void(0)" class="minus" id="quantity_minus_<?=$arItemIDs['ID']?>"><span>-</span></a>
@@ -498,7 +498,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 									<?//ITEM_AVAILABILITY_BUY//
 									} else {
 										//ITEM_AVAILABILITY//?>
-                                   
+
 										<div class="available">
 											<?if($arElement["CAN_BUY"]) {?>
                                                 <?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') { ?>
@@ -519,7 +519,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
                                                            }?>
                                                         </span>
                                                     </div>
-                                                <?}?> 		
+                                                <?}?>
 											<?} elseif(!$arElement["CAN_BUY"]) {?>
 												<div class="not_avl">
 													<i class="fa fa-times-circle"></i>
@@ -527,7 +527,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 												</div>
 											<?}?>
 										</div>
-										<?//ITEM_BUY//?>																
+										<?//ITEM_BUY//?>
 										<div class="add2basket_block">
 											<?if($arElement["CAN_BUY"]) {
 												if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
@@ -550,7 +550,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 																	"NAME" => $arElement["PROPERTIES"]["ARTNUMBER"]["NAME"],
 																	"CODE" => $arElement["PROPERTIES"]["ARTNUMBER"]["CODE"],
 																	"VALUE" => $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-																);												
+																);
 																$props = strtr(base64_encode(serialize($props)), "+/=", "-_,");?>
 																<input type="hidden" name="PROPS" value="<?=$props?>" />
 															<?}
@@ -561,7 +561,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 											} elseif(!$arElement["CAN_BUY"]) {
 												//ITEM_UNDER_ORDER//?>
 												<a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></a>
-											<?}?>										
+											<?}?>
 										</div>
 									<?}?>
 									<div class="clr"></div>
@@ -580,7 +580,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 													"NAME" => $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PROPERTIES"]["ARTNUMBER"]["NAME"],
 													"CODE" => $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PROPERTIES"]["ARTNUMBER"]["CODE"],
 													"VALUE" => $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-												);																
+												);
 											}
 											foreach($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["DISPLAY_PROPERTIES"] as $propOffer) {
 												if($propOffer["PROPERTY_TYPE"] != "S") {
@@ -600,7 +600,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 									} else {
 										if($arElement["CAN_BUY"] && $arElement["MIN_PRICE"]["RATIO_PRICE"] > 0) {
 											$props = "";
-											if(!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {		
+											if(!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 												$props = array();
 												$props[] = array(
 													"NAME" => $arElement["PROPERTIES"]["ARTNUMBER"]["NAME"],
@@ -613,7 +613,7 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 												<a href="javascript:void(0)" id="catalog-item-delay-<?=$arItemIDs['ID']?>" class="catalog-item-delay" onclick="return addToDelay('<?=$arElement["ID"]?>', 'quantity_<?=$arItemIDs["ID"]?>', '<?=$props?>', '', 'catalog-item-delay-<?=$arItemIDs["ID"]?>', '<?=SITE_DIR?>')" title="<?=GetMessage('CATALOG_ELEMENT_ADD_TO_DELAY')?>" rel="nofollow"><i class="fa fa-heart-o"></i><i class="fa fa-check"></i></a>
 											</div>
 										<?}
-									}?>								
+									}?>
 								</div>
 							</div>
 						</div>
@@ -631,21 +631,21 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult["ORIGINAL_PARAME
 //JS//?>
 <script type="text/javascript">
 	BX.ready(function() {
-		BX.message({			
+		BX.message({
 			SECTIONS_ELEMENT_FROM: "<?=GetMessageJS('CATALOG_ELEMENT_FROM')?>",
 			SECTIONS_ADDITEMINCART_ADDED: "<?=GetMessageJS('CATALOG_ELEMENT_ADDED')?>",
-			SECTIONS_POPUP_WINDOW_TITLE: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_TITLE')?>",			
+			SECTIONS_POPUP_WINDOW_TITLE: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_TITLE')?>",
 			SECTIONS_POPUP_WINDOW_BTN_CLOSE: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_BTN_CLOSE')?>",
 			SECTIONS_POPUP_WINDOW_BTN_ORDER: "<?=GetMessageJS('CATALOG_ELEMENT_ADDITEMINCART_BTN_ORDER')?>",
 			SECTIONS_SITE_DIR: "<?=SITE_DIR?>",
-			SECTIONS_POPUP_WINDOW_MORE_OPTIONS: "<?=GetMessageJS('CATALOG_ELEMENT_MORE_OPTIONS')?>",			
+			SECTIONS_POPUP_WINDOW_MORE_OPTIONS: "<?=GetMessageJS('CATALOG_ELEMENT_MORE_OPTIONS')?>",
 			SECTIONS_COMPONENT_TEMPLATE: "<?=$this->GetFolder();?>",
 			SECTIONS_OFFERS_VIEW: "<?=$arSetting['OFFERS_VIEW']['VALUE']?>",
 			SECTIONS_COMPONENT_PARAMS: "<?=CUtil::JSEscape($signedParams)?>"
-		});	
+		});
 		<?foreach($arResult["ITEMS"] as $key => $arElement) {
-			if((isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) || $arElement["SELECT_PROPS"]) {				
-				$arJSParams = array(					
+			if((isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) || $arElement["SELECT_PROPS"]) {
+				$arJSParams = array(
 					"VISUAL" => array(
 						"ID" => $arElement["STR_MAIN_ID"],
 						"PRICE_RANGES_BTN_ID" => $arElement["STR_MAIN_ID"]."_price_ranges_btn",
@@ -673,7 +673,7 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult["ORIGINAL_PARAME
 				if($arElement["SELECT_PROPS"])
 					$arJSParams["VISUAL"]["POPUP_BTN_ID"] = $arElement["STR_MAIN_ID"]."_popup_btn";
 			} else {
-				$arJSParams = array(					
+				$arJSParams = array(
 					"VISUAL" => array(
 						"ID" => $arElement["STR_MAIN_ID"],
 						"PRICE_RANGES_BTN_ID" => $arElement["STR_MAIN_ID"]."_price_ranges_btn",
@@ -691,7 +691,7 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult["ORIGINAL_PARAME
 						"ITEM_PRICES" => $arElement["ITEM_PRICES"],
 						"ITEM_PRICE_SELECTED" => $arElement["ITEM_PRICE_SELECTED"],
 						"ITEM_QUANTITY_RANGES" => $arElement["ITEM_QUANTITY_RANGES"],
-						"CHECK_QUANTITY" => $arElement["CHECK_QUANTITY"],						
+						"CHECK_QUANTITY" => $arElement["CHECK_QUANTITY"],
 						"QUANTITY_FLOAT" => is_double($arElement["CATALOG_MEASURE_RATIO"]),
 						"MAX_QUANTITY" => $arElement["CATALOG_QUANTITY"],
 						"STEP_QUANTITY" => $arElement["CATALOG_MEASURE_RATIO"],
