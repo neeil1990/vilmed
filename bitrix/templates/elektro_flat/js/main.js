@@ -163,7 +163,7 @@ $(function() {
 		autoplay: true,
 		variableWidth: true,
 		centerMode: true,
-		slidesToShow: 3,
+		slidesToShow: 2,
 		responsive: [
 			{
 				breakpoint: 767,
