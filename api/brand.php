@@ -12,30 +12,38 @@ CModule::IncludeModule("iblock");
 $IBLOCK_ID_CATALOG = 24;
 $IBLOCK_ID_BRAND = 13;
 
-$arSelect = Array("ID", "IBLOCK_ID", "NAME","PROPERTY_*");
-$arFilter = Array("IBLOCK_ID" => $IBLOCK_ID_CATALOG);
-$res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
-while($ob = $res->GetNextElement()){
-    $arFields = $ob->GetFields();
-    $arProps = $ob->GetProperties();
+try {
 
-    if($arProps['CML2_ATTRIBUTES']){
+    $arSelect = Array("ID", "IBLOCK_ID", "NAME","PROPERTY_*");
+    $arFilter = Array("IBLOCK_ID" => $IBLOCK_ID_CATALOG);
+    $res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
+    while($ob = $res->GetNextElement()){
+        $arFields = $ob->GetFields();
+        $arProps = $ob->GetProperties();
 
-        foreach($arProps['CML2_ATTRIBUTES']['DESCRIPTION'] as $key => $val){
+        if($arProps['MANUFACTURER']['PROPERTY_TYPE'] != 'E')
+            throw new Exception('Ошибка: Укажите свойству "Производитель" тип "Привязка к элементам в виде списка". К ИБ c ID: '.$IBLOCK_ID_BRAND);
 
-            if(preg_match('/Бренд/', $val)){
-                if($brandName = $arProps['CML2_ATTRIBUTES']['VALUE'][$key]){
+        if($arProps['CML2_ATTRIBUTES']){
 
-                    $resBrand = CIBlockElement::GetList(Array(), ['IBLOCK_ID' => $IBLOCK_ID_BRAND, 'NAME' => trim($brandName)], false, false, ['ID', 'NAME']);
-                    if($obBrand = $resBrand->fetch()){
+            foreach($arProps['CML2_ATTRIBUTES']['DESCRIPTION'] as $key => $val){
 
-                        if($obBrand['ID'])
-                            CIBlockElement::SetPropertyValuesEx($arFields['ID'], $IBLOCK_ID_CATALOG, ['MANUFACTURER' => $obBrand['ID']]);
+                if(preg_match('/Бренд/', $val)){
+                    if($brandName = $arProps['CML2_ATTRIBUTES']['VALUE'][$key]){
+
+                        $resBrand = CIBlockElement::GetList(Array(), ['IBLOCK_ID' => $IBLOCK_ID_BRAND, 'NAME' => trim($brandName)], false, false, ['ID', 'NAME']);
+                        if($obBrand = $resBrand->fetch()){
+
+                            if($obBrand['ID'])
+                                CIBlockElement::SetPropertyValuesEx($arFields['ID'], $IBLOCK_ID_CATALOG, ['MANUFACTURER' => $obBrand['ID']]);
+                        }
                     }
                 }
             }
         }
     }
-}
+    print 'Success!';
+} catch (Exception $e) {
 
-print 'Success!';
+    echo $e->getMessage(), "\n";
+}
