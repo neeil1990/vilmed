@@ -6,7 +6,7 @@ use Bitrix\Main\Loader,
 	Bitrix\Iblock,
 	Bitrix\Main\Localization\Loc,
 	Bitrix\Main\ModuleManager;
-	
+
 if(!Loader::includeModule("iblock"))
 	return;
 
@@ -31,13 +31,13 @@ $cache_id = md5(serialize($arFilter));
 $cache_dir = "/catalog/vendor";
 $obCache = new CPHPCache();
 if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
-	$arCurVendor = $obCache->GetVars();	
+	$arCurVendor = $obCache->GetVars();
 } elseif($obCache->StartDataCache()) {
 	$rsElement = CIBlockElement::GetList(array(), $arFilter, false, false, $arSelect);
 	global $CACHE_MANAGER;
 	$CACHE_MANAGER->StartTagCache($cache_dir);
 	$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID"]);
-	if($arElement = $rsElement->GetNext()) {	
+	if($arElement = $rsElement->GetNext()) {
 		$arCurVendor["ID"] = $arElement["ID"];
 		$arCurVendor["NAME"] = $arElement["NAME"];
 		if($arElement["PREVIEW_PICTURE"] > 0)
@@ -61,6 +61,20 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 	}
 }
 
+//DESCRIPTION//
+
+if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>
+
+    <? if($arCurVendor["DETAIL_PICTURE"]["SRC"]): ?>
+        <div>
+            <img src="<?=$arCurVendor["DETAIL_PICTURE"]["SRC"]?>" alt="<?=$arCurVendor["DETAIL_PICTURE"]["DESCRIPTION"]?>">
+        </div>
+    <? endif; ?>
+    <div class="catalog_description">
+        <?=($arCurVendor["PREVIEW_TEXT"]) ?: $arCurVendor["DETAIL_TEXT"];?>
+    </div>
+<?}
+
 if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 	//SECTIONS//?>
 	<?$APPLICATION->IncludeComponent("bitrix:catalog.section.list", "vendors",
@@ -69,7 +83,7 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 			"IBLOCK_ID" => $arParams["IBLOCK_ID_CATALOG"],
 			"CACHE_TYPE" => $arParams["CACHE_TYPE"],
 			"CACHE_TIME" => $arParams["CACHE_TIME"],
-			"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],		
+			"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
 			"TOP_DEPTH" => "2",
 			"SECTION_FIELDS" => array(),
 			"SECTION_USER_FIELDS" => array(
@@ -91,7 +105,7 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 	if($arSetting["VENDORS_VIEW"]["VALUE"] != "SECTIONS_PRODUCTS") {
 		//COUNT//
 		$arFilter = array(
-			"IBLOCK_ID" => $arParams["IBLOCK_ID_CATALOG"],		
+			"IBLOCK_ID" => $arParams["IBLOCK_ID_CATALOG"],
 			"ACTIVE" => "Y",
 			"PROPERTY_MANUFACTURER" => $arCurVendor["ID"]
 		);
@@ -100,10 +114,10 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 		$obCache = new CPHPCache();
 		if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$count = $obCache->GetVars();
-		} elseif($obCache->StartDataCache()) {		
+		} elseif($obCache->StartDataCache()) {
 			global $CACHE_MANAGER;
 			$CACHE_MANAGER->StartTagCache($cache_dir);
-			$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID_CATALOG"]);			
+			$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID_CATALOG"]);
 			$count = CIBlockElement::GetList(array(), $arFilter, array(), false);
 			$CACHE_MANAGER->EndTagCache();
 			$obCache->EndDataCache($count);
@@ -125,8 +139,8 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 
 		if($_REQUEST["sort"]) {
 			$sort = $arParams["ELEMENT_SORT_FIELD"];
-			$APPLICATION->set_cookie("sort", $sort, false, "/", SITE_SERVER_NAME); 
-		} 
+			$APPLICATION->set_cookie("sort", $sort, false, "/", SITE_SERVER_NAME);
+		}
 		if($_REQUEST["sort"] == "price") {
 			$sort = "PROPERTY_MINIMUM_PRICE";
 			$APPLICATION->set_cookie("sort", $sort, false, "/", SITE_SERVER_NAME);
@@ -139,7 +153,7 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 		$sort_order = $APPLICATION->get_cookie("order") ? $APPLICATION->get_cookie("order") : $arParams["ELEMENT_SORT_ORDER"];
 
 		if($_REQUEST["order"]) {
-			$sort_order = "asc";	
+			$sort_order = "asc";
 			$APPLICATION->set_cookie("order", $sort_order, false, "/", SITE_SERVER_NAME);
 		}
 		if($_REQUEST["order"] == "desc") {
@@ -151,26 +165,26 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 			<label><span class="full"><?=Loc::getMessage("SECT_SORT_LABEL_FULL")?></span><span class="short"><?=Loc::getMessage("SECT_SORT_LABEL_SHORT")?></span>:</label>
 			<?foreach($arAvailableSort as $key => $val) {
 				$className = $sort == $val[0] ? "selected" : "";
-				if($className) 
+				if($className)
 					$className .= $sort_order == "asc" ? " asc" : " desc";
 				$newSort = $sort == $val[0] ? $sort_order == "desc" ? "asc" : "desc" : $arAvailableSort[$key][1];?>
 
 				<a href="<?=$APPLICATION->GetCurPageParam("sort=".$key."&amp;order=".$newSort, array("sort", "order"))?>" class="<?=$className?>" rel="nofollow"><?=Loc::getMessage("SECT_SORT_".$key)?></a>
 			<?}?>
 		</div>
-		
+
 		<?//VIEW//
              $arAvailableView = array("table", "list", "price");
 
 		$view = $APPLICATION->get_cookie("view") ? $APPLICATION->get_cookie("view") : (isset($arCurSection["VIEW"]) && !empty($arCurSection["VIEW"]) ? $arCurSection["VIEW"] : "table");
 
 		if($_REQUEST["view"]) {
-			$view = "table";	
-			$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME); 
+			$view = "table";
+			$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME);
 		}
 		if($_REQUEST["view"] == "list") {
 			$view = "list";
-			$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME); 
+			$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME);
 		}
 		if($_REQUEST["view"] == "price") {
 			$view = "price";
@@ -192,17 +206,17 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 		</div>
 		<div class="clr"></div>
 	<?}
-	
+
 	//ELEMENTS//
 	$arParams["PAGE_ELEMENT_COUNT"] = (int)$arParams["PAGE_ELEMENT_COUNT"] ?: 12;
 	$arParams["LINE_ELEMENT_COUNT"] = 4;
-	
+
 	CBitrixComponent::includeComponentClass("bitrix:catalog.section");
-	if(!isset($arParams["PRODUCT_ROW_VARIANTS"]) || empty($arParams["PRODUCT_ROW_VARIANTS"])) {		
+	if(!isset($arParams["PRODUCT_ROW_VARIANTS"]) || empty($arParams["PRODUCT_ROW_VARIANTS"])) {
 		$arParams["PRODUCT_ROW_VARIANTS"] = Bitrix\Main\Web\Json::encode(CatalogSectionComponent::predictRowVariants($arParams["LINE_ELEMENT_COUNT"], $arParams["PAGE_ELEMENT_COUNT"]));
 	}
 	global $arVendorFilter;
-	$arVendorFilter = array(	
+	$arVendorFilter = array(
 		"PROPERTY_MANUFACTURER" => $arCurVendor["ID"],
 		"PROPERTY_THIS_COLLECTION" => false
 	);?>
@@ -215,16 +229,16 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 			"ELEMENT_SORT_FIELD2" => $arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS_PRODUCTS" ? $arParams["ELEMENT_SORT_FIELD2"] : "",
 			"ELEMENT_SORT_ORDER2" => $arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS_PRODUCTS" ? $arParams["ELEMENT_SORT_ORDER2"] : "",
 			"PROPERTY_CODE" => $arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS_PRODUCTS" ? "" : $arParams["PROPERTY_CODE"],
-			"SET_META_KEYWORDS" => "N",		
-			"SET_META_DESCRIPTION" => "N",		
-			"SET_BROWSER_TITLE" => "N",		
+			"SET_META_KEYWORDS" => "N",
+			"SET_META_DESCRIPTION" => "N",
+			"SET_BROWSER_TITLE" => "N",
 			"SET_LAST_MODIFIED" => "N",
 			"INCLUDE_SUBSECTIONS" => "Y",
 			"SHOW_ALL_WO_SECTION" => "Y",
 			"BASKET_URL" => "/personal/cart/",
 			"ACTION_VARIABLE" => "action",
-			"PRODUCT_ID_VARIABLE" => "id",		
-			"SECTION_ID_VARIABLE" => "SECTION_ID",		
+			"PRODUCT_ID_VARIABLE" => "id",
+			"SECTION_ID_VARIABLE" => "SECTION_ID",
 			"PRODUCT_QUANTITY_VARIABLE" => "quantity",
 			"PRODUCT_PROPS_VARIABLE" => "prop",
 			"FILTER_NAME" => "arVendorFilter",
@@ -281,7 +295,7 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
 			"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
 			"PRODUCT_ROW_VARIANTS" => $arParams["PRODUCT_ROW_VARIANTS"],
 			"TYPE" => $view,
-			"ADD_SECTIONS_CHAIN" => "N",		
+			"ADD_SECTIONS_CHAIN" => "N",
 			"COMPARE_PATH" => "http://".SITE_SERVER_NAME."/catalog/compare/",
 			"BACKGROUND_IMAGE" => "",
 			"DISABLE_INIT_JS_IN_COMPONENT" => "",
@@ -296,27 +310,12 @@ if($arSetting["VENDORS_VIEW"]["VALUE"] == "SECTIONS") {
             "MESS_RELATIVE_QUANTITY_FEW" => (isset($arParams["~MESS_RELATIVE_QUANTITY_FEW"]) ? $arParams["~MESS_RELATIVE_QUANTITY_FEW"] : ""),
 			"BUTTON_PAYMENTS_HREF" => "/payments/",
 		    "BUTTON_CREDIT_HREF" => "/credit/",
-		    "BUTTON_DELIVERY_HREF" => "/delivery/",		
+		    "BUTTON_DELIVERY_HREF" => "/delivery/",
 		),
 		false,
 		array("HIDE_ICONS" => "Y")
 	);?>
 <?}
-
-//DESCRIPTION//
-
-	if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>
-
-		<? if($arCurVendor["DETAIL_PICTURE"]["SRC"]): ?>
-		<div>
-			<img src="<?=$arCurVendor["DETAIL_PICTURE"]["SRC"]?>" alt="<?=$arCurVendor["DETAIL_PICTURE"]["DESCRIPTION"]?>">
-		</div>
-		<? endif; ?>
-		<div class="catalog_description">
-			<?=($arCurVendor["PREVIEW_TEXT"]) ?: $arCurVendor["DETAIL_TEXT"];?>
-		</div>
-	<?}
-
 
 //BIGDATA_ITEMS//
 if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
@@ -324,7 +323,7 @@ if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
 	$propCacheID = array("IBLOCK_ID" => $arParams["IBLOCK_ID_CATALOG"]);
 	$obCache = new CPHPCache();
 	if($obCache->InitCache($arParams["CACHE_TIME"], serialize($propCacheID), "/catalog/property")) {
-		$arProperty = $obCache->GetVars();	
+		$arProperty = $obCache->GetVars();
 	} elseif($obCache->StartDataCache()) {
 		$dbProperty = CIBlockProperty::GetPropertyEnum("THIS_COLLECTION", array(), array("IBLOCK_ID" => $arParams["IBLOCK_ID_CATALOG"]));
 		if($arProp = $dbProperty->GetNext()) {
@@ -344,8 +343,8 @@ if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
 			"ELEMENT_SORT_FIELD2" => "",
 			"ELEMENT_SORT_ORDER2" => "",
 			"PROPERTY_CODE" => $arParams["PROPERTY_CODE"],
-			"SET_META_KEYWORDS" => "N",		
-			"SET_META_DESCRIPTION" => "N",		
+			"SET_META_KEYWORDS" => "N",
+			"SET_META_DESCRIPTION" => "N",
 			"SET_BROWSER_TITLE" => "N",
 			"SET_LAST_MODIFIED" => "N",
 			"INCLUDE_SUBSECTIONS" => "Y",
@@ -353,8 +352,8 @@ if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
 			"CUSTOM_FILTER" => !empty($arProperty) ? "{\"CLASS_ID\":\"CondGroup\",\"DATA\":{\"All\":\"AND\",\"True\":\"True\"},\"CHILDREN\":[{\"CLASS_ID\":\"CondIBProp:".$arParams["IBLOCK_ID_CATALOG"].":".$arProperty["PROPERTY_ID"]."\",\"DATA\":{\"logic\":\"Not\",\"value\":".$arProperty["ID"]."}}]}" : "",
 			"BASKET_URL" => "/personal/cart/",
 			"ACTION_VARIABLE" => "action",
-			"PRODUCT_ID_VARIABLE" => "id",		
-			"SECTION_ID_VARIABLE" => "SECTION_ID",		
+			"PRODUCT_ID_VARIABLE" => "id",
+			"SECTION_ID_VARIABLE" => "SECTION_ID",
 			"PRODUCT_QUANTITY_VARIABLE" => "quantity",
 			"PRODUCT_PROPS_VARIABLE" => "prop",
 			"FILTER_NAME" => "",
@@ -396,14 +395,14 @@ if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
 			"OFFERS_SORT_ORDER" => $arParams["OFFERS_SORT_ORDER"],
 			"OFFERS_SORT_FIELD2" => $arParams["OFFERS_SORT_FIELD2"],
 			"OFFERS_SORT_ORDER2" => $arParams["OFFERS_SORT_ORDER2"],
-			"OFFERS_LIMIT" => $arParams["OFFERS_LIMIT"],			
+			"OFFERS_LIMIT" => $arParams["OFFERS_LIMIT"],
 			"SECTION_ID" => "",
 			"SECTION_CODE" => "",
 			"SECTION_URL" => "",
 			"DETAIL_URL" => "",
 			"USE_MAIN_ELEMENT_SECTION" => "Y",
 			"CONVERT_CURRENCY" => $arParams["CONVERT_CURRENCY"],
-			"CURRENCY_ID" => $arParams["CURRENCY_ID"],			
+			"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 			"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
 			"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
 			"ADD_SECTIONS_CHAIN" => "N",
@@ -424,7 +423,7 @@ if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
             "MESS_RELATIVE_QUANTITY_FEW" => (isset($arParams["~MESS_RELATIVE_QUANTITY_FEW"]) ? $arParams["~MESS_RELATIVE_QUANTITY_FEW"] : ""),
 			"BUTTON_PAYMENTS_HREF" => "/payments/",
 		    "BUTTON_CREDIT_HREF" => "/credit/",
-		    "BUTTON_DELIVERY_HREF" => "/delivery/",	
+		    "BUTTON_DELIVERY_HREF" => "/delivery/",
 		),
 		false
 	);?>
@@ -452,7 +451,7 @@ if(is_array($arCurVendor["PREVIEW_PICTURE"])) {
 
 //CANONICAL//
 if(!empty($_REQUEST["sort"]) || !empty($_REQUEST["order"]) || !empty($_REQUEST["limit"]) || !empty($_REQUEST["view"]) || !empty($_REQUEST["action"]) || !empty($_REQUEST["PAGEN_1"])) {
-	$APPLICATION->AddHeadString("<link rel='canonical' href='".$APPLICATION->GetCurPage()."'>");	
+	$APPLICATION->AddHeadString("<link rel='canonical' href='".$APPLICATION->GetCurPage()."'>");
 }
 
 //BREADCRUMBS//
