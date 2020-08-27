@@ -2216,6 +2216,10 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 			<? else: ?>
 				<?=$arResult["PREVIEW_TEXT"]?>
 			<?endif; ?>
+
+            <? foreach ($arResult['TEMPLATES_ELEMENT_DESCRIPTION'] as $desc): ?>
+                <?=htmlspecialchars_decode($desc)?>
+            <? endforeach; ?>
 			</div>
 		</div>
 		<?//PROPERTIES_TAB//

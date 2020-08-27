@@ -1438,6 +1438,64 @@ $arResult["BACKGROUND_YOUTUBE"] = $arResult["PROPERTIES"]["BACKGROUND_YOUTUBE"][
 $arResult["PRICE_MATRIX_SHOW"]["COLS"] = $arResult["PRICE_MATRIX"]["COLS"];
 $arResult["PRICE_MATRIX_SHOW"]["MATRIX"] = $arPriceMatrix;
 
+if($arResult['SECTION']['ID']){
+	$arResult['PRICE'] = $arResult['MIN_PRICE']['PRICE'];
+	$arResult['SECTION_NAME'] = $arResult['SECTION']['NAME'];
+	$arResult['SECTION_PAGE_URL'] = $arResult['SECTION']['SECTION_PAGE_URL'];
+	$arResult['SECTION_DESCRIPTION'] = ($arResult['SECTION']['DESCRIPTION']) ?: 'Тут будет описание!';
+
+	$arSectionTree = CIBlockSection::GetNavChain($arResult['IBLOCK_ID'], $arResult['SECTION']['ID'], ['ID', 'DEPTH_LEVEL']);
+	while ($arSection = $arSectionTree->fetch())
+		$arSectionTreeIds[$arSection['DEPTH_LEVEL']] = $arSection['ID'];
+
+	$db_list = CIBlockSection::GetList(['depth_level' => 'desc'], ['IBLOCK_ID' => $arResult['IBLOCK_ID'], 'ID' => $arSectionTreeIds], true, ['ID', 'IBLOCK_ID', 'NAME', 'UF_PRODUCT_DESC']);
+	while($ar_result = $db_list->GetNext())
+	{
+		if($ar_result['UF_PRODUCT_DESC']){
+			$arResult['SECTION_ELEMENT_CNT'] = $ar_result['ELEMENT_CNT'];
+			$arResult['TEMPLATES_ELEMENT_DESCRIPTION'] = $ar_result['UF_PRODUCT_DESC'];
+
+			break;
+		}
+	}
+
+	if(isset($arResult['TEMPLATES_ELEMENT_DESCRIPTION'])){
+
+		foreach ($arResult['TEMPLATES_ELEMENT_DESCRIPTION'] as $i => &$description){
+
+			preg_match_all('/{(.*?)}/', $description, $match);
+			if(isset($match[1])){
+
+				foreach($match[1] as $index => $key){
+					$newValue = false;
+
+					$arKey = explode('.', $key);
+					if(count($arKey) > 1){
+
+						$arProperty = $arResult[$arKey[0]][$arKey[1]];
+						if($arProperty['MULTIPLE'] == "Y"){
+
+							$keyDesc = array_search($arKey[2], $arProperty['DESCRIPTION']);
+							if($keyDesc !== false){
+								$newValue = trim($arProperty['VALUE'][$keyDesc]);
+							}
+						}else
+							$newValue = trim($arProperty['VALUE']);
+					}else{
+						$newValue = trim($arResult[$arKey[0]]);
+					}
+
+					if(!$newValue){
+						unset($arResult['TEMPLATES_ELEMENT_DESCRIPTION'][$i]);
+						break;
+					}
+
+					$description = str_replace($match[0][$index], $newValue, $description);
+				}
+			}
+		}
+	}
+}
 
 //CACHE_KEYS//
 $this->__component->SetResultCacheKeys(
