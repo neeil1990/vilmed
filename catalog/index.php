@@ -182,7 +182,6 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 			2 => "PROP3",
 		),
 		"DETAIL_MAIN_BLOCK_PROPERTY_CODE" => array(
-			0 => "CML2_MANUFACTURER",
 		),
 		"DETAIL_MAIN_BLOCK_OFFERS_PROPERTY_CODE" => array(
 		),
@@ -252,6 +251,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		"1CB_REQUIRED_FIELDS" => array(
 			0 => "NAME",
 			1 => "PHONE",
+			2 => "EMAIL",
 		),
 		"COUNT_REVIEW" => "5",
 		"RELATED_PRODUCTS_SHOW" => "Y",

@@ -24,7 +24,7 @@ if(0 < intval($arResult["VARIABLES"]["SECTION_ID"])) {
 } elseif("" != $arResult["VARIABLES"]["SECTION_CODE"]) {
 	$arFilter["=CODE"] = $arResult["VARIABLES"]["SECTION_CODE"];
 }
-$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG");
+$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND");
 
 $arproductType = array("newproduct", "saleleader", "discount");
 
@@ -59,6 +59,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 				$arCurSection["VIEW_COLLECTION"] = true;
 			};
 			$arCurSection["SECTION_TITLE_H1"] = $arSection["UF_SECTION_TITLE_H1"];
+			$arCurSection["HIDDEN_NOT_FIND"] = $arSection["UF_HIDDEN_NOT_FIND"];
 			if(isset($arSection["UF_YOUTUBE_BG"]) && !empty($arSection["UF_YOUTUBE_BG"])) {
 				$arCurSection["BACKGROUND_YOUTUBE"] = $arSection["UF_YOUTUBE_BG"];
 			}
@@ -82,7 +83,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 						array("DEPTH_LEVEL" => "DESC"),
 						array("IBLOCK_ID" => $arSection["IBLOCK_ID"], "ACTIVE" => "Y", "GLOBAL_ACTIVE" => "Y", "ID" => $parentSectionPathIds),
 						false,
-						array("ID", "IBLOCK_ID", "DEPTH_LEVEL", "UF_BACKGROUND_IMAGE", "UF_VIEW", "UF_YOUTUBE_BG")
+						array("ID", "IBLOCK_ID", "DEPTH_LEVEL", "UF_BACKGROUND_IMAGE", "UF_VIEW", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND")
 					);
 					while($arSection = $rsSections->GetNext()) {
 						if(!isset($arCurSection["BACKGROUND_IMAGE"]) && $arSection["UF_BACKGROUND_IMAGE"] > 0) {
@@ -96,6 +97,9 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 						}
 						if(!isset($arCurSection["BACKGROUND_YOUTUBE"]) && !empty($arSection["UF_YOUTUBE_BG"])) {
 							$arCurSection["BACKGROUND_YOUTUBE"] = $arSection["UF_YOUTUBE_BG"];
+						}
+						if(!isset($arCurSection["HIDDEN_NOT_FIND"]) && !empty($arSection["UF_HIDDEN_NOT_FIND"])) {
+							$arCurSection["HIDDEN_NOT_FIND"] = $arSection["UF_HIDDEN_NOT_FIND"];
 						}
 					}
 				}
@@ -343,6 +347,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 	$obCache->EndDataCache($count);
 }?>
 
+<? if(!$arCurSection['HIDDEN_NOT_FIND']): ?>
 <div class="count_items">
 	<?if(!$arCurSection["VIEW_COLLECTION"]) {?>
 		<label><?=Loc::getMessage("COUNT_ITEMS")?></label>
@@ -351,6 +356,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 	<?}?>
 	<span><?=$count?></span>
 </div>
+<? endif; ?>
 
 <?//SORT//
 if(!$arCurSection["VIEW_COLLECTION"]) {
@@ -410,6 +416,7 @@ if($_REQUEST["order"] == "desc") {
 	$APPLICATION->set_cookie("order", $sort_order, false, "/", SITE_SERVER_NAME);
 }?>
 
+<? if(!$arCurSection['HIDDEN_NOT_FIND']): ?>
 <div class="catalog-item-sorting">
 	<label><span class="full"><?=Loc::getMessage("SECT_SORT_LABEL_FULL")?></span><span class="short"><?=Loc::getMessage("SECT_SORT_LABEL_SHORT")?></span>:</label>
 	<?foreach($arAvailableSort as $key => $val) {
@@ -420,6 +427,7 @@ if($_REQUEST["order"] == "desc") {
 		<a href="<?=$APPLICATION->GetCurPageParam("sort=".$key."&amp;order=".$newSort, array("sort", "order"))?>" class="<?=$className?>" rel="nofollow"><?=Loc::getMessage("SECT_SORT_".$key)?></a>
 	<?}?>
 </div>
+<? endif; ?>
 
 <?//VIEW//
 if(!$arCurSection["VIEW_COLLECTION"]) {
@@ -449,6 +457,7 @@ if(!$arCurSection["VIEW_COLLECTION"]) {
 		$APPLICATION->set_cookie("view", $view, false, "/", SITE_SERVER_NAME);
 	}?>
 
+	<? if(!$arCurSection['HIDDEN_NOT_FIND']): ?>
 	<div class="catalog-item-view">
 		<?foreach($arAvailableView as $val) {?>
 			<a href="<?=$APPLICATION->GetCurPageParam("view=".$val, array("view"))?>" class="<?=$val?><?if($view==$val) echo ' selected';?>" title="<?=Loc::getMessage('SECT_VIEW_'.$val)?>" rel="nofollow">
@@ -462,6 +471,7 @@ if(!$arCurSection["VIEW_COLLECTION"]) {
 			</a>
 		<?}?>
 	</div>
+	<? endif; ?>
 <?} else {
 	$view = "collections";
 	$arParams["DISPLAY_IMG_WIDTH"] = "480";
@@ -496,6 +506,8 @@ if(!isset($arParams["LIST_PRODUCT_ROW_VARIANTS"]) || empty($arParams["LIST_PRODU
 if($arCurSection["VIEW_COLLECTION"]) {
 	$arParams["LIST_PRODUCT_ROW_VARIANTS"] = Bitrix\Main\Web\Json::encode(CatalogSectionComponent::predictRowVariants($arParams["LINE_ELEMENT_COUNT"], $arParams["PAGE_ELEMENT_COUNT"]));
 }?>
+
+<? if(!$arCurSection['HIDDEN_NOT_FIND']): ?>
 
 <?$intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
 	array(
@@ -592,6 +604,8 @@ if($arCurSection["VIEW_COLLECTION"]) {
 		),
 	$component
 );?>
+
+<? endif; ?>
 
 <?//DESCRIPTION//
 if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>

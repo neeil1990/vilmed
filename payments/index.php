@@ -1,5 +1,8 @@
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetTitle("Способы оплаты");?><?$APPLICATION->IncludeComponent(
+$APPLICATION->SetTitle("Способы оплаты");?><h2 style="text-align: center;">МИНИМАЛЬНАЯ СУММА ОТГРУЗКИ:</h2>
+<h2 style="text-align: center;">на оборудование - 5 000₽</h2>
+<h2 style="text-align: center;">на инструментарий и расходные материалы - 10 000₽</h2>
+ <?$APPLICATION->IncludeComponent(
 	"bitrix:catalog.section.list",
 	"payments",
 	Array(
@@ -26,7 +29,7 @@ $APPLICATION->SetTitle("Способы оплаты");?><?$APPLICATION->IncludeC
 <p>
 	 Далее на электронную почту придет письмо с сформированным КП или счетом от нашего менеджера.
 </p>
-<br>
+ <br>
 <p>
 	 В случае оплаты счета без заключения индивидуального договора, вы соглашаетесь с условиями договора оферты: <a target="_blank" href="https://vilmed.ru/upload/oferta.pdf">https://vilmed.ru/upload/oferta.pdf</a> <br>
 </p><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
