@@ -241,7 +241,7 @@ if(!empty($arCurSection)) {
     $rsParentSection = CIBlockSection::GetByID($arCurSection["ID"]);
     if ($arParentSection = $rsParentSection->GetNext())
     {
-        $arFilter = array('IBLOCK_ID' => $arParentSection['IBLOCK_ID'],'>LEFT_MARGIN' => $arParentSection['LEFT_MARGIN'],'<RIGHT_MARGIN' => $arParentSection['RIGHT_MARGIN'],'>DEPTH_LEVEL' => $arParentSection['DEPTH_LEVEL'], 'UF_HIDDEN' => 1);
+        $arFilter = array('IBLOCK_ID' => $arParentSection['IBLOCK_ID'],'>LEFT_MARGIN' => $arParentSection['LEFT_MARGIN'],'<RIGHT_MARGIN' => $arParentSection['RIGHT_MARGIN'],'>DEPTH_LEVEL' => $arParentSection['DEPTH_LEVEL'], 'UF_SHOW_TAGS' => 1);
         $rsSect = CIBlockSection::GetList(array('left_margin' => 'asc'),$arFilter);
         if($rsSect->SelectedRowsCount()){
         ?>

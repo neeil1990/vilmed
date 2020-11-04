@@ -17,6 +17,7 @@ $arOrder = array(
 $arFilter = array(
 	"IBLOCK_ID" => $arParams["IBLOCK_ID"],
 	"GLOBAL_ACTIVE" => "Y",
+	"UF_HIDDEN" => "N",
 	"IBLOCK_ACTIVE" => "Y",
 	"<="."DEPTH_LEVEL" => $arParams["DEPTH_LEVEL"],
 );

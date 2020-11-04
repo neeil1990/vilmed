@@ -568,10 +568,11 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 												<?}?>
 												<span class="catalog-detail-item-price">
 													<span class="catalog-detail-item-price-current">
+                                                        Цена:
 														<?=$arOffer["MIN_PRICE"]["PRINT_RATIO_PRICE"]?>
 													</span>
 													<span class="unit">
-														<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arOffer["CATALOG_MEASURE_RATIO"] : "1")." ".$arOffer["CATALOG_MEASURE_NAME"];?>
+														<?//=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arOffer["CATALOG_MEASURE_RATIO"] : "1")." ".$arOffer["CATALOG_MEASURE_NAME"];?>
 													</span>
 												</span>
 												<?if($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"])) {?>
@@ -703,7 +704,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 											<span class="catalog-detail-item-price">
 												<?=($arResult["TOTAL_OFFERS"]["FROM"] == "Y" ? "<span class='from'>".GetMessage("CATALOG_ELEMENT_FROM")."</span> " : "").$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["PRINT_RATIO_PRICE"];?>
 												<span class="unit">
-													<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"] : "1")." ".$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?>
+													<?//=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"] : "1")." ".$arResult["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?>
 												</span>
 											</span>
 											<?if($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"])) {?>
@@ -787,13 +788,14 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									<?}?>
 									<span class="catalog-detail-item-price">
 										<span class="catalog-detail-item-price-current">
+                                            Цена:
 											<?if($arResult["COLLECTION"]["THIS"]) {?>
 												<span class="from"><?=GetMessage("CATALOG_ELEMENT_FROM");?></span>
 											<?}?>
 											<?=$arResult["MIN_PRICE"]["PRINT_RATIO_PRICE"]?>
 										</span>
 										<span class="unit">
-											<?=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arResult["CATALOG_MEASURE_RATIO"] : "1")." ".$arResult["CATALOG_MEASURE_NAME"];?>
+											<?//=GetMessage("CATALOG_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arResult["CATALOG_MEASURE_RATIO"] : "1")." ".$arResult["CATALOG_MEASURE_NAME"];?>
 										</span>
 									</span>
 									<?if($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"])) {?>

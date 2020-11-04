@@ -141,13 +141,13 @@ use \Bitrix\Main\Localization\Loc;?>
 						<?}
 					}?>
 					<span class="catalog-item-price">
+                        Цена:
 						<?if(count($arElement["ITEM_QUANTITY_RANGES"]) > 1 && $inMinPrice) {?>
 							<span class="from"><?=Loc::getMessage("CT_BCS_ELEMENT_FROM")?></span>
 						<?}
 						echo number_format($arElement["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>
 						<span class="unit">
 							<?=$currency?>
-							<span><?=Loc::getMessage("CT_BCS_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arElement["CATALOG_MEASURE_RATIO"] : "1")." ".$arElement["CATALOG_MEASURE_NAME"];?></span>
 						</span>
 						<?if($arParams["USE_PRICE_COUNT"] && count($arElement["ITEM_QUANTITY_RANGES"]) > 1) {?>
 							<span class="catalog-item-price-ranges-wrap">
