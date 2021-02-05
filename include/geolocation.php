@@ -1,6 +1,7 @@
-<?$APPLICATION->IncludeComponent(
-	"altop:geolocation", 
-	".default", 
+<?
+$APPLICATION->IncludeComponent(
+	"altop:geolocation",
+	"city",
 	array(
 		"IBLOCK_TYPE" => "content",
 		"IBLOCK_ID" => "7",
@@ -15,7 +16,7 @@
 		"COMPONENT_TEMPLATE" => ".default",
 		"COMPOSITE_FRAME_MODE" => "A",
 		"COMPOSITE_FRAME_TYPE" => "AUTO",
-		"MODE_OPERATION" => "YANDEX"
+		"MODE_OPERATION" => "YANDEX",
 	),
 	false
 );?>

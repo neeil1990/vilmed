@@ -28,8 +28,8 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 							for(var i = 0; i < cItem.PATH.length; i++) {
 								path += ', '+this.vars.cache.path[cItem.PATH[i]]; // deprecated
 							}
-						}						
-						
+						}
+
 						quickLocationsVal = BX.findChildren(BX("cityChange"), {tagName: "li", className: "quick-locations__val"}, true);
 						if(!!quickLocationsVal && 0 < quickLocationsVal.length) {
 							for(i = 0; i < quickLocationsVal.length; i++) {
@@ -38,7 +38,7 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 									BX.addClass(quickLocationsVal[i], "active");
 							}
 						}
-						BX.adjust(BX("selectCity"), {props: {disabled: false}});						
+						BX.adjust(BX("selectCity"), {props: {disabled: false}});
 
 						this.ctrls.inputs.fake.setAttribute('title', path);
 						this.ctrls.fullRoute.value = path;
@@ -48,15 +48,15 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 					},
 					'after-deselect-item': function() {
 						this.ctrls.fullRoute.value = '';
-						this.ctrls.inputs.fake.setAttribute('title', '');						
-						
+						this.ctrls.inputs.fake.setAttribute('title', '');
+
 						quickLocationsVal = BX.findChildren(BX("cityChange"), {tagName: "li", className: "quick-locations__val"}, true);
 						if(!!quickLocationsVal && 0 < quickLocationsVal.length) {
 							for(i = 0; i < quickLocationsVal.length; i++) {
 								BX.removeClass(quickLocationsVal[i], "active");
 							}
 						}
-						BX.adjust(BX("selectCity"), {props: {disabled: true}});						
+						BX.adjust(BX("selectCity"), {props: {disabled: true}});
 					},
 					'before-render-variant': function(itemData) {
 						if(itemData.PATH.length > 0) {
@@ -91,7 +91,7 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 			sys: {
 				code: 'sls'
 			}
-		});		
+		});
 		this.handleInitStack(nf, BX.Sale.component.location.selector.search, opts);
 	}
 
@@ -113,7 +113,7 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 				sv = this.vars,
 				ctx = this,
 				code = this.sys.code;
-			
+
 			// full route node
 			sc.fullRoute = BX.create('input', {
 				props: {
@@ -124,7 +124,7 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 					disabled: 'disabled',
 					autocomplete: 'off'
 				}
-			});			
+			});
 
 			BX.prepend(sc.fullRoute, sc.container);
 
@@ -176,7 +176,7 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 			if(typeof sv.cache.nodesByCode[code] == 'undefined') {
 				// lazyload it...
 				this.resetNavVariables();
-				
+
 				ctx.downloadBundle({CODE: code}, function(data) {
 					ctx.fillCache(data, false); // storing item in the cache
 
@@ -240,7 +240,7 @@ if(typeof BX.Sale.component.location.selector.search == 'undefined' && typeof BX
 				if(typeof item.TYPE_ID != 'undefined' && typeof this.opts.types != 'undefined')
 					item.TYPE = this.opts.types[item.TYPE_ID].CODE;
 
-				var path = item.PATH; 
+				var path = item.PATH;
 				delete(item.PATH);
 				result.push(item);
 

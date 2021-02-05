@@ -33,32 +33,32 @@ if($request->isPost() && check_bitrix_sessid()) {
 			$cookie = new Cookie($arOption, null, time() - 3600);
 			$cookie->setDomain(SITE_SERVER_NAME);
 			$cookie->setHttpOnly(false);
-			$context->getResponse()->addCookie($cookie);			
+			$context->getResponse()->addCookie($cookie);
 			unset($cookie);
-		}		
+		}
 	}
 	if($flush)
 		$context->getResponse()->flush("");
-	
+
 	switch($action) {
 		case "searchLocation":
 			//GEOLOCATION_COUNTRY//
 			$country = $request->getPost("country");
 			if(SITE_CHARSET != "utf-8")
 				$country = Encoding::convertEncoding($country, "utf-8", SITE_CHARSET);
-			
+
 			//GEOLOCATION_REGION//
 			$region = $request->getPost("region");
 			if(SITE_CHARSET != "utf-8")
 				$region = Encoding::convertEncoding($region, "utf-8", SITE_CHARSET);
-			
+
 			//GEOLOCATION_CITY//
 			$city = $request->getPost("city");
 			if(SITE_CHARSET != "utf-8")
 				$city = Encoding::convertEncoding($city, "utf-8", SITE_CHARSET);
 			if(empty($city))
 				return;
-			
+
 			//GEOLOCATION_LOCATION_ID//
 			$locationId = false;
 			$rsLocation = Bitrix\Sale\Location\LocationTable::getList(array(
@@ -71,7 +71,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if($arLocation = $rsLocation->fetch())
 				$locationId = $arLocation["ID"];
 			unset($arLocation, $rsLocation);
-			
+
 			//GEOLOCATION_CONTACTS_ID//
 			//GEOLOCATION_CONTACTS//
 			//PHONE_MASK//
@@ -80,15 +80,15 @@ if($request->isPost() && check_bitrix_sessid()) {
 			$rsElements = CIBlockElement::GetList(
 				array(
 					"SORT" => "ASC"
-				), 
+				),
 				array(
 					"ACTIVE" => "Y",
 					"IBLOCK_ID" => intval($arParams["IBLOCK_ID"])
-				), 
-				false, 
-				false, 
+				),
+				false,
+				false,
 				array("ID", "IBLOCK_ID", "PREVIEW_TEXT")
-			);				
+			);
 			while($obElement = $rsElements->GetNextElement()) {
 				$arElement = $obElement->GetFields();
 				$arElement["PROPERTIES"] = $obElement->GetProperties();
@@ -102,7 +102,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			foreach($contactsList as $arElement) {
 				if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($city, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
 					$contactsId = $arElement["ID"];
-					$contacts = $arElement["PREVIEW_TEXT"];					
+					$contacts = $arElement["PREVIEW_TEXT"];
 					break;
 				}
 			}
@@ -110,7 +110,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($region, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
 						$contactsId = $arElement["ID"];
-						$contacts = $arElement["PREVIEW_TEXT"];						
+						$contacts = $arElement["PREVIEW_TEXT"];
 						break;
 					}
 				}
@@ -119,7 +119,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($country, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
 						$contactsId = $arElement["ID"];
-						$contacts = $arElement["PREVIEW_TEXT"];						
+						$contacts = $arElement["PREVIEW_TEXT"];
 						break;
 					}
 				}
@@ -127,14 +127,14 @@ if($request->isPost() && check_bitrix_sessid()) {
 
 			//PHONE_MASK//
 			//VALIDATE_PHONE_MASK//
-			$phoneMask = $validatePhoneMask = false;			
+			$phoneMask = $validatePhoneMask = false;
 			foreach($contactsList as $arElement) {
 				if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($city, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
 					$phoneMask = $arElement["PROPERTIES"]["PHONE_MASK"]["VALUE"];
 					$validatePhoneMask = $arElement["PROPERTIES"]["VALIDATE_PHONE_MASK"]["VALUE"];
 					break;
 				}
-			}			
+			}
 			if(empty($phoneMask) && empty($validatePhoneMask) && !empty($region)) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($region, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
@@ -153,7 +153,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 					}
 				}
 			}
-			
+
 			//SEARCH_RESULT//
 			$searchResult = array(
 				"city" => $city,
@@ -162,55 +162,55 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if(SITE_CHARSET != "utf-8")
 				$searchResult = Encoding::convertEncoding($searchResult, SITE_CHARSET, "utf-8");
 
-			//SET_GEOLOCATION_COOKIES//			
+			//SET_GEOLOCATION_COOKIES//
 			$cookie = new Cookie("GEOLOCATION_CITY", $searchResult["city"], time() + $arParams["COOKIE_TIME"]);
 			$cookie->setDomain(SITE_SERVER_NAME);
 			$cookie->setHttpOnly(false);
-			$context->getResponse()->addCookie($cookie);			
-			unset($cookie);			
+			$context->getResponse()->addCookie($cookie);
+			unset($cookie);
 			if(!empty($locationId)) {
 				$cookie = new Cookie("GEOLOCATION_LOCATION_ID", $locationId, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);				
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
-			}			
+			}
 			if(!empty($contactsId)) {
 				$cookie = new Cookie("GEOLOCATION_CONTACTS_ID", $contactsId, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);				
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
-			}			
+			}
 			if(!empty($phoneMask)) {
 				$cookie = new Cookie("GEOLOCATION_PHONE_MASK", $phoneMask, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);				
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
-			}			
+			}
 			if(!empty($validatePhoneMask)) {
 				$cookie = new Cookie("GEOLOCATION_VALIDATE_PHONE_MASK", $validatePhoneMask, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);				
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			}
 			$context->getResponse()->flush("");
-			
+
 			echo json_encode($searchResult);
-			break;		
+			break;
 		case "setLocation":
 			//GEOLOCATION_LOCATION_ID//
 			$locationId = $request->getPost("locationId");
 			if(intval($locationId) <= 0)
 				return;
-			
+
 			//GEOLOCATION_COUNTRY_REGION_SUBREGION_CITY_VILLAGE//
 			$country = $region = $subregion = $city = $village = false;
 			$rsLocations = Bitrix\Sale\Location\LocationTable::getList(array(
 				"filter" => array(
-					"=ID" => $locationId, 
+					"=ID" => $locationId,
 					"=PARENTS.NAME.LANGUAGE_ID" => LANGUAGE_ID,
 					"=PARENTS.TYPE.NAME.LANGUAGE_ID" => LANGUAGE_ID,
 				),
@@ -237,7 +237,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 					$village = $arLocation["I_NAME_RU"];
 			}
 			unset($arLocation, $rsLocations);
-			
+
 			//GEOLOCATION_CONTACTS_ID//
 			//PHONE_MASK//
 			//VALIDATE_PHONE_MASK//
@@ -245,18 +245,18 @@ if($request->isPost() && check_bitrix_sessid()) {
 			$rsElements = CIBlockElement::GetList(
 				array(
 					"SORT" => "ASC"
-				), 
+				),
 				array(
 					"ACTIVE" => "Y",
 					"IBLOCK_ID" => intval($arParams["IBLOCK_ID"])
-				), 
-				false, 
-				false, 
+				),
+				false,
+				false,
 				array("ID", "IBLOCK_ID", "PREVIEW_TEXT")
-			);				
+			);
 			while($obElement = $rsElements->GetNextElement()) {
 				$arElement = $obElement->GetFields();
-				$arElement["PROPERTIES"] = $obElement->GetProperties();					
+				$arElement["PROPERTIES"] = $obElement->GetProperties();
 				$contactsList[] = $arElement;
 			}
 			unset($arElement, $obElement, $rsElements);
@@ -266,7 +266,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if(!empty($village)) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($village, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
-						$contactsId = $arElement["ID"];						
+						$contactsId = $arElement["ID"];
 						break;
 					}
 				}
@@ -274,7 +274,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if(empty($contactsId) && !empty($city)) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($city, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
-						$contactsId = $arElement["ID"];						
+						$contactsId = $arElement["ID"];
 						break;
 					}
 				}
@@ -282,7 +282,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if(empty($contactsId) && !empty($subregion)) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($subregion, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
-						$contactsId = $arElement["ID"];						
+						$contactsId = $arElement["ID"];
 						break;
 					}
 				}
@@ -290,7 +290,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if(empty($contactsId) && !empty($region)) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($region, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
-						$contactsId = $arElement["ID"];						
+						$contactsId = $arElement["ID"];
 						break;
 					}
 				}
@@ -298,7 +298,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			if(empty($contactsId) && !empty($country)) {
 				foreach($contactsList as $arElement) {
 					if(!empty($arElement["PROPERTIES"]["LOCATION"]["VALUE"]) && in_array($country, $arElement["PROPERTIES"]["LOCATION"]["VALUE"])) {
-						$contactsId = $arElement["ID"];						
+						$contactsId = $arElement["ID"];
 						break;
 					}
 				}
@@ -352,7 +352,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 					}
 				}
 			}
-			
+
 			//SET_RESULT//
 			$setResult = array(
 				"village" => $village,
@@ -369,57 +369,57 @@ if($request->isPost() && check_bitrix_sessid()) {
 				$cookie = new Cookie("GEOLOCATION_CITY", $setResult["village"], time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			} elseif(!empty($setResult["city"])) {
 				$cookie = new Cookie("GEOLOCATION_CITY", $setResult["city"], time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			} elseif(!empty($setResult["subregion"])) {
 				$cookie = new Cookie("GEOLOCATION_CITY", $setResult["subregion"], time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			} elseif(!empty($setResult["region"])) {
 				$cookie = new Cookie("GEOLOCATION_CITY", $setResult["region"], time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			} elseif(!empty($setResult["country"])) {
 				$cookie = new Cookie("GEOLOCATION_CITY", $setResult["country"], time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			}
 			$cookie = new Cookie("GEOLOCATION_LOCATION_ID", $locationId, time() + $arParams["COOKIE_TIME"]);
 			$cookie->setDomain(SITE_SERVER_NAME);
 			$cookie->setHttpOnly(false);
-			$context->getResponse()->addCookie($cookie);			
+			$context->getResponse()->addCookie($cookie);
 			unset($cookie);
 			if(!empty($contactsId)) {
 				$cookie = new Cookie("GEOLOCATION_CONTACTS_ID", $contactsId, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			}
 			if(!empty($phoneMask)) {
 				$cookie = new Cookie("GEOLOCATION_PHONE_MASK", $phoneMask, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			}
 			if(!empty($validatePhoneMask)) {
 				$cookie = new Cookie("GEOLOCATION_VALIDATE_PHONE_MASK", $validatePhoneMask, time() + $arParams["COOKIE_TIME"]);
 				$cookie->setDomain(SITE_SERVER_NAME);
 				$cookie->setHttpOnly(false);
-				$context->getResponse()->addCookie($cookie);			
+				$context->getResponse()->addCookie($cookie);
 				unset($cookie);
 			}
 			$context->getResponse()->flush("");

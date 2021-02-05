@@ -19,20 +19,20 @@ if(!empty($arResult["ERRORS"]["FATAL"])):?>
 
 	<div id="sls-<?=$arResult['RANDOM_TAG']?>" class="bx-sls">
 		<div class="dropdown-block bx-ui-sls-input-block">
-			<i class="fa fa-search dropdown-icon"></i>			
+			<i class="fa fa-search dropdown-icon"></i>
 			<input type="text" autocomplete="off" name="<?=$arParams['INPUT_NAME']?>" value="<?=$arResult['VALUE']?>" class="dropdown-field" placeholder="<?=Loc::getMessage('SALE_SLS_INPUT_SOME')?>" />
-			<div class="dropdown-fade2white"></div>			
+			<div class="dropdown-fade2white"></div>
 			<i class="fa fa-spinner fa-pulse bx-ui-sls-loader"></i>
-			<i class="fa fa-times-circle bx-ui-sls-clear" title="<?=Loc::getMessage('SALE_SLS_CLEAR_SELECTION')?>" aria-hidden="true"></i>		
+			<i class="fa fa-times-circle bx-ui-sls-clear" title="<?=Loc::getMessage('SALE_SLS_CLEAR_SELECTION')?>" aria-hidden="true"></i>
 			<div class="bx-ui-sls-pane"></div>
 		</div>
 		<?if(is_array($arResult["DEFAULT_LOCATIONS"]) && !empty($arResult["DEFAULT_LOCATIONS"])):?>
 			<div class="bx-ui-sls-quick-locations quick-locations">
-				<div class="quick-locations__title"><?=Loc::getMessage('SALE_SLS_CHOOSE')?></div>				
-				<ul class="quick-locations__values">					
+				<div class="quick-locations__title"><?=Loc::getMessage('SALE_SLS_CHOOSE')?></div>
+				<ul class="quick-locations__values">
 					<?foreach($arResult["DEFAULT_LOCATIONS"] as $lid => $loc):?>
 						<li class="quick-locations__val" data-id="<?=intval($loc['ID'])?>"><?=htmlspecialcharsbx($loc["NAME"])?></li>
-					<?endforeach;?>						
+					<?endforeach;?>
 				</ul>
 			</div>
 		<?endif?>
@@ -47,9 +47,9 @@ if(!empty($arResult["ERRORS"]["FATAL"])):?>
 		</script>
 		<script type="text/html" data-template-id="bx-ui-sls-dropdown-item">
 			<div class="dropdown-item bx-ui-sls-variant">
-				<span class="dropdown-item-text">{{display_wrapped}}</span>				
+				<span class="dropdown-item-text">{{display_wrapped}}</span>
 			</div>
-		</script>		
+		</script>
 		<?if(!$arParams["SUPPRESS_ERRORS"]):
 			if(!empty($arResult["ERRORS"]["NONFATAL"])):?>
 				<div class="bx-ui-sls-error-message">
@@ -58,7 +58,7 @@ if(!empty($arResult["ERRORS"]["FATAL"])):?>
 					endforeach;?>
 				</div>
 			<?endif;
-		endif;?>		
+		endif;?>
 	</div>
 
 	<script>
@@ -72,7 +72,7 @@ if(!empty($arResult["ERRORS"]["FATAL"])):?>
 
 			if(strlen($arParams["JS_CONTROL_GLOBAL_ID"])):?>
 				if(typeof window.BX.locationSelectors == "undefined") window.BX.locationSelectors = {};
-				window.BX.locationSelectors["<?=$arParams['JS_CONTROL_GLOBAL_ID']?>"] = 
+				window.BX.locationSelectors["<?=$arParams['JS_CONTROL_GLOBAL_ID']?>"] =
 			<?endif;?>
 
 			new BX.Sale.component.location.selector.search(<?=CUtil::PhpToJSObject(array(
