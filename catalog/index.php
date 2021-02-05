@@ -31,7 +31,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		"SHOW_TOP_ELEMENTS" => "N",
 		"SECTION_COUNT_ELEMENTS" => "",
 		"SECTION_TOP_DEPTH" => "",
-		"PAGE_ELEMENT_COUNT" => "12",
+		"PAGE_ELEMENT_COUNT" => "80",
 		"LINE_ELEMENT_COUNT" => "4",
 		"ELEMENT_SORT_FIELD2" => "",
 		"ELEMENT_SORT_ORDER2" => "",
@@ -115,7 +115,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 			0 => "PROP2",
 			1 => "",
 		),
-		"COMPARE_ELEMENT_SORT_FIELD" => "sort",
+		"COMPARE_ELEMENT_SORT_FIELD" => "",
 		"COMPARE_ELEMENT_SORT_ORDER" => "asc",
 		"PRICE_CODE" => array(
 			0 => "BASE",
@@ -154,7 +154,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 			2 => "PROP3",
 		),
 		"LIST_OFFERS_LIMIT" => "",
-		"LIST_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false}]",
+		"LIST_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false}]",
 		"DETAIL_PROPERTY_CODE" => array(
 			0 => "ARTNUMBER",
 			1 => "MANUFACTURER",

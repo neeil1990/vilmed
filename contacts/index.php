@@ -14,7 +14,7 @@ $APPLICATION->SetTitle("Контакты");?><p>
 		 E-mail для заказов и справки: <a href="mailto:info@vilmed.ru" class="roi_visit">info@vilmed.ru</a>
 	</p>
 	<p>
-		 Телефон: +7 (499) 113-02-79
+		 Телефон: +7 (499) 113-02-70
 	</p>
 	<p>
 		 График работы менеджеров: пн-пт 9:00-19:00
