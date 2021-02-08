@@ -56,14 +56,28 @@ if(!empty($arResult["ERRORS"]["FATAL"])):?>
             endif;?>
         </div>
 
-        <?if(is_array($arResult["DEFAULT_LOCATIONS"]) && !empty($arResult["DEFAULT_LOCATIONS"])):?>
+        <?
+        if(is_array($arResult["DEFAULT_LOCATIONS"]) && !empty($arResult["DEFAULT_LOCATIONS"])):?>
             <div class="block-info">
                 <div class="block-info__title">Популярные города</div>
                 <div class="bx-ui-sls-quick-locations popular-city">
                     <div class="item-city">
-                        <?foreach($arResult["DEFAULT_LOCATIONS"] as $lid => $loc):?>
+                        <?
+                        $i = 0;
+                        foreach($arResult["DEFAULT_LOCATIONS"] as $lid => $loc):?>
+
+                            <? if($i == 16): ?>
+                                </div>
+                                <div class="item-city">
+                                    <a href="javascript:void(0)" class="city-show" onclick="$(this).closest('.popular-city').find('.item-city:last-child').toggle(); return false;">Показать все города</a>
+                                </div>
+                                <div class="item-city" style="display: none;">
+                            <? endif; ?>
+
                             <a href="javascript:void(0)" data-id="<?=intval($loc['ID'])?>"><?=htmlspecialcharsbx($loc["NAME"])?></a>
-                        <?endforeach;?>
+                        <?
+                        $i++;
+                        endforeach;?>
                     </div>
                 </div>
             </div>

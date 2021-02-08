@@ -43,6 +43,10 @@ if($arParams["USE_GEOLOCATION"] == "Y"):?>
 		//CHANGE_CITY//
 		BX.bind(BX("geolocationChangeCity"), "click", BX.delegate(BX.CityChange, BX));
 	</script>
+
+    <div class="geolocation__popup" id="geolocation__popup">
+        <? include_once('popup.php'); ?>
+    </div>
 <?else:?>
 	<div class="telephone"><?=(!empty($arResult["CONTACTS"]) ? $arResult["CONTACTS"] : "");?></div>
 <?endif;

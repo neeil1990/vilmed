@@ -1,51 +1,44 @@
 //CITY_CHANGE//
-BX.CityChange = function() {	
+BX.CityChange = function() {
 	var close;
-	
+
 	BX.CityChange.popup = BX.PopupWindowManager.create("cityChange", null, {
 		autoHide: true,
 		offsetLeft: 0,
-		offsetTop: 0,			
+		offsetTop: 0,
 		overlay: {
 			opacity: 100
 		},
 		draggable: false,
 		closeByEsc: false,
-		closeIcon: { right : "-10px", top : "-10px"},			
+		closeIcon: { right : "-10px", top : "-10px"},
 		titleBar: {content: BX.create("span", {html: BX.message("GEOLOCATION_POPUP_WINDOW_TITLE")})},
 		content: "<div class='popup-window-wait'><i class='fa fa-spinner fa-pulse'></i></div>",
 		events: {
 			onAfterPopupShow: function()
 			{
 				if(!BX.findChild(BX("cityChange"), {className: "bx-sls"}, true, false)) {
-					BX.ajax.post(
-						BX.message("GEOLOCATION_COMPONENT_TEMPLATE") + "/popup.php",
-						{							
-							arParams: BX.message("GEOLOCATION_PARAMS")
-						},
-						BX.delegate(function(result)
-						{
-							this.setContent(result);
-							var windowSize =  BX.GetWindowInnerSize(),
-								windowScroll = BX.GetWindowScrollPos(),
-								popupHeight = BX("cityChange").offsetHeight;
-							BX("cityChange").style.top = windowSize.innerHeight/2 - popupHeight/2 + windowScroll.scrollTop + "px";
-						},
-						this)
-					);
+
+					var result = BX.findChild(BX("geolocation__popup"), {tag: "div"}, true, false);
+
+					this.setContent(result);
+					var windowSize =  BX.GetWindowInnerSize(),
+						windowScroll = BX.GetWindowScrollPos(),
+						popupHeight = BX("cityChange").offsetHeight;
+					BX("cityChange").style.top = windowSize.innerHeight/2 - popupHeight/2 + windowScroll.scrollTop + "px";
 				}
 			}
 		}
 	});
-	
+
 	BX.addClass(BX("cityChange"), "pop-up city-change");
 	close = BX.findChildren(BX("cityChange"), {className: "popup-window-close-icon"}, true);
 	if(!!close && 0 < close.length) {
-		for(i = 0; i < close.length; i++) {					
+		for(i = 0; i < close.length; i++) {
 			close[i].innerHTML = "<i class='fa fa-times'></i>";
 		}
-	}		
-	
+	}
+
 	BX.CityChange.popup.show();
 };
 
@@ -55,35 +48,35 @@ BX.CityConfirm = function(not_defined) {
 		close,
 		strContent,
 		buttons = [];
-	
+
 	BX.CityConfirm.popup = BX.PopupWindowManager.create("cityConfirm", null, {
 		autoHide: true,
 		offsetLeft: 0,
-		offsetTop: 0,			
+		offsetTop: 0,
 		overlay: {
 			opacity: 100
 		},
 		draggable: false,
 		closeByEsc: false,
-		closeIcon: { right : "-10px", top : "-10px"},			
+		closeIcon: { right : "-10px", top : "-10px"},
 		titleBar: false
-	});		
-	
+	});
+
 	BX.addClass(BX("cityConfirm"), "pop-up city-confirm");
 	close = BX.findChildren(BX("cityConfirm"), {className: "popup-window-close-icon"}, true);
 	if(!!close && 0 < close.length) {
-		for(i = 0; i < close.length; i++) {					
+		for(i = 0; i < close.length; i++) {
 			close[i].innerHTML = "<i class='fa fa-times'></i>";
 		}
-	}		
-	
+	}
+
 	strContent = "<div class='your-city'><div class='your-city__label'>" + BX.message("GEOLOCATION_YOUR_CITY") + "</div><div class='your-city__val'>" + BX.message("GEOLOCATION_POSITIONING") + "</div></div>";
-	
+
 	var CityConfirmButton = function(params) {
-		CityConfirmButton.superclass.constructor.apply(this, arguments);		
+		CityConfirmButton.superclass.constructor.apply(this, arguments);
 		this.buttonNode = BX.create("button", {
 			text: params.text,
-			attrs: { 
+			attrs: {
 				name: params.name,
 				className: params.className
 			},
@@ -91,10 +84,10 @@ BX.CityConfirm = function(not_defined) {
 		});
 	};
 	BX.extend(CityConfirmButton, BX.PopupWindowButton);
-	
+
 	if(!not_defined) {
 		buttons = [
-			new CityConfirmButton({				
+			new CityConfirmButton({
 				text: BX.message("GEOLOCATION_YES"),
 				name: "cityConfirmYes",
 				className: "btn_buy popdef",
@@ -102,7 +95,7 @@ BX.CityConfirm = function(not_defined) {
 					click: BX.delegate(BX.CityConfirm.popup.close, BX.CityConfirm.popup)
 				}
 			}),
-			new CityConfirmButton({				
+			new CityConfirmButton({
 				text: BX.message("GEOLOCATION_CHANGE_CITY"),
 				name: "cityConfirmChange",
 				className: "btn_buy apuo",
@@ -113,7 +106,7 @@ BX.CityConfirm = function(not_defined) {
 		];
 	} else {
 		buttons = [
-			new CityConfirmButton({				
+			new CityConfirmButton({
 				text: BX.message("GEOLOCATION_CHANGE_CITY"),
 				name: "cityConfirmChange",
 				className: "btn_buy apuo",
@@ -122,14 +115,14 @@ BX.CityConfirm = function(not_defined) {
 				}
 			})
 		];
-	}	
-	
+	}
+
 	BX.CityConfirm.popup.setContent(strContent);
-	BX.CityConfirm.popup.setButtons(buttons);		
-	
+	BX.CityConfirm.popup.setButtons(buttons);
+
 	BX("geolocation").appendChild(BX("popup-window-overlay-cityConfirm"));
 	BX("geolocation").appendChild(BX("cityConfirm"));
-	
+
 	BX.CityConfirm.popup.show();
 };
 
@@ -183,7 +176,7 @@ BX.Geolocation = function(geolocation) {
 			},
 			function(result) {
 				var json = JSON.parse(result);
-				$(".geolocation__value").html(json.city);				
+				$(".geolocation__value").html(json.city);
 				if(BX.message("GEOLOCATION_SHOW_CONFIRM") == "Y") {
 					BX.CityConfirm();
 					$(".your-city__val").html(json.city + "?");
@@ -199,7 +192,7 @@ BX.Geolocation = function(geolocation) {
 					}
 				}
 			}
-		);		
+		);
 	} else {
 		$(".geolocation__value").html(BX.message("GEOLOCATION_NOT_DEFINED"));
 		if(BX.message("GEOLOCATION_SHOW_CONFIRM") == "Y") {

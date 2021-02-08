@@ -1,19 +1,19 @@
 <?require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
-$APPLICATION->ShowAjaxHead();
+//$APPLICATION->ShowAjaxHead();
 $APPLICATION->AddHeadScript("/bitrix/js/main/dd.js");
 
 use Bitrix\Main\Application;
 
 $request = Application::getInstance()->getContext()->getRequest();
 
-$arParams = $request->getPost("arParams");
 if(!empty($arParams))
-	$arParams = unserialize(gzuncompress(stripslashes(base64_decode(strtr($arParams, '-_,', '+/=')))));
+	$arParams = $arParams["PARAMS_STRING"];
 
 $locationId = $request->getCookie("GEOLOCATION_LOCATION_ID");?>
 
-<?$APPLICATION->IncludeComponent("bitrix:sale.location.selector.search", "geolocation.city",
+<?
+$APPLICATION->IncludeComponent("bitrix:sale.location.selector.search", "geolocation.city",
 	array(
 		"COMPONENT_TEMPLATE" => ".default",
 		"ID" => $locationId,
@@ -23,7 +23,7 @@ $locationId = $request->getCookie("GEOLOCATION_LOCATION_ID");?>
 		"JSCONTROL_GLOBAL_ID" => "",
 		"JS_CALLBACK" => "",
 		"FILTER_BY_SITE" => "Y",
-		"SHOW_DEFAULT_LOCATIONS" => $arParams["SHOW_DEFAULT_LOCATIONS"],
+		"SHOW_DEFAULT_LOCATIONS" => "Y",
 		"CACHE_TYPE" => $arParams["CACHE_TYPE"],
 		"CACHE_TIME" => $arParams["CACHE_TIME"],
 		"FILTER_SITE_ID" => SITE_ID,

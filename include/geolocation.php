@@ -10,7 +10,7 @@ $APPLICATION->IncludeComponent(
 		"SHOW_TEXT_BLOCK" => "Y",
 		"SHOW_TEXT_BLOCK_TITLE" => "Y",
 		"TEXT_BLOCK_TITLE" => "",
-		"CACHE_TYPE" => "A",
+		"CACHE_TYPE" => "N",
 		"CACHE_TIME" => "36000000",
 		"COOKIE_TIME" => "36000000",
 		"COMPONENT_TEMPLATE" => ".default",
