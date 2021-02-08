@@ -3,8 +3,16 @@
 if(!CModule::IncludeModule("iblock"))
 	return;
 
+global $arSetting;
+if($arSetting["CATALOG_VIEW"]["VALUE"] == "FOUR_LEVELS"){
+	$arParams["DEPTH_LEVEL"] = "4";
+}elseif ($arSetting["CATALOG_VIEW"]["VALUE"] == "THREE_LEVELS"){
+	$arParams["DEPTH_LEVEL"] = "3";
+}else{
+	$arParams["DEPTH_LEVEL"] = "2";
+}
+
 $arParams["IBLOCK_ID"] = "24";
-$arParams["DEPTH_LEVEL"] = "4";
 $arParams["CACHE_TIME"] = "36000000";
 
 $arResult["SECTIONS"] = array();

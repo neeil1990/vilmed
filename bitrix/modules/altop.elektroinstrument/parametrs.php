@@ -92,6 +92,7 @@ $moduleClass::$arParametrsList = array(
 				"TYPE" => "selectbox",
 				"LIST" => array(
 					"TWO_LEVELS" => GetMessage("CATALOG_VIEW_TWO_LEVELS"),
+					"THREE_LEVELS" => GetMessage("CATALOG_VIEW_THREE_LEVELS"),
 					"FOUR_LEVELS" => GetMessage("CATALOG_VIEW_FOUR_LEVELS")
 				),
 				"DEFAULT" => "TWO_LEVELS",

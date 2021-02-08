@@ -139,7 +139,7 @@ Loc::loadMessages(__FILE__);?>
 			<?elseif($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?>
 				<div class="top-catalog">
 					<div class="center<?=($arSetting['SITE_BACKGROUND']['VALUE'] == 'Y' ? ' inner' : '');?>">
-						<?$APPLICATION->IncludeComponent("bitrix:menu", $arSetting["CATALOG_VIEW"]["VALUE"] == "FOUR_LEVELS" ? "tree" : "sections",
+						<? $APPLICATION->IncludeComponent("bitrix:menu", ($arSetting["CATALOG_VIEW"]["VALUE"] == "FOUR_LEVELS" || $arSetting["CATALOG_VIEW"]["VALUE"] == "THREE_LEVELS") ? "tree" : "sections",
 							array(
 								"ROOT_MENU_TYPE" => "left",
 								"MENU_CACHE_TYPE" => "A",
@@ -238,7 +238,7 @@ Loc::loadMessages(__FILE__);?>
                                             <?if($arSetting["BLOCK_LEFT"]["LIST"]["CATALOG_MENU_LEFT"]["CURRENT"]=="Y"){?><a class="showfilter"><i class="fa fa-angle-down"></i><i class="fa fa-angle-up"></i></a>
                                             <?}?></div>
                                         <div  <?=$arSetting["BLOCK_LEFT"]["LIST"]["CATALOG_MENU_LEFT"]["CURRENT"]=="Y" ? 'id="catalog_wrap"': ""?> >
-										<?$APPLICATION->IncludeComponent("bitrix:menu", $arSetting["CATALOG_VIEW"]["VALUE"] == "FOUR_LEVELS" ? "tree" : "sections",
+										<?$APPLICATION->IncludeComponent("bitrix:menu", ($arSetting["CATALOG_VIEW"]["VALUE"] == "FOUR_LEVELS" || $arSetting["CATALOG_VIEW"]["VALUE"] == "THREE_LEVELS") ? "tree" : "sections",
 											array(
 												"ROOT_MENU_TYPE" => "left",
 												"MENU_CACHE_TYPE" => "A",

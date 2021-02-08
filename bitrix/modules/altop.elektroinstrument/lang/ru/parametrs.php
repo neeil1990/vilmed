@@ -26,6 +26,7 @@ $MESS["CATALOG_LOCATION_LEFT"] = "Слева";
 $MESS["CATALOG_LOCATION_HEADER"] = "В шапке";
 $MESS["CATALOG_VIEW"] = "Вид каталога";
 $MESS["CATALOG_VIEW_TWO_LEVELS"] = "2 уровня";
+$MESS["CATALOG_VIEW_THREE_LEVELS"] = "3 уровня";
 $MESS["CATALOG_VIEW_FOUR_LEVELS"] = "4 уровня";
 $MESS["CART_LOCATION"] = "Панель с корзиной";
 $MESS["CART_LOCATION_BOTTOM"] = "Снизу";
