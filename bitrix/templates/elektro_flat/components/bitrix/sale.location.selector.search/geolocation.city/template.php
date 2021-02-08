@@ -66,7 +66,7 @@ if(!empty($arResult["ERRORS"]["FATAL"])):?>
                         $i = 0;
                         foreach($arResult["DEFAULT_LOCATIONS"] as $lid => $loc):?>
 
-                            <? if($i == 16): ?>
+                            <? if($i == 15): ?>
                                 </div>
                                 <div class="item-city">
                                     <a href="javascript:void(0)" class="city-show" onclick="$(this).closest('.popular-city').find('.item-city:last-child').toggle(); return false;">Показать все города</a>
