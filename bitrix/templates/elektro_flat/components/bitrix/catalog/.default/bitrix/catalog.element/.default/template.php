@@ -1105,7 +1105,10 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 													<input type="hidden" name="SELECT_PROPS" id="select_props_<?=$arItemIDs['ID']?>" value="" />
 												<?}?>
 												<?if(!$arResult["COLLECTION"]["THIS"]) {?>
-												<button type="button" id="<?=$arItemIDs['BTN_BUY']?>" class="btn_buy detail" name="add2basket"><i class="fa fa-shopping-cart"></i><span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span></button>
+												<a href="javascript:void(0)" id="<?=$arItemIDs['BTN_BUY']?>" class="btn_buy detail btn_href_detail" name="add2basket">
+                                                    <i class="fa fa-shopping-cart"></i>
+                                                    <span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span>
+                                                </a>
 												<?} else {?>
 													<button onclick="toItem(this)" type="button" id="to_item" class="btn_buy toitem" name="toitem"><span><?=GetMessage('CATALOG_ELEMENT_TO_ITEM')?></span></button>
 													<script type="text/javascript">

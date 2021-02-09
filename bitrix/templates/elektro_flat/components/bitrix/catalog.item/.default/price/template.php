@@ -6,7 +6,7 @@ use \Bitrix\Main\Localization\Loc;?>
 	<?//QUICK_VIEW?>
 	<?if($inQuickView){?>
 	    <button type="button" id="<?=$itemIds['QUICK_VIEW'];?>" class="quick_view"  data-action="view" name="quick_view">
-		    <i class="fa fa-eye"></i>		
+		    <i class="fa fa-eye"></i>
 		</button>
 	<?}?>
 	<?//ITEM_PREVIEW_PICTURE//?>
@@ -18,29 +18,29 @@ use \Bitrix\Main\Localization\Loc;?>
 					<img class="item_img" src="<?=$arElement['PREVIEW_PICTURE']['SRC']?>" width="<?=$arElement['PREVIEW_PICTURE']['WIDTH']?>" height="<?=$arElement['PREVIEW_PICTURE']['HEIGHT']?>" alt="<?=$strAlt?>" title="<?=$strTitle?>" />
 				<?} else {?>
 					<img src="<?=SITE_TEMPLATE_PATH?>/images/no-photo.jpg" width="150" height="150" alt="<?=$strAlt?>" title="<?=$strTitle?>" />
-				<?}?>																
+				<?}?>
 				<span class="sticker">
 					<?=$sticker?>
-				</span>								
-			</a>							
+				</span>
+			</a>
 		</div>
-        </div> 
+        </div>
 	<?//ITEM_TITLE//?>
 	<div class="catalog-item-title<?=$class?>">
 		<a href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>" itemprop="url">
 			<span itemprop="name"><?=$arElement["NAME"]?></span>
 		</a>
 	</div>
-	<meta content="<?=strip_tags($arElement['PREVIEW_TEXT'])?>" itemprop="description" />					
+	<meta content="<?=strip_tags($arElement['PREVIEW_TEXT'])?>" itemprop="description" />
 	<?//TIME_BUY//
 	if(array_key_exists("TIME_BUY", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
 		if(!empty($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
-			$showBar = false;													
+			$showBar = false;
 			if($haveOffers) {
 				if($arElement["TOTAL_OFFERS"]["QUANTITY"] > 0) {
-					$showBar = true;									
-					$startQnt = $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];	
-					$currQnt = $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];		
+					$showBar = true;
+					$startQnt = $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_FROM"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];
+					$currQnt = $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] ? $arElement["PROPERTIES"]["TIME_BUY_TO"]["VALUE"] : $arElement["TOTAL_OFFERS"]["QUANTITY"];
 					$currQntPercent = round($currQnt * 100 / $startQnt);
 				} else {
 					$showBar = true;
@@ -59,20 +59,20 @@ use \Bitrix\Main\Localization\Loc;?>
 					}
 				}
 			}
-			if($showBar == true) {?>								
-				<div class="item_time_buy">										
+			if($showBar == true) {?>
+				<div class="item_time_buy">
 					<div class="progress_bar_bg">
 						<div class="progress_bar_line" style="width:<?=$currQntPercent?>%;"></div>
-					</div>											
+					</div>
 					<?$new_date = ParseDateTime($arElement["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
-					<script type="text/javascript">												
-						$(function() {														
+					<script type="text/javascript">
+						$(function() {
 							$("#time_buy_timer_<?=$itemIds['ID']?>").countdown({
 								until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
 								format: "DHMS",
 								expiryText: "<div class='over'><?=Loc::getMessage('CT_BCS_ELEMENT_TIME_BUY_EXPIRY')?></div>"
 							});
-						});												
+						});
 					</script>
 					<div class="time_buy_cont">
 						<div class="time_buy_clock">
@@ -80,7 +80,7 @@ use \Bitrix\Main\Localization\Loc;?>
 						</div>
 						<div class="time_buy_timer" id="time_buy_timer_<?=$itemIds['ID']?>"></div>
 					</div>
-				</div>								
+				</div>
 			<?}
 		}
 	}
@@ -88,10 +88,10 @@ use \Bitrix\Main\Localization\Loc;?>
 	<div class="item-price<?=$class?>" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 		<?//TOTAL_OFFERS_PRICE//
 		if($haveOffers) {
-			if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>								
+			if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
 				<span class="catalog-item-no-price">
 					<?=Loc::getMessage("CT_BCS_ELEMENT_NO_PRICE")?>
-				</span>								
+				</span>
 			<?} else {
 				if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] < $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_BASE_PRICE"]) {?>
 					<span class="catalog-item-price-old">
@@ -102,7 +102,7 @@ use \Bitrix\Main\Localization\Loc;?>
 					</span>
 				<?}?>
 				<span class="catalog-item-price<?=($arElement['TOTAL_OFFERS']['MIN_PRICE']['RATIO_PRICE'] < $arElement['TOTAL_OFFERS']['MIN_PRICE']['RATIO_BASE_PRICE']) ? '-discount' : '';?>">
-					<?=($arElement["TOTAL_OFFERS"]["FROM"] == "Y" ? "<span class='from'>".Loc::getMessage("CT_BCS_ELEMENT_FROM")."</span> " : "").number_format($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>									
+					<?=($arElement["TOTAL_OFFERS"]["FROM"] == "Y" ? "<span class='from'>".Loc::getMessage("CT_BCS_ELEMENT_FROM")."</span> " : "").number_format($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>
 					<span><?=$currency?></span>
 					<?if($arParams["USE_PRICE_COUNT"] && count($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["ITEM_QUANTITY_RANGES"]) > 1) {?>
 						<span class="catalog-item-price-ranges-wrap">
@@ -119,12 +119,12 @@ use \Bitrix\Main\Localization\Loc;?>
 							<?=CCurrencyLang::CurrencyFormat($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CURRENCY"], true);?>
 						</span>
 					<?}?>
-				</span>							
+				</span>
 			<?}?>
 			<meta itemprop="price" content="<?=$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"]?>" />
 			<meta itemprop="priceCurrency" content="<?=$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CURRENCY"]?>" />
 			<?if($arElement["TOTAL_OFFERS"]["QUANTITY"] > 0) {?>
-				<meta content="InStock" itemprop="availability" />									
+				<meta content="InStock" itemprop="availability" />
 			<?} else {?>
 				<meta content="OutOfStock" itemprop="availability" />
 			<?}
@@ -133,9 +133,9 @@ use \Bitrix\Main\Localization\Loc;?>
 			if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {?>
 				<span class="catalog-item-no-price">
 					<?=Loc::getMessage("CT_BCS_ELEMENT_NO_PRICE")?>
-				</span>											
+				</span>
 			<?} else {
-				if($arElement["MIN_PRICE"]["RATIO_PRICE"] < $arElement["MIN_PRICE"]["RATIO_BASE_PRICE"]) {?>								
+				if($arElement["MIN_PRICE"]["RATIO_PRICE"] < $arElement["MIN_PRICE"]["RATIO_BASE_PRICE"]) {?>
 					<span class="catalog-item-price-old">
 						<?=$arElement["MIN_PRICE"]["PRINT_RATIO_BASE_PRICE"];?>
 					</span>
@@ -143,11 +143,11 @@ use \Bitrix\Main\Localization\Loc;?>
 						<?="-".$arElement["MIN_PRICE"]["PERCENT"]."%";?>
 					</span>
 				<?}?>
-				<span class="catalog-item-price<?=($arElement["MIN_PRICE"]['RATIO_PRICE'] < $arElement["MIN_PRICE"]['RATIO_BASE_PRICE']) ? '-discount' : '';?>">		
+				<span class="catalog-item-price<?=($arElement["MIN_PRICE"]['RATIO_PRICE'] < $arElement["MIN_PRICE"]['RATIO_BASE_PRICE']) ? '-discount' : '';?>">
 					<?if(count($arElement["ITEM_QUANTITY_RANGES"]) > 1 && $inMinPrice) {?>
 						<span class="from"><?=Loc::getMessage("CT_BCS_ELEMENT_FROM")?></span>
 					<?}
-					echo number_format($arElement["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>									
+					echo number_format($arElement["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>
 					<span><?=$currency?></span>
 					<?if($arParams["USE_PRICE_COUNT"] && count($arElement["ITEM_QUANTITY_RANGES"]) > 1) {?>
 						<span class="catalog-item-price-ranges-wrap">
@@ -164,14 +164,14 @@ use \Bitrix\Main\Localization\Loc;?>
 							<?=CCurrencyLang::CurrencyFormat($arElement["MIN_PRICE"]["RATIO_PRICE"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arElement["MIN_PRICE"]["CURRENCY"], true);?>
 						</span>
 					<?}?>
-				</span>															
+				</span>
 			<?}?>
 			<meta itemprop="price" content="<?=$arElement["MIN_PRICE"]["RATIO_PRICE"]?>" />
 			<meta itemprop="priceCurrency" content="<?=$arElement["MIN_PRICE"]["CURRENCY"]?>" />
 			<?if($arElement["CAN_BUY"]) {?>
 				<meta content="InStock" itemprop="availability" />
 			<?} elseif(!$arElement["CAN_BUY"]) {?>
-				<meta content="OutOfStock" itemprop="availability" />									
+				<meta content="OutOfStock" itemprop="availability" />
 			<?}
 		}?>
 	</div>
@@ -188,9 +188,9 @@ use \Bitrix\Main\Localization\Loc;?>
 	<?//TOTAL_OFFERS_ITEM_AVAILABILITY//?>
 	<div class="available">
 		<?//TOTAL_OFFERS_AVAILABILITY//
-		if($haveOffers) {						
+		if($haveOffers) {
 			if($arElement["TOTAL_OFFERS"]["QUANTITY"] > 0 || !$arElement["CHECK_QUANTITY"]) {?>
-				<?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') { ?>                     
+				<?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') { ?>
                     <div class="avl">
                         <i class="fa fa-check-circle"></i>
                         <span>
@@ -208,7 +208,7 @@ use \Bitrix\Main\Localization\Loc;?>
                             }?>
                         </span>
                     </div>
-                <?}?>  
+                <?}?>
 			<?} else {?>
 				<div class="not_avl">
 					<i class="fa fa-times-circle"></i>
@@ -216,8 +216,8 @@ use \Bitrix\Main\Localization\Loc;?>
 				</div>
 			<?}
 		//ITEM_AVAILABILITY//
-		} else {							
-			if($arElement["CAN_BUY"]) {?>								
+		} else {
+			if($arElement["CAN_BUY"]) {?>
 				<?if($arParams['SHOW_MAX_QUANTITY'] !== 'N') { ?>
                     <div class="avl">
                         <i class="fa fa-check-circle"></i>
@@ -236,19 +236,19 @@ use \Bitrix\Main\Localization\Loc;?>
                             }?>
                         </span>
                     </div>
-                <?}?>                
-			<?} elseif(!$arElement["CAN_BUY"]) {?>								
+                <?}?>
+			<?} elseif(!$arElement["CAN_BUY"]) {?>
 				<div class="not_avl">
 					<i class="fa fa-times-circle"></i>
 					<span><?=Loc::getMessage("CT_BCS_ELEMENT_NOT_AVAILABLE")?></span>
 				</div>
 			<?}
 		}?>
-	</div>						
+	</div>
 	<?//OFFERS_ITEM_BUY//?>
 	<div class="buy_more">
 		<?//OFFERS_BUY//
-		if($haveOffers) {?>								
+		if($haveOffers) {?>
 			<div class="add2basket_block">
 				<form action="javascript:void(0)" class="add2basket_form">
 					<div class="qnt_cont">
@@ -285,12 +285,12 @@ use \Bitrix\Main\Localization\Loc;?>
 										"NAME" => $arElement["PROPERTIES"]["ARTNUMBER"]["NAME"],
 										"CODE" => $arElement["PROPERTIES"]["ARTNUMBER"]["CODE"],
 										"VALUE" => $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-									);												
+									);
 									$props = strtr(base64_encode(serialize($props)), "+/=", "-_,");?>
 									<input type="hidden" name="PROPS" value="<?=$props?>" />
 								<?}
 							}?>
-							<button type="button" id="<?=(isset($arElement['SELECT_PROPS']) && !empty($arElement['SELECT_PROPS']) ? $itemIds['PROPS_BTN'] : $itemIds['BTN_BUY']);?>" class="btn_buy" name="add2basket"><i class="fa fa-shopping-cart"></i></button>
+							<a href="javascript:void(0)" id="<?=(isset($arElement['SELECT_PROPS']) && !empty($arElement['SELECT_PROPS']) ? $itemIds['PROPS_BTN'] : $itemIds['BTN_BUY']);?>" class="btn_buy btn_href" name="add2basket"><i class="fa fa-shopping-cart"></i></a>
 						</form>
 					</div>
 				<?}
@@ -298,7 +298,7 @@ use \Bitrix\Main\Localization\Loc;?>
 				//ITEM_UNDER_ORDER//?>
 				<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=Loc::getMessage("CT_BCS_ELEMENT_UNDER_ORDER")?></span></a>
 			<?}
-		}?>						
+		}?>
 		<?//ITEM_COMPARE//
 		if($arParams["DISPLAY_COMPARE"]=="Y") {?>
 			<div class="compare">
@@ -314,7 +314,7 @@ use \Bitrix\Main\Localization\Loc;?>
 						"NAME" => $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PROPERTIES"]["ARTNUMBER"]["NAME"],
 						"CODE" => $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PROPERTIES"]["ARTNUMBER"]["CODE"],
 						"VALUE" => $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-					);																
+					);
 				}
 				foreach($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["DISPLAY_PROPERTIES"] as $propOffer) {
 					if($propOffer["PROPERTY_TYPE"] != "S") {
@@ -332,9 +332,9 @@ use \Bitrix\Main\Localization\Loc;?>
 			<?}
 		//ITEM_DELAY//
 		} else {
-			if($arElement["CAN_BUY"] && $arElement["MIN_PRICE"]["RATIO_PRICE"] > 0) {							
+			if($arElement["CAN_BUY"] && $arElement["MIN_PRICE"]["RATIO_PRICE"] > 0) {
 				$props = "";
-				if(!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {		
+				if(!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
 					$props = array();
 					$props[] = array(
 						"NAME" => $arElement["PROPERTIES"]["ARTNUMBER"]["NAME"],

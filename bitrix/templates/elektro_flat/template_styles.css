@@ -2119,7 +2119,17 @@ button[name="banners-main__item-button"]:after{
 	padding:0px;
 }
 
+.btn_buy{
+	color: #fff!important;
+}
+.btn_buy.apuo{
+	color: #8184a1!important;
+}
+.btn_buy.apuo:hover{
+	color: #fff!important;
+}
 .catalog-item-card .buy_more button[name="add2basket"],
+.catalog-item-card .buy_more a.btn_href,
 .catalog-item-card .buy_more .apuo{
 	width:138px;
 	height:29px;
@@ -2128,6 +2138,8 @@ button[name="banners-main__item-button"]:after{
 	top:29px;
 	margin:0px;
 	padding:0px;
+	text-decoration: none;
+	line-height: 29px;
 }
 
 .catalog-item-card .buy_more .apuo{
@@ -2136,6 +2148,7 @@ button[name="banners-main__item-button"]:after{
 }
 
 .catalog-item-card .buy_more button[name="add2basket"] i,
+.catalog-item-card .buy_more a.btn_href i,
 .catalog-item-card .buy_more .apuo i{
 	margin:0px;
 	padding:0px 7px 0px 0px;
@@ -4607,11 +4620,16 @@ a.catalog_item_toogle_filter_reset{
 	padding:0px;
 }
 
-.catalog-item .buy_more button[name="add2basket"]{
+.catalog-item .buy_more button[name="add2basket"],
+.catalog-item .buy_more .btn_href
+{
 	width:138px;
 	height:29px;
 	margin:6px 0px 0px 0px;
 	padding:0px;
+	display: inline-block;
+	line-height: 29px;
+	text-decoration: none;
 }
 
 .catalog-item .buy_more .apuo{
@@ -4626,6 +4644,7 @@ a.catalog_item_toogle_filter_reset{
 }
 
 .catalog-item .buy_more button[name="add2basket"] i,
+.catalog-item .buy_more .btn_href i,
 .catalog-item .buy_more .apuo i{
 	margin:0px;
 	padding:0px 7px 0px 0px;
@@ -4824,7 +4843,9 @@ a.catalog_item_toogle_filter_reset{
 	float:left;
 }
 
-.catalog-item-price-view .buy_more button[name="add2basket"]{
+.catalog-item-price-view .buy_more button[name="add2basket"],
+.catalog-item-price-view .buy_more .btn_href
+{
 	width:37px;
 	margin:0px 0px 0px 5px;
 	padding:0px;
@@ -4835,11 +4856,15 @@ a.catalog_item_toogle_filter_reset{
 	margin:0px;
 }
 
-.catalog-item-price-view .buy_more button[name="add2basket"] i{
+.catalog-item-price-view .buy_more button[name="add2basket"] i,
+.catalog-item-price-view .buy_more .btn_href i
+{
 	padding:0px;
 }
 
-.catalog-item-price-view .buy_more button[name="add2basket"] span{
+.catalog-item-price-view .buy_more button[name="add2basket"] span,
+.catalog-item-price-view .buy_more .btn_href span
+{
 	display:none;
 }
 
@@ -5779,6 +5804,7 @@ a.catalog_item_toogle_filter_reset{
 
 /***CATALOG_DETAIL_BUY_BUTTON***/
 .catalog-detail .buy_more_detail button[name="add2basket"],
+.catalog-detail .buy_more_detail .btn_href_detail,
 .catalog-detail .buy_more_detail .apuo_detail,
 .catalog-detail .buy_more_detail button[name="choose_offer"],
 .catalog-detail .buy_more_detail button[name="toitem"]{
@@ -5787,13 +5813,17 @@ a.catalog_item_toogle_filter_reset{
 	float:left;
 	margin:0px;
 	padding:0px;
+	text-decoration: none;
+	line-height: 41px;
 }
 
 .catalog-detail .buy_more_detail button[name="toitem"]{
 	height:37px;
 }
 
-.catalog-detail .buy_more_detail button[name="add2basket"] i{
+.catalog-detail .buy_more_detail button[name="add2basket"] i,
+.catalog-detail .buy_more_detail .btn_href_detail i
+{
 	margin:0px;
 	padding:0px 10px 0px 0px;
 }
@@ -6768,16 +6798,22 @@ a.catalog_item_toogle_filter_reset{
 	float:left;
 }
 
-.offers-items .catalog-item .buy_more button[name="add2basket"]{
+.offers-items .catalog-item .buy_more button[name="add2basket"],
+.offers-items .catalog-item .buy_more .btn_href
+{
 	width:37px;
 	margin:0px 0px 0px 5px;
 }
 
-.offers-items .catalog-item .buy_more button[name="add2basket"] i{
+.offers-items .catalog-item .buy_more button[name="add2basket"] i,
+.offers-items .catalog-item .buy_more .btn_href i
+{
 	padding:0px;
 }
 
-.offers-items .catalog-item .buy_more button[name="add2basket"] span{
+.offers-items .catalog-item .buy_more button[name="add2basket"] span,
+.offers-items .catalog-item .buy_more .btn_href span
+{
 	display:none;
 }
 
@@ -6912,7 +6948,9 @@ a.catalog_item_toogle_filter_reset{
 	position:static;
 }
 
-.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"]{
+.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"],
+.set-constructor .catalog-item-card.result-item .buy_more .btn_href
+{
 	width:100%;
 	position:static;
 }
@@ -7352,11 +7390,15 @@ table.compare-grid .buy_more input[name="quantity"]{
 }
 
 table.compare-grid .buy_more button[name="add2basket"],
+table.compare-grid .buy_more .btn_href,
 table.compare-grid .buy_more .apuo{
 	width:138px;
 	height:29px;
 	margin:5px 0px 0px 0px;
 	padding:0px;
+	display: inline-block;
+	line-height: 29px;
+	text-decoration: none;
 }
 
 table.compare-grid .buy_more .apuo{
@@ -7369,6 +7411,7 @@ table.compare-grid .buy_more .apuo{
 }
 
 table.compare-grid .buy_more button[name="add2basket"] i,
+table.compare-grid .buy_more .btn_href i,
 table.compare-grid .buy_more .apuo i{
 	margin:0px;
 	padding:0px 7px 0px 0px;
@@ -7780,11 +7823,16 @@ table.compare-grid .delay .catalog-item-delayed i:nth-child(2){
 	padding:0px;
 }
 
-.more_options .item_sale .buy_more button[name="add2basket"]{
+.more_options .item_sale .buy_more button[name="add2basket"],
+.more_options .item_sale .buy_more .btn_href
+{
 	width:138px;
 	height:29px;
 	margin:0px 0px 0px 15px;
 	padding:0px;
+	display: inline-block;
+	line-height: 29px;
+	text-decoration: none;
 }
 
 .more_options .item_sale .buy_more .apuo{
@@ -7795,6 +7843,7 @@ table.compare-grid .delay .catalog-item-delayed i:nth-child(2){
 }
 
 .more_options .item_sale .buy_more button[name="add2basket"] i,
+.more_options .item_sale .buy_more .btn_href i,
 .more_options .item_sale .buy_more .apuo i{
 	margin:0px;
 	padding:0px 7px 0px 0px;
@@ -7864,16 +7913,22 @@ table.compare-grid .delay .catalog-item-delayed i:nth-child(2){
 	right:0;
 }
 
-.more_options .offers-items .catalog-item .buy_more button[name="add2basket"]{
+.more_options .offers-items .catalog-item .buy_more button[name="add2basket"],
+.more_options .offers-items .catalog-item .buy_more .btn_href
+{
 	width:37px;
 	margin:0px 0px 0px 5px;
 }
 
-.more_options .offers-items .catalog-item .buy_more button[name="add2basket"] i{
+.more_options .offers-items .catalog-item .buy_more button[name="add2basket"] i,
+.more_options .offers-items .catalog-item .buy_more .btn_href i
+{
 	padding:0px;
 }
 
-.more_options .offers-items .catalog-item .buy_more button[name="add2basket"] span{
+.more_options .offers-items .catalog-item .buy_more button[name="add2basket"] span,
+.more_options .offers-items .catalog-item .buy_more .btn_href span
+{
 	display:none;
 }
 
@@ -10616,6 +10671,7 @@ transform: translateX(-8px);
 		}
 
 		.catalog-item-card .buy_more button[name="add2basket"],
+		.catalog-item-card .buy_more a.btn_href,
 		.catalog-item-card .buy_more .apuo{
 			width:37px;
 			float:left;
@@ -10627,11 +10683,13 @@ transform: translateX(-8px);
 		}
 
 		.catalog-item-card .buy_more button[name="add2basket"] i,
+		.catalog-item-card .buy_more a.btn_href i,
 		.catalog-item-card .buy_more .apuo i{
 			padding:0px;
 		}
 
 		.catalog-item-card .buy_more button[name="add2basket"] span,
+		.catalog-item-card .buy_more a.btn_href span,
 		.catalog-item-card .buy_more .apuo span{
 			display:none;
 		}
@@ -10670,6 +10728,7 @@ transform: translateX(-8px);
 		}
 
 		.catalog-item-card .buy_more button[name="add2basket"],
+		.catalog-item-card .buy_more a.btn_href,
 		.catalog-item-card .buy_more .apuo{
 			width:37px;
 			float:left;
@@ -10682,11 +10741,14 @@ transform: translateX(-8px);
 			margin:0px 5px 0px 0px;
 		}
 
-		.catalog-item-card .buy_more button[name="add2basket"] i{
+		.catalog-item-card .buy_more button[name="add2basket"] i,
+		.catalog-item-card .buy_more a.btn_href i
+		{
 			padding:0px;
 		}
 
 		.catalog-item-card .buy_more button[name="add2basket"] span,
+		.catalog-item-card .buy_more a.btn_href span,
 		.catalog-item-card .buy_more .apuo .full{
 			display:none;
 		}
@@ -11371,6 +11433,7 @@ transform: translateX(-8px);
 		}
 
 		.catalog-item .buy_more button[name="add2basket"],
+		.catalog-item .buy_more .btn_href,
 		.catalog-item .buy_more .apuo{
 			width:37px;
 			float:left;
@@ -11383,11 +11446,13 @@ transform: translateX(-8px);
 		}
 
 		.catalog-item .buy_more button[name="add2basket"] i,
+		.catalog-item .buy_more .btn_href i,
 		.catalog-item .buy_more .apuo i{
 			padding:0px;
 		}
 
 		.catalog-item .buy_more button[name="add2basket"] span,
+		.catalog-item .buy_more .btn_href span,
 		.catalog-item .buy_more .apuo span{
 			display:none;
 		}
@@ -11431,6 +11496,7 @@ transform: translateX(-8px);
 		}
 
 		.catalog-item .buy_more button[name="add2basket"],
+		.catalog-item .buy_more .btn_href,
 		.catalog-item .buy_more .apuo{
 			width:37px;
 			float:left;
@@ -11443,11 +11509,14 @@ transform: translateX(-8px);
 			margin:0px 5px 0px 0px;
 		}
 
-		.catalog-item .buy_more button[name="add2basket"] i{
+		.catalog-item .buy_more button[name="add2basket"] i,
+		.catalog-item .buy_more .btn_href i
+		{
 			padding:0px;
 		}
 
 		.catalog-item .buy_more button[name="add2basket"] span,
+		.catalog-item .buy_more .btn_href span,
 		.catalog-item .buy_more .apuo .full{
 			display:none;
 		}
@@ -12131,7 +12200,9 @@ transform: translateX(-8px);
 		bottom:0px;
 	}
 
-	.offers-items .catalog-item .buy_more button[name="add2basket"]{
+	.offers-items .catalog-item .buy_more button[name="add2basket"],
+	.offers-items .catalog-item .buy_more .btn_href
+	{
 		margin:0px;
 	}
 
@@ -12184,7 +12255,9 @@ transform: translateX(-8px);
 			width:100%;
 		}
 
-		.offers-items .catalog-item .buy_more button[name="add2basket"]{
+		.offers-items .catalog-item .buy_more button[name="add2basket"],
+		.offers-items .catalog-item .buy_more .btn_href
+		{
 			margin:0px 0px 0px 5px;
 		}
 
@@ -12330,16 +12403,22 @@ transform: translateX(-8px);
 		bottom:11px;
 	}
 
-	.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"]{
+	.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"],
+	.set-constructor .catalog-item-card.result-item .buy_more .btn_href
+	{
 		width:132px;
 		margin:0px;
 	}
 
-	.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"] i{
+	.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"] i,
+	.set-constructor .catalog-item-card.result-item .buy_more .btn_href i
+	{
 		padding:0px 7px 0px 0px;
 	}
 
-	.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"] span{
+	.set-constructor .catalog-item-card.result-item .buy_more button[name="add2basket"] span,
+	.set-constructor .catalog-item-card.result-item .buy_more .btn_href span
+	{
 		display:inline-block;
 	}
 
@@ -12534,7 +12613,9 @@ transform: translateX(-8px);
 		margin:0px;
 	}
 
-	.more_options .item_sale .buy_more button[name="add2basket"]{
+	.more_options .item_sale .buy_more button[name="add2basket"],
+	.more_options .item_sale .buy_more .btn_href
+	{
 		float:left;
 		clear:right;
 		margin:5px 0px 0px 0px;
@@ -12563,7 +12644,9 @@ transform: translateX(-8px);
 		margin:3px 0px 0px 0px;
 	}
 
-	.more_options .offers-items .catalog-item .buy_more button[name="add2basket"]{
+	.more_options .offers-items .catalog-item .buy_more button[name="add2basket"],
+	.more_options .offers-items .catalog-item .buy_more .btn_href
+	{
 		margin:0px;
 	}
 
@@ -12581,7 +12664,9 @@ transform: translateX(-8px);
 			width:153px;
 		}
 
-		.more_options .offers-items .catalog-item .buy_more button[name="add2basket"]{
+		.more_options .offers-items .catalog-item .buy_more button[name="add2basket"],
+		.more_options .offers-items .catalog-item .buy_more .btn_href
+		{
 			margin:0px 0px 0px 5px;
 		}
 
