@@ -20,3 +20,9 @@
 .city-change .popular-city .item-city a:hover {
     color: #660901;
 }
+.city-change .popular-city .item-city:last-child{
+    display: none;
+}
+.city-change .popular-city .item-city:last-child.active{
+    display: flex;
+}
