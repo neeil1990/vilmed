@@ -1,6 +1,6 @@
 <?if(!defined("B_PROLOG_INCLUDED")||B_PROLOG_INCLUDED!==true)die();
 
-$frame = $this->createFrame("geolocation")->begin("");
+//$frame = $this->createFrame("geolocation")->begin("");
 
 use Bitrix\Main\Localization\Loc;
 
@@ -51,4 +51,5 @@ if($arParams["USE_GEOLOCATION"] == "Y"):?>
 	<div class="telephone"><?=(!empty($arResult["CONTACTS"]) ? $arResult["CONTACTS"] : "");?></div>
 <?endif;
 
-$frame->end();?>
+//$frame->end();
+?>

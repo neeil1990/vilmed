@@ -1,7 +1,9 @@
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetTitle("Моя корзина");?>
 
-<?$APPLICATION->IncludeComponent("bitrix:sale.basket.basket", ".default", 
+<?$APPLICATION->IncludeComponent(
+	"bitrix:sale.basket.basket", 
+	".default", 
 	array(
 		"COLUMNS_LIST" => array(
 			0 => "NAME",
@@ -14,7 +16,7 @@ $APPLICATION->SetTitle("Моя корзина");?>
 			7 => "SUM",
 		),
 		"PATH_TO_ORDER" => "/personal/order/make/",
-		"HIDE_COUPON" => "N",
+		"HIDE_COUPON" => "Y",
 		"PRICE_VAT_SHOW_VALUE" => "N",
 		"COUNT_DISCOUNT_4_ALL_QUANTITY" => "N",
 		"USE_PREPAYMENT" => "N",
@@ -23,11 +25,11 @@ $APPLICATION->SetTitle("Моя корзина");?>
 		"ACTION_VARIABLE" => "action",
 		"IBLOCK_TYPE" => "catalog",
 		"IBLOCK_ID" => "15",
-		"OFFERS_FIELD_CODE" => array(),
+		"OFFERS_FIELD_CODE" => "",
 		"OFFERS_PROPERTY_CODE" => array(
 			0 => "COLOR",
 			1 => "PROP2",
-			2 => "PROP3"
+			2 => "PROP3",
 		),
 		"OFFERS_SORT_FIELD" => "sort",
 		"OFFERS_SORT_ORDER" => "asc",
@@ -42,15 +44,16 @@ $APPLICATION->SetTitle("Моя корзина");?>
 		"OFFERS_CART_PROPERTIES" => array(
 			0 => "COLOR",
 			1 => "PROP2",
-			2 => "PROP3"
+			2 => "PROP3",
 		),
-		"DISPLAY_IMG_WIDTH" => "178",
-		"DISPLAY_IMG_HEIGHT" => "178",
+		"DISPLAY_IMG_WIDTH" => "250",
+		"DISPLAY_IMG_HEIGHT" => "250",
 		"ELEMENT_SORT_FIELD" => "RAND",
 		"ELEMENT_SORT_ORDER" => "ASC",
 		"DISPLAY_COMPARE" => "Y",
 		"PROPERTY_CODE_MOD" => array(
-			0 => "GUARANTEE"
+			0 => "GUARANTEE",
+			1 => "",
 		),
 		"HIDE_NOT_AVAILABLE" => "N",
 		"1CB_USE_FILE_FIELD" => "Y",
@@ -60,7 +63,8 @@ $APPLICATION->SetTitle("Моя корзина");?>
 		"1CB_FILE_FIELD_TYPE" => "doc, docx, txt, rtf",
 		"1CB_REQUIRED_FIELDS" => array(
 			0 => "NAME",
-			1 => "PHONE"
+			1 => "PHONE",
+			2 => "EMAIL",
 		),
 		"USE_BIG_DATA" => "Y",
 		"BIG_DATA_RCM_TYPE" => "any",
@@ -82,7 +86,22 @@ $APPLICATION->SetTitle("Моя корзина");?>
 		"GIFTS_MESS_BTN_DETAIL" => "",
 		"GIFTS_PAGE_ELEMENT_COUNT" => "",
 		"GIFTS_CONVERT_CURRENCY" => "",
-		"GIFTS_HIDE_NOT_AVAILABLE" => ""
+		"GIFTS_HIDE_NOT_AVAILABLE" => "",
+		"COLUMNS_LIST_EXT" => array(
+			0 => "PREVIEW_PICTURE",
+			1 => "DISCOUNT",
+			2 => "DELETE",
+			3 => "DELAY",
+			4 => "TYPE",
+			5 => "SUM",
+		),
+		"COMPATIBLE_MODE" => "Y",
+		"COMPOSITE_FRAME_MODE" => "A",
+		"COMPOSITE_FRAME_TYPE" => "AUTO",
+		"ADDITIONAL_PICT_PROP_15" => "-",
+		"ADDITIONAL_PICT_PROP_16" => "-",
+		"ADDITIONAL_PICT_PROP_24" => "-",
+		"BASKET_IMAGES_SCALING" => "adaptive"
 	),
 	false
 );?>
