@@ -11,14 +11,14 @@ if(isset($arResult['ITEM'])) {
 	$inPercentPrice = in_array("PERCENT_PRICE", $arParams["SETTING"]["PRODUCT_TABLE_VIEW"]);
 	$inArticle = in_array("ARTNUMBER", $arParams["SETTING"]["PRODUCT_TABLE_VIEW"]);
 	$inRating = in_array("RATING", $arParams["SETTING"]["PRODUCT_TABLE_VIEW"]);
-	$inPreviewText = in_array("PREVIEW_TEXT", $arParams["SETTING"]["PRODUCT_TABLE_VIEW"]);	
+	$inPreviewText = in_array("PREVIEW_TEXT", $arParams["SETTING"]["PRODUCT_TABLE_VIEW"]);
 	$inProductQnt = in_array("PRODUCT_QUANTITY", $arParams["SETTING"]["GENERAL_SETTINGS"]);
 	$inPriceRatio = in_array("PRICE_RATIO", $arParams["SETTING"]["GENERAL_SETTINGS"]);
 
-	$arElement = $arResult['ITEM'];	
+	$arElement = $arResult['ITEM'];
 	$areaId = $arResult['AREA_ID'];
 	$itemIds = array(
-		'ID' => $areaId,		
+		'ID' => $areaId,
 		'POPUP_BTN' => $areaId.'_popup_btn',
 		'PROPS_BTN' => $areaId.'_props_btn',
 		'BTN_BUY' => $areaId.'_btn_buy'
@@ -50,11 +50,14 @@ if(isset($arResult['ITEM'])) {
 		//NEW//
 		if(array_key_exists("NEWPRODUCT", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["NEWPRODUCT"]["VALUE"] == false)
 			$sticker .= "<span class='new'>".GetMessage("CT_SPG_ELEMENT_NEWPRODUCT")."</span>";
+        //IN_STOCK//
+        if(array_key_exists("IN_STOCK", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["IN_STOCK"]["VALUE"] == false)
+            $sticker .= "<span class='new in-stock'><span class='text'>".GetMessage("CT_BCS_ELEMENT_IN_STOCK")."</span></span>";
 		//HIT//
 		if(array_key_exists("SALELEADER", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["SALELEADER"]["VALUE"] == false)
 			$sticker .= "<span class='hit'>".GetMessage("CT_SPG_ELEMENT_SALELEADER")."</span>";
-		//DISCOUNT//				
-		if($haveOffers) {						
+		//DISCOUNT//
+		if($haveOffers) {
 			if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"] > 0)
 				$sticker .= "<span class='discount'>-".$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"]."%</span>";
 			else
@@ -84,9 +87,9 @@ if(isset($arResult['ITEM'])) {
 		}
 
 		if($haveOffers || $arElement["SELECT_PROPS"]) {
-			$jsParams = array(					
+			$jsParams = array(
 				"VISUAL" => array(
-					"ID" => $itemIds["ID"],					
+					"ID" => $itemIds["ID"],
 					"PROPS_BTN_ID" => $itemIds["PROPS_BTN"]
 				),
 				"PRODUCT" => array(
@@ -112,9 +115,9 @@ if(isset($arResult['ITEM'])) {
 				$jsParams["PRODUCT"]["ITEM_PRICES_DEF"] = $signer->sign(base64_encode(serialize($arElement["ITEM_PRICES_DEF"])), "sale.products.gift");
 			}
 		} else {
-			$jsParams = array(					
+			$jsParams = array(
 				"VISUAL" => array(
-					"ID" => $itemIds["ID"],					
+					"ID" => $itemIds["ID"],
 					"POPUP_BTN_ID" => $itemIds["POPUP_BTN"],
 					"BTN_BUY_ID" => $itemIds["BTN_BUY"],
                     "ADD2BASKET_WINDOW"=>in_array("ADD2BASKET_WINDOW", $arSetting["GENERAL_SETTINGS"])? "Y" : "",
@@ -125,8 +128,8 @@ if(isset($arResult['ITEM'])) {
 					"PICT" => is_array($arElement["PREVIEW_PICTURE"]) ? $arElement["PREVIEW_PICTURE"] : array("SRC" => SITE_TEMPLATE_PATH."/images/no-photo.jpg", "WIDTH" => 150, "HEIGHT" => 150),
 					"ITEM_PRICE_MODE" => $arElement["ITEM_PRICE_MODE"],
 					"ITEM_PRICES" => $arElement["ITEM_PRICES"],
-					"ITEM_PRICE_SELECTED" => $arElement["ITEM_PRICE_SELECTED"],					
-					"CHECK_QUANTITY" => $arElement["CHECK_QUANTITY"],						
+					"ITEM_PRICE_SELECTED" => $arElement["ITEM_PRICE_SELECTED"],
+					"CHECK_QUANTITY" => $arElement["CHECK_QUANTITY"],
 					"QUANTITY_FLOAT" => is_double($arElement["ITEM_MEASURE_RATIOS"][$arElement["ITEM_MEASURE_RATIO_SELECTED"]]["RATIO"]),
 					"MAX_QUANTITY" => $arElement["ITEM_MEASURE_RATIOS"][$arElement["ITEM_MEASURE_RATIO_SELECTED"]]["RATIO"],
 					"STEP_QUANTITY" => $arElement["ITEM_MEASURE_RATIOS"][$arElement["ITEM_MEASURE_RATIO_SELECTED"]]["RATIO"],

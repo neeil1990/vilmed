@@ -1,6 +1,7 @@
 <?
 $MESS["CT_BCS_TPL_ELEMENT_DELETE_CONFIRM"] = "Будет удалена вся информация, связанная с этой записью. Продолжить?";
 $MESS["CT_BCS_ELEMENT_NEWPRODUCT"] = "New";
+$MESS["CT_BCS_ELEMENT_IN_STOCK"] = "В наличии";
 $MESS["CT_BCS_ELEMENT_SALELEADER"] = "Хит";
 $MESS["CT_BCS_ELEMENT_TIME_BUY"] = "Успей<br />купить";
 $MESS["CT_BCS_ELEMENT_ARTNUMBER"] = "Артикул: ";

@@ -1,4 +1,24 @@
 /***CUSTOM CSS RULES FOR YOUR SITE***/
 
+/* STICKER */
+.catalog-item-card .item-image .sticker,
+.catalog-detail-pictures .detail_picture .sticker{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.catalog-item-card .item-image .sticker .new.in-stock,
+.catalog-item .catalog-item-image .sticker .new.in-stock,
+.catalog-detail-pictures .detail_picture .sticker .new.in-stock {
+    width: 80px;
+}
+
+@media screen and (max-width: 787px){
+    .catalog-item-card .item-image .sticker .new.in-stock,
+    .catalog-item .catalog-item-image .sticker .new.in-stock {
+        width: 60px;
+    }
+}
+
 /***CUSTOM CSS RULES FOR YOUR SITE***/
 
