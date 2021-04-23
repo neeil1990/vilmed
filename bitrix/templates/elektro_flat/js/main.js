@@ -198,4 +198,11 @@ $(function() {
 		});
 	});
 
+	if ($("div[data-text_script]").length){
+		$('div[data-text_script]').each(function(i, el){
+			var span = $(el);
+			span.html(span.data('text_script'));
+		});
+	}
+
 });

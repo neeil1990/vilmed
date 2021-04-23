@@ -50,9 +50,7 @@ use \Bitrix\Main\Localization\Loc;?>
 			<div class="article_rating">
 				<?//ARTICLE//
 				if($inArticle) {?>
-					<div class="article">
-						<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?>
-					</div>
+					<div class="article" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?>"></div>
 				<?}
 				//RATING//
 				if($inRating) {?>
