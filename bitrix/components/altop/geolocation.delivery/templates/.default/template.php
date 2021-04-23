@@ -12,8 +12,6 @@ use Bitrix\Main\Localization\Loc;?>
 				<?foreach($arResult["DELIVERY"] as $delivery_id => $arDelivery):?>
 					<div class="geolocation-delivery__delivery-item">
 						<span class="geolocation-delivery__delivery-name"><?=$arDelivery["NAME"]?></span>
-						<span class="geolocation-delivery__delivery-dots"></span>
-						<span class="geolocation-delivery__delivery-price"><?=$arDelivery["PRICE_FORMATED"]?></span>
 					</div>
 				<?endforeach;?>
 			</div>
@@ -32,7 +30,7 @@ $arJSParams["COMPONENT_TEMPLATE"] = $this->GetFolder();
 $arJSParams["PARAMS"] = $arParams;
 $arJSParams = CUtil::PhpToJSObject($arJSParams);?>
 
-<script type="text/javascript">		
+<script type="text/javascript">
 	<?if($arParams["AJAX_CALL"] == "Y" && $arResult["DELIVERY"]):?>
 		//GEOLOCATION_DELIVERY_DETAIL//
 		BX.bind(BX("geolocationDeliveryLink-<?=$arParams['ELEMENT_ID']?>"), "click", function() {
@@ -41,7 +39,7 @@ $arJSParams = CUtil::PhpToJSObject($arJSParams);?>
 	<?endif;
 	if($arParams["AJAX_CALL"] != "Y" && $arParams["GEOLOCATION_LOCATION_ID"] > 0):?>
 		//SHOW_GEOLOCATION_DELIVERY//
-		BX.ShowGeolocationDelivery(<?=$arJSParams?>);	
+		BX.ShowGeolocationDelivery(<?=$arJSParams?>);
 	<?endif;?>
 </script>
 
