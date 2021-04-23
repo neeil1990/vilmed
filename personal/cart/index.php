@@ -2,8 +2,8 @@
 $APPLICATION->SetTitle("Моя корзина");?>
 
 <?$APPLICATION->IncludeComponent(
-	"bitrix:sale.basket.basket", 
-	".default", 
+	"bitrix:sale.basket.basket",
+	".default",
 	array(
 		"COLUMNS_LIST" => array(
 			0 => "NAME",
@@ -24,7 +24,7 @@ $APPLICATION->SetTitle("Моя корзина");?>
 		"SET_TITLE" => "Y",
 		"ACTION_VARIABLE" => "action",
 		"IBLOCK_TYPE" => "catalog",
-		"IBLOCK_ID" => "15",
+		"IBLOCK_ID" => "24",
 		"OFFERS_FIELD_CODE" => "",
 		"OFFERS_PROPERTY_CODE" => array(
 			0 => "COLOR",
