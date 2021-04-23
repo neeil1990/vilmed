@@ -32,7 +32,7 @@ use \Bitrix\Main\Localization\Loc;?>
 	<?//ITEM_TITLE//?>
 	<div class="item-all-title">
 		<a class="item-title" href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>">
-			<?=$arElement['NAME']?>
+			<?=html_entity_decode($arElement['NAME'])?>
 		</a>
 	</div>
 	<?//ARTICLE_RATING//

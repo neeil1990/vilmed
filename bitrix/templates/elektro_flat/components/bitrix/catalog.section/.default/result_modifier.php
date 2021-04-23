@@ -12,7 +12,7 @@ $inMinPrice = in_array("MIN_PRICE", $arSetting["PRODUCT_TABLE_VIEW"]);
 
 //COLLECTION//
 if($arParams["TYPE"] == "collections") {
-	$collectionIds = $arValue = $arValueAll = array();	
+	$collectionIds = $arValue = $arValueAll = array();
 	foreach($arResult["ITEMS"] as $arElement) {
 		$collectionIds[] = $arElement["ID"];
 	}
@@ -27,10 +27,10 @@ if($arParams["TYPE"] == "collections") {
 	if(!empty($arValue)){
 		$arResult["COLLECTION"]["THIS"] = true;
 		$arResult["COLLECTION"]["VALUE"] = $arValue;
-		$arResult["COLLECTION"]["VALUE_ALL"] = $arValueAll; 
+		$arResult["COLLECTION"]["VALUE_ALL"] = $arValueAll;
 	}
 	unset($collectionIds, $arValue, $arValueAll);
-	
+
 	$arConvertParams = array();
 	if($arParams["CONVERT_CURRENCY"] == "Y") {
 		if(!Bitrix\Main\Loader::includeModule("currency")) {
@@ -48,7 +48,7 @@ if($arParams["TYPE"] == "collections") {
 		}
 	}
 
-	$arSelect = array("ID", "IBLOCK_ID");	
+	$arSelect = array("ID", "IBLOCK_ID");
 	$arr["PRICES"] = CIBlockPriceTools::GetCatalogPrices($arParams["IBLOCK_ID"], $arParams["PRICE_CODE"]);
 	foreach($arr["PRICES"] as $key => $value) {
 		if(!$value["CAN_VIEW"] && !$value["CAN_BUY"])
@@ -79,7 +79,7 @@ if($arParams["TYPE"] == "collections") {
 		unset($key, $arItem);
 	}
 
-	$arSumPrice = array();	
+	$arSumPrice = array();
 	foreach($itemsList as $key => $item) {
 		foreach($item as $sectionItem) {
 			$priceList = CIBlockPriceTools::GetItemPrices(
@@ -135,7 +135,7 @@ if($arParams["TYPE"] == "collections") {
 		$priceFormat = CCurrencyLang::GetCurrencyFormat($price["CURRENCY"], LANGUAGE_ID);
 		if(empty($priceFormat["THOUSANDS_SEP"])):
 			$priceFormat["THOUSANDS_SEP"] = " ";
-		endif;					
+		endif;
 		if($priceFormat["HIDE_ZERO"] == "Y"):
 			if(round(min($arSumPrice[$key]), $priceFormat["DECIMALS"]) == round(min($arSumPrice[$key]), 0)):
 				$priceFormat["DECIMALS"] = 0;
@@ -163,7 +163,7 @@ if($arParams["TYPE"] == "collections") {
 if(!$inPriceRatio) {
 
 
-	foreach($arResult["ITEMS"] as $key => $arElement) {	
+	foreach($arResult["ITEMS"] as $key => $arElement) {
 		if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 			foreach($arElement["OFFERS"] as $key_off => $arOffer) {
 				foreach($arOffer["ITEM_PRICES"] as $keyPrice => $itemPrice) {
@@ -171,7 +171,7 @@ if(!$inPriceRatio) {
 					$arResult["ITEMS"][$key]["OFFERS"][$key_off]["ITEM_PRICES"][$keyPrice]["PRINT_RATIO_BASE_PRICE"] = $itemPrice["PRINT_BASE_PRICE"];
 					$arResult["ITEMS"][$key]["OFFERS"][$key_off]["ITEM_PRICES"][$keyPrice]["RATIO_PRICE"] = $itemPrice["PRICE"];
 					$arResult["ITEMS"][$key]["OFFERS"][$key_off]["ITEM_PRICES"][$keyPrice]["PRINT_RATIO_PRICE"] = $itemPrice["PRINT_PRICE"];
-					$arResult["ITEMS"][$key]["OFFERS"][$key_off]["ITEM_PRICES"][$keyPrice]["PRINT_RATIO_DISCOUNT"] = $itemPrice["PRINT_DISCOUNT"];	
+					$arResult["ITEMS"][$key]["OFFERS"][$key_off]["ITEM_PRICES"][$keyPrice]["PRINT_RATIO_DISCOUNT"] = $itemPrice["PRINT_DISCOUNT"];
 				}
 				unset($keyPrice, $itemPrice);
 			}
@@ -191,7 +191,7 @@ if(!$inPriceRatio) {
 	}
 	unset($key, $arElement);
 } else {
-	foreach($arResult["ITEMS"] as $key => $arElement) {	
+	foreach($arResult["ITEMS"] as $key => $arElement) {
 		if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 			foreach($arElement["OFFERS"] as $key_off => $arOffer) {
 				foreach($arOffer["ITEM_PRICES"] as $keyPrice => $itemPrice) {
@@ -213,8 +213,7 @@ if(!$inPriceRatio) {
 
 //MIN_QUANTITY//
 foreach($arResult["ITEMS"] as $key => $arElement) {
-	
-	$arResult["ITEMS"][$key]['NAME'] = html_entity_decode($arElement['NAME']);
+
     if(!array_key_exists("ZERO-INF",$arElement["PRICE_MATRIX"]["ROWS"])){
         foreach($arElement["ITEM_PRICES"] as $keyPrice => $itemPrice) {
             $arResult["ITEMS"][$key]["ITEM_PRICES"][$keyPrice]["MIN_QUANTITY"] =  $itemPrice["QUANTITY_FROM"];
@@ -251,7 +250,7 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 
 	//CURRENT_DISCOUNT//
 	$arPrice = array();
-	$arResult["ITEMS"][$key]["CURRENT_DISCOUNT"] = array();	
+	$arResult["ITEMS"][$key]["CURRENT_DISCOUNT"] = array();
 
 	if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
 		$minId = false;
@@ -259,8 +258,8 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 		foreach($arElement["OFFERS"] as $key_off => $arOffer) {
 			$arOffer["MIN_PRICE"] = $arOffer["ITEM_PRICES"][$arOffer["ITEM_PRICE_SELECTED"]];
 			if($arOffer["MIN_PRICE"]["RATIO_PRICE"] == 0)
-				continue;			
-			if($minRatioPrice === false || $minRatioPrice > $arOffer["MIN_PRICE"]["RATIO_PRICE"]) {			
+				continue;
+			if($minRatioPrice === false || $minRatioPrice > $arOffer["MIN_PRICE"]["RATIO_PRICE"]) {
 				$minId = $arOffer["ID"];
 				$minRatioPrice = $arOffer["MIN_PRICE"]["RATIO_PRICE"];
 			}
@@ -327,10 +326,10 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 			false,
 			false,
 			array("ID", "CODE", "NAME", "PROPERTY_HEX", "PROPERTY_PICT")
-		);		
+		);
 		while($arElColorCollection = $obElColorCollection->GetNext()) {
 			$arResult["ITEMS"][$key]["VERSIONS_PERFORMANCE"]["ITEMS"][$arElColorCollection["ID"]] = $arElColorCollection;
-			
+
 			if($arElColorCollection["PROPERTY_PICT_VALUE"] > 0) {
 				$arFile = CFile::GetFileArray($arElColorCollection["PROPERTY_PICT_VALUE"]);
 				if($arFile["WIDTH"] > 24 || $arFile["HEIGHT"] > 24) {
@@ -358,15 +357,15 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 		foreach($arElement["ITEM_PRICES"] as $itemPrice) {
 			if($itemPrice["RATIO_PRICE"] == 0)
 				continue;
-			if($minPrice === false || $minPrice > $itemPrice["RATIO_PRICE"]) {								
-				$minPrice = $itemPrice["RATIO_PRICE"];					
-				$arResult["ITEMS"][$key]["MIN_PRICE"] = array(		
+			if($minPrice === false || $minPrice > $itemPrice["RATIO_PRICE"]) {
+				$minPrice = $itemPrice["RATIO_PRICE"];
+				$arResult["ITEMS"][$key]["MIN_PRICE"] = array(
 					"RATIO_BASE_PRICE" => $itemPrice["RATIO_BASE_PRICE"],
 					"PRINT_RATIO_BASE_PRICE" => $itemPrice["PRINT_RATIO_BASE_PRICE"],
-					"RATIO_PRICE" => $minPrice,						
+					"RATIO_PRICE" => $minPrice,
 					"PRINT_RATIO_DISCOUNT" => $itemPrice["PRINT_RATIO_DISCOUNT"],
 					"PERCENT" => $itemPrice["PERCENT"],
-					"CURRENCY" => $itemPrice["CURRENCY"],					
+					"CURRENCY" => $itemPrice["CURRENCY"],
 					"MIN_QUANTITY" => $arElement["ITEM_PRICES"][$arElement["ITEM_PRICE_SELECTED"]]["MIN_QUANTITY"]
 				);
 			}
@@ -384,7 +383,7 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 
 	//CHECK_QUANTITY//
 	$arResult["ITEMS"][$key]["CHECK_QUANTITY"] = $arElement["CATALOG_QUANTITY_TRACE"] == "Y" && $arElement["CATALOG_CAN_BUY_ZERO"] == "N";
-	
+
 	//SELECT_PROPS//
 	if(is_array($arParams["PROPERTY_CODE_MOD"]) && !empty($arParams["PROPERTY_CODE_MOD"])) {
 		$arResult["ITEMS"][$key]["SELECT_PROPS"] = array();
@@ -412,10 +411,10 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 		}
 		unset($pid);
 	}
-	
+
 	//OFFERS//
 	if(isset($arElement["OFFERS"]) && !empty($arElement["OFFERS"])) {
-		//TOTAL_OFFERS//	
+		//TOTAL_OFFERS//
 		$totalQnt = false;
 		$minPrice = false;
 		$totalPrices = false;
@@ -427,16 +426,16 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 
 
 				if($itemPrice["RATIO_PRICE"] == 0)
-					continue;						
+					continue;
 				if($minPrice === false || $minPrice > $itemPrice["RATIO_PRICE"]) {
 
 
 					$minPrice = $itemPrice["RATIO_PRICE"];
-					$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["MIN_PRICE"] = array(		
-						"ID" => $arOffer["ID"],						
+					$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["MIN_PRICE"] = array(
+						"ID" => $arOffer["ID"],
 						"RATIO_BASE_PRICE" => $itemPrice["RATIO_BASE_PRICE"],
 						"PRINT_RATIO_BASE_PRICE" => $itemPrice["PRINT_RATIO_BASE_PRICE"],
-						"RATIO_PRICE" => $minPrice,						
+						"RATIO_PRICE" => $minPrice,
 						"PRINT_RATIO_DISCOUNT" => $itemPrice["PRINT_RATIO_DISCOUNT"],
 						"PERCENT" => $itemPrice["PERCENT"],
 						"CURRENCY" => $itemPrice["CURRENCY"],
@@ -461,9 +460,9 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 					}
 					if(isset($value))
 						unset($value);
-				  
+
 					$arOffer['PRICE_MATRIX'] = CatalogGetPriceTableEx($arOffer['ID'], 0, $arPriceTypeID, 'Y');
-				
+
 					$arMatrix;
 					$arPriceMatrix = false;
 					if(true) {
@@ -485,7 +484,7 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 					}
 					$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["PRICE_MATRIX_SHOW"]["COLS"] = $arOffer["PRICE_MATRIX"]["COLS"];
 					$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["PRICE_MATRIX_SHOW"]["MATRIX"] = $arPriceMatrix;
-				}			
+				}
 				$totalPrices[] = $itemPrice["RATIO_PRICE"];
 			}
 			unset($itemPrice);
@@ -496,27 +495,27 @@ foreach($arResult["ITEMS"] as $key => $arElement) {
 		if($minPrice === false) {
 			$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["MIN_PRICE"] = array(
 				"RATIO_PRICE" => "0",
-				"CURRENCY" => $arElement["OFFERS"][0]["ITEM_PRICES"][$arElement["OFFERS"][0]["ITEM_PRICE_SELECTED"]]["CURRENCY"],	
+				"CURRENCY" => $arElement["OFFERS"][0]["ITEM_PRICES"][$arElement["OFFERS"][0]["ITEM_PRICE_SELECTED"]]["CURRENCY"],
 				"CATALOG_MEASURE_RATIO" => $arElement["OFFERS"][0]["CATALOG_MEASURE_RATIO"],
 				"CATALOG_MEASURE_NAME" => $arElement["OFFERS"][0]["CATALOG_MEASURE_NAME"]
 			);
 		}
-		$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["QUANTITY"] = $totalQnt;	
+		$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["QUANTITY"] = $totalQnt;
 		if(count(array_unique($totalPrices)) > 1) {
 			$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["FROM"] = "Y";
 		} else {
 			$arResult["ITEMS"][$key]["TOTAL_OFFERS"]["FROM"] = "N";
-		}	
+		}
 		//END_TOTAL_OFFERS//
 	}
-	//END_OFFERS//	
+	//END_OFFERS//
 }
 unset($key, $arElement);
 
 //END_ELEMENTS//
 
 //MANUFACTURER//
-if(count($vendorIds) > 0) {	
+if(count($vendorIds) > 0) {
 	$arVendor = array();
 	$rsElements = CIBlockElement::GetList(
 		array(),
@@ -530,7 +529,7 @@ if(count($vendorIds) > 0) {
 	while($arElement = $rsElements->GetNext()) {
 		$arVendor[$arElement["ID"]]["NAME"] = $arElement["NAME"];
 		if($arElement["PREVIEW_PICTURE"] > 0) {
-			$arFile = CFile::GetFileArray($arElement["PREVIEW_PICTURE"]);		
+			$arFile = CFile::GetFileArray($arElement["PREVIEW_PICTURE"]);
 			if($arFile["WIDTH"] > 69 || $arFile["HEIGHT"] > 24) {
 				$arFileTmp = CFile::ResizeImageGet(
 					$arFile,
@@ -550,7 +549,7 @@ if(count($vendorIds) > 0) {
 			}
 		}
 	}
-	
+
 	//ELEMENTS//
 	foreach($arResult["ITEMS"] as $key => $arElement) {
 		//MANUFACTURER//
