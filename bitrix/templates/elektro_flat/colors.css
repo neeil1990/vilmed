@@ -1417,6 +1417,10 @@ button[name="banners-main__item-button"]:hover:after{
 	box-shadow:0px 0px 15px rgba(0, 0, 0, 0.36);
 }
 
+.catalog-item-card:hover .catalog-item-info{
+	overflow: hidden;
+}
+
 .catalog-item-card.item-tb:hover,
 .catalog-item-card.item-pm:hover{
 	border:1px solid transparent;

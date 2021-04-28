@@ -1830,6 +1830,7 @@ button[name="banners-main__item-button"]:after{
 	margin:12px 0px 0px 0px;
 	padding:0px;
 	overflow:hidden;
+	transition: height .7s ease;
 }
 
 .catalog-item-card .item-all-title .item-title{

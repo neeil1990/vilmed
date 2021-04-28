@@ -433,7 +433,7 @@ if($_REQUEST["order"] == "desc") {
 if(!$arCurSection["VIEW_COLLECTION"]) {
 	$arAvailableView = array("table", "list", "price");
 
-	$view = $APPLICATION->get_cookie("view") ? $APPLICATION->get_cookie("view") : (isset($arCurSection["VIEW"]) && !empty($arCurSection["VIEW"]) ? $arCurSection["VIEW"] : "table");
+	$view = $APPLICATION->get_cookie("view") ? $APPLICATION->get_cookie("view") : (isset($arCurSection["VIEW"]) && !empty($arCurSection["VIEW"]) ? $arCurSection["VIEW"] : "list");
 
 	//AJAX_MODE//
 	if($arParams["AJAX_MODE"] == "Y") {
@@ -476,7 +476,8 @@ if(!$arCurSection["VIEW_COLLECTION"]) {
 	$view = "collections";
 	$arParams["DISPLAY_IMG_WIDTH"] = "480";
 	$arParams["DISPLAY_IMG_HEIGHT"] = "255";
-}?>
+}
+?>
 <div class="clr"></div>
 
 <?//SECTION//

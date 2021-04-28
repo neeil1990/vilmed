@@ -205,4 +205,10 @@ $(function() {
 		});
 	}
 
+	$('.catalog-item-table-view .catalog-item-card .item-all-title').hover(function () {
+		$(this).height($(this)[0].scrollHeight);
+	}, function () {
+		$(this).removeAttr('style');
+	});
+
 });
