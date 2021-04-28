@@ -7,7 +7,7 @@ if(!empty($arResult["PROPERTY_LINKED_ID"])):
 	);
 	$bxajaxid = $_REQUEST["bxajaxid"];
 	if(!empty($bxajaxid)) {
-		//JS//?>	
+		//JS//?>
 		<script type="text/javascript">
 			//<![CDATA[
 			BX.ready(function() {
@@ -34,6 +34,12 @@ if(!empty($arResult["PROPERTY_LINKED_ID"])):
 		);?>
 	</div>
 <?endif;?>
+
+<? if(!empty($arResult["PROPERTY_DETAIL_TEXT_AFTER"])): ?>
+    <div class="reviews-detail">
+        <div class="reviews-detail__text"><?=$arResult["PROPERTY_DETAIL_TEXT_AFTER"]?></div>
+    </div>
+<? endif; ?>
 
 <?
 $APPLICATION->SetPageProperty("ogtype", "article");

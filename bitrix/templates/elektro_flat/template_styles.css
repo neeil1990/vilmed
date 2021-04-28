@@ -3232,8 +3232,7 @@ footer{
 	width:100%;
 	float:none;
 	display:table;
-	margin-top:21px;
-	margin-bottom:-2px;
+	margin:21px auto;
 }
 
 .news-detail__products .filtered-items,

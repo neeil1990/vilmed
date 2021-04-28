@@ -23,10 +23,12 @@ if(is_array($arResult["DETAIL_PICTURE"])) {
 
 //PROPERTY_LINKED_ID//
 $arResult["PROPERTY_LINKED_ID"] = $arResult["PROPERTIES"]["LINKED"]["VALUE"];
+$arResult["PROPERTY_DETAIL_TEXT_AFTER"] = $arResult["PROPERTIES"]["DETAIL_TEXT_AFTER"]["~VALUE"]["TEXT"];
 
 //CACHE_KEYS//
 $this->__component->SetResultCacheKeys(
-	array(		
+	array(
+		"PROPERTY_DETAIL_TEXT_AFTER",
 		"PROPERTY_LINKED_ID",
 		"DETAIL_PICTURE"
 	)
