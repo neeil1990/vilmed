@@ -3,7 +3,7 @@ $arLinkPrFilter["PROPERTY_THIS_COLLECTION"] = false;?>
 <?$APPLICATION->IncludeComponent("bitrix:catalog.section", "filtered",
 	array(
 		"IBLOCK_TYPE" => "catalog",
-		"IBLOCK_ID" => "15",
+		"IBLOCK_ID" => "24",
 		"ELEMENT_SORT_FIELD" => "CATALOG_AVAILABLE",
 		"ELEMENT_SORT_ORDER" => "DESC",
 		"ELEMENT_SORT_FIELD2" => "SORT",
@@ -13,8 +13,8 @@ $arLinkPrFilter["PROPERTY_THIS_COLLECTION"] = false;?>
 			1 => "SALELEADER",
 			2 => "DISCOUNT",
 		),
-		"SET_META_KEYWORDS" => "N",		
-		"SET_META_DESCRIPTION" => "N",		
+		"SET_META_KEYWORDS" => "N",
+		"SET_META_DESCRIPTION" => "N",
 		"SET_BROWSER_TITLE" => "N",
 		"SET_LAST_MODIFIED" => "N",
 		"INCLUDE_SUBSECTIONS" => "Y",
@@ -83,7 +83,7 @@ $arLinkPrFilter["PROPERTY_THIS_COLLECTION"] = false;?>
 		"CONVERT_CURRENCY" => "N",
 		"CURRENCY_ID" => "",
 		"HIDE_NOT_AVAILABLE" => "N",
-		"ADD_SECTIONS_CHAIN" => "N",		
+		"ADD_SECTIONS_CHAIN" => "N",
 		"COMPARE_PATH" => "",
 		"BACKGROUND_IMAGE" => "",
 		"DISABLE_INIT_JS_IN_COMPONENT" => "",
@@ -91,7 +91,7 @@ $arLinkPrFilter["PROPERTY_THIS_COLLECTION"] = false;?>
 		"DISPLAY_IMG_HEIGHT" =>	"178",
 		"PROPERTY_CODE_MOD" => array(
 			0 => "GUARANTEE",
-		),		
+		),
 	),
 	false
 );?>

@@ -94,7 +94,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		"HIDE_NOT_AVAILABLE" => "N",
 		"HIDE_NOT_AVAILABLE_OFFERS" => "N",
 		"IBLOCK_ID" => "24",
-		"IBLOCK_ID_REVIEWS" => "17",
+		"IBLOCK_ID_REVIEWS" => "20",
 		"IBLOCK_TYPE" => "catalog",
 		"IBLOCK_TYPE_REVIEWS" => "catalog",
 		"INCLUDE_SUBSECTIONS" => "Y",
