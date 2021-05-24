@@ -29,7 +29,7 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"Светильники медицинские", 
+		"Светильники", 
 		"/catalog/svetilniki-meditsinskie/", 
 		Array(), 
 		Array(), 

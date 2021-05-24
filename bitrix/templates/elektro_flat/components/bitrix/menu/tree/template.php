@@ -31,7 +31,6 @@ global $arSetting;?>
 		echo str_repeat("</ul></li>", ($previousLevel-1) );
 	endif;?>
 </ul>
-
 <script type="text/javascript">
 	//<![CDATA[
 	$(function() {

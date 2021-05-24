@@ -8,6 +8,8 @@ use Bitrix\Main\Loader,
 
 global $USER, $arSetting;
 
+
+
 //USE_PRICE_RATIO//
 $inPriceRatio = in_array("PRICE_RATIO", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 

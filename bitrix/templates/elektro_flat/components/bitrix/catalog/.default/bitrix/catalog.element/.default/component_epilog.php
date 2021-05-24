@@ -5,6 +5,10 @@ global $arSetting;
 use Bitrix\Main\Loader,
 	Bitrix\Main\Page\Asset;
 
+use Bitrix\Iblock\SectionTable;
+use Bitrix\Iblock\ElementTable;
+use Bitrix\Main\SystemException;
+
 //SET_CURRENCIES//
 if(!empty($templateData["CURRENCIES"])) {
 	$loadCurrency = Loader::includeModule("currency");
@@ -534,3 +538,43 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 		<?endif;
 	endif;
 }?>
+<?
+$CurPage = $APPLICATION->GetCurDir();
+$CurPageAr = explode('/',$CurPage);
+if($CurPageAr[1]=="catalog"){
+	LocalRedirect("/product/".$arParams["ELEMENT_CODE"]."/");
+}
+
+
+
+    $parentSections = [];
+ 
+    $parentSectionIterator = SectionTable::getList([
+        'select' => [
+        	'NAME' => 'SECTION_SECTION.NAME',
+        	'CODE' => 'SECTION_SECTION.CODE',
+            'SECTION_ID' => 'SECTION_SECTION.ID',
+            'IBLOCK_SECTION_ID' => 'SECTION_SECTION.IBLOCK_SECTION_ID',
+        ],
+        'filter' => [
+            '=ID' => $arResult['IBLOCK_SECTION_ID'],
+        ],
+        'runtime' => [
+            'SECTION_SECTION' => [
+                'data_type' => '\Bitrix\Iblock\SectionTable',
+                'reference' => [
+                    '=this.IBLOCK_ID' => 'ref.IBLOCK_ID',
+                    '>=this.LEFT_MARGIN' => 'ref.LEFT_MARGIN',
+                    '<=this.RIGHT_MARGIN' => 'ref.RIGHT_MARGIN',
+                ],
+                'join_type' => 'inner'
+            ],
+        ],
+    ]);
+ 
+    while ($parentSection = $parentSectionIterator->fetch()) {
+        if($parentSection["CODE"]){
+        	$APPLICATION->AddChainItem($parentSection["NAME"], "/catalog/".$parentSection["CODE"]."/", true);
+        }
+    }
+ 	$APPLICATION->AddChainItem($arResult["NAME"], "", true);

@@ -205,6 +205,13 @@ $(function() {
 		});
 	}
 
+	if ($("span[data-text_script]").length){
+		$('span[data-text_script]').each(function(i, el){
+			var span = $(el);
+			span.html(span.data('text_script'));
+		});
+	}
+
 	$('.catalog-item-table-view .catalog-item-card .item-all-title').hover(function () {
 		$(this).height($(this)[0].scrollHeight);
 	}, function () {

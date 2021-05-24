@@ -1,6 +1,10 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
-use \Bitrix\Main\Localization\Loc;?>
+use \Bitrix\Main\Localization\Loc;
+global $kn;
+$kn++;
+$arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
+?>
 
 <div class="catalog-item-info">
 	<?//QUICK_VIEW?>
@@ -41,7 +45,7 @@ use \Bitrix\Main\Localization\Loc;?>
 		<div class="article_rating">
 			<?//ARTICLE//
 			if($inArticle) {?>
-				<div class="article" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?>"></div>
+				<div class="article" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?><?}?></div>
 			<?}
 			//RATING//
 			if($inRating) {?>
@@ -94,9 +98,8 @@ use \Bitrix\Main\Localization\Loc;?>
 					}?>
 					<span class="catalog-item-price">
 						<?=($arElement["TOTAL_OFFERS"]["FROM"] == "Y" ? "<span class='from'>".Loc::getMessage("CT_BCS_ELEMENT_FROM")."</span> " : "").number_format($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>
-						<span class="unit">
-							<?=$currency?>
-							<span><?=Loc::getMessage("CT_BCS_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"] : "1")." ".$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?></span>
+						<span class="unit" data-text_script='<?=$currency?>
+							<span><?=Loc::getMessage("CT_BCS_ELEMENT_UNIT")." ".(($inPriceRatio) ? $arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_RATIO"] : "1")." ".$arElement["TOTAL_OFFERS"]["MIN_PRICE"]["CATALOG_MEASURE_NAME"];?></span>'>
 						</span>
 						<?if($arParams["USE_PRICE_COUNT"] && count($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["ITEM_QUANTITY_RANGES"]) > 1) {?>
 							<span class="catalog-item-price-ranges-wrap">
@@ -144,8 +147,7 @@ use \Bitrix\Main\Localization\Loc;?>
 							<span class="from"><?=Loc::getMessage("CT_BCS_ELEMENT_FROM")?></span>
 						<?}
 						echo number_format($arElement["MIN_PRICE"]["RATIO_PRICE"], $arCurFormat["DECIMALS"], $arCurFormat["DEC_POINT"], $arCurFormat["THOUSANDS_SEP"]);?>
-						<span class="unit">
-							<?=$currency?>
+						<span class="unit"  data-text_script="<?=$currency?>">
 						</span>
 						<?if($arParams["USE_PRICE_COUNT"] && count($arElement["ITEM_QUANTITY_RANGES"]) > 1) {?>
 							<span class="catalog-item-price-ranges-wrap">
@@ -187,7 +189,7 @@ use \Bitrix\Main\Localization\Loc;?>
 							<span class="from"><?=Loc::getMessage("CT_BCS_ELEMENT_FROM");?></span>
 						<?}?>
 						<div class="catalog-detail-price-ranges__price"><?=$oneRange["DISCOUNT_PRICE"]?></div>
-						<span class="unit"><?=$oneRange["PRINT_CURRENCY"]?></span>
+						<span class="unit"  data-text_script="<?=$oneRange["PRINT_CURRENCY"]?>"></span>
 						<?if($countRange > 1):?>
 							<span class="catalog-item-price-ranges-wrap">
 								<a id="<?=$itemIds['PRICE_MATRIX_BTN']?>_<?=$key_matrix?>" data-key="<?=$key_matrix?>" class="catalog-item-price-ranges" href="javascript:void(0);">
@@ -218,7 +220,7 @@ use \Bitrix\Main\Localization\Loc;?>
 							<span class="from"><?=Loc::getMessage("CT_BCS_ELEMENT_FROM");?></span>
 						<?}?>
 						<div class="catalog-detail-price-ranges__price"><?=$oneRange["DISCOUNT_PRICE"]?></div>
-						<span class="unit"><?=$oneRange["PRINT_CURRENCY"]?></span>
+						<span class="unit"  data-text_script="<?=$oneRange["PRINT_CURRENCY"]?>"></span>
 						<?if($countRange > 1):?>
 							<span class="catalog-item-price-ranges-wrap">
 								<a id="<?=$itemIds['PRICE_MATRIX_BTN']?>_<?=$key_matrix?>" data-key="<?=$key_matrix?>" class="catalog-item-price-ranges" href="javascript:void(0);">
@@ -335,7 +337,7 @@ use \Bitrix\Main\Localization\Loc;?>
 
 					<input type="text" id="quantity_<?=$itemIds['ID']?>" name="quantity" class="quantity" value="<?=($arElement['TOTAL_OFFERS']['MIN_PRICE']["QUANTITY_FROM"]>0?$arElement['TOTAL_OFFERS']['MIN_PRICE']["QUANTITY_FROM"]:$arElement['TOTAL_OFFERS']['MIN_PRICE']['MIN_QUANTITY'])?>"/>
 					<a href="javascript:void(0)" class="plus" id="quantity_plus_<?=$itemIds['ID']?>"><span>+</span></a>
-					<button type="button" id="<?=$itemIds['PROPS_BTN']?>" class="btn_buy" name="add2basket"><i class="fa fa-shopping-cart"></i><span><?=($arSetting["NAME_BUTTON_TO_CART"] ? $arSetting["NAME_BUTTON_TO_CART"] : Loc::getMessage("CT_BCS_ELEMENT_ADD_TO_CART"))?>
+					<button type="button" id="<?=$itemIds['PROPS_BTN']?>" class="btn_buy" name="add2basket"><i class="fa fa-shopping-cart"></i><span data-text_script="<?=($arSetting["NAME_BUTTON_TO_CART"] ? $arSetting["NAME_BUTTON_TO_CART"] : Loc::getMessage("CT_BCS_ELEMENT_ADD_TO_CART"))?>"><?if($kn<21){?><?=($arSetting["NAME_BUTTON_TO_CART"] ? $arSetting["NAME_BUTTON_TO_CART"] : Loc::getMessage("CT_BCS_ELEMENT_ADD_TO_CART"))?><?}?>
                         </span></button>
 				</form>
 			</div>
@@ -373,7 +375,7 @@ use \Bitrix\Main\Localization\Loc;?>
 				<? if($arElement["CAN_BUY"]) {
 					if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
 						//ITEM_ASK_PRICE//?>
-						<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span class="full"><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?></span><span class="short"><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?></span></a>
+						<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span class="full" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?><?}?></span><span class="short" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?><?}?></span></a>
 					<?} else {
 						if(isset($arElement["SELECT_PROPS"]) && !empty($arElement["SELECT_PROPS"])) {?>
 							<form action="javascript:void(0)" class="add2basket_form">
@@ -401,13 +403,13 @@ use \Bitrix\Main\Localization\Loc;?>
 							}?>
 							<a href="javascript:void(0)" id="<?=(isset($arElement['SELECT_PROPS']) && !empty($arElement['SELECT_PROPS']) ? $itemIds['PROPS_BTN'] : $itemIds['BTN_BUY']);?>" class="btn_buy btn_href" name="add2basket">
                                 <i class="fa fa-shopping-cart"></i>
-                                <span><?=($arSetting["NAME_BUTTON_TO_CART"] ? $arSetting["NAME_BUTTON_TO_CART"] : Loc::getMessage("CT_BCS_ELEMENT_ADD_TO_CART"))?></span>
+                                <span data-text_script="<?=($arSetting["NAME_BUTTON_TO_CART"] ? $arSetting["NAME_BUTTON_TO_CART"] : Loc::getMessage("CT_BCS_ELEMENT_ADD_TO_CART"))?>"><?if($kn<21){?><?=($arSetting["NAME_BUTTON_TO_CART"] ? $arSetting["NAME_BUTTON_TO_CART"] : Loc::getMessage("CT_BCS_ELEMENT_ADD_TO_CART"))?><?}?></span>
                             </a>
 						</form>
 					<?}
 				} elseif(!$arElement["CAN_BUY"]) {
 					//ITEM_UNDER_ORDER//?>
-                        <a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span class="full"><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?></span><span class="short"><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?></span></a>
+                        <a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span class="full" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?><?}?></span><span class="short" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?><?}?></span></a>
 				<?}?>
 			</div>
 		<?}?>
