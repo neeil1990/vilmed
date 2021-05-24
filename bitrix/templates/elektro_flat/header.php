@@ -239,27 +239,27 @@ Loc::loadMessages(__FILE__);?>
                                             <?}?></div>
                                         <div  <?=$arSetting["BLOCK_LEFT"]["LIST"]["CATALOG_MENU_LEFT"]["CURRENT"]=="Y" ? 'id="catalog_wrap"': ""?> >
 										<?$APPLICATION->IncludeComponent(
-	"bitrix:menu", 
-	"tree", 
-	array(
-		"ROOT_MENU_TYPE" => "left",
-		"MENU_CACHE_TYPE" => "A",
-		"MENU_CACHE_TIME" => "36000000",
-		"MENU_CACHE_USE_GROUPS" => "Y",
-		"MENU_CACHE_GET_VARS" => array(
-		),
-		"MAX_LEVEL" => "1",
-		"CHILD_MENU_TYPE" => "left",
-		"USE_EXT" => "Y",
-		"DELAY" => "N",
-		"ALLOW_MULTI_SELECT" => "N",
-		"CACHE_SELECTED_ITEMS" => "N",
-		"COMPONENT_TEMPLATE" => "tree",
-		"COMPOSITE_FRAME_MODE" => "A",
-		"COMPOSITE_FRAME_TYPE" => "AUTO"
-	),
-	false
-);?>
+                                            "bitrix:menu",
+                                            "tree",
+                                            array(
+                                                "ROOT_MENU_TYPE" => "left",
+                                                "MENU_CACHE_TYPE" => "A",
+                                                "MENU_CACHE_TIME" => "36000000",
+                                                "MENU_CACHE_USE_GROUPS" => "Y",
+                                                "MENU_CACHE_GET_VARS" => array(
+                                                ),
+                                                "MAX_LEVEL" => "4",
+                                                "CHILD_MENU_TYPE" => "left",
+                                                "USE_EXT" => "Y",
+                                                "DELAY" => "N",
+                                                "ALLOW_MULTI_SELECT" => "N",
+                                                "CACHE_SELECTED_ITEMS" => "N",
+                                                "COMPONENT_TEMPLATE" => "tree",
+                                                "COMPOSITE_FRAME_MODE" => "A",
+                                                "COMPOSITE_FRAME_TYPE" => "AUTO"
+                                            ),
+                                            false
+                                        );?>
                                         </div>
 									<?endif;
 								endif;
