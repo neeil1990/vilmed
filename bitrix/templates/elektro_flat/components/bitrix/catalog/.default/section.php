@@ -24,7 +24,7 @@ if(0 < intval($arResult["VARIABLES"]["SECTION_ID"])) {
 } elseif("" != $arResult["VARIABLES"]["SECTION_CODE"]) {
 	$arFilter["=CODE"] = $arResult["VARIABLES"]["SECTION_CODE"];
 }
-$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST");
+$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST", "UF_TAGS_TITLE");
 
 $arproductType = array("newproduct", "saleleader", "discount");
 
@@ -47,6 +47,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["CODE"] = $arSection["CODE"];
 			$arCurSection["NAME"] = $arSection["NAME"];
 			$arCurSection["TAGS_LIST"] = ($arSection['UF_TAGS_LIST']) ?: false;
+			$arCurSection["TAGS_TITLE"] = ($arSection['UF_TAGS_TITLE']) ?: false;
 			if($arSection["PICTURE"] > 0)
 				$arCurSection["PICTURE"] = CFile::GetFileArray($arSection["PICTURE"]);
 			$arCurSection["DESCRIPTION"] = $arSection["DESCRIPTION"];
@@ -239,6 +240,9 @@ if(!empty($arCurSection)) {
     <div class="clear"></div>
 
     <? if($arCurSection["TAGS_LIST"]): ?>
+    <? if($arCurSection["TAGS_TITLE"]): ?>
+    <div class="h1"><?=$arCurSection["TAGS_TITLE"]?></div>
+    <? endif; ?>
     <div class="subcategories">
         <ul class="tag-slider sub-links-2">
             <? foreach ($arCurSection["TAGS_LIST"] as $tags):

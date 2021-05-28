@@ -14514,3 +14514,11 @@ legend
 	background:#575b71;
 	color:#fff!important;
 }
+
+.h1{
+	padding: 10px 0px;
+	font-size: 24px;
+	font-weight: 600;
+	color: #575b71;
+	line-height: 1.1;
+}
