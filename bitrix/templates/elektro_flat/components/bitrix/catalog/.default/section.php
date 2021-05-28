@@ -24,7 +24,7 @@ if(0 < intval($arResult["VARIABLES"]["SECTION_ID"])) {
 } elseif("" != $arResult["VARIABLES"]["SECTION_CODE"]) {
 	$arFilter["=CODE"] = $arResult["VARIABLES"]["SECTION_CODE"];
 }
-$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND");
+$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST");
 
 $arproductType = array("newproduct", "saleleader", "discount");
 
@@ -46,6 +46,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["ID"] = $arSection["ID"];
 			$arCurSection["CODE"] = $arSection["CODE"];
 			$arCurSection["NAME"] = $arSection["NAME"];
+			$arCurSection["TAGS_LIST"] = ($arSection['UF_TAGS_LIST']) ?: false;
 			if($arSection["PICTURE"] > 0)
 				$arCurSection["PICTURE"] = CFile::GetFileArray($arSection["PICTURE"]);
 			$arCurSection["DESCRIPTION"] = $arSection["DESCRIPTION"];
@@ -237,28 +238,22 @@ if(!empty($arCurSection)) {
 
     <div class="clear"></div>
 
-    <?
-    $rsParentSection = CIBlockSection::GetByID($arCurSection["ID"]);
-    if ($arParentSection = $rsParentSection->GetNext())
-    {
-        $arFilter = array('IBLOCK_ID' => $arParentSection['IBLOCK_ID'],'>LEFT_MARGIN' => $arParentSection['LEFT_MARGIN'],'<RIGHT_MARGIN' => $arParentSection['RIGHT_MARGIN'],'>DEPTH_LEVEL' => $arParentSection['DEPTH_LEVEL'], 'UF_SHOW_TAGS' => 1);
-        $rsSect = CIBlockSection::GetList(array('left_margin' => 'asc'),$arFilter);
-        if($rsSect->SelectedRowsCount()){
-        ?>
-        <div class="subcategories">
-            <ul class="tag-slider sub-links-2">
-                <? while ($arSect = $rsSect->GetNext()) { ?>
-                <li><a href="<?=$arSect['SECTION_PAGE_URL']?>"><?=$arSect['NAME']?></a></li>
-                <? } ?>
-            </ul>
-            <div class="navi">
-                <span class="open">Показать все</span>
-                <span hidden class="close">Свернуть</span>
-            </div>
+    <? if($arCurSection["TAGS_LIST"]): ?>
+    <div class="subcategories">
+        <ul class="tag-slider sub-links-2">
+            <? foreach ($arCurSection["TAGS_LIST"] as $tags):
+                $arTags = explode('@', $tags, 2);
+                ?>
+                <li><a href="<?=$arTags[1]?>"><?=$arTags[0]?></a></li>
+            <? endforeach; ?>
+        </ul>
+        <div class="navi">
+            <span class="open">Показать все</span>
+            <span hidden class="close">Свернуть</span>
         </div>
-        <?}
-    }
-    ?>
+    </div>
+    <? endif; ?>
+
 
 	<?//PREVIEW//  else need for fast link
 	if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>

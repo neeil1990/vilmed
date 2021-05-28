@@ -331,6 +331,29 @@ Loc::loadMessages(__FILE__);?>
                                             array("HIDE_ICONS" => "Y")
                                         );?>
                                     <?}?>
+                                    <?
+                                        if(preg_match('/(catalog)/', $APPLICATION->GetCurPage(false))){
+                                            $arSectionCode = explode('/', $APPLICATION->GetCurPage(false));
+                                            if($arSectionCode[1] == 'catalog' && $arSectionCode[2]){
+                                                $sectionCode = $arSectionCode[2];
+                                                $db_listTag = CIBlockSection::GetList([], ['IBLOCK_ID' => 24, 'CODE' => $sectionCode, 'UF_TAGS_LIST_BAR' => '%'], true, ['UF_TAGS_LIST_BAR']);
+                                                ?>
+                                                <? if($ar_resultTag = $db_listTag->GetNext()): ?>
+                                                    <div class="tag_menu">
+                                                        <? foreach($ar_resultTag['UF_TAGS_LIST_BAR'] as $inc => $tag):
+                                                            $tag = explode('@', $tag);
+                                                            ?>
+                                                            <a href="<?=$tag[1]?>" class="<?=($inc < 5) ? 'active' : ''?>"><?=$tag[0]?></a>
+                                                            <? if($inc == 4): ?>
+                                                                <a href="javascript:void(0)" class="active" onclick="$(this).closest('.tag_menu').find('a').css('display', 'block'); $(this).hide();" style="text-align: center">Показать все</a>
+                                                            <? endif; ?>
+                                                        <? endforeach; ?>
+                                                    </div>
+                                                <? endif; ?>
+                                                <?
+                                            }
+                                        }
+                                    ?>
 									<?if($APPLICATION->GetCurPage(true)!= SITE_DIR."index.php") {?>
                                         <?if(in_array("SLIDER", $arSetting["BLOCK_LEFT"]["VALUE"])) {?>
                                             <?$APPLICATION->IncludeComponent("bitrix:main.include", "",

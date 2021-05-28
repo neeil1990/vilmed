@@ -14492,3 +14492,25 @@ legend
 	clear: both;
 	margin-bottom: 5px;
 }
+
+.tag_menu{
+	width: 100%;
+	float: left;
+	margin-top: 10px;
+}
+
+.tag_menu a{
+	display: none;
+	border: 1px solid #dee0ee;
+	color: #575b71!important;
+	margin-top: 10px;
+	padding: 7px 15px;
+	text-decoration: none;
+}
+.tag_menu a.active{
+	display: block;
+}
+.tag_menu a:hover{
+	background:#575b71;
+	color:#fff!important;
+}
