@@ -61,7 +61,12 @@ $containerName = "container-".$navParams["NavNum"];
 		<?} else {
 			//load css for bigData/deferred load
 			$APPLICATION->IncludeComponent("bitrix:catalog.item", "",
-				array(),
+				array(
+						"RESULT" => array(
+							"TYPE" => $arParams["TYPE"]
+						),
+						"PARAMS" => ""
+					),
 				$component,
 				array("HIDE_ICONS" => "Y")
 			);

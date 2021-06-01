@@ -15,7 +15,7 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"ЛОР оборудование, инструменты", 
+		"ЛОР", 
 		"/catalog/lor-oborudovanie-instrumenty/", 
 		Array(), 
 		Array(), 

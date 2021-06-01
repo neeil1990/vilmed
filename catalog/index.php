@@ -155,9 +155,9 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		"LINK_IBLOCK_ID" => "",
 		"LINK_IBLOCK_TYPE" => "",
 		"LINK_PROPERTY_SID" => "",
-		"LIST_BROWSER_TITLE" => "-",
-		"LIST_META_DESCRIPTION" => "-",
-		"LIST_META_KEYWORDS" => "-",
+		"LIST_BROWSER_TITLE" => "UF_META_TITLE",
+		"LIST_META_DESCRIPTION" => "UF_META_DESCRIPTION",
+		"LIST_META_KEYWORDS" => "UF_META_KEYWORDS",
 		"LIST_OFFERS_FIELD_CODE" => array(
 			0 => "",
 			1 => "",
@@ -168,7 +168,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 			1 => "PROP2",
 			2 => "PROP3",
 		),
-		"LIST_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false}]",
+		"LIST_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false}]",
 		"LIST_PROPERTY_CODE" => array(
 			0 => "CHASTOTA_H_H",
 			1 => "MAX_KR_MOM",
@@ -198,7 +198,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		"PAGER_SHOW_ALWAYS" => "N",
 		"PAGER_TEMPLATE" => "arrows",
 		"PAGER_TITLE" => "Товары",
-		"PAGE_ELEMENT_COUNT" => "76",
+		"PAGE_ELEMENT_COUNT" => "72",
 		"PARTIAL_PRODUCT_PROPERTIES" => "",
 		"PATH_TO_SHIPPING" => "/delivery/",
 		"PRICE_CODE" => array(
