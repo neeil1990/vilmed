@@ -2,9 +2,10 @@
 $APPLICATION->SetPageProperty("title", "Медицинское оборудование и товары заказать купить оптом и в розницу | Цены в каталоге | Доставка по всей России в любые населенные пункты | Интернет магазин VilMed");
 $APPLICATION->SetPageProperty("description", "Купить медицинское оборудование и медтехнику,скидки, выгодные цены, оптом, в розницу, прямая поставка.☎ +7 (499) 113-02-79");
 $APPLICATION->SetTitle("Каталог медицинского оборудования ");?><?$APPLICATION->IncludeComponent(
-	"bitrix:catalog", 
-	".default", 
+	"bitrix:catalog",
+	".default",
 	array(
+		"BY_LINK" => "N",
 		"1CB_FILE_FIELD_MAX_COUNT" => "5",
 		"1CB_FILE_FIELD_MULTIPLE" => "Y",
 		"1CB_FILE_FIELD_NAME" => "Реквизиты",

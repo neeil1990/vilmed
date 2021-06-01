@@ -218,7 +218,7 @@ if(!empty($arCurSection)) {
 					1 => "UF_HIDDEN",
 				),
 				"SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
-				"ADD_SECTIONS_CHAIN" => (isset($arParams["ADD_SECTIONS_CHAIN"]) ? $arParams["ADD_SECTIONS_CHAIN"] : ""),
+                "ADD_SECTIONS_CHAIN" => (isset($arParams["ADD_SECTIONS_CHAIN"]) ? $arParams["ADD_SECTIONS_CHAIN"] : ""),
 				"DISPLAY_IMG_WIDTH"	 =>	"50",
 				"DISPLAY_IMG_HEIGHT" =>	"50"
 			),
@@ -509,8 +509,78 @@ if($arCurSection["VIEW_COLLECTION"]) {
 
 <? if(!$arCurSection['HIDDEN_NOT_FIND']): ?>
 
-<?$intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
+<?
+$SectionElementsCount = $arParams['PAGE_ELEMENT_COUNT'];
+$current_element_cnt = CIBlockSection::GetSectionElementsCount($arCurSection['ID'], ['CNT_ACTIVE' => 'Y']);
+if($current_element_cnt < $SectionElementsCount){
+
+    $arPathSection = [];
+    $pathIterator = CIBlockSection::GetNavChain(
+        $arParams['IBLOCK_ID'],
+        $arCurSection['ID'],
+        array(
+            'ID', 'CODE', 'XML_ID', 'EXTERNAL_ID', 'IBLOCK_ID',
+            'IBLOCK_SECTION_ID', 'SORT', 'NAME', 'ACTIVE',
+            'DEPTH_LEVEL', 'SECTION_PAGE_URL'
+        )
+    );
+    while ($path = $pathIterator->GetNext())
+        $arPathSection[] = $path;
+
+
+    if($arPathSection){
+
+        foreach(array_reverse($arPathSection) as $section){
+
+            $element_cnt = CIBlockSection::GetSectionElementsCount($section['ID'], ['CNT_ACTIVE' => 'Y']);
+            if($element_cnt > $SectionElementsCount){
+
+                $arFilter = Array(
+                    "IBLOCK_ID" => IntVal($section['IBLOCK_ID']),
+                    "ACTIVE" => "Y",
+                    array(
+                        "LOGIC" => "AND",
+                        array("SECTION_ID" => $section['ID'], "INCLUDE_SUBSECTIONS" => "Y"),
+                        array("!=IBLOCK_SECTION_ID" => $arCurSection['ID']),
+                    ),
+                );
+
+                $arAdditionalIds = [];
+                $res = CIBlockElement::GetList(Array(), $arFilter, false, ['nTopCount' => ($SectionElementsCount - $current_element_cnt)], ['ID']);
+                while($ob = $res->GetNextElement()){
+                    $arFields = $ob->GetFields();
+                    $arAdditionalIds[] = $arFields['ID'];
+                }
+
+                $arParams["BY_LINK"] = "Y";
+
+                $arCurrentIds = [];
+                $res = CIBlockElement::GetList(Array(), ["IBLOCK_ID" => $arParams['IBLOCK_ID'], "SECTION_ID" => $arCurSection['ID'], "ACTIVE" => "Y"], false, false, ["ID"]);
+                while($ob = $res->GetNextElement())
+                {
+                    $arFields = $ob->GetFields();
+                    $arCurrentIds[$arFields['ID']] = $arFields['ID'];
+                }
+
+                if($arCurrentIds)
+                    $arAdditionalIds = array_merge($arCurrentIds, $arAdditionalIds);
+
+                $GLOBALS[$arParams['FILTER_NAME']] = ['ID' => $arAdditionalIds];
+                ?>
+                <script>
+                    $('.count_items span').text(<?=count($arAdditionalIds)?>);
+                </script>
+                <?
+                break;
+            }else
+                continue;
+        }
+    }
+}
+
+$intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
 	array(
+        "BY_LINK" => $arParams["BY_LINK"],
 		"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
 		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
 		"ELEMENT_SORT_FIELD" => $sort,
