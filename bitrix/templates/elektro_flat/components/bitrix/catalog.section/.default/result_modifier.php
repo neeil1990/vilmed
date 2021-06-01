@@ -10,6 +10,14 @@ $arResult["SETTING"] = $arSetting;
 $inPriceRatio = in_array("PRICE_RATIO", $arSetting["GENERAL_SETTINGS"]);
 $inMinPrice = in_array("MIN_PRICE", $arSetting["PRODUCT_TABLE_VIEW"]);
 
+if($arParams['ELEMENT_SORT_ADDITIONAL']){
+    $sort = $arParams['ELEMENT_SORT_ADDITIONAL'];
+    usort($arResult["ITEMS"], function($a, $b) use ($sort) {
+        $sort = array_flip($sort);
+        return $sort[$a['ID']] > $sort[$b['ID']];
+    });
+}
+
 //COLLECTION//
 if($arParams["TYPE"] == "collections") {
 	$collectionIds = $arValue = $arValueAll = array();

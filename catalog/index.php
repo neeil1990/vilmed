@@ -5,6 +5,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 	"bitrix:catalog",
 	".default",
 	array(
+		"ELEMENT_SORT_ADDITIONAL" => false,
 		"BY_LINK" => "N",
 		"1CB_FILE_FIELD_MAX_COUNT" => "5",
 		"1CB_FILE_FIELD_MULTIPLE" => "Y",

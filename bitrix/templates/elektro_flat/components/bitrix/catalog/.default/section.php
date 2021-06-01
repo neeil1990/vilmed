@@ -566,6 +566,9 @@ if($current_element_cnt < $SectionElementsCount){
                     $arAdditionalIds = array_merge($arCurrentIds, $arAdditionalIds);
 
                 $GLOBALS[$arParams['FILTER_NAME']] = ['ID' => $arAdditionalIds];
+
+                $arParams["ELEMENT_SORT_ADDITIONAL"] = $arAdditionalIds;
+
                 ?>
                 <script>
                     $('.count_items span').text(<?=count($arAdditionalIds)?>);
@@ -580,6 +583,7 @@ if($current_element_cnt < $SectionElementsCount){
 
 $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
 	array(
+        "ELEMENT_SORT_ADDITIONAL" => $arParams["ELEMENT_SORT_ADDITIONAL"],
         "BY_LINK" => $arParams["BY_LINK"],
 		"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
 		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
