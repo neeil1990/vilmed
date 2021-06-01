@@ -510,7 +510,7 @@ if($arCurSection["VIEW_COLLECTION"]) {
 <? if(!$arCurSection['HIDDEN_NOT_FIND']): ?>
 
 <?
-$SectionElementsCount = $arParams['PAGE_ELEMENT_COUNT'];
+$SectionElementsCount = $arParams['PAGE_ELEMENT_COUNT_ADDITIONAL'];
 $current_element_cnt = CIBlockSection::GetSectionElementsCount($arCurSection['ID'], ['CNT_ACTIVE' => 'Y']);
 if($current_element_cnt < $SectionElementsCount){
 
