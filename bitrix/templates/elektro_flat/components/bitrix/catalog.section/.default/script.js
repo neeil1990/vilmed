@@ -19,12 +19,12 @@
 				NavPageCount: parseInt(params.navParams.NavPageCount) || 1
 			};
 		}
-		
+
 		this.container = document.querySelector('[data-entity="' + params.container + '"]');
 		this.showMoreButton = null;
 		this.showMoreButtonMessage = null;
 		this.showMoreButtonContainer = null;
-		
+
 		if(params.lazyLoad) {
 			this.showMoreButton = document.querySelector('[data-use="show-more-' + this.navParams.NavNum + '"]');
 			this.showMoreButtonMessage = this.showMoreButton.innerHTML;
@@ -37,7 +37,8 @@
 		}
 
 		if(!!BX.hasClass(this.container, 'catalog-item-table-view')) {
-			var itemsTable = this.container.querySelectorAll('[data-entity="item"]');
+			var container = BX.findParent(BX(this.container), {"tag" : "div"});
+			var itemsTable = container.querySelectorAll('[data-entity="item"]');
 			if(!!itemsTable) {
 				this.adjustItemsHeight(itemsTable);
 				BX.bind(window, 'resize', BX.delegate(function() {this.adjustItemsHeight(false)}, this));
@@ -58,14 +59,14 @@
 
 		enableButton: function() {
 			if(this.showMoreButton) {
-				BX.adjust(this.showMoreButton, {props: {disabled: false}});	
+				BX.adjust(this.showMoreButton, {props: {disabled: false}});
 				this.showMoreButton.innerHTML = this.showMoreButtonMessage;
 			}
 		},
 
 		disableButton: function() {
 			if(this.showMoreButton) {
-				BX.adjust(this.showMoreButton, {props: {disabled: true}});	
+				BX.adjust(this.showMoreButton, {props: {disabled: true}});
 				this.showMoreButton.innerHTML = BX.message('BTN_MESSAGE_LAZY_LOAD_WAITER');
 			}
 		},
@@ -98,8 +99,8 @@
 				if(!items)
 					items = this.container.querySelectorAll('[data-entity="item"]');
 
-				var i, itemHeight, itemMaxHeight = 0;			
-				
+				var i, itemHeight, itemMaxHeight = 0;
+
 				for(i = 0; i < items.length; i++) {
 					items[i].style.height = 'auto';
 					itemHeight = items[i].clientHeight;
@@ -112,7 +113,7 @@
 				}
 			}, this), 1);
 		},
-		
+
 		sendRequest: function(data) {
 			var defaultData = {
 				siteId: this.siteId,
@@ -123,7 +124,7 @@
 			if(this.ajaxId) {
 				defaultData.AJAX_ID = this.ajaxId;
 			}
-		
+
 			BX.ajax({
 				url: this.componentPath + '/ajax.php' + (document.location.href.indexOf('clear_cache=Y') !== -1 ? '?clear_cache=Y' : ''),
 				method: 'POST',
@@ -144,7 +145,7 @@
 				}, this)
 			});
 		},
-		
+
 		processShowMoreAction: function(result) {
 			this.formPosting = false;
 			this.enableButton();
@@ -156,7 +157,7 @@
 				this.checkButton();
 			}
 		},
-		
+
 		processItems: function(itemsHtml) {
 			if(!itemsHtml)
 				return;
@@ -176,7 +177,7 @@
 						container.appendChild(items[k]);
 					}
 				}
-				
+
 				new BX.easing({
 					duration: 2000,
 					start: {opacity: 0},

@@ -31,7 +31,7 @@ $obName = "ob".preg_replace("/[^a-zA-Z0-9_]/", "x", $this->GetEditAreaId($navPar
 $containerName = "container-".$navParams["NavNum"];
 
 //CATALOG//?>
-<div id="catalog">	
+<div id="catalog">
 	<div class="catalog-item-<?=$arParams['TYPE']?>-view" data-entity="<?=$containerName?>">
 		<?if(!empty($arResult["ITEMS"])) {
 			$areaIds = array();
@@ -42,7 +42,7 @@ $containerName = "container-".$navParams["NavNum"];
 				$this->AddDeleteAction($uniqueId, $item["DELETE_LINK"], $elementDelete, $elementDeleteParams);
 			}?>
 			<!-- items-container -->
-			<?foreach($arResult["ITEMS"] as $item) {
+			<?foreach($arResult["ITEMS"] as $id => $item) {
 
 				$APPLICATION->IncludeComponent("bitrix:catalog.item", "",
 					array(
@@ -56,6 +56,16 @@ $containerName = "container-".$navParams["NavNum"];
 					$component,
 					array("HIDE_ICONS" => "Y")
 				);
+
+                if($arParams['DELIMITER_ADDITIONAL_PRODUCT'] == $item['ID']){
+                    ?>
+                    </div>
+                    <div class="clr"></div>
+                    <h2 style="margin-top: 15px">Возможно, Вас заинтересует:</h2>
+                    <div class="catalog-item-<?=$arParams['TYPE']?>-view" data-entity="<?=$containerName?>">
+                    <?
+                }
+
 			}?>
 			<!-- items-container -->
 		<?} else {

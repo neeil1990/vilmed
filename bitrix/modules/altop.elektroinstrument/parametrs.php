@@ -346,5 +346,16 @@ $moduleClass::$arParametrsList = array(
 				"IN_SETTINGS_PANEL" => "N"
             ),
         )
-    )
+    ),
+	"PAGE_ELEMENT_COUNT_ADDITIONAL" => array(
+		"TITLE" => GetMessage("PAGE_ELEMENT_COUNT_ADDITIONAL_OPTIONS"),
+		"OPTIONS" => array(
+			"PAGE_ELEMENT_COUNT_ADDITIONAL" => array(
+				"TITLE" => GetMessage("PAGE_ELEMENT_COUNT_ADDITIONAL_TITLE"),
+				"TYPE" => "number",
+				"DEFAULT" => "10",
+				"IN_SETTINGS_PANEL" => "N"
+			),
+		)
+	)
 );?>
