@@ -529,6 +529,7 @@ if($current_element_cnt < $SectionElementsCount){
         $arPathSection[] = $path;
 
     if($arPathSection){
+
         foreach(array_reverse($arPathSection) as $section){
             $element_cnt = CIBlockSection::GetSectionElementsCount($section['ID'], ['CNT_ACTIVE' => 'Y']);
             if($element_cnt > $SectionElementsCount){
@@ -675,7 +676,48 @@ $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
 		"BUTTON_DELIVERY_HREF" => $arParams["BUTTON_DELIVERY_HREF"],
 		),
 	$component
-);?>
+);
+
+if ($arParams["BY_LINK"] === 'Y')
+{
+    if ($arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'] != '')
+    {
+        $APPLICATION->SetTitle($arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE']);
+    }
+    elseif (isset($arCurSection['NAME']))
+    {
+        $APPLICATION->SetTitle($arCurSection['NAME']);
+    }
+
+    $browserTitle =  \Bitrix\Main\Type\Collection::firstNotEmpty(
+        $arCurSection, $arParams['BROWSER_TITLE'],
+        $arCurSection['IPROPERTY_VALUES'], 'SECTION_META_TITLE'
+    );
+
+    if (is_array($browserTitle))
+    {
+        $APPLICATION->SetPageProperty('title', implode(' ', $browserTitle));
+    }
+    elseif ($browserTitle != '')
+    {
+        $APPLICATION->SetPageProperty('title', $browserTitle);
+    }
+
+    $metaDescription = \Bitrix\Main\Type\Collection::firstNotEmpty(
+        $arCurSection, $arParams['META_DESCRIPTION'],
+        $arCurSection['IPROPERTY_VALUES'], 'SECTION_META_DESCRIPTION'
+    );
+
+    if (is_array($metaDescription))
+    {
+        $APPLICATION->SetPageProperty('description', implode(' ', $metaDescription));
+    }
+    elseif ($metaDescription != '')
+    {
+        $APPLICATION->SetPageProperty('description', $metaDescription);
+    }
+}
+?>
 
 <? endif; ?>
 
