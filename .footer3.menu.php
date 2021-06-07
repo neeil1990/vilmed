@@ -15,7 +15,7 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"Новости", 
+		"Новостная лента", 
 		"/news/", 
 		Array(), 
 		Array(), 

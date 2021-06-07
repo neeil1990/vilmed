@@ -1,4 +1,4 @@
 <?
-$MESS["REVIEWS_TITLE"] = "Обзоры и советы";
-$MESS["ALL_REVIEWS"] = "Все обзоры и советы";
+$MESS["REVIEWS_TITLE"] = "Обзоры";
+$MESS["ALL_REVIEWS"] = "Смотреть все";
 ?>

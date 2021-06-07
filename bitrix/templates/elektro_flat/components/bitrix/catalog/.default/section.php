@@ -24,7 +24,7 @@ if(0 < intval($arResult["VARIABLES"]["SECTION_ID"])) {
 } elseif("" != $arResult["VARIABLES"]["SECTION_CODE"]) {
 	$arFilter["=CODE"] = $arResult["VARIABLES"]["SECTION_CODE"];
 }
-$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST", "UF_TAGS_TITLE");
+$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST", "UF_TAGS_TITLE", "UF_COUNT");
 
 $arproductType = array("newproduct", "saleleader", "discount");
 
@@ -48,6 +48,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["NAME"] = $arSection["NAME"];
 			$arCurSection["TAGS_LIST"] = ($arSection['UF_TAGS_LIST']) ?: false;
 			$arCurSection["TAGS_TITLE"] = ($arSection['UF_TAGS_TITLE']) ?: false;
+			$arCurSection["COUNT_ELEMENT_PAGE"] = ($arSection['UF_COUNT']) ?: false;
 			if($arSection["PICTURE"] > 0)
 				$arCurSection["PICTURE"] = CFile::GetFileArray($arSection["PICTURE"]);
 			$arCurSection["DESCRIPTION"] = $arSection["DESCRIPTION"];
@@ -612,7 +613,7 @@ $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
 		"SHOW_404" => $arParams["SHOW_404"],
 		"FILE_404" => $arParams["FILE_404"],
 		"DISPLAY_COMPARE" => $arParams["USE_COMPARE"],
-		"PAGE_ELEMENT_COUNT" => $arParams["PAGE_ELEMENT_COUNT"],
+		"PAGE_ELEMENT_COUNT" => ($arCurSection["COUNT_ELEMENT_PAGE"]) ?: $arParams["PAGE_ELEMENT_COUNT"],
 		"LINE_ELEMENT_COUNT" => $arParams["LINE_ELEMENT_COUNT"],
 		"PRICE_CODE" => $arParams["PRICE_CODE"],
 		"USE_PRICE_COUNT" => $arParams["USE_PRICE_COUNT"],
