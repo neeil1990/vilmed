@@ -14522,3 +14522,21 @@ legend
 	color: #575b71;
 	line-height: 1.1;
 }
+
+.item-hide-image,
+.catalog-detail-hide-image {
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	text-transform: uppercase;
+	font-size: 1.3em;
+	font-weight: bold;
+	background: rgba(0, 0, 0, 0.3);
+	color: #FFFFFF;
+	z-index: 100;
+}

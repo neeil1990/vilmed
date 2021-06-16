@@ -12,6 +12,12 @@ use \Bitrix\Main\Localization\Loc;?>
 	<?//ITEM_PREVIEW_PICTURE//?>
 	<div class="catalog-item-image-cont">
 		<div class="catalog-item-image">
+            <?
+            $APPLICATION->IncludeFile($this->GetFolder() . '/include/image.php', Array("arResult" => $arElement["PROPERTIES"]["NOT_STOCK"]), Array(
+                "MODE" => "php",
+                "SHOW_BORDER" => false,
+            ));
+            ?>
 			<meta content="<?=(is_array($arElement['PREVIEW_PICTURE']) ? $arElement['PREVIEW_PICTURE']['SRC'] : SITE_TEMPLATE_PATH.'/images/no-photo.jpg');?>" itemprop="image" />
 			<a href="<?=$arElement['DETAIL_PAGE_URL']?>">
 				<?if(is_array($arElement["PREVIEW_PICTURE"])) {?>

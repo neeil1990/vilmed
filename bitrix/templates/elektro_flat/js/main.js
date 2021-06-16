@@ -218,4 +218,9 @@ $(function() {
 		$(this).removeAttr('style');
 	});
 
+	if ($(".item-hide-image").length){
+		let sectionItem = $(".item-hide-image").closest('.catalog-item-info');
+		sectionItem.find('a[itemprop="url"]').attr('href','#');
+	}
+
 });

@@ -295,7 +295,13 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					//DETAIL_PICTURE//
 					} else {?>
 						<div class="detail_picture">
-							<meta content="<?=($isDetailImg ? $arResult['DETAIL_PICTURE']['SRC'] : SITE_TEMPLATE_PATH.'/images/no-photo.jpg');?>" itemprop="image" />
+                            <? if($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'] == 'Y'): ?>
+                                <div class="catalog-detail-hide-image">
+                                    <div><?=$arResult["PROPERTIES"]['NOT_STOCK']['NAME']?></div>
+                                </div>
+                            <? endif; ?>
+
+                            <meta content="<?=($isDetailImg ? $arResult['DETAIL_PICTURE']['SRC'] : SITE_TEMPLATE_PATH.'/images/no-photo.jpg');?>" itemprop="image" />
 							<?if($isDetailImg) {?>
 								<a rel="lightbox" class="catalog-detail-images fancybox" href="<?=$arResult['DETAIL_PICTURE']['SRC']?>">
 									<img src="<?=$arResult['DETAIL_IMG']['SRC']?>" width="<?=$arResult['DETAIL_IMG']['WIDTH']?>" height="<?=$arResult['DETAIL_IMG']['HEIGHT']?>" alt="<?=$strAlt?>" title="<?=$strTitle?>" />

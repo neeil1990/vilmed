@@ -539,7 +539,7 @@ if($current_element_cnt < $SectionElementsCount){
             if($element_cnt > $SectionElementsCount){
 
                 $arCurrentIds = [];
-                $res = CIBlockElement::GetList(Array(), ["IBLOCK_ID" => $arParams['IBLOCK_ID'], "SECTION_ID" => $arCurSection['ID'], "ACTIVE" => "Y", "INCLUDE_SUBSECTIONS" => "Y"], false, false, ["ID"]);
+                $res = CIBlockElement::GetList(Array("PROPERTY_NOT_STOCK" => "asc", $sort => $sort_order), ["IBLOCK_ID" => $arParams['IBLOCK_ID'], "SECTION_ID" => $arCurSection['ID'], "ACTIVE" => "Y", "INCLUDE_SUBSECTIONS" => "Y"], false, false, ["ID"]);
                 while($ob = $res->GetNextElement())
                 {
                     $arFields = $ob->GetFields();
@@ -590,10 +590,10 @@ $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
         "BY_LINK" => $arParams["BY_LINK"],
 		"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
 		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
-		"ELEMENT_SORT_FIELD" => $sort,
-		"ELEMENT_SORT_ORDER" => $sort_order,
-		"ELEMENT_SORT_FIELD2" => "",
-		"ELEMENT_SORT_ORDER2" => "",
+		"ELEMENT_SORT_FIELD" => "PROPERTY_NOT_STOCK",
+		"ELEMENT_SORT_ORDER" => "asc",
+		"ELEMENT_SORT_FIELD2" => $sort,
+		"ELEMENT_SORT_ORDER2" => $sort_order,
 		"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
 		"META_KEYWORDS" => $arParams["LIST_META_KEYWORDS"],
 		"META_DESCRIPTION" => $arParams["LIST_META_DESCRIPTION"],
