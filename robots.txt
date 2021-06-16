@@ -38,6 +38,11 @@ Disallow: /bitrix/rk.php
 Disallow: /bitrix/rk.php*
 Disallow: *rk.php?goto=
 Disallow: *rk.php?
+###############pustye razdely###################
+Disallow: /catalog/discount/
+Disallow: /catalog/newproduct/
+Disallow: /catalog/saleleader/
+#################################################
 Allow: /bitrix/components/
 Allow: /bitrix/cache/
 Allow: /bitrix/js/

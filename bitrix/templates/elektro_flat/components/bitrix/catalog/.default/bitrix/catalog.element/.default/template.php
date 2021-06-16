@@ -2221,8 +2221,6 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 			<div class="tabs__box-content">
 			<? if($arResult["DETAIL_TEXT"]): ?>
 				<?=$arResult["DETAIL_TEXT"];?>
-			<? else: ?>
-				<?=$arResult["PREVIEW_TEXT"]?>
 			<?endif; ?>
 
             <? foreach ($arResult['TEMPLATES_ELEMENT_DESCRIPTION'] as $desc): ?>

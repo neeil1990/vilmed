@@ -24,7 +24,7 @@ if(0 < intval($arResult["VARIABLES"]["SECTION_ID"])) {
 } elseif("" != $arResult["VARIABLES"]["SECTION_CODE"]) {
 	$arFilter["=CODE"] = $arResult["VARIABLES"]["SECTION_CODE"];
 }
-$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST", "UF_TAGS_TITLE", "UF_COUNT");
+$arSelect = array("ID", "CODE", "IBLOCK_ID", "IBLOCK_SECTION_ID", "NAME", "ACTIVE", "GLOBAL_ACTIVE", "PICTURE", "DESCRIPTION", "DEPTH_LEVEL", "SECTION_PAGE_URL", "UF_BANNER", "UF_BANNER_URL", "UF_BACKGROUND_IMAGE", "UF_PREVIEW", "UF_VIEW", "UF_VIEW_COLLECTION", "UF_SECTION_TITLE_H1", "UF_YOUTUBE_BG", "UF_HIDDEN_NOT_FIND", "UF_TAGS_LIST", "UF_TAGS_TITLE", "UF_COUNT", "UF_PAGE_TITLE", "UF_META_TITLE", "UF_META_KEYWORDS", "UF_META_DESCRIPTION");
 
 $arproductType = array("newproduct", "saleleader", "discount");
 
@@ -46,6 +46,10 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["ID"] = $arSection["ID"];
 			$arCurSection["CODE"] = $arSection["CODE"];
 			$arCurSection["NAME"] = $arSection["NAME"];
+			$arCurSection["META_PAGE_TITLE"] = $arSection["UF_PAGE_TITLE"];
+			$arCurSection["META_TITLE"] = $arSection["UF_META_TITLE"];
+			$arCurSection["META_KEYWORDS"] = $arSection["UF_META_KEYWORDS"];
+			$arCurSection["META_DESCRIPTION"] = $arSection["UF_META_DESCRIPTION"];
 			$arCurSection["TAGS_LIST"] = ($arSection['UF_TAGS_LIST']) ?: false;
 			$arCurSection["TAGS_TITLE"] = ($arSection['UF_TAGS_TITLE']) ?: false;
 			$arCurSection["COUNT_ELEMENT_PAGE"] = ($arSection['UF_COUNT']) ?: false;
@@ -678,14 +682,22 @@ $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
 	$component
 );
 
+if ($arParams['SET_TITLE'] && $arCurSection["META_PAGE_TITLE"])
+{
+	if ($arCurSection['META_PAGE_TITLE'] != '')
+		$APPLICATION->SetTitle($arCurSection["META_PAGE_TITLE"]);
+}
+
 if ($arParams["BY_LINK"] === 'Y')
 {
     if ($arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'] != '')
     {
+		$arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'] = ($arCurSection['META_PAGE_TITLE']) ?: $arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'];
         $APPLICATION->SetTitle($arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE']);
     }
     elseif (isset($arCurSection['NAME']))
     {
+		$arCurSection['NAME'] = ($arCurSection['META_PAGE_TITLE']) ?: $arCurSection['NAME'];
         $APPLICATION->SetTitle($arCurSection['NAME']);
     }
 
@@ -693,6 +705,8 @@ if ($arParams["BY_LINK"] === 'Y')
         $arCurSection, $arParams['BROWSER_TITLE'],
         $arCurSection['IPROPERTY_VALUES'], 'SECTION_META_TITLE'
     );
+
+	$browserTitle = ($arCurSection['META_TITLE']) ?: $browserTitle;
 
     if (is_array($browserTitle))
     {
@@ -707,6 +721,8 @@ if ($arParams["BY_LINK"] === 'Y')
         $arCurSection, $arParams['META_DESCRIPTION'],
         $arCurSection['IPROPERTY_VALUES'], 'SECTION_META_DESCRIPTION'
     );
+	
+	$metaDescription = ($arCurSection['META_DESCRIPTION']) ?: $metaDescription;
 
     if (is_array($metaDescription))
     {

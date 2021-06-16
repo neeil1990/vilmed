@@ -36,7 +36,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		"CACHE_FILTER" => "Y",
 		"CACHE_GROUPS" => "Y",
 		"CACHE_TIME" => "36000000",
-		"CACHE_TYPE" => "A",
+		"CACHE_TYPE" => "Y",
 		"COMPARE_ELEMENT_SORT_FIELD" => "",
 		"COMPARE_ELEMENT_SORT_ORDER" => "asc",
 		"COMPARE_FIELD_CODE" => array(

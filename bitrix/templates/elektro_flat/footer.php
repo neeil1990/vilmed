@@ -47,7 +47,7 @@ Loc::loadMessages(__FILE__);?>
 							"USE_PERSONALIZATION" => "Y",
 							"PAGE" => SITE_DIR."personal/mailings/",
 							"SHOW_HIDDEN" => "N",
-							"CACHE_TYPE" => "A",
+							"CACHE_TYPE" => "Y",
 							"CACHE_TIME" => "36000000",
 							"CACHE_NOTES" => ""
 						),
