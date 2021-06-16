@@ -690,6 +690,27 @@ if ($arParams['SET_TITLE'] && $arCurSection["META_PAGE_TITLE"])
 
 if ($arParams["BY_LINK"] === 'Y')
 {
+    $arResult['SECTION_PAGE_URL'] = (end($arPathSection)['SECTION_PAGE_URL']) ?: $arResult['FOLDER'].$arResult['VARIABLES']['SECTION_CODE'].'/';
+    $returnUrl = array(
+        'add_section' => (
+        strlen($arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"])
+            ? $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"]
+            : CIBlock::GetArrayByID($arParams['IBLOCK_ID'], 'SECTION_PAGE_URL')
+        ),
+        'delete_section' => $arResult['SECTION_PAGE_URL'],
+    );
+
+    $buttons = CIBlock::GetPanelButtons(
+        $arParams['IBLOCK_ID'],
+        0,
+        $arCurSection['ID'],
+        [ "RETURN_URL" => $returnUrl ]
+    );
+    if ($APPLICATION->GetShowIncludeAreas())
+    {
+        $component->addIncludeAreaIcons(CIBlock::GetComponentMenu($APPLICATION->GetPublicShowMode(), $buttons));
+    }
+
     if ($arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'] != '')
     {
 		$arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'] = ($arCurSection['META_PAGE_TITLE']) ?: $arCurSection['IPROPERTY_VALUES']['SECTION_PAGE_TITLE'];
@@ -721,7 +742,7 @@ if ($arParams["BY_LINK"] === 'Y')
         $arCurSection, $arParams['META_DESCRIPTION'],
         $arCurSection['IPROPERTY_VALUES'], 'SECTION_META_DESCRIPTION'
     );
-	
+
 	$metaDescription = ($arCurSection['META_DESCRIPTION']) ?: $metaDescription;
 
     if (is_array($metaDescription))
