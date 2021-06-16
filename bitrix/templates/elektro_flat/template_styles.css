@@ -14540,3 +14540,9 @@ legend
 	color: #FFFFFF;
 	z-index: 100;
 }
+@media screen and (max-width: 768px){
+	.item-hide-image,
+	.catalog-detail-hide-image {
+		font-size: 0.5em;
+	}
+}
