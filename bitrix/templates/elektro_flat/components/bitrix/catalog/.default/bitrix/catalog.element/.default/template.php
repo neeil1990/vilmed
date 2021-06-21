@@ -298,7 +298,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
                             <?
                             if($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'] == 'Y'): ?>
                                 <div class="catalog-detail-hide-image">
-                                    <div><?=$arResult["PROPERTIES"]['NOT_STOCK']['NAME']?></div>
+                                    <div data-text_script="<?=$arResult["PROPERTIES"]['NOT_STOCK']['NAME']?>"></div>
                                 </div>
                             <? endif; ?>
 
@@ -554,7 +554,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					<?}
 				}?>
 				<div class="column three<?=($arResult["COLLECTION"]["THIS"]) ? " colletion" : ""?>">
-                    <? if(empty($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'])): ?>
+
 					<div class="price_buy_detail" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 						<?//OFFERS_DETAIL_PRICE//?>
 						<div class="catalog-detail-price" id="<?=$arItemIDs['PRICE'];?>">
@@ -945,210 +945,219 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 						</div>
 						<?//OFFERS_DETAIL_TIME_BUY_TIMER_BUY//?>
 						<div class="catalog-detail-buy" id="<?=$arItemIDs['BUY'];?>">
-							<?if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {
-								//OFFERS_TIME_BUY_TIMER//
-								if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
-									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
-										$new_date = ParseDateTime($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
-										<script type="text/javascript">
-											$(function() {
-												$("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
-													until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
-													format: "DHMS",
-													expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
-												});
-											});
-										</script>
-										<div class="time_buy_cont">
-											<div class="time_buy_clock">
-												<i class="fa fa-clock-o"></i>
-											</div>
-											<div class="time_buy_timer" id="time_buy_timer_<?=$arItemIDs['ID']?>"></div>
-										</div>
-									<?}
-								}
-								//OFFERS_BUY//
-								if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST") {
-									foreach($arResult["OFFERS"] as $key => $arOffer) {?>
-										<div id="buy_more_detail_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" class="buy_more_detail<?=($key == $arResult['OFFERS_SELECTED'] ? '' : ' hidden');?>">
-											<?$offerName = isset($arOffer["NAME"]) && !empty($arOffer["NAME"]) ? $arOffer["NAME"] : $arResult["NAME"];
-											$properties = array();
-											foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
-												if($propOffer["PROPERTY_TYPE"] != "S")
-													$properties[] = $propOffer["NAME"].": ".strip_tags($propOffer["DISPLAY_VALUE"]);
-											}
-											$properties = implode("; ", $properties);
-											$elementName = !empty($properties) ? $offerName." (".$properties.")" : $offerName;
-											if($arOffer["CAN_BUY"]) {
-												if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
-													//OFFERS_ASK_PRICE//?>
-													<form action="javascript:void(0)">
-														<input type="hidden" name="ACTION" value="ask_price" />
-														<input type="hidden" name="NAME" value="<?=$elementName?>" />
-														<button type="button" id="<?=$arItemIDs['POPUP_BTN'].'_'.$arOffer['ID']?>" class="btn_buy apuo_detail"><i class="fa fa-comment-o"></i><span><?=GetMessage("CATALOG_ELEMENT_ASK_PRICE")?></span></button>
-													</form>
-												<?} else {?>
-													<div class="add2basket_block">
-														<form action="<?=SITE_DIR?>ajax/add2basket.php" class="add2basket_form">
-															<div class="qnt_cont">
-																<a href="javascript:void(0)" class="minus"><span>-</span></a>
-																<input type="text" id="quantity_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" name="quantity" class="quantity" value="<?=(!empty($arOffer['MIN_PRICE']['QUANTITY_FROM'])? $arOffer['MIN_PRICE']['QUANTITY_FROM']: $arOffer['MIN_PRICE']['MIN_QUANTITY'])?>" />
-																<a href="javascript:void(0)" class="plus"><span>+</span></a>
-															</div>
-															<input type="hidden" name="ID" class="offer_id" value="<?=$arOffer['ID']?>" />
-															<?$props = array();
-															if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
-																$props[] = array(
-																	"NAME" => $arOffer["PROPERTIES"]["ARTNUMBER"]["NAME"],
-																	"CODE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["CODE"],
-																	"VALUE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-																);
-															}
-															foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
-																if($propOffer["PROPERTY_TYPE"] != "S") {
-																	$props[] = array(
-																		"NAME" => $propOffer["NAME"],
-																		"CODE" => $propOffer["CODE"],
-																		"VALUE" => strip_tags($propOffer["DISPLAY_VALUE"])
-																	);
-																}
-															}
-															$props = !empty($props) ? strtr(base64_encode(serialize($props)), "+/=", "-_,") : "";?>
-															<input type="hidden" name="PROPS" id="props_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" value="<?=$props?>" />
-															<?if(!empty($arResult["SELECT_PROPS"])) {?>
-																<input type="hidden" name="SELECT_PROPS" id="select_props_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" value="" />
-															<?}?>
-															<button  type="button" class="btn_buy detail" name="add2basket"><i class="fa fa-shopping-cart"></i><span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span></button>
-														</form>
-														<?//OFFERS_BUY_ONE_CLICK//
-														if($inBtnBoc) {?>
-															<button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage('CATALOG_ELEMENT_BOC')?></span></button>
-														<?}
-														//OFFERS_CHEAPER
-														if($inBtnCheaper) {?>
-															<form action="javascript:void(0)" class="cheaper_form">
-																<input type="hidden" name="ACTION" value="cheaper" />
-																<input type="hidden" name="NAME" value="<?=$elementName?>" />
-																<input type="hidden" name="PRICE" value="<?=$arOffer['MIN_PRICE']['PRINT_RATIO_PRICE']?>" />
-																<button type="button" id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo cheaper_anch"><i class="fa fa-commenting-o"></i><span><?=GetMessage('CATALOG_ELEMENT_CHEAPER')?></span></button>
-															</form>
-														<?}?>
-													</div>
-												<?}
-											} elseif(!$arOffer["CAN_BUY"]) {
-												//OFFERS_UNDER_ORDER?>
-												<form action="javascript:void(0)" class="apuo_form">
-													<input type="hidden" name="ACTION" value="under_order" />
-													<input type="hidden" name="NAME" value="<?=$elementName?>" />
-													<button type="button" id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail"><i class="fa fa-clock-o"></i><span class="short"><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></button>
-												</form>
-											<?}?>
-										</div>
-									<?}?>
-								<div id="<?=$arItemIDs['BTN_BUY']?>"  class="hidden_btn_offer_prediction"></div>
+                            <? if($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'] == "Y"): ?>
+                                <div class="buy_more_detail">
+                                    <a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail" href="javascript:void(0)" rel="nofollow" data-action="ask_analog">
+                                        <i class="fa fa-comment-o"></i>
+                                        <span><?=GetMessage("CATALOG_ELEMENT_ASK_ANALOG")?></span>
+                                    </a>
+                                </div>
+                            <? else: ?>
+                                <?if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {
+                                    //OFFERS_TIME_BUY_TIMER//
+                                    if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
+                                        if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
+                                            $new_date = ParseDateTime($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
+                                            <script type="text/javascript">
+                                                $(function() {
+                                                    $("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
+                                                        until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
+                                                        format: "DHMS",
+                                                        expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
+                                                    });
+                                                });
+                                            </script>
+                                            <div class="time_buy_cont">
+                                                <div class="time_buy_clock">
+                                                    <i class="fa fa-clock-o"></i>
+                                                </div>
+                                                <div class="time_buy_timer" id="time_buy_timer_<?=$arItemIDs['ID']?>"></div>
+                                            </div>
+                                        <?}
+                                    }
+                                    //OFFERS_BUY//
+                                    if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST") {
+                                        foreach($arResult["OFFERS"] as $key => $arOffer) {?>
+                                            <div id="buy_more_detail_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" class="buy_more_detail<?=($key == $arResult['OFFERS_SELECTED'] ? '' : ' hidden');?>">
+                                                <?$offerName = isset($arOffer["NAME"]) && !empty($arOffer["NAME"]) ? $arOffer["NAME"] : $arResult["NAME"];
+                                                $properties = array();
+                                                foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
+                                                    if($propOffer["PROPERTY_TYPE"] != "S")
+                                                        $properties[] = $propOffer["NAME"].": ".strip_tags($propOffer["DISPLAY_VALUE"]);
+                                                }
+                                                $properties = implode("; ", $properties);
+                                                $elementName = !empty($properties) ? $offerName." (".$properties.")" : $offerName;
+                                                if($arOffer["CAN_BUY"]) {
+                                                    if($arOffer["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
+                                                        //OFFERS_ASK_PRICE//?>
+                                                        <form action="javascript:void(0)">
+                                                            <input type="hidden" name="ACTION" value="ask_price" />
+                                                            <input type="hidden" name="NAME" value="<?=$elementName?>" />
+                                                            <button type="button" id="<?=$arItemIDs['POPUP_BTN'].'_'.$arOffer['ID']?>" class="btn_buy apuo_detail"><i class="fa fa-comment-o"></i><span><?=GetMessage("CATALOG_ELEMENT_ASK_PRICE")?></span></button>
+                                                        </form>
+                                                    <?} else {?>
+                                                        <div class="add2basket_block">
+                                                            <form action="<?=SITE_DIR?>ajax/add2basket.php" class="add2basket_form">
+                                                                <div class="qnt_cont">
+                                                                    <a href="javascript:void(0)" class="minus"><span>-</span></a>
+                                                                    <input type="text" id="quantity_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" name="quantity" class="quantity" value="<?=(!empty($arOffer['MIN_PRICE']['QUANTITY_FROM'])? $arOffer['MIN_PRICE']['QUANTITY_FROM']: $arOffer['MIN_PRICE']['MIN_QUANTITY'])?>" />
+                                                                    <a href="javascript:void(0)" class="plus"><span>+</span></a>
+                                                                </div>
+                                                                <input type="hidden" name="ID" class="offer_id" value="<?=$arOffer['ID']?>" />
+                                                                <?$props = array();
+                                                                if(!empty($arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
+                                                                    $props[] = array(
+                                                                        "NAME" => $arOffer["PROPERTIES"]["ARTNUMBER"]["NAME"],
+                                                                        "CODE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["CODE"],
+                                                                        "VALUE" => $arOffer["PROPERTIES"]["ARTNUMBER"]["VALUE"]
+                                                                    );
+                                                                }
+                                                                foreach($arOffer["DISPLAY_PROPERTIES"] as $propOffer) {
+                                                                    if($propOffer["PROPERTY_TYPE"] != "S") {
+                                                                        $props[] = array(
+                                                                            "NAME" => $propOffer["NAME"],
+                                                                            "CODE" => $propOffer["CODE"],
+                                                                            "VALUE" => strip_tags($propOffer["DISPLAY_VALUE"])
+                                                                        );
+                                                                    }
+                                                                }
+                                                                $props = !empty($props) ? strtr(base64_encode(serialize($props)), "+/=", "-_,") : "";?>
+                                                                <input type="hidden" name="PROPS" id="props_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" value="<?=$props?>" />
+                                                                <?if(!empty($arResult["SELECT_PROPS"])) {?>
+                                                                    <input type="hidden" name="SELECT_PROPS" id="select_props_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" value="" />
+                                                                <?}?>
+                                                                <button  type="button" class="btn_buy detail" name="add2basket"><i class="fa fa-shopping-cart"></i><span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span></button>
+                                                            </form>
+                                                            <?//OFFERS_BUY_ONE_CLICK//
+                                                            if($inBtnBoc) {?>
+                                                                <button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage('CATALOG_ELEMENT_BOC')?></span></button>
+                                                            <?}
+                                                            //OFFERS_CHEAPER
+                                                            if($inBtnCheaper) {?>
+                                                                <form action="javascript:void(0)" class="cheaper_form">
+                                                                    <input type="hidden" name="ACTION" value="cheaper" />
+                                                                    <input type="hidden" name="NAME" value="<?=$elementName?>" />
+                                                                    <input type="hidden" name="PRICE" value="<?=$arOffer['MIN_PRICE']['PRINT_RATIO_PRICE']?>" />
+                                                                    <button type="button" id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo cheaper_anch"><i class="fa fa-commenting-o"></i><span><?=GetMessage('CATALOG_ELEMENT_CHEAPER')?></span></button>
+                                                                </form>
+                                                            <?}?>
+                                                        </div>
+                                                    <?}
+                                                } elseif(!$arOffer["CAN_BUY"]) {
+                                                    //OFFERS_UNDER_ORDER?>
+                                                    <form action="javascript:void(0)" class="apuo_form">
+                                                        <input type="hidden" name="ACTION" value="under_order" />
+                                                        <input type="hidden" name="NAME" value="<?=$elementName?>" />
+                                                        <button type="button" id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail"><i class="fa fa-clock-o"></i><span class="short"><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></button>
+                                                    </form>
+                                                <?}?>
+                                            </div>
+                                        <?}?>
+                                    <div id="<?=$arItemIDs['BTN_BUY']?>"  class="hidden_btn_offer_prediction"></div>
 
-								<?//OFFERS_LIST_BUY//
-								} elseif($arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {?>
-									<div class="buy_more_detail">
-										<script type="text/javascript">
-											$(function() {
-												$("button[name=choose_offer]").click(function() {
-													var destination = $("#catalog-detail-offers-list").offset().top;
-													$("html:not(:animated),body:not(:animated)").animate({scrollTop: destination}, 500);
-													return false;
-												});
-											});
-										</script>
-										<button class="btn_buy detail" name="choose_offer"><?=GetMessage('CATALOG_ELEMENT_CHOOSE_OFFER')?></button>
-									</div>
-								<?}
-							} else {
-								//DETAIL_TIME_BUY_TIMER//
-								if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
-									if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
-										if($arResult["CAN_BUY"]) {
-											$new_date = ParseDateTime($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
-											<script type="text/javascript">
-												$(function() {
-													$("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
-														until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
-														format: "DHMS",
-														expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
-													});
-												});
-											</script>
-											<div class="time_buy_cont">
-												<div class="time_buy_clock">
-													<i class="fa fa-clock-o"></i>
-												</div>
-												<div class="time_buy_timer" id="time_buy_timer_<?=$arItemIDs['ID']?>"></div>
-											</div>
-										<?}
-									}
-								}
-								//DETAIL_BUY//?>
-								<div class="buy_more_detail">
-									<?if($arResult["CAN_BUY"]) {
-										if($arResult["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
-											//DETAIL_ASK_PRICE//?>
-											<a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span><?=GetMessage("CATALOG_ELEMENT_ASK_PRICE")?></span></a>
-										<?} else {?>
-											<form action="<?=SITE_DIR?>ajax/add2basket.php" class="add2basket_form">
-												<?if(!$arResult["COLLECTION"]["THIS"]) {?>
-													<div class="qnt_cont">
-														<a href="javascript:void(0)" class="minus" id="quantity_minus_<?=$arItemIDs['ID']?>"><span>-</span></a>
-														<input type="text" id="quantity_<?=$arItemIDs['ID']?>" name="quantity" class="quantity" value="<?=(!empty($arResult['MIN_PRICE']["QUANTITY_FROM"])? $arResult['MIN_PRICE']["QUANTITY_FROM"] : $arResult['MIN_PRICE']['MIN_QUANTITY'])?>"/>
-														<a href="javascript:void(0)" class="plus" id="quantity_plus_<?=$arItemIDs['ID']?>"><span>+</span></a>
-													</div>
-												<?}?>
-												<input type="hidden" name="ID" class="id" value="<?=$arResult['ID']?>" />
-												<?$props = array();
-												if(!empty($arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
-													$props[] = array(
-														"NAME" => $arResult["PROPERTIES"]["ARTNUMBER"]["NAME"],
-														"CODE" => $arResult["PROPERTIES"]["ARTNUMBER"]["CODE"],
-														"VALUE" => $arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-													);
-													$props = strtr(base64_encode(serialize($props)), "+/=", "-_,");?>
-													<input type="hidden" name="PROPS" id="props_<?=$arItemIDs['ID']?>" value="<?=$props?>" />
-												<?}
-												if(!empty($arResult["SELECT_PROPS"])) {?>
-													<input type="hidden" name="SELECT_PROPS" id="select_props_<?=$arItemIDs['ID']?>" value="" />
-												<?}?>
-												<?if(!$arResult["COLLECTION"]["THIS"]) {?>
-												<a href="javascript:void(0)" id="<?=$arItemIDs['BTN_BUY']?>" class="btn_buy detail btn_href_detail" name="add2basket">
-                                                    <i class="fa fa-shopping-cart"></i>
-                                                    <span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span>
-                                                </a>
-												<?} else {?>
-													<button onclick="toItem(this)" type="button" id="to_item" class="btn_buy toitem" name="toitem"><span><?=GetMessage('CATALOG_ELEMENT_TO_ITEM')?></span></button>
-													<script type="text/javascript">
-														function toItem(button) {
-															BX.delegate(BX(button),"click",scrollItem());
-														}
-														function scrollItem() {
-															var destination = $("#collection-to").offset().top;
-															$("html:not(:animated),body:not(:animated)").animate({scrollTop: destination-70}, 500);
-															return false;
-														}
-													</script>
-												<?}?>
-											</form>
-											<?//DETAIL_BUY_ONE_CLICK//
-											if($inBtnBoc && !$arResult["COLLECTION"]["THIS"]) {?>
-												<button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage('CATALOG_ELEMENT_BOC')?></span></button>
-											<?}
-											//DETAIL_CHEAPER
-											if($inBtnCheaper) {?>
-												<a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo cheaper_anch" href="javascript:void(0)" rel="nofollow" data-action="cheaper"><i class="fa fa-commenting-o"></i><span><?=GetMessage('CATALOG_ELEMENT_CHEAPER')?></span></a>
-											<?}
-										}
-									} elseif(!$arResult["CAN_BUY"]) {
-										//DETAIL_UNDER_ORDER//?>
-										<a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></a>
-									<?}?>
-								</div>
-							<?}?>
+                                    <?//OFFERS_LIST_BUY//
+                                    } elseif($arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {?>
+                                        <div class="buy_more_detail">
+                                            <script type="text/javascript">
+                                                $(function() {
+                                                    $("button[name=choose_offer]").click(function() {
+                                                        var destination = $("#catalog-detail-offers-list").offset().top;
+                                                        $("html:not(:animated),body:not(:animated)").animate({scrollTop: destination}, 500);
+                                                        return false;
+                                                    });
+                                                });
+                                            </script>
+                                            <button class="btn_buy detail" name="choose_offer"><?=GetMessage('CATALOG_ELEMENT_CHOOSE_OFFER')?></button>
+                                        </div>
+                                    <?}
+                                } else {
+                                    //DETAIL_TIME_BUY_TIMER//
+                                    if(array_key_exists("TIME_BUY", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TIME_BUY"]["VALUE"] == false) {
+                                        if(!empty($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"])) {
+                                            if($arResult["CAN_BUY"]) {
+                                                $new_date = ParseDateTime($arResult["CURRENT_DISCOUNT"]["ACTIVE_TO"], FORMAT_DATETIME);?>
+                                                <script type="text/javascript">
+                                                    $(function() {
+                                                        $("#time_buy_timer_<?=$arItemIDs['ID']?>").countdown({
+                                                            until: new Date(<?=$new_date["YYYY"]?>, <?=$new_date["MM"]?> - 1, <?=$new_date["DD"]?>, <?=$new_date["HH"]?>, <?=$new_date["MI"]?>),
+                                                            format: "DHMS",
+                                                            expiryText: "<div class='over'><?=GetMessage('CATALOG_ELEMENT_TIME_BUY_EXPIRY')?></div>"
+                                                        });
+                                                    });
+                                                </script>
+                                                <div class="time_buy_cont">
+                                                    <div class="time_buy_clock">
+                                                        <i class="fa fa-clock-o"></i>
+                                                    </div>
+                                                    <div class="time_buy_timer" id="time_buy_timer_<?=$arItemIDs['ID']?>"></div>
+                                                </div>
+                                            <?}
+                                        }
+                                    }
+                                    //DETAIL_BUY//?>
+                                    <div class="buy_more_detail">
+                                        <?if($arResult["CAN_BUY"]) {
+                                            if($arResult["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
+                                                //DETAIL_ASK_PRICE//?>
+                                                <a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span><?=GetMessage("CATALOG_ELEMENT_ASK_PRICE")?></span></a>
+                                            <?} else {?>
+                                                <form action="<?=SITE_DIR?>ajax/add2basket.php" class="add2basket_form">
+                                                    <?if(!$arResult["COLLECTION"]["THIS"]) {?>
+                                                        <div class="qnt_cont">
+                                                            <a href="javascript:void(0)" class="minus" id="quantity_minus_<?=$arItemIDs['ID']?>"><span>-</span></a>
+                                                            <input type="text" id="quantity_<?=$arItemIDs['ID']?>" name="quantity" class="quantity" value="<?=(!empty($arResult['MIN_PRICE']["QUANTITY_FROM"])? $arResult['MIN_PRICE']["QUANTITY_FROM"] : $arResult['MIN_PRICE']['MIN_QUANTITY'])?>"/>
+                                                            <a href="javascript:void(0)" class="plus" id="quantity_plus_<?=$arItemIDs['ID']?>"><span>+</span></a>
+                                                        </div>
+                                                    <?}?>
+                                                    <input type="hidden" name="ID" class="id" value="<?=$arResult['ID']?>" />
+                                                    <?$props = array();
+                                                    if(!empty($arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
+                                                        $props[] = array(
+                                                            "NAME" => $arResult["PROPERTIES"]["ARTNUMBER"]["NAME"],
+                                                            "CODE" => $arResult["PROPERTIES"]["ARTNUMBER"]["CODE"],
+                                                            "VALUE" => $arResult["PROPERTIES"]["ARTNUMBER"]["VALUE"]
+                                                        );
+                                                        $props = strtr(base64_encode(serialize($props)), "+/=", "-_,");?>
+                                                        <input type="hidden" name="PROPS" id="props_<?=$arItemIDs['ID']?>" value="<?=$props?>" />
+                                                    <?}
+                                                    if(!empty($arResult["SELECT_PROPS"])) {?>
+                                                        <input type="hidden" name="SELECT_PROPS" id="select_props_<?=$arItemIDs['ID']?>" value="" />
+                                                    <?}?>
+                                                    <?if(!$arResult["COLLECTION"]["THIS"]) {?>
+                                                    <a href="javascript:void(0)" id="<?=$arItemIDs['BTN_BUY']?>" class="btn_buy detail btn_href_detail" name="add2basket">
+                                                        <i class="fa fa-shopping-cart"></i>
+                                                        <span><?=($arSetting["NAME_BUTTON_TO_CART"]["VALUE"] ? $arSetting["NAME_BUTTON_TO_CART"]["VALUE"] : GetMessage("CATALOG_ELEMENT_ADD_TO_CART"))?></span>
+                                                    </a>
+                                                    <?} else {?>
+                                                        <button onclick="toItem(this)" type="button" id="to_item" class="btn_buy toitem" name="toitem"><span><?=GetMessage('CATALOG_ELEMENT_TO_ITEM')?></span></button>
+                                                        <script type="text/javascript">
+                                                            function toItem(button) {
+                                                                BX.delegate(BX(button),"click",scrollItem());
+                                                            }
+                                                            function scrollItem() {
+                                                                var destination = $("#collection-to").offset().top;
+                                                                $("html:not(:animated),body:not(:animated)").animate({scrollTop: destination-70}, 500);
+                                                                return false;
+                                                            }
+                                                        </script>
+                                                    <?}?>
+                                                </form>
+                                                <?//DETAIL_BUY_ONE_CLICK//
+                                                if($inBtnBoc && !$arResult["COLLECTION"]["THIS"]) {?>
+                                                    <button id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy boc_anch" data-action="boc"><i class="fa fa-bolt"></i><span><?=GetMessage('CATALOG_ELEMENT_BOC')?></span></button>
+                                                <?}
+                                                //DETAIL_CHEAPER
+                                                if($inBtnCheaper) {?>
+                                                    <a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo cheaper_anch" href="javascript:void(0)" rel="nofollow" data-action="cheaper"><i class="fa fa-commenting-o"></i><span><?=GetMessage('CATALOG_ELEMENT_CHEAPER')?></span></a>
+                                                <?}
+                                            }
+                                        } elseif(!$arResult["CAN_BUY"]) {
+                                            //DETAIL_UNDER_ORDER//?>
+                                            <a id="<?=$arItemIDs['POPUP_BTN']?>" class="btn_buy apuo_detail" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=GetMessage("CATALOG_ELEMENT_UNDER_ORDER")?></span></a>
+                                        <?}?>
+                                    </div>
+                                <?}?>
+                            <? endif; ?>
 						</div>
 						<?//DETAIL_SUBSCRIBE//?>
 						<div id="<?=$arItemIDs['SUBSCRIBE']?>">
@@ -1328,7 +1337,6 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							</div>
 						<?}?>
 					</div>
-                    <? endif; ?>
 
                     <?if($arResult["COLLECTION"]["THIS"]) {
 						//DETAIL_GIFT//

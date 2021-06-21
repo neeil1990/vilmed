@@ -14541,6 +14541,9 @@ legend
 	color: #575b71;
 	z-index: 100;
 }
+.item-hide-image{
+	font-size: 0.8em;
+}
 .item-hide-image div,
 .catalog-detail-hide-image div{
 	flex: 0.8;

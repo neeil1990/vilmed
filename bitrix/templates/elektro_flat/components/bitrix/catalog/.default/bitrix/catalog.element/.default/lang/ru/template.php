@@ -16,6 +16,7 @@ $MESS["CATALOG_ELEMENT_ADD_TO_CART"] = "В корзину";
 $MESS["CATALOG_ELEMENT_CHOOSE_OFFER"] = "Выбрать товар";
 $MESS["CATALOG_ELEMENT_ADDED"] = "Добавлено";
 $MESS["CATALOG_ELEMENT_ASK_PRICE"] = "Запросить цену";
+$MESS["CATALOG_ELEMENT_ASK_ANALOG"] = "Запросить аналог";
 $MESS["CATALOG_ELEMENT_ASK_PRICE_SHORT"] = "Запрос цены";
 $MESS["CATALOG_ELEMENT_UNDER_ORDER"] = "Заказать товар";
 $MESS["CATALOG_ELEMENT_UNDER_ORDER_SHORT"] = "Под заказ";

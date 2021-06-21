@@ -5,36 +5,36 @@ $APPLICATION->ShowAjaxHead();
 $APPLICATION->AddHeadScript("/bitrix/js/main/dd.js");
 
 use Bitrix\Main\Application,
-    Bitrix\Main\Loader; 
+    Bitrix\Main\Loader;
 
 $request = Application::getInstance()->getContext()->getRequest();
 
 if($request->isPost() && check_bitrix_sessid()) {
 	$action = $request->getPost("action");
-	
+
 	$signer = new \Bitrix\Main\Security\Sign\Signer;
-	
+
 	$arParams = $request->getPost("arParams");
 	if(!empty($arParams))
 		$arParams = unserialize(base64_decode($signer->unsign($arParams, "catalog.element")));
-	
+
 	$settingProduct = $request->getPost("SETTING_PRODUCT");
 	if(!empty($settingProduct))
 		$settingProduct = unserialize(base64_decode($signer->unsign($settingProduct, "settings")));
-	
+
 	$iblockId = $request->getPost("IBLOCK_ID");
 	$strMainId = $request->getPost("STR_MAIN_ID");
 	$useCaptcha = $request->getPost("USE_CAPTCHA");
-	
-	$elementId = $request->getPost("ELEMENT_ID");	
+
+	$elementId = $request->getPost("ELEMENT_ID");
 	$elementAreaId = $request->getPost("ELEMENT_AREA_ID");
 	$elementName = $request->getPost("ELEMENT_NAME");
 	$elementPrice = $request->getPost("ELEMENT_PRICE");
 	$elementCount = $request->getPost("ELEMENT_COUNT");
-	
-	switch($action) {		
+
+	switch($action) {
 		case "ask_price":
-			//ASK_PRICE//			
+			//ASK_PRICE//
 			global $arAskPriceFilter;
 			$arAskPriceFilter = array(
 				"ELEMENT_ID" => $elementId,
@@ -42,7 +42,17 @@ if($request->isPost() && check_bitrix_sessid()) {
 				"ELEMENT_NAME" => $elementName
 			);
 			$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/form_ask_price.php"), false, array("HIDE_ICONS" => "Y"));
-			break;		
+			break;
+        case "ask_analog":
+            //ASK_PRICE//
+            global $arAskPriceFilter;
+            $arAskPriceFilter = array(
+                "ELEMENT_ID" => $elementId,
+                "ELEMENT_AREA_ID" => $action."_".$elementAreaId,
+                "ELEMENT_NAME" => $elementName
+            );
+            $APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/form_ask_analog.php"), false, array("HIDE_ICONS" => "Y"));
+            break;
 		case "under_order":
 			//UNDER_ORDER//
 			global $arUnderOrderFilter;
@@ -55,8 +65,8 @@ if($request->isPost() && check_bitrix_sessid()) {
 			break;
 		case "boc":
 			//BUY_ONE_CLICK//
-			$APPLICATION->IncludeComponent("altop:buy.one.click", "", 
-				array(																
+			$APPLICATION->IncludeComponent("altop:buy.one.click", "",
+				array(
 					"ELEMENT_ID" => $elementId,
 					"ELEMENT_AREA_ID" => $elementAreaId,
 					"USE_FILE_FIELD" => $arParams["1CB_USE_FILE_FIELD"],
@@ -65,7 +75,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 					"FILE_FIELD_NAME" => $arParams["1CB_FILE_FIELD_NAME"],
 					"FILE_FIELD_TYPE" => $arParams["1CB_FILE_FIELD_TYPE"],
 					"REQUIRED" => $arParams["1CB_REQUIRED_FIELDS"],
-					"BUY_MODE" => "ONE",		
+					"BUY_MODE" => "ONE",
 					"CACHE_TYPE" => $arParams["CACHE_TYPE"],
 					"CACHE_TIME" => $arParams["CACHE_TIME"]
 				),
@@ -100,7 +110,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 		case "delivery":
 			//GEOLOCATION_DELIVERY//
 			$APPLICATION->IncludeComponent("altop:geolocation.delivery", "",
-				array(			
+				array(
 					"ELEMENT_ID" => $elementId,
 					"ELEMENT_COUNT" => $elementCount,
 					"CACHE_TYPE" => $arParams["CACHE_TYPE"],
@@ -116,8 +126,8 @@ if($request->isPost() && check_bitrix_sessid()) {
 			$APPLICATION->IncludeComponent("bitrix:catalog.set.constructor", "",
 				array(
 					"IBLOCK_TYPE_ID" => $arParams["IBLOCK_TYPE"],
-					"IBLOCK_ID" => $iblockId,						
-					"ELEMENT_ID" => $elementId,		
+					"IBLOCK_ID" => $iblockId,
+					"ELEMENT_ID" => $elementId,
 					"BASKET_URL" => $arParams["BASKET_URL"],
 					"PRICE_CODE" => $arParams["PRICE_CODE"],
 					"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"],
@@ -147,7 +157,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 					"USE_STORE_PHONE" => $arParams["USE_STORE_PHONE"],
 					"SCHEDULE" => $arParams["USE_STORE_SCHEDULE"],
 					"USE_MIN_AMOUNT" => $arParams["USE_MIN_AMOUNT"],
-					"MIN_AMOUNT" => $arParams["MIN_AMOUNT"],									
+					"MIN_AMOUNT" => $arParams["MIN_AMOUNT"],
 					"STORES" => $arParams["STORES"],
 					"SHOW_EMPTY_STORE" => $arParams["SHOW_EMPTY_STORE"],
 					"SHOW_GENERAL_STORE_INFORMATION" => $arParams["SHOW_GENERAL_STORE_INFORMATION"],

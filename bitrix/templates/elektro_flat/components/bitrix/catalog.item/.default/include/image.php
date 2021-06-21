@@ -4,7 +4,7 @@ if(empty($arParams['arResult']['VALUE_XML_ID']))
 ?>
 
 <div class="item-hide-image">
-    <div><?=($_REQUEST['view'] != 'price') ? $arParams['arResult']['NAME'] : "";?></div>
+    <div data-text_script="<?=($_REQUEST['view'] != 'price') ? $arParams['arResult']['NAME'] : "";?>"></div>
 </div>
 
 
