@@ -7,8 +7,7 @@ if(count($arResult["ITEMS"]) < 1)
 
 <div class="reviews-block">
 	<div class="reviews-block__title"><?=GetMessage("REVIEWS_TITLE")?></div>
-	<a class="reviews-block__all-reviews top" href="<?=str_replace('#SITE_DIR#', SITE_DIR, $arResult['LIST_PAGE_URL']);?>"><?=GetMessage("ALL_REVIEWS")?></a>
-	<div class="reviews-block__items"> 
+	<div class="reviews-block__items">
 		<?foreach($arResult["ITEMS"] as $arItem):?>
 			<a class="reviews-block__item" href="<?=$arItem["DETAIL_PAGE_URL"]?>">
 				<span class="reviews-block__item-block">
@@ -20,5 +19,5 @@ if(count($arResult["ITEMS"]) < 1)
 			</a>
 		<?endforeach;?>
 	</div>
-	<a class="reviews-block__all-reviews bottom" href="<?=str_replace('#SITE_DIR#', SITE_DIR, $arResult['LIST_PAGE_URL']);?>"><?=GetMessage("ALL_REVIEWS")?></a>
+	<a class="reviews-block__all-reviews bottom" href="<?=str_replace('#SITE_DIR#', SITE_DIR, $arResult['LIST_PAGE_URL']);?>" data-text_script="<?=GetMessage("ALL_REVIEWS")?>"></a>
 </div>

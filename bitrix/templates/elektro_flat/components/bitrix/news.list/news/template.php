@@ -7,9 +7,8 @@ if(count($arResult["ITEMS"]) < 1)
 
 <div class="news-block">
 	<div class="news-block__title"><?=GetMessage("NEWS_TITLE")?></div>
-	<a class="news-block__all-news top" href="<?=str_replace('#SITE_DIR#', SITE_DIR, $arResult['LIST_PAGE_URL']);?>"><?=GetMessage("ALL_NEWS")?></a>
-	<div class="news-block__items"> 
-		<?foreach($arResult["ITEMS"] as $arItem):?>			
+	<div class="news-block__items">
+		<?foreach($arResult["ITEMS"] as $arItem):?>
 			<a class="news-block__item" href="<?=$arItem["DETAIL_PAGE_URL"]?>">
 				<span class="news-block__item-block">
 					<span class="news-block__item-image"<?=($arItem["PREVIEW_PICTURE"]["SRC"] ? " style=\"background-image:url('".$arItem["PREVIEW_PICTURE"]["SRC"]."');\"" : "");?>></span>
@@ -23,5 +22,5 @@ if(count($arResult["ITEMS"]) < 1)
 			</a>
 		<?endforeach;?>
 	</div>
-	<a class="news-block__all-news bottom" href="<?=str_replace('#SITE_DIR#', SITE_DIR, $arResult['LIST_PAGE_URL']);?>"><?=GetMessage("ALL_NEWS")?></a>
+	<a class="news-block__all-news bottom" href="<?=str_replace('#SITE_DIR#', SITE_DIR, $arResult['LIST_PAGE_URL']);?>" data-text_script="<?=GetMessage("ALL_NEWS")?>"></a>
 </div>

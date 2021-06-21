@@ -198,15 +198,8 @@ $(function() {
 		});
 	});
 
-	if ($("div[data-text_script]").length){
-		$('div[data-text_script]').each(function(i, el){
-			var span = $(el);
-			span.html(span.data('text_script'));
-		});
-	}
-
-	if ($("span[data-text_script]").length){
-		$('span[data-text_script]').each(function(i, el){
+	if ($("[data-text_script]").length){
+		$('[data-text_script]').each(function(i, el){
 			var span = $(el);
 			span.html(span.data('text_script'));
 		});

@@ -13,4 +13,4 @@ if(count($arResult["ITEMS"]) < 1)
 		</p>
 	<?endforeach;?>
 </div>
-<a class="all" href="<?=SITE_DIR?>vendors/"><?=GetMessage("ALL_VENDORS")?></a>
+<a class="all" href="<?=SITE_DIR?>vendors/" data-text_script="<?=GetMessage("ALL_VENDORS")?>"></a>
