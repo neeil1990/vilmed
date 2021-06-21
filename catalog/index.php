@@ -4,9 +4,21 @@ $APPLICATION->SetPageProperty("description", "Купить медицинско�
 $APPLICATION->SetTitle("Каталог медицинского оборудования ");?>
 
 <?
+global $USER;
+if ($USER->IsAdmin()){
+	$file = str_replace('/','_',$APPLICATION->GetCurPage(false));
+	$APPLICATION->IncludeFile(SITE_TEMPLATE_PATH . "/admin/description/". $file .".php", Array(), Array(
+		"MODE"      => "html",
+		"NAME"      => "заметки",
+		"TEMPLATE"  => $file . ".php"
+	));
+}
+?>
+
+<?
 $APPLICATION->IncludeComponent(
-	"bitrix:catalog", 
-	".default", 
+	"bitrix:catalog",
+	".default",
 	array(
 		"ELEMENT_SORT_ADDITIONAL" => false,
 		"BY_LINK" => "N",
