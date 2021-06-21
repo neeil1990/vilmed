@@ -295,7 +295,8 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					//DETAIL_PICTURE//
 					} else {?>
 						<div class="detail_picture">
-                            <? if($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'] == 'Y'): ?>
+                            <?
+                            if($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'] == 'Y'): ?>
                                 <div class="catalog-detail-hide-image">
                                     <div><?=$arResult["PROPERTIES"]['NOT_STOCK']['NAME']?></div>
                                 </div>
@@ -553,6 +554,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 					<?}
 				}?>
 				<div class="column three<?=($arResult["COLLECTION"]["THIS"]) ? " colletion" : ""?>">
+                    <? if(empty($arResult["PROPERTIES"]['NOT_STOCK']['VALUE_XML_ID'])): ?>
 					<div class="price_buy_detail" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 						<?//OFFERS_DETAIL_PRICE//?>
 						<div class="catalog-detail-price" id="<?=$arItemIDs['PRICE'];?>">
@@ -1326,7 +1328,9 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							</div>
 						<?}?>
 					</div>
-					<?if($arResult["COLLECTION"]["THIS"]) {
+                    <? endif; ?>
+
+                    <?if($arResult["COLLECTION"]["THIS"]) {
 						//DETAIL_GIFT//
 						if(!empty($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"])) {?>
 							<div class="catalog-detail-gift">

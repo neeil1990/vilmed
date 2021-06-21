@@ -266,45 +266,51 @@ use \Bitrix\Main\Localization\Loc;?>
 				</form>
 			</div>
 		<?//ITEM_BUY//
-		} else {
-			if($arElement["CAN_BUY"]) {
-				if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
-					//ITEM_ASK_PRICE//?>
-					<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?></span></a>
-				<?} else {?>
-					<div class="add2basket_block">
-						<?if(isset($arElement["SELECT_PROPS"]) && !empty($arElement["SELECT_PROPS"])) {?>
-							<form action="javascript:void(0)" class="add2basket_form">
-						<?} else {?>
-							<form action="<?=SITE_DIR?>ajax/add2basket.php" class="add2basket_form">
-						<?}?>
-							<div class="qnt_cont">
-								<a href="javascript:void(0)" class="minus" id="quantity_minus_<?=$itemIds['ID']?>"><span>-</span></a>
-								<input type="text" id="quantity_<?=$itemIds['ID']?>" name="quantity" class="quantity" value="<?=$arElement['MIN_PRICE']['MIN_QUANTITY']?>"/>
-								<a href="javascript:void(0)" class="plus" id="quantity_plus_<?=$itemIds['ID']?>"><span>+</span></a>
-							</div>
-							<?if(!isset($arElement["SELECT_PROPS"]) || empty($arElement["SELECT_PROPS"])) {?>
-								<input type="hidden" name="ID" value="<?=$arElement['ID']?>"/>
-								<?if(!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
-									$props = array();
-									$props[] = array(
-										"NAME" => $arElement["PROPERTIES"]["ARTNUMBER"]["NAME"],
-										"CODE" => $arElement["PROPERTIES"]["ARTNUMBER"]["CODE"],
-										"VALUE" => $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]
-									);
-									$props = strtr(base64_encode(serialize($props)), "+/=", "-_,");?>
-									<input type="hidden" name="PROPS" value="<?=$props?>" />
-								<?}
-							}?>
-							<a href="javascript:void(0)" id="<?=(isset($arElement['SELECT_PROPS']) && !empty($arElement['SELECT_PROPS']) ? $itemIds['PROPS_BTN'] : $itemIds['BTN_BUY']);?>" class="btn_buy btn_href" name="add2basket"><i class="fa fa-shopping-cart"></i></a>
-						</form>
-					</div>
-				<?}
-			} elseif(!$arElement["CAN_BUY"]) {
-				//ITEM_UNDER_ORDER//?>
-				<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=Loc::getMessage("CT_BCS_ELEMENT_UNDER_ORDER")?></span></a>
-			<?}
-		}?>
+		} else {?>
+            <? if($arElement["PROPERTIES"]["NOT_STOCK"]["VALUE_XML_ID"] == "Y"): ?>
+                <a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_analog">
+                    <span><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_ANALOG_FULL")?></span>
+                </a>
+            <? else: ?>
+                <? if($arElement["CAN_BUY"]) {
+                    if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
+                        //ITEM_ASK_PRICE//?>
+                        <a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?></span></a>
+                    <?} else {?>
+                        <div class="add2basket_block">
+                            <?if(isset($arElement["SELECT_PROPS"]) && !empty($arElement["SELECT_PROPS"])) {?>
+                                <form action="javascript:void(0)" class="add2basket_form">
+                            <?} else {?>
+                                <form action="<?=SITE_DIR?>ajax/add2basket.php" class="add2basket_form">
+                            <?}?>
+                                <div class="qnt_cont">
+                                    <a href="javascript:void(0)" class="minus" id="quantity_minus_<?=$itemIds['ID']?>"><span>-</span></a>
+                                    <input type="text" id="quantity_<?=$itemIds['ID']?>" name="quantity" class="quantity" value="<?=$arElement['MIN_PRICE']['MIN_QUANTITY']?>"/>
+                                    <a href="javascript:void(0)" class="plus" id="quantity_plus_<?=$itemIds['ID']?>"><span>+</span></a>
+                                </div>
+                                <?if(!isset($arElement["SELECT_PROPS"]) || empty($arElement["SELECT_PROPS"])) {?>
+                                    <input type="hidden" name="ID" value="<?=$arElement['ID']?>"/>
+                                    <?if(!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"])) {
+                                        $props = array();
+                                        $props[] = array(
+                                            "NAME" => $arElement["PROPERTIES"]["ARTNUMBER"]["NAME"],
+                                            "CODE" => $arElement["PROPERTIES"]["ARTNUMBER"]["CODE"],
+                                            "VALUE" => $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]
+                                        );
+                                        $props = strtr(base64_encode(serialize($props)), "+/=", "-_,");?>
+                                        <input type="hidden" name="PROPS" value="<?=$props?>" />
+                                    <?}
+                                }?>
+                                <a href="javascript:void(0)" id="<?=(isset($arElement['SELECT_PROPS']) && !empty($arElement['SELECT_PROPS']) ? $itemIds['PROPS_BTN'] : $itemIds['BTN_BUY']);?>" class="btn_buy btn_href" name="add2basket"><i class="fa fa-shopping-cart"></i></a>
+                            </form>
+                        </div>
+                    <?}
+                } elseif(!$arElement["CAN_BUY"]) {
+                    //ITEM_UNDER_ORDER//?>
+                    <a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=Loc::getMessage("CT_BCS_ELEMENT_UNDER_ORDER")?></span></a>
+                <?}?>
+            <? endif; ?>
+		<?}?>
 		<?//ITEM_COMPARE//
 		if($arParams["DISPLAY_COMPARE"]=="Y") {?>
 			<div class="compare">

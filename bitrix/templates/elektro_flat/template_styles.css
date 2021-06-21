@@ -14529,6 +14529,7 @@ legend
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	text-align: center;
 	top: 0px;
 	left: 0px;
 	width: 100%;
@@ -14536,9 +14537,13 @@ legend
 	text-transform: uppercase;
 	font-size: 1.3em;
 	font-weight: bold;
-	background: rgba(0, 0, 0, 0.3);
-	color: #FFFFFF;
+	background: rgb(255 255 255 / 65%);
+	color: #575b71;
 	z-index: 100;
+}
+.item-hide-image div,
+.catalog-detail-hide-image div{
+	flex: 0.8;
 }
 @media screen and (max-width: 768px){
 	.item-hide-image,

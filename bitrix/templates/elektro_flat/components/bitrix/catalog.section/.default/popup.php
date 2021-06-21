@@ -16,7 +16,7 @@ $request = Application::getInstance()->getContext()->getRequest();
 if($request->isPost() && check_bitrix_sessid()) {
 	$action = $request->getPost("action");
 	$arParams = $request->getPost("arParams");
-	
+
 	switch($action) {
 		case "ask_price":
 			//ASK_PRICE//
@@ -27,7 +27,17 @@ if($request->isPost() && check_bitrix_sessid()) {
 				"ELEMENT_NAME" => $arParams["ELEMENT_NAME"]
 			);?>
 			<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/form_ask_price.php"), false, array("HIDE_ICONS" => "Y"));?>
-			<?break;		
+			<?break;
+		case "ask_analog":
+			//ASK_ANALOG//
+			global $arAskPriceFilter;
+			$arAskPriceFilter = array(
+				"ELEMENT_ID" => $arParams["ELEMENT_ID"],
+				"ELEMENT_AREA_ID" => $arParams["ELEMENT_AREA_ID"],
+				"ELEMENT_NAME" => $arParams["ELEMENT_NAME"]
+			);?>
+			<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/form_ask_analog.php"), false, array("HIDE_ICONS" => "Y"));?>
+			<?break;
 		case "under_order":
 			//UNDER_ORDER//
 			global $arUnderOrderFilter;
@@ -39,10 +49,10 @@ if($request->isPost() && check_bitrix_sessid()) {
 			<?$APPLICATION->IncludeComponent("bitrix:main.include", "", array("AREA_FILE_SHOW" => "file", "PATH" => SITE_DIR."include/form_under_order.php"), false, array("HIDE_ICONS" => "Y"));?>
 			<?break;
 		case "props":
-		 
+
 			//PROPS//
-			$signer = new \Bitrix\Main\Security\Sign\Signer;			
-			$arParams = unserialize(base64_decode($signer->unsign($arParams, "catalog.section")));			
+			$signer = new \Bitrix\Main\Security\Sign\Signer;
+			$arParams = unserialize(base64_decode($signer->unsign($arParams, "catalog.section")));
 			$elementId = $request->getPost("ELEMENT_ID");
 			$strMainId = $request->getPost("STR_MAIN_ID");
 
@@ -57,7 +67,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 				    	break;
 				    }
 				}
-				
+
 				if(!$flag) {
 					$arPriceBase = CCatalogGroup::GetBaseGroup();
 			    	$arParams["OFFERS_SORT_FIELD_PP"] = "catalog_PRICE_".$arPriceBase['ID'];
@@ -68,7 +78,7 @@ if($request->isPost() && check_bitrix_sessid()) {
 			} else {
 				$arParams["OFFERS_SORT_FIELD_PP"] = $arParams["OFFERS_SORT_FIELD"];
 			}?>
-			
+
 			<?$APPLICATION->IncludeComponent("bitrix:catalog.element", "props",
 				array(
 					"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
@@ -127,9 +137,9 @@ if($request->isPost() && check_bitrix_sessid()) {
 					"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
 					"USE_ELEMENT_COUNTER" => "Y",
 					"SHOW_DEACTIVATED" => "N",
-					"USE_MAIN_ELEMENT_SECTION" => $arParams["USE_MAIN_ELEMENT_SECTION"],		
+					"USE_MAIN_ELEMENT_SECTION" => $arParams["USE_MAIN_ELEMENT_SECTION"],
 					"ADD_SECTIONS_CHAIN" => "N",
-					"ADD_ELEMENT_CHAIN" => "N",		
+					"ADD_ELEMENT_CHAIN" => "N",
 					"DISPLAY_COMPARE" => $arParams["DISPLAY_COMPARE"],
 					"COMPARE_PATH" => "",
 					"BACKGROUND_IMAGE" => "",
@@ -144,10 +154,10 @@ if($request->isPost() && check_bitrix_sessid()) {
 					"SHOW_EMPTY_STORE" => $arParams["SHOW_EMPTY_STORE"],
 					"SHOW_GENERAL_STORE_INFORMATION" => $arParams["SHOW_GENERAL_STORE_INFORMATION"],
 					"USER_FIELDS" => $arParams["USER_FIELDS"],
-					"FIELDS" => $arParams["FIELDS"],		
+					"FIELDS" => $arParams["FIELDS"],
 					"DISPLAY_IMG_WIDTH" => $arParams["DISPLAY_IMG_WIDTH"],
 					"DISPLAY_IMG_HEIGHT" =>	$arParams["DISPLAY_IMG_HEIGHT"],
-					"PROPERTY_CODE_MOD" => $arParams["PROPERTY_CODE_MOD"],					
+					"PROPERTY_CODE_MOD" => $arParams["PROPERTY_CODE_MOD"],
 					"STR_MAIN_ID" => $strMainId,
                     "SHOW_MAX_QUANTITY" => $arParams["SHOW_MAX_QUANTITY"],
 		            "MESS_SHOW_MAX_QUANTITY" => (isset($arParams["~MESS_SHOW_MAX_QUANTITY"]) ? $arParams["~MESS_SHOW_MAX_QUANTITY"] : ""),
@@ -159,15 +169,15 @@ if($request->isPost() && check_bitrix_sessid()) {
 				array("HIDE_ICONS" => "Y")
 			);?>
 			<?break;
-			
+
 			case "view":
 		    //QUICK_VIEW//
-			$signer = new \Bitrix\Main\Security\Sign\Signer;			
-			$arParams = unserialize(base64_decode($signer->unsign($arParams, "catalog.section")));		
+			$signer = new \Bitrix\Main\Security\Sign\Signer;
+			$arParams = unserialize(base64_decode($signer->unsign($arParams, "catalog.section")));
 			$elementId = $request->getPost("ELEMENT_ID");
 			$strMainId = $request->getPost("STR_MAIN_ID");?>
 
-            
+
 			<?$APPLICATION->IncludeComponent("bitrix:catalog.element", "quick_view",
 				array(
 					"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
@@ -228,9 +238,9 @@ if($request->isPost() && check_bitrix_sessid()) {
 					"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
 					"USE_ELEMENT_COUNTER" => "Y",
 					"SHOW_DEACTIVATED" => "N",
-					"USE_MAIN_ELEMENT_SECTION" => $arParams["USE_MAIN_ELEMENT_SECTION"],		
+					"USE_MAIN_ELEMENT_SECTION" => $arParams["USE_MAIN_ELEMENT_SECTION"],
 					"ADD_SECTIONS_CHAIN" => "N",
-					"ADD_ELEMENT_CHAIN" => "N",		
+					"ADD_ELEMENT_CHAIN" => "N",
 					"DISPLAY_COMPARE" => $arParams["DISPLAY_COMPARE"],
 					"COMPARE_PATH" => $arParams["COMPARE_PATH"],
 					"BACKGROUND_IMAGE" => "",
@@ -245,10 +255,10 @@ if($request->isPost() && check_bitrix_sessid()) {
 					"SHOW_EMPTY_STORE" => $arParams["SHOW_EMPTY_STORE"],
 					"SHOW_GENERAL_STORE_INFORMATION" => $arParams["SHOW_GENERAL_STORE_INFORMATION"],
 					"USER_FIELDS" => $arParams["USER_FIELDS"],
-					"FIELDS" => $arParams["FIELDS"],		
+					"FIELDS" => $arParams["FIELDS"],
 					"DISPLAY_IMG_WIDTH" => $arParams["DISPLAY_IMG_WIDTH"],
 					"DISPLAY_IMG_HEIGHT" =>	$arParams["DISPLAY_IMG_HEIGHT"],
-					"PROPERTY_CODE_MOD" => $arParams["PROPERTY_CODE_MOD"],					
+					"PROPERTY_CODE_MOD" => $arParams["PROPERTY_CODE_MOD"],
 					"STR_MAIN_ID" => $strMainId,
                     "SHOW_MAX_QUANTITY" => $arParams["SHOW_MAX_QUANTITY"],
 		            "MESS_SHOW_MAX_QUANTITY" => (isset($arParams["~MESS_SHOW_MAX_QUANTITY"]) ? $arParams["~MESS_SHOW_MAX_QUANTITY"] : ""),

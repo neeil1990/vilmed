@@ -389,6 +389,11 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 			</div>
 			<?//ITEM_BUY//?>
 			<div class="add2basket_block">
+            <? if($arElement["PROPERTIES"]["NOT_STOCK"]["VALUE_XML_ID"] == "Y"): ?>
+                <a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_analog">
+                    <span><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_ANALOG_FULL")?></span>
+                </a>
+            <? else: ?>
 				<?if($arElement["CAN_BUY"]) {
 					if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
 						//ITEM_ASK_PRICE//?>
@@ -425,8 +430,12 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 					<?}
 				} elseif(!$arElement["CAN_BUY"]) {
 					//ITEM_UNDER_ORDER//?>
-					<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="under_order"><i class="fa fa-clock-o"></i><span><?=Loc::getMessage("CT_BCS_ELEMENT_UNDER_ORDER")?></span></a>
+					<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="under_order">
+                        <i class="fa fa-clock-o"></i>
+                        <span><?=Loc::getMessage("CT_BCS_ELEMENT_UNDER_ORDER")?></span>
+                    </a>
 				<?}?>
+            <? endif; ?>
 			</div>
 		<?}?>
 	</div>
