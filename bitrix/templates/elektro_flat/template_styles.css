@@ -775,7 +775,7 @@ ul.left-menu > li.parentMore > ul.submenuMore{
 }
 
 ul.left-menu > li.parent > ul.submenu{
-	padding:15px 25px 15px 0px;
+	padding: 25px;
 	list-style:none;
 }
 
@@ -786,13 +786,53 @@ ul.left-menu > li.parentMore > ul.submenuMore{
 }
 
 ul.left-menu > li.parent > ul.submenu > li{
-	width:141px;
+	position: relative;
+	width:33%;
 	display:inline-block;
 	vertical-align:top;
 	margin:0px;
-	padding:0px 0px 0px 25px;
 }
 
+ul.left-menu > li.parent > ul.submenu > li > .more{
+	position: absolute;
+	top: 11px;
+	left: -5px;
+	border-radius: 2px;
+	border: 1px solid #999;
+	width: 13px;
+	height: 13px;
+	cursor: pointer;
+}
+ul.left-menu > li.parent > ul.submenu > li > .more:before{
+	top: 4px;
+	left: 6px;
+	width: 1px;
+	height: 5px;
+}
+ul.left-menu > li.parent > ul.submenu > li > .more:after{
+	top: 6px;
+	left: 4px;
+	width: 5px;
+	height: 1px;
+}
+ul.left-menu > li.parent > ul.submenu > li > .more:before,
+ul.left-menu > li.parent > ul.submenu > li > .more:after {
+	content: "";
+	position: absolute;
+	display: block;
+	background-color: #999;
+}
+ul.left-menu > li.parent > ul.submenu > li > .more:hover {
+	border-color: #b21001;
+	background-color: #b21001;
+}
+ul.left-menu > li.parent > ul.submenu > li > .more:hover:before,
+ul.left-menu > li.parent > ul.submenu > li > .more:hover:after {
+	background-color: #fff;
+}
+ul.left-menu > li.parent > ul.submenu > li > .more.open:before{
+	content: none;
+}
 ul.left-menu > li.parentMore > ul.submenuMore > li{
 	margin:0px 0px 2px 0px;
 	padding:0px;
@@ -802,7 +842,8 @@ ul.left-menu > li.parent > ul.submenu > li a,
 ul.left-menu > li.parentMore > ul.submenuMore > li a{
 	display:block;
 	margin:0px;
-	padding:7px 0px;
+	padding:10px 20px;
+	text-decoration: none;
 }
 
 ul.left-menu > li.parentMore > ul.submenuMore > li a{
@@ -816,9 +857,15 @@ ul.left-menu > li.parentMore > ul.submenuMore > li a .arrow{
 }
 
 ul.left-menu > li.parent > ul.submenu > li.parent ul{
+	display: none;
 	margin:0px;
 	padding:0px;
 	list-style:none;
+}
+
+ul.left-menu > li.parent > ul.submenu > li.parent ul.show{
+	display: block;
+	padding-left: 25px;
 }
 
 ul.left-menu > li.parent > ul.submenu > li.parent ul li{

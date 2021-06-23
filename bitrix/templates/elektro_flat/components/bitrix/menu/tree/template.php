@@ -5,16 +5,22 @@ $this->setFrameMode(true);
 if(count($arResult) < 1)
 	return;
 
-global $arSetting;?>
+global $arSetting;
+?>
 
 <ul class="left-menu">
 	<?$previousLevel = 0;
 	foreach($arResult as $arItem):
+        $more = ($arItem["DEPTH_LEVEL"] == 2 && ($arSetting["CATALOG_VIEW"]["VALUE"] == "THREE_LEVELS" || $arSetting["CATALOG_VIEW"]["VALUE"] == "FOUR_LEVELS"));
+
 		if($previousLevel && $arItem["DEPTH_LEVEL"] < $previousLevel):
 			echo str_repeat("</ul></li>", ($previousLevel - $arItem["DEPTH_LEVEL"]));
 		endif;
 		if($arItem["IS_PARENT"]):?>
 			<li class="parent<?if($arItem['SELECTED']):?> selected<?endif?>">
+                <? if($more): ?>
+                    <span class="more" onclick="$(this).toggleClass('open'); $(this).closest('.parent').find('.submenu').toggleClass('show');"></span>
+                <? endif; ?>
 				<a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?></a>
 				<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?><span class="arrow"></span><?endif;?>
 				<ul class="submenu">
