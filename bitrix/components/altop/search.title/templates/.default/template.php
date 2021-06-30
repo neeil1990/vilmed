@@ -16,7 +16,7 @@ if($arParams["SHOW_INPUT"] !== "N"):?>
 	<div id="<?=$CONTAINER_ID?>" class="form-box">
 		<form action="<?=$arResult['FORM_ACTION']?>">
 			<i class="fa fa-search"></i>
-			<input type="text" name="q" id="<?=$INPUT_ID?>" class="" maxlength="50" autocomplete="off" placeholder="<?=GetMessage('ALTOP_CATALOG_SEARCH')?>" value="" />
+			<input type="text" name="q" id="<?=$INPUT_ID?>" class="" maxlength="255" autocomplete="off" placeholder="<?=GetMessage('ALTOP_CATALOG_SEARCH')?>" value="" />
 			<input type="submit" name="submit" class="" value="<?=GetMessage('ALTOP_SEARCH_BUTTON')?>" />
 		</form>
 	</div>
