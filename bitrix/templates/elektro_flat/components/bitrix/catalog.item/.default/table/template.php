@@ -52,14 +52,14 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 	<?//ITEM_TITLE//?>
 	<div class="item-all-title">
 		<a class="item-title" href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>" itemprop="url">
-			<span itemprop="name"><?=$arElement['NAME']?></span>
+			<span itemprop="name"><?=$arElement['IPROPERTY_VALUES']['ELEMENT_PAGE_TITLE']?></span>
 		</a>
 	</div>
 	<?//ARTICLE_RATING//
 	if($inArticle || $inRating) {?>
 		<div class="article_rating">
 			<?//ARTICLE//
-			if($inArticle) {?>				
+			if($inArticle) {?>
 				<?if($inc_a <= $config->get("js_index")['article']):?>
 				<div class="article" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?>"></div>
 				<?else: ?>
@@ -428,7 +428,7 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 							</span>
 						</a>
 						<? endif; ?>
-                       
+
                     <?} else {
                     if(isset($arElement["SELECT_PROPS"]) && !empty($arElement["SELECT_PROPS"])) {?>
                     <form action="javascript:void(0)" class="add2basket_form">

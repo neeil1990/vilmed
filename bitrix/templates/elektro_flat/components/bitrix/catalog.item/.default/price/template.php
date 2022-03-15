@@ -34,7 +34,7 @@ use \Bitrix\Main\Localization\Loc;?>
 	<?//ITEM_TITLE//?>
 	<div class="catalog-item-title<?=$class?>">
 		<a href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>" itemprop="url">
-			<span itemprop="name"><?=$arElement["NAME"]?></span>
+			<span itemprop="name"><?=$arElement['IPROPERTY_VALUES']['ELEMENT_PAGE_TITLE']?></span>
 		</a>
 	</div>
 	<meta content="<?=strip_tags($arElement['PREVIEW_TEXT'])?>" itemprop="description" />
