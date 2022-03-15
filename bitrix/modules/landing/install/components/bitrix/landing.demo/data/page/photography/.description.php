@@ -13,7 +13,7 @@ return array(
 	'fields' => array(
 		'ADDITIONAL_FIELDS' => array(
 			'THEME_CODE' => 'photography',
-			'THEME_CODE_TYPO' => 'photography',
+
 			'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/photography/preview.jpg',
 			'METAOG_TITLE' => Loc::getMessage('LANDING_DEMO_TITLE'),
 			'METAOG_DESCRIPTION' => Loc::getMessage('LANDING_DEMO_DESCRIPTION'),
@@ -27,7 +27,7 @@ return array(
 				'CODE' => '0.menu_15_photography',
 				'SORT' => '-100',
 				'CONTENT' => '
-<header class="landing-block landing-block-menu landing-ui-pattern-transparent u-header u-header--floating u-header--floating-relative">
+<header class="landing-block landing-block-menu u-header u-header--sticky u-header--relative">
 	<!-- Top Bar -->
 	<div class="landing-block-node-top-block u-header__section u-header__section--hidden g-bg-white g-transition-0_3 g-pt-15 g-pb-15">
 		<div class="container">
@@ -180,7 +180,7 @@ return array(
 										Yhdte Jit Iurrw Joksmns Iooldf
 									</div>
 									<div class="landing-block-node-button-container">
-										<a class="landing-block-node-img-button btn btn-md u-btn-outline-white g-font-size-11 g-brd-2 rounded-0 g-px-25" href="#">Learn More</a>
+										<a class="landing-block-node-img-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0" href="#">Learn More</a>
 									</div>
 								</div>
 							</article>
@@ -206,7 +206,7 @@ return array(
 										Ut pulvinar tellus jhsed sed elit
 									</div>
 									<div class="landing-block-node-button-container">
-										<a class="landing-block-node-img-button btn btn-md u-btn-outline-white g-font-size-11 g-brd-2 rounded-0 g-px-25" href="#">Learn More</a>
+										<a class="landing-block-node-img-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0" href="#">Learn More</a>
 									</div>
 								</div>
 							</article>
@@ -349,7 +349,7 @@ return array(
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card col-lg-6 g-pl-100--md g-mb-30 js-animation slideInUp">
 				<article class="landing-block-node-card-container media d-block d-md-flex h-100 g-bg-white">
 					<!-- Article Image -->
@@ -654,7 +654,7 @@ return array(
 	
 	<div class="container">
 		<!-- Team Block -->
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-card-employee js-animation col-md-6 g-mb-30 g-mb-0--lg  col-lg-4 fadeIn animated">
 				<div class="text-center">
 					<!-- Figure -->
@@ -664,8 +664,8 @@ return array(
 						<!-- End Figure Image -->
 
 						<!-- Figure Caption -->
-						<figcaption class="g-pos-abs g-top-0 g-left-0 g-flex-middle w-100 h-100 g-bg-primary-opacity-0_8 opacity-0 g-opacity-1--parent-hover g-pa-20 g-transition-0_2 g-transition--ease-in">
-							<div class="landing-block-node-employee-quote text-uppercase g-flex-middle-item g-line-height-1_4 g-font-weight-700 g-font-size-16 g-color-white">nahar@company24.com</div>
+						<figcaption class="g-pos-abs g-top-0 g-left-0 g-flex-middle w-100 h-100 g-bg-primary-opacity-0_8 opacity-0 g-opacity-1--parent-hover g-pa-20 g-transition-0_2 g-transition--ease-in g-pointer-events-none g-mt-0">
+							<div class="landing-block-node-employee-quote g-pointer-events-all text-uppercase g-flex-middle-item g-line-height-1_4 g-font-weight-700 g-font-size-16 g-color-white">nahar@company24.com</div>
 						
 						<!-- End Figure Caption -->
 					</figcaption></figure>
@@ -689,8 +689,8 @@ return array(
 						<!-- End Figure Image -->
 
 						<!-- Figure Caption -->
-						<figcaption class="g-pos-abs g-top-0 g-left-0 g-flex-middle w-100 h-100 g-bg-primary-opacity-0_8 opacity-0 g-opacity-1--parent-hover g-pa-20 g-transition-0_2 g-transition--ease-in">
-							<div class="landing-block-node-employee-quote text-uppercase g-flex-middle-item g-line-height-1_4 g-font-weight-700 g-font-size-16 g-color-white">ali@company24.com</div>
+						<figcaption class="g-pos-abs g-top-0 g-left-0 g-flex-middle w-100 h-100 g-bg-primary-opacity-0_8 opacity-0 g-opacity-1--parent-hover g-pa-20 g-transition-0_2 g-transition--ease-in g-pointer-events-none g-mt-0">
+							<div class="landing-block-node-employee-quote g-pointer-events-all text-uppercase g-flex-middle-item g-line-height-1_4 g-font-weight-700 g-font-size-16 g-color-white">ali@company24.com</div>
 						
 						<!-- End Figure Caption -->
 					</figcaption></figure>
@@ -714,8 +714,8 @@ return array(
 						<!-- End Figure Image -->
 
 						<!-- Figure Caption -->
-						<figcaption class="g-pos-abs g-top-0 g-left-0 g-flex-middle w-100 h-100 g-bg-primary-opacity-0_8 opacity-0 g-opacity-1--parent-hover g-pa-20 g-transition-0_2 g-transition--ease-in">
-							<div class="landing-block-node-employee-quote text-uppercase g-flex-middle-item g-line-height-1_4 g-font-weight-700 g-font-size-16 g-color-white">nano@company24.com</div>
+						<figcaption class="g-pos-abs g-top-0 g-left-0 g-flex-middle w-100 h-100 g-bg-primary-opacity-0_8 opacity-0 g-opacity-1--parent-hover g-pa-20 g-transition-0_2 g-transition--ease-in g-pointer-events-none g-mt-0">
+							<div class="landing-block-node-employee-quote g-pointer-events-all text-uppercase g-flex-middle-item g-line-height-1_4 g-font-weight-700 g-font-size-16 g-color-white">nano@company24.com</div>
 						
 						<!-- End Figure Caption -->
 					</figcaption></figure>
@@ -751,7 +751,7 @@ return array(
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card col-md-6 col-lg-4 g-mb-30 g-mb-0--md ">
 				<!-- Article -->
 				<article class="landing-block-node-card-container js-animation text-center text-uppercase g-theme-photography-bg-gray-dark-v2 g-color-white-opacity-0_5 fadeInRight animated">
@@ -790,7 +790,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0  g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -834,7 +834,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0  g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -879,7 +879,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0  g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -899,13 +899,13 @@ return array(
 			<div class="col-sm-12 col-md-6 col-lg-6 g-mb-25 g-mb-0--lg">
 				<h2 class="landing-block-node-title text-uppercase g-font-weight-700 g-font-size-16 g-mb-20">Contact
 					us</h2>
-				<div class="landing-block-node-text g-font-size-default g-color-gray-dark-v2 g-mb-20">
+				<div class="landing-block-node-text g-color-gray-dark-v2 g-mb-20">
 					<p>Lorem ipsum dolor sit amet, consectetur
 						adipiscing</p></div>
 
 				<address class="g-mb-20">
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-home"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-dark-v2">
@@ -913,8 +913,8 @@ return array(
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-phone"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-dark-v2">
@@ -923,8 +923,8 @@ return array(
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="link">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-envelope"></i>
 						</div>
 						<div>

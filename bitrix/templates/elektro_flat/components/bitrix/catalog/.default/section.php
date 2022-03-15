@@ -1,6 +1,7 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
 $this->setFrameMode(false);
+$arResult["VARIABLES"]["SECTION_CODE"] = str_replace(' ', '-', $arResult["VARIABLES"]["SECTION_CODE"]);
 
 use Bitrix\Main\Loader,
 	Bitrix\Iblock,

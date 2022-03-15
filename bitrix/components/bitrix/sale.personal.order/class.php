@@ -1,6 +1,7 @@
 <?php
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
+use Bitrix\Main\Loader;
 use \Bitrix\Sale;
 
 class PersonalOrder extends CBitrixComponent
@@ -90,7 +91,8 @@ class PersonalOrder extends CBitrixComponent
 		if ($componentPage == "detail")
 		{
 			$id = urldecode(urldecode($variables["ID"]));
-			$registry = Sale\Registry::getInstance(Sale\Order::getRegistryType());
+			Loader::includeModule('sale');
+			$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 			$orderClassName = $registry->getOrderClassName();
 
 			$order = $orderClassName::loadByAccountNumber($id);
@@ -107,7 +109,7 @@ class PersonalOrder extends CBitrixComponent
 					|| $order->isCanceled()
 				)
 				{
-					$delimeter = (strpos($this->arResult["PATH_TO_LIST"], '?' ) !== false) ? '&' : '?';
+					$delimeter = (mb_strpos($this->arResult["PATH_TO_LIST"], '?') !== false) ? '&' : '?';
 					$this->arResult["PATH_TO_LIST"] .=  $delimeter . "filter_history=Y";
 					if ($order->isCanceled())
 					{

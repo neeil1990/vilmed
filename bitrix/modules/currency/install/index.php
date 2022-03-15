@@ -25,9 +25,7 @@ class currency extends CModule
 	{
 		$arModuleVersion = array();
 
-		$path = str_replace("\\", "/", __FILE__);
-		$path = substr($path, 0, strlen($path) - strlen("/index.php"));
-		include($path."/version.php");
+		include(__DIR__.'/version.php');
 
 		if (!empty($arModuleVersion['VERSION']))
 		{
@@ -77,7 +75,7 @@ class currency extends CModule
 		$this->errors = false;
 
 		if (!$DB->Query("SELECT COUNT(CURRENCY) FROM b_catalog_currency", true)):
-			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/currency/install/db/".strtolower($DB->type)."/install.sql");
+			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/currency/install/db/".mb_strtolower($DB->type)."/install.sql");
 		endif;
 
 		if ($this->errors !== false)
@@ -105,7 +103,7 @@ class currency extends CModule
 			\Bitrix\Currency\CurrencyManager::clearCurrencyCache();
 		if (!isset($arParams["savedata"]) || $arParams["savedata"] != "Y")
 		{
-			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/currency/install/db/".strtolower($DB->type)."/uninstall.sql");
+			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/currency/install/db/".mb_strtolower($DB->type)."/uninstall.sql");
 			if($this->errors !== false)
 			{
 				$APPLICATION->ThrowException(implode('', $this->errors));
@@ -272,7 +270,7 @@ class currency extends CModule
 				'filter' => array('=ACTIVE' => 'Y')
 			));
 			while ($existLanguage = $languageIterator->fetch())
-				$languages[$existLanguage['ID']] = strtoupper($existLanguage['ID']);
+				$languages[$existLanguage['ID']] = mb_strtoupper($existLanguage['ID']);
 			unset($existLanguage, $languageIterator);
 			$whiteList = [
 				'FULL_NAME' => true,
@@ -309,7 +307,7 @@ class currency extends CModule
 			unset($oneCurrency);
 			if (!$bitrix24)
 			{
-				$checkDate = Main\Type\DateTime::createFromTimestamp(strtotime('tomorrow 00:01:00'));;
+				$checkDate = Main\Type\DateTime::createFromTimestamp(strtotime('tomorrow 00:01:00'));
 				CAgent::AddAgent('\Bitrix\Currency\CurrencyManager::currencyBaseRateAgent();', 'currency', 'Y', 86400, '', 'Y', $checkDate->toString(), 100, false, true);
 				unset($checkDate);
 			}

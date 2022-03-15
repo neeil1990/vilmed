@@ -8,13 +8,6 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"Ларингоскопы", 
-		"/catalog/laringoskopy/", 
-		Array(), 
-		Array(), 
-		"" 
-	),
-	Array(
 		"ЛОР", 
 		"/catalog/lor-oborudovanie-instrumenty/", 
 		Array(), 

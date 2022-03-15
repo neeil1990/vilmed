@@ -35,7 +35,6 @@
 			>
 			</div>
 
-
 			<!--			for resource booking-->
 			<div class="g-bg-gray-dark-v5"
 				 data-form-style-bg-as-text="1"
@@ -56,17 +55,31 @@
 				 data-form-style-main-bg-light="1"
 			>
 			</div>
+			<div class="g-bg-white"
+				 data-form-style-light-bg="1"
+			>
+			</div>
+			<p class="landing-semantic-text-medium"
+			   data-form-style-main-font-weight="1"
+			   data-form-style-header-text-font-size="1"
+			   data-form-style-label-font-weight="1"
+			   data-form-style-label-font-size="1"
+			   data-form-style-second-font-color="1"
+			>
+			</p>
 		</div>
 
 		<div class="row">
-			<div class="landing-block-node-img col-md-6 g-min-height-300 g-bg-img-hero g-px-0 g-bg-size-contain--xs g-bg-size-cover--sm"
+			<div class="landing-block-node-img col-md-6 g-min-height-300 g-bg-img-hero g-px-0"
 				 style="background-image: url(https://cdn.bitrix24.site/bitrix/images/landing/business/570x511/img1.png);"></div>
 			<div class="col-md-6">
 				<div class="bitrix24forms g-brd-white-opacity-0_6 u-form-alert-v4"
 					 data-b24form=""
 					 data-b24form-use-style="Y"
 					 data-b24form-show-header="N"
-				></div>
+				>
+					<div class="g-landing-alert">MESS[LANDING_BLOCK_WEBFORM_PRELOADER]</div>
+				</div>
 			</div>
 		</div>
 	</div>

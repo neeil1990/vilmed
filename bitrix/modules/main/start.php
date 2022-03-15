@@ -6,13 +6,15 @@
  * @copyright 2001-2013 Bitrix
  */
 
+use Bitrix\Main\Loader;
+
 error_reporting(E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR|E_PARSE);
 
-require_once(substr(__FILE__, 0, strlen(__FILE__) - strlen("/start.php"))."/bx_root.php");
+require_once(mb_substr(__FILE__, 0, mb_strlen(__FILE__) - mb_strlen("/start.php"))."/bx_root.php");
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lib/loader.php");
 
-\Bitrix\Main\Loader::registerAutoLoadClasses(
+Loader::registerAutoLoadClasses(
 	"main",
 	array(
 		"bitrix\\main\\application" => "lib/application.php",
@@ -125,13 +127,15 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lib/loader.php");
 		"bitrix\\main\\senderconnectoruser" => "lib/senderconnector.php",
 		"bitrix\\main\\urlrewriterrulemaker" => "lib/urlrewriter.php",
 		"bitrix\\main\\update\\stepper" => "lib/update/stepper.php",
-		"CTimeZone" => "classes/general/time.php",
 		"bitrix\\main\\composite\\abstractresponse" => "lib/composite/responder.php",
 		"bitrix\\main\\composite\\fileresponse" => "lib/composite/responder.php",
 		"bitrix\\main\\composite\\memcachedresponse" => "lib/composite/responder.php",
 		"bitrix\\main\\security\\otpexception" => "lib/security/securityexception.php",
+		"CTimeZone" => "classes/general/time.php",
 	)
 );
+
+Loader::registerHandler([\Bitrix\Main\ORM\Loader::class, 'autoLoad']);
 
 // old class names compatibility
 require_once $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/compatibility.php";
@@ -220,7 +224,7 @@ if ($DBDebugToFile)
 $show_sql_stat = "";
 if(array_key_exists("show_sql_stat", $_GET))
 {
-	$show_sql_stat = (strtoupper($_GET["show_sql_stat"]) == "Y"? "Y":"");
+	$show_sql_stat = (mb_strtoupper($_GET["show_sql_stat"]) == "Y"? "Y":"");
 	setcookie("show_sql_stat", $show_sql_stat, false, "/");
 }
 elseif(array_key_exists("show_sql_stat", $_COOKIE))
@@ -247,7 +251,7 @@ if(!($GLOBALS["DB"]->Connect($DBHost, $DBName, $DBLogin, $DBPassword)))
 $LICENSE_KEY = "";
 if(file_exists(($_fname = $_SERVER["DOCUMENT_ROOT"].BX_ROOT."/license_key.php")))
 	include($_fname);
-if($LICENSE_KEY == "" || strtoupper($LICENSE_KEY) == "DEMO")
+if($LICENSE_KEY == "" || mb_strtoupper($LICENSE_KEY) == "DEMO")
 	define("LICENSE_KEY", "DEMO");
 else
 	define("LICENSE_KEY", $LICENSE_KEY);
@@ -259,6 +263,7 @@ require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/".$DBType.
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/".$DBType."/option.php");	//options and settings class
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/cache.php");	//various cache classes
 require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/module.php");
+require_once($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/".$DBType."/sqlwhere.php");
 
 error_reporting(E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR|E_PARSE);
 

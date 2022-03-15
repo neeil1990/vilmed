@@ -21,8 +21,6 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 
 	protected $propertyGroups = null;
 
-	private static $eventClassName = null;
-
 	/**
 	 * @param OrderBase $order
 	 * @return PropertyValueCollectionBase
@@ -479,7 +477,7 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 
 	/**
 	 * @param $orderPropertyId
-	 * @return PropertyValueBase
+	 * @return PropertyValueBase|null
 	 */
 	public function getItemByOrderPropertyId($orderPropertyId)
 	{
@@ -496,40 +494,69 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 	}
 
 	/**
+	 * @param string $propertyCode
+	 * @return PropertyValueBase[]
+	 */
+	public function getItemsByOrderPropertyCode(string $propertyCode)
+	{
+		return $this->getItemsByFilter(
+			function ($propertyValue) use ($propertyCode)
+			{
+				return (
+					$propertyValue->getField('CODE') == $propertyCode
+				);
+			}
+		);
+	}
+
+	/**
+	 * @param string $propertyCode
+	 * @return PropertyValueBase|null
+	 */
+	public function getItemByOrderPropertyCode(string $propertyCode)
+	{
+		$items = $this->getItemsByOrderPropertyCode($propertyCode);
+
+		return empty($items) ? null : current($items);
+	}
+
+	/**
+	 * @param callable $filter
+	 * @return PropertyValueBase[]
+	 */
+	public function getItemsByFilter(callable $filter)
+	{
+		$results = [];
+
+		/** @var PropertyValueBase $propertyValue */
+		foreach ($this->collection as $propertyValue)
+		{
+			if (!$filter($propertyValue))
+			{
+				continue;
+			}
+
+			$results[] = $propertyValue;
+		}
+
+		return $results;
+	}
+
+	/**
 	 * @return Result
 	 * @throws Main\ObjectNotFoundException
 	 */
 	public function verify()
 	{
 		$result = new Result();
-		$registry = Registry::getInstance(static::getRegistryType());
-
-		/** @var EntityMarker $entityMarker */
-		$entityMarker = $registry->getEntityMarkerClassName();
-
-		/** @var OrderBase $order */
-		if (!$order = $this->getOrder())
-		{
-			throw new Main\ObjectNotFoundException('Entity "Order" not found');
-		}
-		$entityMarker::deleteByFilter(
-			array(
-				"ORDER_ID" => $order->getId(),
-				"ENTITY_TYPE" => $entityMarker::ENTITY_TYPE_PROPERTY_VALUE
-			)
-		);
 
 		/** @var PropertyValueBase $propertyValue */
 		foreach ($this->collection as $propertyValue)
 		{
-			$r = $propertyValue->checkValue($propertyValue->getPropertyId(),$propertyValue->getValue());
-
-			if (!$r->isSuccess() && (int)$propertyValue->getId() > 0)
+			$r = $propertyValue->verify();
+			if (!$r->isSuccess())
 			{
-				$result->addWarnings($r->getWarnings());
-
-				$entityMarker::addMarker($order, $propertyValue, $r);
-				$order->setField('MARKED', 'Y');
+				$result->addErrors($r->getErrors());
 			}
 		}
 
@@ -552,24 +579,13 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 		}
 
 		$itemsFromDb = $this->getOriginalItemsValues();
-
-		/** @var PropertyValue $property */
-		foreach ($this->collection as $property)
-		{
-			$r = $property->save();
-			if (!$r->isSuccess())
-			{
-				$result->addErrors($r->getErrors());
-			}
-
-			if (isset($itemsFromDb[$property->getId()]))
-			{
-				unset($itemsFromDb[$property->getId()]);
-			}
-		}
-
 		foreach ($itemsFromDb as $k => $v)
 		{
+			if ($this->getItemById($k))
+			{
+				continue;
+			}
+
 			$this->callEventOnBeforeSalePropertyValueDeleted($v);
 
 			$r = self::delete($v);
@@ -581,6 +597,16 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 			$this->callEventOnSalePropertyValueDeleted($v);
 		}
 
+		/** @var PropertyValue $property */
+		foreach ($this->collection as $property)
+		{
+			$r = $property->save();
+			if (!$r->isSuccess())
+			{
+				$result->addErrors($r->getErrors());
+			}
+		}
+
 		return $result;
 	}
 
@@ -590,14 +616,12 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 	 */
 	protected function callEventOnSalePropertyValueDeleted($values)
 	{
-		$eventClassName = $this->getItemEventName();
-
 		$values['ENTITY_REGISTRY_TYPE'] = static::getRegistryType();
 
 		/** @var Main\Event $event */
 		$event = new Main\Event(
 			'sale',
-			'On'.$eventClassName.'Deleted',
+			'OnSalePropertyValueDeleted',
 			array('VALUES' => $values)
 		);
 
@@ -610,14 +634,12 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 	 */
 	protected function callEventOnBeforeSalePropertyValueDeleted($values)
 	{
-		$eventClassName = $this->getItemEventName();
-
 		$values['ENTITY_REGISTRY_TYPE'] = static::getRegistryType();
 
 		/** @var Main\Event $event */
 		$event = new Main\Event(
 			'sale',
-			'OnBefore'.$eventClassName.'Deleted',
+			'OnBeforeSalePropertyValueDeleted',
 			array('VALUES' => $values)
 		);
 
@@ -651,15 +673,6 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 		}
 
 		return $itemsFromDb;
-	}
-
-	/**
-	 * @throws Main\NotImplementedException
-	 * @return string
-	 */
-	public static function getRegistryType()
-	{
-		throw new Main\NotImplementedException();
 	}
 
 	/**
@@ -746,20 +759,57 @@ abstract class PropertyValueCollectionBase extends Internals\EntityCollection
 	}
 
 	/**
-	 * @return string
+	 * @internal
+	 *
+	 * @throws ArgumentOutOfRangeException
+	 * @throws Main\ArgumentException
+	 * @throws Main\ArgumentTypeException
+	 * @throws Main\NotImplementedException
+	 * @throws Main\ObjectNotFoundException
+	 * @throws Main\ObjectPropertyException
+	 * @throws Main\SystemException
 	 */
-	protected function getItemEventName()
+	public function refreshRelated()
 	{
-		if (self::$eventClassName === null)
-		{
-			$registry = Registry::getInstance(static::getRegistryType());
-			/** @var PropertyValueBase $propertyValueClassName */
-			$propertyValueClassName = $registry->getPropertyValueClassName();
+		$registry = Registry::getInstance(static::getRegistryType());
 
-			self::$eventClassName = $propertyValueClassName::getEntityEventName();
+		/** @var PropertyValueBase $propertyValueClassName */
+		$propertyValueClassName = $registry->getPropertyValueClassName();
+
+		$props = $propertyValueClassName::loadForOrder($this->getOrder());
+
+		/** @var PropertyValueBase $propertyValue */
+		foreach ($this->collection as $propertyValue)
+		{
+			$property = $propertyValue->getPropertyObject();
+			if (!$property->getRelations())
+			{
+				continue;
+			}
+
+			if ($propertyValue->getId() <= 0
+				&& !isset($props[$propertyValue->getPropertyId()])
+			)
+			{
+				$propertyValue->delete();
+			}
 		}
 
-		return self::$eventClassName;
+		/** @var PropertyValueBase $propertyValue */
+		foreach ($props as $propertyValue)
+		{
+			$property = $propertyValue->getPropertyObject();
+			if (!$property->getRelations())
+			{
+				continue;
+			}
+
+			if (!$this->getItemByOrderPropertyId($propertyValue->getPropertyId()))
+			{
+				$propertyValue->setCollection($this);
+				$this->addItem($propertyValue);
+			}
+		}
 	}
 
 	/**

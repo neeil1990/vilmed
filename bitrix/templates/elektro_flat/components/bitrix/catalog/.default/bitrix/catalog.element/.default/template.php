@@ -257,6 +257,12 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							$isOfferDetailImg = is_array($arOffer["DETAIL_IMG"]);
 							$offerName = isset($arOffer["NAME"]) && !empty($arOffer["NAME"]) ? $arOffer["NAME"] : $arResult["NAME"];?>
 							<div id="detail_picture_<?=$arItemIDs['ID'].'_'.$arOffer['ID']?>" class="detail_picture<?=($key == $arResult['OFFERS_SELECTED'] ? '' : ' hidden');?>">
+								<?
+								$APPLICATION->IncludeFile($this->GetFolder() . '/include/image.php', Array("arResult" => $arResult["PROPERTIES"]["NOT_STOCK"]), Array(
+									"MODE" => "php",
+									"SHOW_BORDER" => false,
+								));
+								?>								
 								<meta content="<?=($isOfferDetailImg ? $arOffer['DETAIL_PICTURE']['SRC'] : $isDetailImg ? $arResult['DETAIL_PICTURE']['SRC'] : SITE_TEMPLATE_PATH.'/images/no-photo.jpg');?>" itemprop="image" />
 								<?if($isOfferDetailImg || $isDetailImg) {?>
 									<a <?=($key == $arResult['OFFERS_SELECTED'] ? 'rel="lightbox" ' : '');?>class="catalog-detail-images fancybox" id="catalog-detail-images-<?=$arItemIDs['ID'].'-'.$arOffer['ID']?>" href="<?=($isOfferDetailImg ? $arOffer['DETAIL_PICTURE']['SRC'] : $arResult['DETAIL_PICTURE']['SRC']);?>">

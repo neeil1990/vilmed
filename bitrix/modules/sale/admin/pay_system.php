@@ -20,7 +20,7 @@ $instance = \Bitrix\Main\Application::getInstance();
 $context = $instance->getContext();
 $request = $context->getRequest();
 
-$oSort = new CAdminSorting($sTableID, "ID", "asc");
+$oSort = new CAdminUiSorting($sTableID, "ID", "asc");
 $lAdmin = new CAdminUiList($sTableID, $oSort);
 
 $listPersonType = array();
@@ -98,7 +98,7 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 				if ($dbRes->fetch())
 				{
 					$lAdmin->AddGroupError(Loc::getMessage("SALE_DELETE_ERROR"), $id);
-					continue;
+					continue 2;
 				}
 
 				$result = \Bitrix\Sale\PaySystem\Manager::delete($id);
@@ -144,7 +144,7 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 $filter['ENTITY_REGISTRY_TYPE'] = \Bitrix\Sale\Registry::REGISTRY_TYPE_ORDER;
 
 $params = array(
-	'select' => array('ID', 'NAME', 'SORT', 'DESCRIPTION', 'ACTIVE', 'ACTION_FILE', 'LOGOTIP'),
+	'select' => array('ID', 'NAME', 'SORT', 'DESCRIPTION', 'ACTIVE', 'ACTION_FILE', 'LOGOTIP', 'PS_MODE'),
 	'filter' => $filter
 );
 
@@ -267,7 +267,7 @@ while ($arCCard = $dbRes->NavNext(false))
 
 	$row->AddField("LID", $pSite);
 
-	$description = \Bitrix\Sale\PaySystem\Manager::getHandlerDescription($arCCard["ACTION_FILE"]);
+	$description = \Bitrix\Sale\PaySystem\Manager::getHandlerDescription($arCCard["ACTION_FILE"], $arCCard["PS_MODE"]);
 	$row->AddField("ACTION_FILE", $description['NAME']);
 
 	$arActions = array(
@@ -335,8 +335,15 @@ $lAdmin->CheckListMode();
 $APPLICATION->SetTitle(GetMessage("SALE_SECTION_TITLE"));
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
 
-$lAdmin->DisplayFilter($filterFields);
-$lAdmin->DisplayList();
+if (!$publicMode && \Bitrix\Sale\Update\CrmEntityCreatorStepper::isNeedStub())
+{
+	$APPLICATION->IncludeComponent("bitrix:sale.admin.page.stub", ".default");
+}
+else
+{
+	$lAdmin->DisplayFilter($filterFields);
+	$lAdmin->DisplayList();
+}
 
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 

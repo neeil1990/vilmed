@@ -101,7 +101,7 @@ abstract class Tree extends Entity\DataManager
 
 		foreach (static::getEntity()->getFields() as $field)
 		{
-			if($field->getName() == 'PARENT_ID' && strlen($data['PARENT_ID']))
+			if($field->getName() == 'PARENT_ID' && mb_strlen($data['PARENT_ID']))
 			{
 				//it cant be parent for itself
 				if(intval($primary['ID']) == intval($data['PARENT_ID']))
@@ -155,7 +155,7 @@ abstract class Tree extends Entity\DataManager
 		$rebalance = !isset($additional['REBALANCE']) || $additional['REBALANCE'] !== false;
 		$node = self::getNodeInfo($primary);
 
-		if(isset($data['PARENT_ID']) && !strlen($data['PARENT_ID']))
+		if(isset($data['PARENT_ID']) && !mb_strlen($data['PARENT_ID']))
 			$data['PARENT_ID'] = 0;
 
 		$updResult = parent::update($primary, $data);
@@ -248,6 +248,19 @@ abstract class Tree extends Entity\DataManager
 		));
 
 		return $query->getQuery();
+	}
+
+	public static function checkIntegrity()
+	{
+		return !self::getList([
+			'select' => ['ID'],
+			'filter' => [
+				'LOGIC' => 'OR',
+				['LEFT_MARGIN' => false],
+				['RIGHT_MARGIN' => false]
+			],
+			'limit' => 1
+		])->fetch();
 	}
 
 	public static function checkNodeIsParentOfNodeById($primary, $childPrimary, $behaviour = array('CHECK_DIRECT' => false))

@@ -84,7 +84,7 @@ abstract class BasketBuilder
 	{
 		$result = true;
 
-		if((int)$productData['QUANTITY'] <= 0)
+		if((float)$productData['QUANTITY'] <= 0)
 		{
 			$this->getErrorsContainer()->addError(
 				new Error(
@@ -122,7 +122,7 @@ abstract class BasketBuilder
 
 			if(self::isBasketItemNew($basketCode))
 			{
-				$basketInternalId = intval(substr($basketCode, 1));
+				$basketInternalId = intval(mb_substr($basketCode, 1));
 
 				if($basketInternalId > $this->maxBasketCodeIdx)
 					$this->maxBasketCodeIdx = $basketInternalId;
@@ -287,7 +287,7 @@ abstract class BasketBuilder
 			$productData = $this->formData['PRODUCT'][$basketCode];
 			$isProductDataNeedUpdate = in_array($basketCode, $this->needDataUpdate);
 
-			if(isset($productData["PRODUCT_PROVIDER_CLASS"]) && strlen($productData["PRODUCT_PROVIDER_CLASS"]) > 0)
+			if(isset($productData["PRODUCT_PROVIDER_CLASS"]) && $productData["PRODUCT_PROVIDER_CLASS"] <> '')
 			{
 				$item->setField("PRODUCT_PROVIDER_CLASS", trim($productData["PRODUCT_PROVIDER_CLASS"]));
 			}
@@ -430,7 +430,7 @@ abstract class BasketBuilder
 
 		if($this->getOrder()->getId() <= 0 && (empty($productProviderData[$basketCode]) || !$this->cacheProductProviderData || $isProductDataNeedUpdate))
 		{
-			if(empty($productProviderData[$basketCode]) && strlen($productFormData["PRODUCT_PROVIDER_CLASS"]) > 0)
+			if(empty($productProviderData[$basketCode]) && $productFormData["PRODUCT_PROVIDER_CLASS"] <> '')
 			{
 				$result = false;
 			}
@@ -527,6 +527,15 @@ abstract class BasketBuilder
 				$needUpdateItemPrice = $this->isNeedUpdateNewProductPrice() && $this->isBasketItemNew($basketCode);
 				$isPriceCustom = isset($productFormData['CUSTOM_PRICE']) && $productFormData['CUSTOM_PRICE'] == 'Y';
 
+				if ($isPriceCustom)
+				{
+					$productFormData['DISCOUNT_PRICE'] = 0;
+					if ($productFormData['BASE_PRICE'] > $productFormData['PRICE'])
+					{
+						$productFormData['DISCOUNT_PRICE'] = $productFormData['BASE_PRICE'] - $productFormData['PRICE'];
+					}
+				}
+
 				if(($order->getId() <= 0 && !$isPriceCustom) || $needUpdateItemPrice)
 					unset($productFormData['PRICE'], $productFormData['PRICE_BASE'], $productFormData['BASE_PRICE']);
 
@@ -539,15 +548,15 @@ abstract class BasketBuilder
 			//discard BasketItem redundant fields
 			$product = array_intersect_key($product, array_flip($item::getAvailableFields()));
 
-			if(isset($product["MEASURE_CODE"]) && strlen($product["MEASURE_CODE"]) > 0)
+			if(isset($product["MEASURE_CODE"]) && $product["MEASURE_CODE"] <> '')
 			{
 				$measures = OrderBasket::getCatalogMeasures();
 
-				if(isset($measures[$product["MEASURE_CODE"]]) && strlen($measures[$product["MEASURE_CODE"]]) > 0)
+				if(isset($measures[$product["MEASURE_CODE"]]) && $measures[$product["MEASURE_CODE"]] <> '')
 					$product["MEASURE_NAME"] = $measures[$product["MEASURE_CODE"]];
 			}
 
-			if(!isset($product["CURRENCY"]) || strlen($product["CURRENCY"]) <= 0)
+			if(!isset($product["CURRENCY"]) || $product["CURRENCY"] == '')
 				$product["CURRENCY"] = $order->getCurrency();
 
 			if($productFormData["IS_SET_PARENT"] == "Y")
@@ -559,6 +568,25 @@ abstract class BasketBuilder
 				$order->getSiteId(),
 				array_merge($product, $productFormData)
 			);
+
+			if ($product["CURRENCY"] !== $order->getCurrency())
+			{
+				$product["PRICE"] = \CCurrencyRates::ConvertCurrency($product["PRICE"], $product["CURRENCY"], $order->getCurrency());
+				if ($product["BASE_PRICE"] > 0)
+				{
+					$product["BASE_PRICE"] = \CCurrencyRates::ConvertCurrency($product["BASE_PRICE"], $product["CURRENCY"], $order->getCurrency());
+				}
+				if ($product["DISCOUNT_PRICE"] > 0)
+				{
+					$product["DISCOUNT_PRICE"] = \CCurrencyRates::ConvertCurrency($product["DISCOUNT_PRICE"], $product["CURRENCY"], $order->getCurrency());
+				}
+				if ($product["VAT_RATE"] > 0)
+				{
+					$product["VAT_RATE"] = \CCurrencyRates::ConvertCurrency($product["VAT_RATE"], $product["CURRENCY"], $order->getCurrency());
+				}
+
+				$product["CURRENCY"] = $order->getCurrency();
+			}
 
 			self::setBasketItemFields($item, $product);
 		}
@@ -593,7 +621,7 @@ abstract class BasketBuilder
 
 	public static function isBasketItemNew($basketCode)
 	{
-		return (strpos($basketCode, 'n') === 0) && ($basketCode != self::BASKET_CODE_NEW);
+		return (mb_strpos($basketCode, 'n') === 0) && ($basketCode != self::BASKET_CODE_NEW);
 	}
 
 	protected function getItemFromBasket($basketCode, $productData)

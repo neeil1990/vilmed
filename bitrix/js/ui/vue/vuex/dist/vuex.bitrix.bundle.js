@@ -1,4 +1,4 @@
-(function (exports,ui_vue,ui_dexie,main_md5,ui_vuex) {
+(function (exports,ui_vue,ui_dexie,main_md5,ui_vue_vuex) {
   'use strict';
 
   /**
@@ -1038,6 +1038,19 @@
           });
         });
       }
+    }, {
+      key: "clear",
+      value: function clear() {
+        var _this3 = this;
+
+        return new Promise(function (resolve, reject) {
+          _this3.db.data.delete(_this3.code).then(function (data) {
+            resolve(true);
+          }, function (error) {
+            reject(error);
+          });
+        });
+      }
     }]);
     return VuexBuilderDatabaseIndexedDB;
   }();
@@ -1115,6 +1128,154 @@
         });
       }
     }, {
+      key: "clear",
+      value: function clear() {
+        var _this3 = this;
+
+        return new Promise(function (resolve, reject) {
+          if (_this3.enabled) {
+            window.localStorage.removeItem(_this3.code);
+          }
+
+          resolve(true);
+        });
+      }
+      /**
+       * @private
+       */
+
+    }, {
+      key: "prepareValueAfterGet",
+      value: function prepareValueAfterGet(value) {
+        var _this4 = this;
+
+        if (value instanceof Array) {
+          value = value.map(function (element) {
+            return _this4.prepareValueAfterGet(element);
+          });
+        } else if (value instanceof Date) ; else if (value && babelHelpers.typeof(value) === 'object') {
+          for (var index in value) {
+            if (value.hasOwnProperty(index)) {
+              value[index] = this.prepareValueAfterGet(value[index]);
+            }
+          }
+        } else if (typeof value === 'string') {
+          if (value.startsWith('#DT#')) {
+            value = new Date(value.substring(4));
+          }
+        }
+
+        return value;
+      }
+      /**
+       * @private
+       */
+
+    }, {
+      key: "prepareValueBeforeSet",
+      value: function prepareValueBeforeSet(value) {
+        var _this5 = this;
+
+        if (value instanceof Array) {
+          value = value.map(function (element) {
+            return _this5.prepareValueBeforeSet(element);
+          });
+        } else if (value instanceof Date) {
+          value = '#DT#' + value.toISOString();
+        } else if (value && babelHelpers.typeof(value) === 'object') {
+          for (var index in value) {
+            if (value.hasOwnProperty(index)) {
+              value[index] = this.prepareValueBeforeSet(value[index]);
+            }
+          }
+        }
+
+        return value;
+      }
+    }]);
+    return VuexBuilderDatabaseLocalStorage;
+  }();
+
+  /**
+   * Bitrix Vuex wrapper
+   * BitrixMobile ApplicationStorage driver for Vuex Builder
+   *
+   * @package bitrix
+   * @subpackage ui
+   * @copyright 2001-2019 Bitrix
+   */
+  var VuexBuilderDatabaseJnSharedStorage =
+  /*#__PURE__*/
+  function () {
+    function VuexBuilderDatabaseJnSharedStorage() {
+      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      babelHelpers.classCallCheck(this, VuexBuilderDatabaseJnSharedStorage);
+      this.siteId = config.siteId || 'default';
+      this.userId = config.userId || 0;
+      this.storage = config.storage || 'default';
+      this.name = config.name || '';
+      this.code = (window.md5 || main_md5.md5)(this.siteId + '/' + this.userId + '/' + this.storage + '/' + this.name);
+
+      if (!this.isJnContext() && typeof ApplicationStorage === 'undefined') {
+        console.error('ApplicationStorage is not defined, load "webcomponent/storage" extension.');
+      }
+    }
+
+    babelHelpers.createClass(VuexBuilderDatabaseJnSharedStorage, [{
+      key: "get",
+      value: function get() {
+        var _this = this;
+
+        return new Promise(function (resolve, reject) {
+          if (_this.isJnContext()) {
+            var result = Application.sharedStorage.get(_this.code);
+            resolve(result ? result : null);
+          } else if (typeof ApplicationStorage !== 'undefined') {
+            ApplicationStorage.get(_this.code, null).then(function (data) {
+              return resolve(_this.prepareValueAfterGet(JSON.parse(data)));
+            });
+          } else {
+            resolve(null);
+          }
+        });
+      }
+    }, {
+      key: "set",
+      value: function set(value) {
+        var _this2 = this;
+
+        return new Promise(function (resolve, reject) {
+          if (_this2.isJnContext()) {
+            Application.sharedStorage().set(_this2.code, JSON.stringify(_this2.prepareValueBeforeSet(value)));
+            resolve();
+          } else if (typeof ApplicationStorage !== 'undefined') {
+            ApplicationStorage.set(_this2.code, JSON.stringify(_this2.prepareValueBeforeSet(value))).then(function (data) {
+              return resolve();
+            });
+          } else {
+            resolve();
+          }
+        });
+      }
+    }, {
+      key: "clear",
+      value: function clear() {
+        return this.set(null);
+      }
+      /**
+       * @private
+       */
+
+    }, {
+      key: "isJnContext",
+      value: function isJnContext() {
+        return typeof env !== 'undefined';
+      }
+      /**
+       * @private
+       */
+
+    }, {
       key: "prepareValueAfterGet",
       value: function prepareValueAfterGet(value) {
         var _this3 = this;
@@ -1125,7 +1286,9 @@
           });
         } else if (value instanceof Date) ; else if (value && babelHelpers.typeof(value) === 'object') {
           for (var index in value) {
-            value[index] = this.prepareValueAfterGet(value[index]);
+            if (value.hasOwnProperty(index)) {
+              value[index] = this.prepareValueAfterGet(value[index]);
+            }
           }
         } else if (typeof value === 'string') {
           if (value.startsWith('#DT#')) {
@@ -1135,6 +1298,10 @@
 
         return value;
       }
+      /**
+       * @private
+       */
+
     }, {
       key: "prepareValueBeforeSet",
       value: function prepareValueBeforeSet(value) {
@@ -1157,7 +1324,7 @@
         return value;
       }
     }]);
-    return VuexBuilderDatabaseLocalStorage;
+    return VuexBuilderDatabaseJnSharedStorage;
   }();
 
   /**
@@ -1291,7 +1458,7 @@
         var variables = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
         if (!(babelHelpers.typeof(variables) === 'object' && variables)) {
-          console.error('VuexBuilderModel.setVars: passed variables is not a Object', store);
+          this.logger('error', 'VuexBuilderModel.setVars: passed variables is not a Object', store);
           return this;
         }
 
@@ -1309,7 +1476,7 @@
 
         var nameParts = name.toString().split('.');
 
-        if (nameParts.length == 1) {
+        if (nameParts.length === 1) {
           return this.variables[nameParts[0]];
         }
 
@@ -1386,15 +1553,17 @@
           this.databaseConfig.userId = config.userId;
         }
 
-        if (typeof config.timeout !== 'undefined') {
+        if (typeof config.timeout === 'number') {
           this.databaseConfig.timeout = config.timeout;
         }
 
         if (updateDriver) {
-          if (this.databaseConfig.type == VuexBuilder$$1.DatabaseType.indexedDb) {
+          if (this.databaseConfig.type === VuexBuilder$$1.DatabaseType.indexedDb) {
             this.db = new VuexBuilderDatabaseIndexedDB(this.databaseConfig);
-          } else if (this.databaseConfig.type == VuexBuilder$$1.DatabaseType.localStorage) {
+          } else if (this.databaseConfig.type === VuexBuilder$$1.DatabaseType.localStorage) {
             this.db = new VuexBuilderDatabaseLocalStorage(this.databaseConfig);
+          } else if (this.databaseConfig.type === VuexBuilder$$1.DatabaseType.jnSharedStorage) {
+            this.db = new VuexBuilderDatabaseJnSharedStorage(this.databaseConfig);
           } else {
             this.db = null;
           }
@@ -1433,7 +1602,8 @@
             namespace = _this.namespace ? _this.namespace : _this.getName();
 
             if (!namespace && _this.withNamespace) {
-              console.error('VuexModel.getStore: current model can not be run in Vuex modules mode', _this.getState());
+              _this.logger('error', 'VuexModel.getStore: current model can not be run in Vuex modules mode', _this.getState());
+
               reject();
             }
           }
@@ -1448,9 +1618,38 @@
         });
       }
       /**
-       * Save current state after change state
+       * Get timeout for save to database
+       *
+      	 * @override
+       *
+       * @returns {number}
+       */
+
+    }, {
+      key: "getSaveTimeout",
+      value: function getSaveTimeout() {
+        return 150;
+      }
+      /**
+       * Get state after load from database
        *
       	 * @param state {Object}
+       *
+       * @override
+       *
+       * @returns {Object}
+       */
+
+    }, {
+      key: "getLoadedState",
+      value: function getLoadedState() {
+        var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        return state;
+      }
+      /**
+       * Save current state after change state to database
+       *
+      	 * @param state {Object|function}
        *
        * @returns {Promise}
        */
@@ -1462,14 +1661,42 @@
 
         var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        if (!this.db) {
+        if (!this.isSaveAvailable()) {
           return true;
         }
 
-        clearTimeout(this.saveStateTimeout);
+        this.lastSaveState = state;
+
+        if (this.saveStateTimeout) {
+          this.logger('log', 'VuexModel.saveState: wait save...', this.getName());
+          return true;
+        }
+
+        this.logger('log', 'VuexModel.saveState: start saving', this.getName());
+        var timeout = this.getSaveTimeout();
+
+        if (typeof this.databaseConfig.timeout === 'number') {
+          timeout = this.databaseConfig.timeout;
+        }
+
         this.saveStateTimeout = setTimeout(function () {
-          _this2.db.set(_this2.cloneState(state, _this2.getStateSaveException()));
-        }, this.databaseConfig.timeout);
+          _this2.logger('log', 'VuexModel.saveState: saved!', _this2.getName());
+
+          var lastState = _this2.lastSaveState;
+
+          if (typeof lastState === 'function') {
+            lastState = lastState();
+
+            if (babelHelpers.typeof(lastState) !== 'object' || !lastState) {
+              return false;
+            }
+          }
+
+          _this2.db.set(_this2.cloneState(lastState, _this2.getStateSaveException()));
+
+          _this2.lastState = null;
+          _this2.saveStateTimeout = null;
+        }, timeout);
         return true;
       }
       /**
@@ -1490,9 +1717,34 @@
 
         return this.saveState(this.getState());
       }
+      /**
+       * Clear database only, store state does not change
+       **
+       * @returns {Promise}
+       */
+
+    }, {
+      key: "clearDatabase",
+      value: function clearDatabase() {
+        if (!this.isSaveAvailable()) {
+          return true;
+        }
+
+        this.db.clear();
+        return true;
+      }
+    }, {
+      key: "isSaveAvailable",
+      value: function isSaveAvailable() {
+        return this.db && this.databaseConfig.active;
+      }
     }, {
       key: "isSaveNeeded",
       value: function isSaveNeeded(payload) {
+        if (!this.isSaveAvailable()) {
+          return false;
+        }
+
         var checkFunction = function checkFunction(payload) {
           var filter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
@@ -1547,7 +1799,7 @@
         name: this.getName(),
         siteId: 'default',
         userId: 0,
-        timeout: 150
+        timeout: null
       };
       this.db = null;
       this.store = null;
@@ -1559,8 +1811,8 @@
     babelHelpers.createClass(VuexBuilderModel, [{
       key: "setStore",
       value: function setStore(store) {
-        if (!(store instanceof ui_vuex.VuexVendor.Store)) {
-          console.error('VuexBuilderModel.setStore: passed store is not a Vuex.Store', store);
+        if (!(store instanceof ui_vue_vuex.VuexVendor.Store)) {
+          this.logger('error', 'VuexBuilderModel.setStore: passed store is not a Vuex.Store', store);
           return this;
         }
 
@@ -1572,8 +1824,18 @@
       value: function _getStoreFromDatabase() {
         var _this3 = this;
 
-        return new Promise(function (resolve, reject) {
+        clearTimeout(this.cacheTimeout);
+        return new Promise(function (resolve) {
+          _this3.cacheTimeout = setTimeout(function () {
+            _this3.logger('warn', 'VuexModel.getStoreFromDatabase: Cache loading timeout', _this3.getName());
+
+            resolve(_this3.getState());
+          }, 1000);
+
           _this3.db.get().then(function (cache) {
+            clearTimeout(_this3.cacheTimeout);
+            cache = _this3.getLoadedState(cache ? cache : {});
+
             var state = _this3.getState();
 
             if (cache) {
@@ -1582,6 +1844,7 @@
 
             resolve(state);
           }, function (error) {
+            clearTimeout(_this3.cacheTimeout);
             resolve(_this3.getState());
           });
         });
@@ -1675,6 +1938,37 @@
 
         return result;
       }
+    }, {
+      key: "logger",
+      value: function logger(type) {
+        for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          args[_key - 1] = arguments[_key];
+        }
+
+        if (type === 'error') {
+          var _console;
+
+          (_console = console).error.apply(_console, args);
+
+          return undefined;
+        } else if (typeof BX.VueDevTools === 'undefined') {
+          return undefined;
+        }
+
+        if (type === 'log') {
+          var _console2;
+
+          (_console2 = console).log.apply(_console2, args);
+        } else if (type === 'info') {
+          var _console3;
+
+          (_console3 = console).info.apply(_console3, args);
+        } else if (type === 'warn') {
+          var _console4;
+
+          (_console4 = console).warn.apply(_console4, args);
+        }
+      }
     }], [{
       key: "convertToArray",
       value: function convertToArray(object) {
@@ -1702,7 +1996,8 @@
    */
   var DatabaseType = Object.freeze({
     indexedDb: 'indexedDb',
-    localStorage: 'localStorage'
+    localStorage: 'localStorage',
+    jnSharedStorage: 'jnSharedStorage'
   });
   var VuexBuilder$$1 =
   /*#__PURE__*/
@@ -1811,6 +2106,16 @@
               reject('ERROR_WHILE_CLEARING');
             }
           });
+        });
+      }
+    }, {
+      key: "clearDatabase",
+      value: function clearDatabase() {
+        this.models.forEach(function (model) {
+          return model.clearDatabase();
+        });
+        return new Promise(function (resolve, reject) {
+          return resolve(true);
         });
       }
       /**

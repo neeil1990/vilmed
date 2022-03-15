@@ -13,7 +13,7 @@ return array(
 	'fields' => array(
 		'ADDITIONAL_FIELDS' => array(
 			'THEME_CODE' => '1construction',
-			'THEME_CODE_TYPO' => '1construction',
+
 		    'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/holidays/holiday.april-fool/preview.jpg',
 			'METAOG_TITLE' => Loc::getMessage('LANDING_DEMO_APRIL_FOOL_TITLE'),
 			'METAOG_DESCRIPTION' => Loc::getMessage('LANDING_DEMO_APRIL_FOOL_DESCRIPTION'),
@@ -21,7 +21,6 @@ return array(
 			'METAMAIN_DESCRIPTION' => Loc::getMessage('LANDING_DEMO_APRIL_FOOL_DESCRIPTION')
 		)
 	),
-	'sort' => \LandingSiteDemoComponent::checkActivePeriod(3,11,4,1) ? 81 : -131,
 	'available' => true,
 	'active' => \LandingSiteDemoComponent::checkActive(array(
 		'ONLY_IN' => array(),
@@ -33,7 +32,7 @@ return array(
 				'CODE' => '0.menu_15_photography',
 				'SORT' => '-100',
 				'CONTENT' => '
-<header class="landing-block landing-block-menu landing-ui-pattern-transparent u-header u-header--floating u-header--floating-relative">
+<header class="landing-block landing-block-menu u-header u-header--sticky u-header--relative">
 	<!-- Top Bar -->
 	<div class="landing-block-node-top-block u-header__section u-header__section--hidden g-bg-white g-transition-0_3 g-pt-15 g-pb-15">
 		<div class="container">
@@ -170,7 +169,7 @@ return array(
 									<h3 class="landing-block-node-img-title g-color-white h3 g-line-height-1_4 g-letter-spacing-5 g-font-size-20 g-mb-20">Surprise!</h3>
 									<div class="landing-block-node-img-text g-letter-spacing-3 g-font-weight-300 g-mb-40">UT PULVINAR TELLUS JHSED SED ELIT</div>
 									<div class="landing-block-node-button-container">
-										<a class="landing-block-node-img-button btn btn-md u-btn-outline-white g-font-size-11 g-brd-2 rounded-0 g-px-25" href="#">Learn More</a>
+										<a class="landing-block-node-img-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0" href="#">Learn More</a>
 									</div>
 								</div>
 							</article>
@@ -194,7 +193,7 @@ return array(
 										Ut pulvinar tellus jhsed sed elit
 									</div>
 									<div class="landing-block-node-button-container">
-										<a class="landing-block-node-img-button btn btn-md u-btn-outline-white g-font-size-11 g-brd-2 rounded-0 g-px-25" href="#">Learn More</a>
+										<a class="landing-block-node-img-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0" href="#">Learn More</a>
 									</div>
 								</div>
 							</article>
@@ -220,7 +219,7 @@ return array(
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card col-lg-6 g-pl-100--md g-mb-30 js-animation slideInUp">
 				<article class="landing-block-node-card-container media d-block d-md-flex h-100 g-bg-white">
 					<!-- Article Image -->
@@ -472,7 +471,7 @@ return array(
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card col-md-6 col-lg-4 g-mb-30 g-mb-0--md">
 				<!-- Article -->
 				<article class="landing-block-node-card-container js-animation text-center text-uppercase g-theme-photography-bg-gray-dark-v2 g-color-white-opacity-0_5 fadeInRight">
@@ -504,7 +503,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0 g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -540,7 +539,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0 g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -576,7 +575,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0 g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -596,13 +595,13 @@ return array(
 			<div class="col-sm-12 col-md-6 col-lg-6 g-mb-25 g-mb-0--lg">
 				<h2 class="landing-block-node-title text-uppercase g-font-weight-700 g-font-size-16 g-mb-20">Contact
 					us</h2>
-				<div class="landing-block-node-text g-font-size-default g-color-gray-dark-v2 g-mb-20">
+				<div class="landing-block-node-text g-color-gray-dark-v2 g-mb-20">
 					<p>Lorem ipsum dolor sit amet, consectetur
 						adipiscing</p></div>
 
 				<address class="g-mb-20">
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-home"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-dark-v2">
@@ -610,8 +609,8 @@ return array(
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-phone"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-dark-v2">
@@ -620,8 +619,8 @@ return array(
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="link">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-envelope"></i>
 						</div>
 						<div>

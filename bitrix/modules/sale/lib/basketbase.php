@@ -33,6 +33,9 @@ abstract class BasketBase extends BasketItemCollection
 	/** @var bool $isLoadForFUserId */
 	private $isLoadForFUserId = false;
 
+	/** @var bool $isSaveExecuting */
+	protected $isSaveExecuting = false;
+
 	/**
 	 * @param $code
 	 * @return BasketItemBase|null
@@ -111,13 +114,11 @@ abstract class BasketBase extends BasketItemCollection
 		$basket->isLoadForFUserId = true;
 
 		/** @var BasketBase $collection */
-		return $basket->loadFromDb(
-			array(
-				"FUSER_ID" => $fUserId,
-				"=LID" => $siteId,
-				"ORDER_ID" => null
-			)
-		);
+		return $basket->loadFromDb([
+			"FUSER_ID" => $fUserId,
+			"=LID" => $siteId,
+			"ORDER_ID" => null
+		]);
 	}
 
 	/**
@@ -129,7 +130,7 @@ abstract class BasketBase extends BasketItemCollection
 	 */
 	protected function loadFromDb(array $filter)
 	{
-		$select = array(
+		$select = [
 			"ID", "LID", "MODULE", "PRODUCT_ID", "QUANTITY", "WEIGHT",
 			"DELAY", "CAN_BUY", "PRICE", "CUSTOM_PRICE", "BASE_PRICE",
 			'PRODUCT_PRICE_ID', 'PRICE_TYPE_ID', "CURRENCY", 'BARCODE_MULTI',
@@ -141,17 +142,17 @@ abstract class BasketBase extends BasketItemCollection
 			'ORDER_ID', 'DATE_INSERT', 'DATE_UPDATE', 'PRODUCT_XML_ID',
 			'SUBSCRIBE', 'RECOMMENDATION', 'VAT_INCLUDED', 'SORT',
 			'DATE_REFRESH', 'DISCOUNT_NAME', 'DISCOUNT_VALUE', 'DISCOUNT_COUPON',
-			'XML_ID'
-		);
+			'XML_ID', 'MARKING_CODE_GROUP'
+		];
 
-		$itemList = array();
+		$itemList = [];
 		$first = true;
 
-		$res = static::getList(array(
+		$res = static::getList([
 			"select" => $select,
 			"filter" => $filter,
-			"order" => array('SORT' => 'ASC', 'ID' => 'ASC'),
-		));
+			"order" => ['SORT' => 'ASC', 'ID' => 'ASC'],
+		]);
 		while ($item = $res->fetch())
 		{
 			if ($first)
@@ -172,11 +173,13 @@ abstract class BasketBase extends BasketItemCollection
 			}
 		}
 
-		$result = array();
+		$result = [];
 		foreach ($itemList as $id => $item)
 		{
 			if ($item['SET_PARENT_ID'] == 0)
+			{
 				$result[$id] = $item;
+			}
 		}
 
 		$this->loadFromArray($result);
@@ -259,7 +262,9 @@ abstract class BasketBase extends BasketItemCollection
 
 		/** @var BasketItemBase $basketItem */
 		foreach ($this->collection as $basketItem)
+		{
 			$orderPrice += $basketItem->getFinalPrice();
+		}
 
 		return $orderPrice;
 	}
@@ -466,17 +471,22 @@ abstract class BasketBase extends BasketItemCollection
 	 * Save basket
 	 *
 	 * @return Result
+	 * @throws Main\ArgumentException
+	 * @throws Main\ArgumentNullException
+	 * @throws Main\NotImplementedException
+	 * @throws Main\ObjectNotFoundException
 	 */
 	public function save()
 	{
 		$result = new Result();
 
+		$this->isSaveExecuting = true;
+
 		/** @var OrderBase $order */
 		$order = $this->getOrder();
 		if (!$order)
 		{
-			$r =  $this->verify();
-
+			$r = $this->verify();
 			if (!$r->isSuccess())
 			{
 				return $result->addErrors($r->getErrors());
@@ -485,6 +495,8 @@ abstract class BasketBase extends BasketItemCollection
 			$r = $this->callEventOnSaleBasketBeforeSaved();
 			if (!$r->isSuccess())
 			{
+				$this->isSaveExecuting = false;
+
 				return $result->addErrors($r->getErrors());
 			}
 		}
@@ -525,9 +537,11 @@ abstract class BasketBase extends BasketItemCollection
 			{
 				$result->addErrors($r->getErrors());
 			}
-
-			$this->clearChanged();
 		}
+
+		$this->clearChanged();
+
+		$this->isSaveExecuting = false;
 
 		return $result;
 	}
@@ -538,12 +552,10 @@ abstract class BasketBase extends BasketItemCollection
 	 */
 	private function callEventOnBeforeSaleBasketItemDeleted($itemValues)
 	{
-		$itemEventName = $this->getItemEventName();
-
 		$itemValues['ENTITY_REGISTRY_TYPE'] = static::getRegistryType();
 
 		/** @var Main\Event $event */
-		$event = new Main\Event('sale', "OnBefore".$itemEventName."Deleted", array('VALUES' => $itemValues));
+		$event = new Main\Event('sale', "OnBeforeSaleBasketDeleted", array('VALUES' => $itemValues));
 		$event->send();
 	}
 
@@ -553,12 +565,10 @@ abstract class BasketBase extends BasketItemCollection
 	 */
 	protected function callEventOnSaleBasketItemDeleted($itemValues)
 	{
-		$itemEventName = $this->getItemEventName();
-
 		$itemValues['ENTITY_REGISTRY_TYPE'] = static::getRegistryType();
 
 		/** @var Main\Event $event */
-		$event = new Main\Event('sale', "On".$itemEventName."Deleted", array('VALUES' => $itemValues));
+		$event = new Main\Event('sale', "OnSaleBasketDeleted", array('VALUES' => $itemValues));
 		$event->send();
 	}
 
@@ -724,6 +734,10 @@ abstract class BasketBase extends BasketItemCollection
 			{
 				$result->addErrors($r->getErrors());
 			}
+			elseif ($r->hasWarnings())
+			{
+				$result->addWarnings($r->getWarnings());
+			}
 		}
 
 		return $result;
@@ -832,7 +846,7 @@ abstract class BasketBase extends BasketItemCollection
 	}
 
 	/**
-	 * @return BasketItemCollection
+	 * @return BasketBase
 	 */
 	public function getBasket()
 	{
@@ -847,6 +861,14 @@ abstract class BasketBase extends BasketItemCollection
 	public static function deleteNoDemand($idOrder)
 	{
 		throw new Main\NotImplementedException();
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isSaveRunning()
+	{
+		return $this->isSaveExecuting;
 	}
 
 	/**
@@ -876,7 +898,7 @@ abstract class BasketBase extends BasketItemCollection
 
 	/**
 	 * Getting a list of a count of elements in the basket
-	 * 
+	 *
 	 * @return array
 	 * @throws Main\ArgumentNullException
 	 */

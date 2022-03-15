@@ -233,7 +233,7 @@ class OrderHistory
 				if (!array_key_exists($key, $oldFields)
 					|| (
 						array_key_exists($key, $oldFields)
-						&& strlen($val) > 0 && $val != $oldFields[$key]
+						&& $val <> '' && $val != $oldFields[$key]
 					)
 				)
 				{
@@ -580,7 +580,7 @@ class OrderHistory
 	 */
 	public static function deleteOldAgent($days, $hitLimit = null)
 	{
-		$calledClass = static::class;
+		$calledClass = '\\'.static::class;
 
 		$days = (int)$days;
 

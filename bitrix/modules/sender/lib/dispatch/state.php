@@ -13,13 +13,12 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\NotImplementedException;
 use Bitrix\Main\Type\Date;
 use Bitrix\Main\Type\DateTime;
-
-use Bitrix\Sender\Posting;
 use Bitrix\Sender\Dispatch;
 use Bitrix\Sender\Entity;
-use Bitrix\Sender\PostingRecipientTable;
-use Bitrix\Sender\Internals\Model;
 use Bitrix\Sender\Integration;
+use Bitrix\Sender\Internals\Model;
+use Bitrix\Sender\Posting;
+use Bitrix\Sender\PostingRecipientTable;
 
 Loc::loadMessages(__FILE__);
 
@@ -393,7 +392,7 @@ class State
 
 	protected static function getStateName($code)
 	{
-		$code = $code === self::NEWISH ? self::READY : $code;
+//		$code = $code === self::NEWISH ? self::READY : $code;
 		return Loc::getMessage('SENDER_DISPATCH_STATE1_' . $code) ?: Loc::getMessage('SENDER_DISPATCH_STATE_' . $code);
 	}
 
@@ -817,6 +816,11 @@ class State
 	 */
 	private function changeState($state, Date $sendDate = null)
 	{
+		if (!$this->isCampaignActive() && in_array($state, [self::SENDING, self::PLANNED]))
+		{
+			throw new InvalidOperationException(Loc::getMessage('SENDER_DISPATCH_STATE_ERROR_CAMPAIGN_INACTIVE'));
+		}
+
 		if (!$this->canChangeState($state))
 		{
 			$messageText = Loc::getMessage('SENDER_DISPATCH_STATE_ERROR_CHANGE', array(
@@ -886,6 +890,10 @@ class State
 			$fields['AUTO_SEND_TIME'] = $sendDate;
 		}
 
+		if ($updatedBy = $this->letter->get('UPDATED_BY'))
+		{
+			$fields['UPDATED_BY'] = $updatedBy;
+		}
 		\CTimeZone::disable();
 		$result = Model\LetterTable::update($this->letter->getId(), $fields);
 		\CTimeZone::enable();
@@ -937,5 +945,10 @@ class State
 			Model\LetterTable::STATUS_END => self::SENT,
 			Model\LetterTable::STATUS_CANCEL => self::STOPPED,
 		);
+	}
+
+	private function isCampaignActive()
+	{
+		return $this->letter->get('CAMPAIGN_ACTIVE', 'Y') === 'Y';
 	}
 }

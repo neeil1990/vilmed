@@ -1,4 +1,6 @@
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+$APPLICATION->SetPageProperty("description", "Подробное описание всех условий гарантии приобретенного оборудования в магазине Vilmed");
+$APPLICATION->SetPageProperty("title", "Условия гарантии купленного оборудования в интернет-магазине Vilmed");
 $APPLICATION->SetTitle("Гарантия");?><p>
 	 В магазине Vilmed представлен широкий выбор медицинских товаров от самых известных производителей, которые давно зарекомендовали себя на рынке.
 </p>
@@ -10,7 +12,7 @@ $APPLICATION->SetTitle("Гарантия");?><p>
 </p>
 <div style=" display: flex; justify-content: space-between; padding-right:60px; padding-left:60px;">
 	<div style="text-align: center; width: 25%;">
- <img width="50% alt=" src="/upload/medialibrary/782/7820ccdd0557764ba58462a8f7e5614d.jpg" title="производство.jpg">
+ <img width="50% alt="производство.jpg" src="/upload/medialibrary/782/7820ccdd0557764ba58462a8f7e5614d.jpg" title="производство.jpg">
 		<p>
 			 Работаем напрямую с производителями
 		</p>

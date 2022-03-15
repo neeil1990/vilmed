@@ -36,6 +36,7 @@ class Landing extends Sale\TradingPlatform\Platform
 			"NAME" => Loc::getMessage('SALE_LANDING_NAME', ['#NAME#' => $data['TITLE']]),
 			"DESCRIPTION" => '',
 			"CLASS" => '\\'.static::class,
+			"XML_ID" => static::generateXmlId(),
 		]);
 
 		if ($result->isSuccess())
@@ -48,11 +49,19 @@ class Landing extends Sale\TradingPlatform\Platform
 	}
 
 	/**
+	 * @return string
+	 */
+	protected static function generateXmlId()
+	{
+		return uniqid('bx_');
+	}
+
+	/**
 	 * @return int
 	 */
 	protected function getSiteId()
 	{
-		return (int)substr($this->getCode(), strrpos($this->getCode(), '_') + 1);
+		return (int)mb_substr($this->getCode(), mb_strrpos($this->getCode(), '_') + 1);
 	}
 
 	/**
@@ -216,7 +225,8 @@ class Landing extends Sale\TradingPlatform\Platform
 		/** @var DB\Result $dbRes */
 		$dbRes = \Bitrix\Landing\Site::getList([
 			'filter' => [
-				'=ID' => $this->getSiteId()
+				'=ID' => $this->getSiteId(),
+				'CHECK_PERMISSIONS' => 'N'
 			]
 		]);
 
@@ -242,25 +252,13 @@ class Landing extends Sale\TradingPlatform\Platform
 		{
 			if (Loader::includeModule('landing'))
 			{
-				$sysPages = \Bitrix\Landing\Syspage::get($this->getSiteId());
-				if (isset($sysPages['personal']))
-				{
-					$landing = \Bitrix\Landing\Landing::createInstance(
-						$sysPages['personal']['LANDING_ID'],
-						[
-							'blocks_limit' => 1
-						]
-					);
-					if ($landing->exist())
-					{
-						$url = $landing->getPublicUrl(
-							$sysPages['personal']['LANDING_ID']
-						);
-						$url .= '?SECTION=orders&ID=' . $order->getId();
+				$url = \Bitrix\Landing\Syspage::getSpecialPage(
+					$this->getSiteId(),
+					'personal',
+					['SECTION' => 'orders', 'ID' => $order->getId()]
+				);
 
-						return \Bitrix\Main\Engine\UrlManager::getInstance()->getHostUrl().$url;
-					}
-				}
+				return $url;
 			}
 
 			return '';

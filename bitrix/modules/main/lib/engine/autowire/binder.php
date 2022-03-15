@@ -140,6 +140,23 @@ final class Binder
 		}
 	}
 
+	/**
+	 * @param Parameter $parameter
+	 * @return void
+	 */
+	public static function unRegisterGlobalAutoWiredParameter(Parameter $parameter): void
+	{
+		if (static::$globalAutoWiredParameters === null)
+		{
+			return;
+		}
+
+		if (static::$globalAutoWiredParameters->contains($parameter))
+		{
+			static::$globalAutoWiredParameters->detach($parameter);
+		}
+	}
+
 	private function getPriorityByParameter(Parameter $parameter)
 	{
 		return $parameter->getPriority();
@@ -334,15 +351,13 @@ final class Binder
 		{
 			if ($parameter->isDefaultValueAvailable())
 			{
-				$value = $parameter->getDefaultValue();
+				return $parameter->getDefaultValue();
 			}
-			else
-			{
-				throw new ArgumentException(
-					"Could not find value for parameter {{$parameter->getName()}}",
-					$parameter
-				);
-			}
+
+			throw new ArgumentException(
+				"Could not find value for parameter {{$parameter->getName()}}",
+				$parameter
+			);
 		}
 
 		if ($parameter->isArray())

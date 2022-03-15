@@ -5,9 +5,15 @@ use Bitrix\Main\Localization\Loc;
 if ($arParams['SHOW_ORDER_PAGE'] !== 'Y')
 {
 	LocalRedirect($arParams['SEF_FOLDER']);
-}	
+}
 
-if (strlen($arParams["MAIN_CHAIN_NAME"]) > 0)
+global $USER;
+if ($arParams['USE_PRIVATE_PAGE_TO_AUTH'] === 'Y' && !$USER->IsAuthorized())
+{
+	LocalRedirect($arResult['PATH_TO_AUTH_PAGE']);
+}
+
+if ($arParams["MAIN_CHAIN_NAME"] <> '')
 {
 	$APPLICATION->AddChainItem(htmlspecialcharsbx($arParams["MAIN_CHAIN_NAME"]), $arResult['SEF_FOLDER']);
 }
@@ -39,6 +45,7 @@ $APPLICATION->IncludeComponent(
 		"DISALLOW_CANCEL" => $arParams["ORDER_DISALLOW_CANCEL"],
 		"RESTRICT_CHANGE_PAYSYSTEM" => $arParams["ORDER_RESTRICT_CHANGE_PAYSYSTEM"],
 		"REFRESH_PRICES" => $arParams["ORDER_REFRESH_PRICES"],
+		"CONTEXT_SITE_ID" => $arParams["CONTEXT_SITE_ID"],
 		"AUTH_FORM_IN_TEMPLATE" => 'Y',
 	),
 	$component

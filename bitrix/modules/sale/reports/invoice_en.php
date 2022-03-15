@@ -67,7 +67,7 @@ array(
 							<tr>
 								<td class="mainText">
 								<?
-								if(strlen($arParams["BUYER_COMPANY_NAME"]) > 0)
+								if($arParams["BUYER_COMPANY_NAME"] <> '')
 									echo $arParams["BUYER_COMPANY_NAME"];
 								else
 									echo $arParams["BUYER_LAST_NAME"]." ".$arParams["BUYER_FIRST_NAME"]." ".$arParams["BUYER_SECOND_NAME"];
@@ -78,7 +78,7 @@ array(
 								echo "<br>".$arParams["BUYER_ADDRESS"];
 								echo "<br>".$arParams["BUYER_INDEX"];
 								
-								if (strlen($arParams["BUYER_CONTACT"])>0) echo "<br>Contact person: ".$arParams["BUYER_CONTACT"];?>
+								if ($arParams["BUYER_CONTACT"] <> '') echo "<br>Contact person: ".$arParams["BUYER_CONTACT"];?>
 								</td>
 							</tr>
 							<tr>
@@ -97,7 +97,7 @@ array(
 							<tr>
 								<td class="mainText">
 									<?
-								if(strlen($arParams["BUYER_COMPANY_NAME"]) > 0)
+								if($arParams["BUYER_COMPANY_NAME"] <> '')
 									echo $arParams["BUYER_COMPANY_NAME"];
 								else
 									echo $arParams["BUYER_LAST_NAME"]." ".$arParams["BUYER_FIRST_NAME"]." ".$arParams["BUYER_SECOND_NAME"];
@@ -108,7 +108,7 @@ array(
 								echo "<br>".$arParams["BUYER_ADDRESS"];
 								echo "<br>".$arParams["BUYER_INDEX"];
 								
-								if (strlen($arParams["BUYER_CONTACT"])>0) echo "<br>Contact person: ".$arParams["BUYER_CONTACT"];?>
+								if ($arParams["BUYER_CONTACT"] <> '') echo "<br>Contact person: ".$arParams["BUYER_CONTACT"];?>
 								</td>
 							</tr>
 						</table>
@@ -304,12 +304,17 @@ array(
 								<?if ($arOrder["DELIVERY_ID"]):?>
 									<tr>
 										<td align="right" class="smallText">
-											Delivery 
-											([<?echo $arOrder["DELIVERY_ID"];?>]
-											<?
-											$arDeliv = CSaleDelivery::GetByID($arOrder["DELIVERY_ID"]);
-											echo htmlspecialcharsbx($arDeliv["NAME"]);
-											?>):
+											Delivery <?
+											$deliveryId = \CSaleDelivery::getIdByCode($arOrder['DELIVERY_ID']);
+
+											if($deliveryId > 0)
+											{
+												if($delivery = \Bitrix\Sale\Delivery\Services\Manager::getObjectById($deliveryId))
+												{
+													echo "[".htmlspecialcharsbx($delivery->getNameWithParent())."]";
+												}
+											}
+											?>:
 										</td>
 										<td align="right" class="smallText">
 											<?echo SaleFormatCurrency($arOrder["PRICE_DELIVERY"], $arOrder["CURRENCY"]) ?>

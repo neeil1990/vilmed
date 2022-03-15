@@ -22,6 +22,68 @@ $postRight = $APPLICATION->GetGroupRight($module_id);
 IncludeModuleLangFile($docRoot . '/bitrix/modules/main/options.php');
 Loc::loadMessages(__FILE__);
 
+// local function for build iblocks tree
+$getIblocksTree = function()
+{
+	static $iblocks = null;
+
+	if ($iblocks !== null)
+	{
+		return $iblocks;
+	}
+
+	$iblocks = [];
+	if (\Bitrix\Main\Loader::includeModule('iblock'))
+	{
+		// first gets types
+		$iblockTypes = [];
+		$res = \CIBlockType::getList();
+		while($row = $res->fetch())
+		{
+			if ($typeLang = \CIBlockType::getByIDLang($row['ID'], LANG))
+			{
+				$iblockTypes[$typeLang['IBLOCK_TYPE_ID']] = [
+					'NAME' => $typeLang['NAME'],
+					'SORT' => $typeLang['SORT']
+				];
+			}
+		}
+
+		// and iblocks then
+		$res = \CIBlock::getList(['sort' => 'asc']);
+		while ($row = $res->GetNext(true, false))
+		{
+			if (!isset($iblocks[$row['IBLOCK_TYPE_ID']]))
+			{
+				$iblocks[$row['IBLOCK_TYPE_ID']] = [
+					'ID' => $row['IBLOCK_TYPE_ID'],
+					'NAME' => $iblockTypes[$row['IBLOCK_TYPE_ID']]['NAME'],
+					'SORT' => $iblockTypes[$row['IBLOCK_TYPE_ID']]['SORT'],
+					'ITEMS' => []
+				];
+			}
+			$iblocks[$row['IBLOCK_TYPE_ID']]['ITEMS'][] = [
+				'ID' => $row['ID'],
+				'NAME' => $row['NAME']
+			];
+		}
+
+		// sorting by sort
+		usort($iblocks,
+		  	function($a, $b)
+			{
+				if ($a['SORT'] == $b['SORT'])
+				{
+					return 0;
+				}
+				return ($a['SORT'] < $b['SORT']) ? -1 : 1;
+			}
+		);
+
+		return $iblocks;
+	}
+};
+
 if ($postRight >= 'R'):
 
 	// sites list
@@ -43,6 +105,7 @@ if ($postRight >= 'R'):
 		$sites[] = $row;
 	}
 
+	// site templates
 	$allOptions[] = array(
 		'site_template_id',
 		Loc::getMessage('LANDING_OPT_SITE_TEMPLATE_ID') . ':',
@@ -62,32 +125,60 @@ if ($postRight >= 'R'):
 	}
 
 	// paths for sites
-	if (!Manager::isB24())
+	$allOptions[] = array(
+		'header',
+		Loc::getMessage('LANDING_OPT_PUB_PATH_HEADER'),
+		Loc::getMessage('LANDING_OPT_PUB_PATH_HELP')
+	);
+	foreach ($sites as $row)
 	{
 		$allOptions[] = array(
-			'header',
-			Loc::getMessage('LANDING_OPT_PUB_PATH_HEADER'),
-			Loc::getMessage('LANDING_OPT_PUB_PATH_HELP')
+			'pub_path_' . $row['LID'],
+			$row['NAME'] . ' [' . $row['LID'] . ']:',
+			array('text', 32),
+			\Bitrix\Landing\Manager::getPublicationPathConst()
 		);
-		foreach ($sites as $row)
-		{
-			$allOptions[] = array(
-				'pub_path_' . $row['LID'],
-				$row['NAME'] . ' [' . $row['LID'] . ']:',
-				array('text', 32),
-				\Bitrix\Landing\Manager::getPublicationPathConst()
-			);
-		}
 	}
 
+	// other options
 	$allOptions[] = array(
 		'header',
 		Loc::getMessage('LANDING_OPT_OTHER')
 	);
 	$allOptions[] = array(
+		'google_images_key',
+		Loc::getMessage('LANDING_OPT_GOOGLE_IMAGES_KEY') . ':',
+		array('text', 32)
+	);
+	if (Manager::isB24())
+	{
+		$allOptions[] = array(
+			'portal_url',
+			Loc::getMessage('LANDING_OPT_PORTAL_URL') . ':',
+			array('text', 32)
+		);
+	}
+	$allOptions[] = array(
 		'deleted_lifetime_days',
 		Loc::getMessage('LANDING_OPT_DELETED_LIFETIME_DAYS') . ':',
 		array('text', 4)
+	);
+	if (Manager::isB24())
+	{
+		$allOptions[] = array(
+			'rights_extended_mode',
+			Loc::getMessage('LANDING_OPT_RIGHTS_EXTENDED_MODE') . ':',
+			array('checkbox')
+		);
+	}
+	$allOptions[] = array(
+		'source_iblocks',
+		Loc::getMessage('LANDING_OPT_SOURCE_IBLOCKS') . ':',
+		array(
+			'selectboxtree',
+			$getIblocksTree(),
+			'multiple="multiple" size="10"'
+		)
 	);
 
 	// tabs
@@ -98,7 +189,7 @@ if ($postRight >= 'R'):
 
 	// post save
 	if (
-		strlen($Update . $Apply) > 0 &&
+		$Update . $Apply <> '' &&
 		($postRight=='W' || $postRight=='X') &&
 		\check_bitrix_sessid()
 	)
@@ -116,7 +207,7 @@ if ($postRight >= 'R'):
 				$val = '';
 				for ($j = 0; $j < count($$name); $j++)
 				{
-					if (strlen(trim(${$name}[$j])) > 0)
+					if (trim(${$name}[$j]) <> '')
 					{
 						$val .= ($val <> '' ? ',':'') . trim(${$name}[$j]);
 					}
@@ -126,14 +217,20 @@ if ($postRight >= 'R'):
 			{
 				$val = ${$name.'_1'} . 'x' . ${$name.'_2'};
 			}
-			elseif ($arOption[2][0] == 'selectbox')
+			elseif (
+				$arOption[2][0] == 'selectbox' ||
+				$arOption[2][0] == 'selectboxtree'
+			)
 			{
 				$val = '';
-				for ($j=0; $j<count($$name); $j++)
+				if (isset($$name))
 				{
-					if (strlen(trim(${$name}[$j])) > 0)
+					for ($j=0; $j<count($$name); $j++)
 					{
-						$val .= ($val <> '' ? ',':'') . trim(${$name}[$j]);
+						if (trim(${$name}[$j]) <> '')
+						{
+							$val .= ($val <> '' ? ',':'') . trim(${$name}[$j]);
+						}
 					}
 				}
 			}
@@ -222,7 +319,7 @@ if ($postRight >= 'R'):
 		require_once($docRoot . '/bitrix/modules/main/admin/group_rights.php');
 		ob_end_clean();
 
-		if (strlen($Update)>0 && strlen($backUrl)>0)
+		if ($Update <> '' && $backUrl <> '')
 		{
 			\LocalRedirect($backUrl);
 		}
@@ -304,12 +401,44 @@ if ($postRight >= 'R'):
 			elseif ($type[0] == 'selectbox'):
 				$arr = $type[1];
 				$arr_keys = array_keys($arr);
-				$arVal = explode(',', $val);
+				$currValue = explode(',', $val);
 				?><select name="<?echo \htmlspecialcharsbx($Option[0])?>[]"<?= $type[2]?>><?
 					for($j = 0; $j < count($arr_keys); $j++):
-						?><option value="<?echo $arr_keys[$j]?>"<?if(in_array($arr_keys[$j], $arVal))echo ' selected="selected"'?>><?echo \htmlspecialcharsbx($arr[$arr_keys[$j]])?></option><?
+						?><option value="<?echo $arr_keys[$j]?>"<?if(in_array($arr_keys[$j], $currValue))echo ' selected="selected"'?>><?echo \htmlspecialcharsbx($arr[$arr_keys[$j]])?></option><?
 					endfor;
 					?></select><?
+			elseif ($type[0] == 'selectboxtree'):
+				$arr = $type[1];
+				$currValue = explode(',', $val);
+
+				$output = '<select name="'.\htmlspecialcharsbx($Option[0]).'[]"'.$type[2].'>';
+				$output .= '<option></option>';
+				foreach ($getIblocksTree() as $rowType)
+				{
+					$strIBlocksCpGr = '';
+					foreach ($rowType['ITEMS'] as $rowIb)
+					{
+						if (in_array($rowIb['ID'], $currValue))
+						{
+							$sel = ' selected="selected"';
+						}
+						else
+						{
+							$sel = '';
+						}
+						$strIBlocksCpGr .= '<option value="' . $rowIb['ID'] . '"' . $sel . '>' .
+										   		$rowIb['NAME'] .
+										   '</option>';
+					}
+					if ($strIBlocksCpGr != '')
+					{
+						$output .= '<optgroup label="'.$rowType['NAME'].'">';
+						$output .= $strIBlocksCpGr;
+						$output .= '</optgroup>';
+					}
+				}
+				$output .= '</select>';
+				echo $output;
 			endif;
 			echo $Option[4];?>
 		</td>
@@ -324,7 +453,7 @@ if ($postRight >= 'R'):
 	?>
 	<input <?if ($postRight < 'W') echo 'disabled="disabled"' ?> type="submit" name="Update" value="<?= Loc::getMessage('MAIN_SAVE')?>" title="<?= Loc::getMessage('MAIN_OPT_SAVE_TITLE')?>" />
 	<input <?if ($postRight < 'W') echo 'disabled="disabled"' ?> type="submit" name="Apply" value="<?= Loc::getMessage('MAIN_OPT_APPLY')?>" title="<?= Loc::getMessage('MAIN_OPT_APPLY_TITLE')?>" />
-	<?if (strlen($backUrl) > 0):?>
+	<?if ($backUrl <> ''):?>
 		<input <?if ($postRight < 'W') echo 'disabled="disabled"' ?> type="button" name="Cancel" value="<?= Loc::getMessage('MAIN_OPT_CANCEL')?>" title="<?= Loc::getMessage('MAIN_OPT_CANCEL_TITLE')?>" onclick="window.location='<?echo \htmlspecialcharsbx(CUtil::addslashes($backUrl))?>'" />
 		<input type="hidden" name="back_url_settings" value="<?=\htmlspecialcharsbx($backUrl)?>" />
 	<?endif?>

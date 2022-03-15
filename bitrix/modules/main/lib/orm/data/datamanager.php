@@ -74,12 +74,11 @@ abstract class DataManager
 	 */
 	public static function getEntity()
 	{
-		$class = get_called_class();
-		$class = Entity::normalizeEntityClass($class);
+		$class = static::getEntityClass()::normalizeEntityClass(get_called_class());
 
 		if (!isset(static::$entity[$class]))
 		{
-			static::$entity[$class] = Entity::getInstance($class);
+			static::$entity[$class] = static::getEntityClass()::getInstance($class);
 		}
 
 		return static::$entity[$class];
@@ -87,7 +86,7 @@ abstract class DataManager
 
 	public static function unsetEntity($class)
 	{
-		$class = Entity::normalizeEntityClass($class);
+		$class = static::getEntityClass()::normalizeEntityClass($class);
 
 		if (isset(static::$entity[$class]))
 		{
@@ -116,6 +115,14 @@ abstract class DataManager
 	}
 
 	/**
+	 * @return string
+	 */
+	public static function getTitle()
+	{
+		return null;
+	}
+
+	/**
 	 * Returns class of Object for current entity.
 	 *
 	 * @return string|EntityObject
@@ -124,31 +131,7 @@ abstract class DataManager
 	{
 		if (!isset(static::$objectClass[get_called_class()]))
 		{
-			$objectClass = Entity::normalizeName(get_called_class());
-
-			// make class name more unique
-			$namespace = substr($objectClass, 0, strrpos($objectClass, '\\')+1);
-			$className = substr($objectClass, strrpos($objectClass, '\\') + 1);
-
-			$className = Entity::getDefaultObjectClassName($className);
-
-
-
-			// with prefix EO_ it's not actual anymore
-			/*if (in_array(strtolower($className), static::$reservedWords))
-			{
-				// add postfix to reserved word
-				$className .= 'Object';
-			}*/
-
-			// the same reason
-			/*if (class_exists($objectClass) && !is_subclass_of($objectClass, EntityObject::class))
-			{
-				// add unique postfix to existing class
-				$className .= substr(md5($objectClass), 0, 6);
-			}*/
-
-			static::$objectClass[get_called_class()] = $namespace.$className;
+			static::$objectClass[get_called_class()] = static::getObjectClassByDataClass(get_called_class());
 		}
 
 		return static::$objectClass[get_called_class()];
@@ -162,7 +145,20 @@ abstract class DataManager
 	final public static function getObjectClassName()
 	{
 		$class = static::getObjectClass();
-		return substr($class, strrpos($class, '\\')+1);
+		return mb_substr($class, mb_strrpos($class, '\\') + 1);
+	}
+
+	protected static function getObjectClassByDataClass($dataClass)
+	{
+		$objectClass = static::getEntityClass()::normalizeName($dataClass);
+
+		// make class name more unique
+		$namespace = mb_substr($objectClass, 0, mb_strrpos($objectClass, '\\') + 1);
+		$className = mb_substr($objectClass, mb_strrpos($objectClass, '\\') + 1);
+
+		$className = static::getEntityClass()::getDefaultObjectClassName($className);
+
+		return $namespace.$className;
 	}
 
 	/**
@@ -174,15 +170,7 @@ abstract class DataManager
 	{
 		if (!isset(static::$collectionClass[get_called_class()]))
 		{
-			$objectClass = Entity::normalizeName(get_called_class());
-
-			// make class name more unique
-			$namespace = substr($objectClass, 0, strrpos($objectClass, '\\')+1);
-			$className = substr($objectClass, strrpos($objectClass, '\\') + 1);
-
-			$className = Entity::getDefaultCollectionClassName($className);
-
-			static::$collectionClass[get_called_class()] = $namespace.$className;
+			static::$collectionClass[get_called_class()] = static::getCollectionClassByDataClass(get_called_class());
 		}
 
 		return static::$collectionClass[get_called_class()];
@@ -196,7 +184,52 @@ abstract class DataManager
 	final public static function getCollectionClassName()
 	{
 		$class = static::getCollectionClass();
-		return substr($class, strrpos($class, '\\')+1);
+		return mb_substr($class, mb_strrpos($class, '\\') + 1);
+	}
+
+	protected static function getCollectionClassByDataClass($dataClass)
+	{
+		$objectClass = static::getEntityClass()::normalizeName($dataClass);
+
+		// make class name more unique
+		$namespace = mb_substr($objectClass, 0, mb_strrpos($objectClass, '\\') + 1);
+		$className = mb_substr($objectClass, mb_strrpos($objectClass, '\\') + 1);
+
+		$className = static::getEntityClass()::getDefaultCollectionClassName($className);
+
+		return $namespace.$className;
+	}
+
+	/**
+	 * @return EntityObject|string
+	 */
+	public static function getObjectParentClass()
+	{
+		return EntityObject::class;
+	}
+
+	/**
+	 * @return Collection|string
+	 */
+	public static function getCollectionParentClass()
+	{
+		return Collection::class;
+	}
+
+	/**
+	 * @return Query|string
+	 */
+	public static function getQueryClass()
+	{
+		return Query::class;
+	}
+
+	/**
+	 * @return Entity|string
+	 */
+	public static function getEntityClass()
+	{
+		return Entity::class;
 	}
 
 	/**
@@ -251,7 +284,7 @@ abstract class DataManager
 
 	/**
 	 * Returns entity map definition.
-	 * To get initialized fields @see \Bitrix\Main\ORM\Entity::getFields() and \Bitrix\Main\ORM\Base::getField()
+	 * To get initialized fields @see \Bitrix\Main\ORM\Entity::getFields() and \Bitrix\Main\ORM\Entity::getField()
 	 */
 	public static function getMap()
 	{
@@ -512,7 +545,8 @@ abstract class DataManager
 	 */
 	public static function query()
 	{
-		return new Query(static::getEntity());
+		$queryClass = static::getQueryClass();
+		return new $queryClass(static::getEntity());
 	}
 
 	/**
@@ -524,20 +558,15 @@ abstract class DataManager
 	 */
 	protected static function replaceFieldName($data = array())
 	{
+		$newData = [];
 		$entity = static::getEntity();
+
 		foreach ($data as $fieldName => $value)
 		{
-			/** @var ScalarField $field */
-			$field = $entity->getField($fieldName);
-			$columnName = $field->getColumnName();
-			if($columnName != $fieldName)
-			{
-				$data[$columnName] = $data[$fieldName];
-				unset($data[$fieldName]);
-			}
+			$newData[$entity->getField($fieldName)->getColumnName()] = $value;
 		}
 
-		return $data;
+		return $newData;
 	}
 
 	/**
@@ -749,7 +778,14 @@ abstract class DataManager
 					{
 						if ($entity->getField($fieldName) instanceof ScalarField && $entity->getField($fieldName)->isPrimary())
 						{
-							// and ignore primary
+							// ignore old primary
+							if (array_key_exists($fieldName, $primary) && $primary[$fieldName] == $value)
+							{
+								unset($fields[$fieldName]);
+								continue;
+							}
+
+							// but prevent primary changing
 							trigger_error(sprintf(
 								'Primary of %s %s can not be changed. You can delete this row and add a new one',
 								static::getObjectClass(), Main\Web\Json::encode($object->primary)
@@ -892,7 +928,7 @@ abstract class DataManager
 
 			if (!empty($id))
 			{
-				if (strlen($entity->getAutoIncrement()))
+				if($entity->getAutoIncrement() <> '')
 				{
 					$primary = array($entity->getAutoIncrement() => $id);
 					static::normalizePrimary($primary);
@@ -910,7 +946,7 @@ abstract class DataManager
 
 			// fill result
 			$result->setPrimary($primary);
-			$result->setData($fields);
+			$result->setData($fields + $ufdata);
 			$result->setObject($object);
 
 			foreach ($primary as $primaryName => $primaryValue)
@@ -926,7 +962,7 @@ abstract class DataManager
 
 			$entity->cleanCache();
 
-			static::callOnAfterAddEvent($object, $fields, $id);
+			static::callOnAfterAddEvent($object, $fields + $ufdata, $id);
 		}
 		catch (\Exception $e)
 		{
@@ -954,7 +990,7 @@ abstract class DataManager
 		$rows = array_values($rows);
 		$forceSeparateQueries = false;
 
-		if (!$ignoreEvents && count($rows) > 1 && strlen(static::getEntity()->getAutoIncrement()))
+		if (!$ignoreEvents && count($rows) > 1 && mb_strlen(static::getEntity()->getAutoIncrement()))
 		{
 			$forceSeparateQueries = true;
 
@@ -962,7 +998,7 @@ abstract class DataManager
 			trigger_error(
 				'Multi-insert doesn\'t work with events as far as we can not get last inserted IDs that we need for the events. '.
 				'Insert query was forced to multiple separate queries.',
-				E_USER_WARNING
+				E_USER_NOTICE
 			);
 		}
 
@@ -1096,7 +1132,7 @@ abstract class DataManager
 
 				if (!empty($id))
 				{
-					if (strlen($entity->getAutoIncrement()))
+					if($entity->getAutoIncrement() <> '')
 					{
 						$primary = array($entity->getAutoIncrement() => $id);
 						static::normalizePrimary($primary);
@@ -1134,7 +1170,7 @@ abstract class DataManager
 			{
 				foreach ($objects as $k => $object)
 				{
-					$fields = $allFields[$k];
+					$fields = $allFields[$k] + $allUfData[$k];
 					$id = $forceSeparateQueries ? $ids[$k] : null;
 
 					static::callOnAfterAddEvent($object, $fields, $id);
@@ -1176,7 +1212,7 @@ abstract class DataManager
 
 		// check primary
 		static::normalizePrimary(
-			$primary, isset($fields["fields"]) && is_array($data["fields"]) ? $data["fields"] : $data
+			$primary, isset($data["fields"]) && is_array($data["fields"]) ? $data["fields"] : $data
 		);
 		static::validatePrimary($primary);
 
@@ -1211,7 +1247,7 @@ abstract class DataManager
 			// check if there is still some data
 			if (!count($fields + $ufdata))
 			{
-				$result->addError(new EntityError("There is no data to update."));
+				return $result;
 			}
 
 			// return if any error
@@ -1256,7 +1292,7 @@ abstract class DataManager
 				$result->setAffectedRowsCount($connection);
 			}
 
-			$result->setData($fields);
+			$result->setData($fields + $ufdata);
 			$result->setPrimary($primary);
 			$result->setObject($object);
 
@@ -1269,7 +1305,7 @@ abstract class DataManager
 			$entity->cleanCache();
 
 			// event after update
-			static::callOnAfterUpdateEvent($object, $fields);
+			static::callOnAfterUpdateEvent($object, $fields + $ufdata);
 		}
 		catch (\Exception $e)
 		{
@@ -1519,7 +1555,7 @@ abstract class DataManager
 			{
 				foreach ($objects as $k => $object)
 				{
-					$fields = $allFields[$k];
+					$fields = $allFields[$k] + $allUfData[$k];
 
 					static::callOnAfterUpdateEvent($object, $fields);
 				}
@@ -1827,7 +1863,7 @@ abstract class DataManager
 		{
 			$options = unserialize($optionString);
 		}
-		$options[strtoupper($field)] = $mode;
+		$options[mb_strtoupper($field)] = $mode;
 		Main\Config\Option::set("main", "~crypto_".$table, serialize($options));
 	}
 
@@ -1850,7 +1886,7 @@ abstract class DataManager
 		$optionString = Main\Config\Option::get("main", "~crypto_".$table);
 		if($optionString <> '')
 		{
-			$field = strtoupper($field);
+			$field = mb_strtoupper($field);
 			$options = unserialize($optionString);
 			if(isset($options[$field]) && $options[$field] === true)
 			{

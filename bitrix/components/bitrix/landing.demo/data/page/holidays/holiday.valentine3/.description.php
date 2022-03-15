@@ -13,7 +13,7 @@ return array(
 	'fields' => array(
 		'ADDITIONAL_FIELDS' => array(
 			'THEME_CODE' => 'travel',
-			'THEME_CODE_TYPO' => 'travel',
+
 		    'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/holidays/holiday.valentine3/preview.jpg',
 			'METAOG_TITLE' => Loc::getMessage('LANDING_DEMO_VALENTINE3_TITLE'),
 			'METAOG_DESCRIPTION' => Loc::getMessage('LANDING_DEMO_VALENTINE3_DESCRIPTION'),
@@ -21,7 +21,6 @@ return array(
 			'METAMAIN_DESCRIPTION' => Loc::getMessage('LANDING_DEMO_VALENTINE3_DESCRIPTION')
 		)
 	),
-	'sort' => \LandingSiteDemoComponent::checkActivePeriod(1,24,2,14) ? 113 : -103,
 	'available' => true,
 	'items' => array (
 		'0.menu_15_photography' =>
@@ -29,7 +28,7 @@ return array(
 				'CODE' => '0.menu_15_photography',
 				'SORT' => '-100',
 				'CONTENT' => '
-<header class="landing-block landing-block-menu landing-ui-pattern-transparent u-header u-header--floating u-header--floating-relative">
+<header class="landing-block landing-block-menu u-header u-header--sticky u-header--relative">
 	<!-- Top Bar -->
 	<div class="landing-block-node-top-block u-header__section u-header__section--hidden g-bg-white g-transition-0_3 g-pt-15 g-pb-15">
 		<div class="container">
@@ -102,21 +101,21 @@ return array(
 					<ul class="list-inline mb-0 landing-block-node-menu-list-social">
 						<li class="list-inline-item landing-block-card-social g-mr-10"
 							data-card-preset="facebook">
-							<a class="landing-block-card-social-icon-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover g-font-size-14"
+							<a class="landing-block-card-social-icon-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover"
 							   href="https://facebook.com">
 								<i class="landing-block-card-social-icon fa fa-facebook"></i>
 							</a>
 						</li>
 						<li class="landing-block-card-social list-inline-item g-mr-10"
 							data-card-preset="instagram">
-							<a class="landing-block-card-social-icon-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover g-font-size-14"
+							<a class="landing-block-card-social-icon-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover"
 							   href="https://instagram.com">
 								<i class="landing-block-card-social-icon fa fa-instagram"></i>
 							</a>
 						</li>
 						<li class="landing-block-card-social list-inline-item g-mr-10"
 							data-card-preset="twitter">
-							<a class="landing-block-card-social-icon-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover g-font-size-14"
+							<a class="landing-block-card-social-icon-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover"
 							   href="https://twitter.com">
 								<i class="landing-block-card-social-icon fa fa-twitter"></i>
 							</a>
@@ -183,7 +182,7 @@ return array(
 										Yhdte Jit Iurrw Joksmns Iooldf
 									</div>
 									<div class="landing-block-node-button-container">
-										<a class="landing-block-node-img-button btn btn-md u-btn-outline-white g-font-size-11 g-brd-2 rounded-0 g-px-25" href="#" target="_self">View More</a>
+										<a class="landing-block-node-img-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0" href="#" target="_self">View More</a>
 									</div>
 								</div>
 							</article>
@@ -207,7 +206,7 @@ return array(
 										Ut pulvinar tellus jhsed sed elit
 									</div>
 									<div class="landing-block-node-button-container">
-										<a class="landing-block-node-img-button btn btn-md u-btn-outline-white g-font-size-11 g-brd-2 rounded-0 g-px-25" href="#" target="_self">View More</a>
+										<a class="landing-block-node-img-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0" href="#" target="_self">View More</a>
 									</div>
 								</div>
 							</article>
@@ -318,7 +317,7 @@ return array(
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card col-lg-6 g-pl-100--md g-mb-30 js-animation slideInUp">
 				<article class="landing-block-node-card-container media d-block d-md-flex h-100 g-bg-white">
 					<!-- Article Image -->
@@ -533,7 +532,7 @@ return array(
 				'SORT' => '4000',
 				'CONTENT' => '<section class="landing-block g-pt-30 g-pb-30">
 	<div class="container">
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card js-animation col-md-6 col-lg-6 g-pt-30 g-mb-50 g-mb-0--md fadeIn">
 				<!-- Article -->
 				<article class="text-center">
@@ -544,13 +543,13 @@ return array(
 					<!-- End Article Image -->
 
 					<!-- Article Title -->
-					<h4 class="landing-block-node-card-name g-line-height-1 g-font-size-40 g-font-cormorant-infant font-italic g-font-weight-600 g-mb-20">
+					<h4 class="landing-block-node-card-name g-line-height-1">
 						Samantha
 						Fox</h4>
 					<!-- End Article Title -->
 					<!-- Article Body -->
 					<div class="landing-block-node-card-post text-uppercase g-font-weight-700 g-font-size-12 g-color-primary g-mb-30">TRIED VIDEO VALENTINE</div>
-					<div class="landing-block-node-card-text g-font-size-default g-color-gray-dark-v5 g-mb-40">
+					<div class="landing-block-node-card-text g-color-gray-dark-v5 g-mb-40">
 						<p>
 							Etiam dolor tortor, egestas a libero eget, sollicitudin maximus nulla.
 							Nunc vitae maximus ipsum. Vestibulum sodales nisi massa, vitae blandit massa luctus id. Nunc
@@ -573,13 +572,13 @@ return array(
 					<!-- End Article Image -->
 
 					<!-- Article Title -->
-					<h4 class="landing-block-node-card-name g-line-height-1 g-font-size-40 g-font-cormorant-infant font-italic g-font-weight-600 g-mb-20">
+					<h4 class="landing-block-node-card-name g-line-height-1">
 						Dorian
 						Black</h4>
 					<!-- End Article Title -->
 					<!-- Article Body -->
 					<div class="landing-block-node-card-post text-uppercase g-font-weight-700 g-font-size-12 g-color-primary g-mb-30">TRIED ROMANTIC DINNER</div>
-					<div class="landing-block-node-card-text g-font-size-default g-color-gray-dark-v5 g-mb-40">
+					<div class="landing-block-node-card-text g-color-gray-dark-v5 g-mb-40">
 						<p>
 							Etiam dolor tortor, egestas a libero eget, sollicitudin maximus nulla. Nunc vitae maximus
 							ipsum.
@@ -610,7 +609,7 @@ return array(
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row landing-block-inner">
 			<div class="landing-block-node-card col-md-6 col-lg-4 g-mb-30 g-mb-0--md">
 				<!-- Article -->
 				<article class="landing-block-node-card-container js-animation text-center text-uppercase g-theme-photography-bg-gray-dark-v2 g-color-white-opacity-0_5 fadeInRight">
@@ -648,7 +647,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0 g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -692,7 +691,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0 g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -734,7 +733,7 @@ return array(
 					</ul>
 
 					<footer class="g-pa-40 landing-block-node-card-button-containe">
-						<a class="landing-block-node-card-button btn btn-md rounded-0 u-btn-outline-white g-brd-2 g-font-size-12 g-font-weight-600 g-letter-spacing-1" href="#">Order Now</a>
+						<a class="landing-block-node-card-button btn g-btn-type-outline g-btn-white g-btn-size-md g-btn-px-m rounded-0 g-letter-spacing-1" href="#">Order Now</a>
 					</footer>
 					<!-- End of Article Content -->
 				</article>
@@ -754,13 +753,13 @@ return array(
 			<div class="col-sm-12 col-md-6 col-lg-6 g-mb-25 g-mb-0--lg">
 				<h2 class="landing-block-node-title text-uppercase g-font-weight-700 g-font-size-16 g-mb-20">Contact
 					us</h2>
-				<div class="landing-block-node-text g-font-size-default g-color-gray-dark-v2 g-mb-20">
+				<div class="landing-block-node-text g-color-gray-dark-v2 g-mb-20">
 					<p>Lorem ipsum dolor sit amet, consectetur
 						adipiscing</p></div>
 
 				<address class="g-mb-20">
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-home"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-dark-v2">
@@ -768,8 +767,8 @@ return array(
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="text">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-phone"></i>
 						</div>
 						<div class="landing-block-node-card-contact-text g-color-gray-dark-v2">
@@ -778,8 +777,8 @@ return array(
 						</div>
 					</div>
 
-					<div class="landing-block-card-contact g-pos-rel g-pl-20 g-mb-7" data-card-preset="link">
-						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 g-absolute-centered--y g-left-0">
+					<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link">
+						<div class="landing-block-node-card-contact-icon-container g-color-gray-dark-v2 text-left g-width-20">
 							<i class="landing-block-node-card-contact-icon fa fa-envelope"></i>
 						</div>
 						<div>

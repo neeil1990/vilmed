@@ -15,12 +15,12 @@ if ($saleModulePermissions == "D")
 
 if(!CBXFeatures::IsFeatureEnabled('SaleAccounts'))
 {
-	require($DOCUMENT_ROOT."/bitrix/modules/main/include/prolog_admin_after.php");
+	require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
 
 	ShowError(GetMessage("SALE_FEATURE_NOT_ALLOW"));
 
 	require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
-	die();
+	return;
 }
 
 ClearVars();
@@ -42,7 +42,7 @@ while ($arGroups = $dbGroups->Fetch())
 	$arUsersGroups[] = $arGroups;
 
 $sTableID = "tbl_sale_buyers";
-$oSort = new CAdminSorting($sTableID, "LAST_LOGIN", "desc");
+$oSort = new CAdminUiSorting($sTableID, "LAST_LOGIN", "desc");
 global $by, $order;
 $lAdmin = new CAdminUiList($sTableID, $oSort);
 
@@ -169,18 +169,40 @@ $lAdmin->setFilterPresets($filterPresets);
 
 $lAdmin->AddFilter($filterFields, $arFilter);
 
-if (isset($arFilter["BUYER"]) && strlen($arFilter["BUYER"]) > 0)
+if (isset($arFilter["BUYER"]) && $arFilter["BUYER"] <> '')
 {
 	$nameSearch = trim($arFilter["BUYER"]);
 	$searchFilter = \Bitrix\Main\UserUtils::getAdminSearchFilter([
 		'FIND' => $nameSearch
 	]);
-	foreach ($searchFilter as $key => $searchValue)
-	{
-		$key = str_replace('INDEX', 'USER.INDEX', $key);
-		$arFilter[$key] = $searchValue;
-	}
 
+	$renameUserFields = function ($fields) use (&$renameUserFields)
+	{
+		$result = [];
+		foreach ($fields as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$result[$key] = $renameUserFields($value);
+			}
+			else
+			{
+				if (mb_strpos($key, 'INDEX') !== false)
+				{
+					$key = str_replace('INDEX', 'USER.INDEX', $key);
+				}
+				elseif ($key !== 'LOGIC')
+				{
+					$namePosition = mb_strpos($key, preg_replace('/^\W+/', '', $key));
+					$key = mb_substr($key, 0, $namePosition)."USER.".mb_substr($key, $namePosition);
+				}
+				$result[$key] = $value;
+			}
+		}
+		return $result;
+	};
+
+	$arFilter = array_merge($arFilter, $renameUserFields($searchFilter));
 	unset($arFilter["BUYER"]);
 }
 
@@ -229,7 +251,7 @@ if ($publicMode && \Bitrix\Main\Loader::includeModule('crm'))
 	$sorting = $gridOptions->getSorting(['sort' => ['NAME' => 'ASC']]);
 
 	$by = key($sorting['sort']);
-	$order = strtoupper(current($sorting['sort'])) === 'ASC' ? 'ASC' : 'DESC';
+	$order = mb_strtoupper(current($sorting['sort'])) === 'ASC' ? 'ASC' : 'DESC';
 
 	$sortByUserField = isset($by) && in_array($by, $userFields);
 
@@ -256,7 +278,17 @@ if ($publicMode && \Bitrix\Main\Loader::includeModule('crm'))
 
 	if ($searchString !== '')
 	{
-		$filter = array_merge($filter, \Bitrix\Main\UserUtils::getAdminSearchFilter(['FIND' => $searchString]));
+		$searchFields = ['FIND' => $searchString];
+		$filter = array_merge(\Bitrix\Main\UserUtils::getAdminSearchFilter($searchFields), $filter);
+	}
+
+	foreach ($arFilter as $key => $searchValue)
+	{
+		if (mb_strpos($key, 'USER.') === 0 || mb_strpos($key, '%USER.') === 0 || mb_strpos($key, '*USER.') === 0)
+		{
+			$field = str_replace('USER.', '', $key);
+			$filter[$field] = $searchValue;
+		}
 	}
 
 	$gridColumns = $gridOptions->getUsedColumns();
@@ -478,7 +510,7 @@ while ($arBuyers = $resultUsersList->Fetch())
 		"LINK" => $profileUrl,
 		"DEFAULT" => true
 	);
-	
+
 	if ($publicMode)
 	{
 		$arActions[] = array(
@@ -524,8 +556,14 @@ $lAdmin->CheckListMode();
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/prolog.php");
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
-
-$lAdmin->DisplayFilter($filterFields);
-$lAdmin->DisplayList();
+if (!$publicMode && \Bitrix\Sale\Update\CrmEntityCreatorStepper::isNeedStub())
+{
+	$APPLICATION->IncludeComponent("bitrix:sale.admin.page.stub", ".default");
+}
+else
+{
+	$lAdmin->DisplayFilter($filterFields);
+	$lAdmin->DisplayList();
+}
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 ?>

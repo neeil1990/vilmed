@@ -1,4 +1,6 @@
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+$APPLICATION->SetPageProperty("description", "Актуальные вакансии в компании Vilmed");
+$APPLICATION->SetPageProperty("title", "Вакансии в компании Vilmed");
 $APPLICATION->SetTitle("Вакансии");?>
 <p>
 </p>

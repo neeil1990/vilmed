@@ -12,6 +12,10 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/iblock/prolog.php");
 IncludeModuleLangFile(__FILE__);
 
 $selfFolderUrl = $adminPage->getSelfFolderUrl();
+if ($adminPage->publicMode)
+{
+	$adminSidePanelHelper->setSkipResponse(true);
+}
 
 $bFullForm = isset($_REQUEST["IBLOCK_ID"]) && isset($_REQUEST["ID"]);
 $bSectionPopup = isset($_REQUEST["return_url"]) && ($_REQUEST["return_url"] === "section_edit");
@@ -208,7 +212,7 @@ elseif(isset($_REQUEST['ID']))
 else
 	$str_PROPERTY_ID = "";
 
-if (!strlen($str_PROPERTY_ID))
+if ($str_PROPERTY_ID == '')
 {
 	require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_after.php");
 	ShowError(GetMessage("BT_ADM_IEP_PROPERTY_ID_IS_ABSENT"));
@@ -251,7 +255,7 @@ if (
 			require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 			die();
 		}
-		$highBlockName = strtoupper(substr($highBlockName, 0, 1)).substr($highBlockName, 1);
+		$highBlockName = mb_strtoupper(mb_substr($highBlockName, 0, 1)).mb_substr($highBlockName, 1);
 		if (!preg_match('/^[A-Z][A-Za-z0-9]*$/', $highBlockName))
 		{
 			if ($adminSidePanelHelper->isAjaxRequest())
@@ -570,7 +574,7 @@ if ($isPost && isset($_POST["checkAction"]) && $_POST["checkAction"] === "delete
 	}
 	else
 	{
-		if (strlen($return_url) > 0)
+		if ($return_url <> '')
 		{
 			$adminSidePanelHelper->localRedirect($return_url);
 			LocalRedirect($return_url);
@@ -625,14 +629,16 @@ elseif(!$bReload && $isPost && (isset($_POST["save"]) || isset($_POST["apply"]))
 
 	if (isset($_POST["PROPERTY_PROPERTY_TYPE"]))
 	{
-		if (strpos($_POST["PROPERTY_PROPERTY_TYPE"], ":"))
+		if(mb_strpos($_POST["PROPERTY_PROPERTY_TYPE"], ":"))
 		{
 			list($arFields["PROPERTY_TYPE"], $arFields["USER_TYPE"]) = explode(':', $_POST["PROPERTY_PROPERTY_TYPE"], 2);
-			if ($arFields["USER_TYPE"] != "")
+			if($arFields["USER_TYPE"] != "")
 			{
 				$userType = CIBlockProperty::GetUserType($arFields['USER_TYPE']);
-				if (empty($userType))
+				if(empty($userType))
+				{
 					$arFields["USER_TYPE"] = "";
+				}
 				unset($userType);
 			}
 		}
@@ -710,7 +716,7 @@ elseif(!$bReload && $isPost && (isset($_POST["save"]) || isset($_POST["apply"]))
 	}
 	if ($strWarning == '')
 	{
-		if(strlen($apply)<=0)
+		if($apply == '')
 		{
 			if($bSectionPopup)
 			{
@@ -755,7 +761,7 @@ elseif(!$bReload && $isPost && (isset($_POST["save"]) || isset($_POST["apply"]))
 				$adminSidePanelHelper->sendSuccessResponse("base", array("ID" => intval($str_PROPERTY_ID)));
 			}
 
-			if(strlen($return_url) > 0)
+			if($return_url <> '')
 			{
 				$adminSidePanelHelper->localRedirect($return_url);
 				LocalRedirect($return_url);
@@ -772,7 +778,7 @@ elseif(!$bReload && $isPost && (isset($_POST["save"]) || isset($_POST["apply"]))
 		}
 		$applyUrl = $selfFolderUrl."iblock_edit_property.php?lang=".LANGUAGE_ID."&IBLOCK_ID=".$intIBlockID.
 			"&find_section_section=".intval($find_section_section).'&ID='.intval($str_PROPERTY_ID).
-			(strlen($return_url)>0?"&return_url=".UrlEncode($return_url):"").($_REQUEST["admin"]=="Y"? "&admin=Y": "&admin=N");
+			($return_url <> ''?"&return_url=".UrlEncode($return_url):"").($_REQUEST["admin"]=="Y"? "&admin=Y": "&admin=N");
 		$applyUrl = $adminSidePanelHelper->setDefaultQueryParams($applyUrl);
 		LocalRedirect($applyUrl);
 	}
@@ -850,7 +856,7 @@ if (isset($_REQUEST['saveresult']))
 	$arProperty['ACTIVE'] = ('Y' == $arProperty['ACTIVE'] ? 'Y' : 'N');
 	$arProperty['SECTION_PROPERTY'] = ('N' == $arProperty['SECTION_PROPERTY'] ? 'N' : 'Y');
 	$arProperty['SMART_FILTER'] = ('Y' == $arProperty['SMART_FILTER'] ? 'Y' : 'N');
-	$arProperty['DISPLAY_TYPE'] = substr($arProperty['DISPLAY_TYPE'], 0, 1);
+	$arProperty['DISPLAY_TYPE'] = mb_substr($arProperty['DISPLAY_TYPE'], 0, 1);
 	$arProperty['DISPLAY_EXPANDED'] = ('Y' == $arProperty['DISPLAY_EXPANDED'] ? 'Y' : 'N');
 	$arProperty['MULTIPLE_CNT'] = (int)$arProperty['MULTIPLE_CNT'];
 	if ($arProperty['MULTIPLE_CNT'] <= 0)
@@ -942,7 +948,7 @@ if(!$bFullForm)
 	$arProperty['WITH_DESCRIPTION'] = ($arProperty['WITH_DESCRIPTION'] == 'Y' ? 'Y' : 'N');
 
 	$arProperty['USER_TYPE'] = '';
-	if (false !== strpos($arProperty['PROPERTY_TYPE'],':'))
+	if (false !== mb_strpos($arProperty['PROPERTY_TYPE'], ':'))
 	{
 		list($arProperty['PROPERTY_TYPE'],$arProperty['USER_TYPE']) = explode(':', $arProperty['PROPERTY_TYPE'], 2);
 	}
@@ -981,7 +987,7 @@ else
 
 		if (isset($_POST["PROPERTY_PROPERTY_TYPE"]))
 		{
-			if (strpos($_POST["PROPERTY_PROPERTY_TYPE"], ":"))
+			if(mb_strpos($_POST["PROPERTY_PROPERTY_TYPE"], ":"))
 			{
 				list($arProperty["PROPERTY_TYPE"], $arProperty["USER_TYPE"]) = explode(':', $_POST["PROPERTY_PROPERTY_TYPE"], 2);
 			}
@@ -1283,6 +1289,16 @@ elseif($message)
 			<td width="60%">
 			<?
 			$arUserTypeList = CIBlockProperty::GetUserType();
+			$isRequestFromNewProductCard = ($_REQUEST['newProductCard'] ?? 'N') === 'Y';
+
+			if ($isRequestFromNewProductCard && \Bitrix\Catalog\Config\State::isProductCardSliderEnabled())
+			{
+				$arUserTypeList = array_intersect_key($arUserTypeList, array_flip([
+					'Date',	'DateTime',	'HTML',	'Sequence',	'Money', 'map_google', 'map_yandex',
+					'video', 'directory', 'SectionAuto',
+				]));
+			}
+
 			\Bitrix\Main\Type\Collection::sortByColumn($arUserTypeList, array('DESCRIPTION' => SORT_STRING));
 			$boolUserPropExist = !empty($arUserTypeList);
 			?>

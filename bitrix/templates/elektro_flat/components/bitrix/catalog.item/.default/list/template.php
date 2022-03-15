@@ -1,8 +1,16 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
 use \Bitrix\Main\Localization\Loc;
+$config = \Bitrix\Main\Config\Configuration::getInstance();
+
 global $kn;
 $kn++;
+
+global $inc_a;
+$inc_a++;
+
+global $inc_p;
+
 $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 ?>
 
@@ -60,7 +68,11 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 			<div class="article_rating">
 				<?//ARTICLE//
 				if($inArticle) {?>
-					<div class="article" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : "-";?><?}?></div>
+				<?if($inc_a <= $config->get("js_index")['article']):?>
+				<div class="article" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?>"></div>
+				<?else: ?>
+				<div class="article"><?=Loc::getMessage("CT_BCS_ELEMENT_ARTNUMBER")?><?=!empty($arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"]) ? $arElement["PROPERTIES"]["ARTNUMBER"]["VALUE"] : $arElement["PROPERTIES"]["CML2_ARTICLE"]["VALUE"];?></div>
+				<?endif;?>
 				<?}
 				//RATING//
 				if($inRating) {?>
@@ -396,8 +408,25 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
             <? else: ?>
 				<?if($arElement["CAN_BUY"]) {
 					if($arElement["MIN_PRICE"]["RATIO_PRICE"] <= 0) {
+						$inc_p++;
 						//ITEM_ASK_PRICE//?>
-						<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price"><i class="fa fa-comment-o"></i><span class="full" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?><?}?></span><span class="short" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?>"><?if($kn<21){?><?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?><?}?></span></a>
+						<? if($inc_p <= $config->get("js_index")['ask_price']): ?>
+						<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price">
+							<i class="fa fa-comment-o"></i>
+							<span class="full" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?>"></span>
+							<span class="short" data-text_script="<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?>"></span>
+						</a>
+						<? else:?>
+						<a id="<?=$itemIds['POPUP_BTN']?>" class="btn_buy apuo" href="javascript:void(0)" rel="nofollow" data-action="ask_price">
+							<i class="fa fa-comment-o"></i>
+							<span class="full">
+									<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_FULL")?>
+							</span>
+							<span class="short">
+									<?=Loc::getMessage("CT_BCS_ELEMENT_ASK_PRICE_SHORT")?>
+							</span>
+						</a>
+						<? endif; ?>
 					<?} else {
 						if(isset($arElement["SELECT_PROPS"]) && !empty($arElement["SELECT_PROPS"])) {?>
 							<form action="javascript:void(0)" class="add2basket_form">

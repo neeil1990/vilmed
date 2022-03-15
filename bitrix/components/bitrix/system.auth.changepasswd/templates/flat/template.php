@@ -30,7 +30,7 @@ if(!empty($arParams["~AUTH_RESULT"])):
 	<h3 class="bx-title"><?=GetMessage("AUTH_CHANGE_PASSWORD")?></h3>
 
 	<form method="post" action="<?=$arResult["AUTH_FORM"]?>" name="bform">
-<?if (strlen($arResult["BACKURL"]) > 0): ?>
+<?if ($arResult["BACKURL"] <> ''): ?>
 		<input type="hidden" name="backurl" value="<?=$arResult["BACKURL"]?>" />
 <? endif ?>
 		<input type="hidden" name="AUTH_FORM" value="Y">

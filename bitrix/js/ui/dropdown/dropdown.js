@@ -33,45 +33,71 @@
 		this.isChanged = false;
 		this.isDisabled = BX.prop.getBoolean(options, "isDisabled", false);
 		this.enableCreation = BX.prop.getBoolean(options, "enableCreation", false);
+		this.enableCreationOnBlur = BX.prop.getBoolean(options, "enableCreationOnBlur", true);
+
+		this.isEmbedded = BX.prop.getBoolean(BX.prop.getObject(options, "context", {}), "isEmbedded", false);
+		this.quickForm = document.querySelectorAll('.crm-kanban-quick-form');
+
+		this.ajaxRequestTimer = null;
+		this.autocompleteDelay = BX.prop.getInteger(options, "autocompleteDelay", 0);
+		this.minSearchStringLength = BX.prop.getInteger(options, "minSearchStringLength", 2);
 
 		this.documentClickHandler = BX.delegate(this.onDocumentClick, this);
 
 		this.emptyValueEventHandle = 0;
 
 		this.events = options.events || {};
+		this.bindEvents();
+
 		this.updateItemsList(options.items);
 		this.setDefaultItems(options.items);
 		this.setFooterItems(options.footerItems);
-		// this.init();
 
-		if (this.targetElement !== 'undefined')
+		if (this.targetElement !== 'undefined' && (typeof this.targetElement !== 'undefined'))
 		{
 			this.init();
 		}
 	};
-
 	BX.UI.Dropdown.prototype =
 		{
+			bindEvents: function()
+			{
+				if (this.events)
+				{
+					for (var eventName in this.events)
+					{
+						if (BX.type.isFunction(this.events[eventName]))
+						{
+							BX.addCustomEvent(this, "BX.UI.Dropdown:" + eventName, this.events[eventName]);
+						}
+					}
+				}
+			},
 			init: function ()
 			{
-				BX.bind(this.targetElement, "input", function()
-				{
-                    if (this.isDisabled)
-                    {
-                        return;
-                    }
-
-					if (this.targetElement.value.length === 0)
+				setTimeout(function() {
+					BX.bind(this.targetElement, "input", function()
 					{
-						this.enableTargetElement();
-						return;
-					}
+						if (this.isDisabled)
+						{
+							return;
+						}
 
-					this.getPopupWindow().show();
+						if (this.targetElement.value.length === 0)
+						{
+							this.enableTargetElement();
+							return;
+						}
 
-				}.bind(this));
+						this.getPopupWindow().show();
+
+					}.bind(this));
+				}.bind(this), 100);
+
 				this.targetElement.addEventListener("click", function(e)
 				{
+					this.destroyPopupWindow();
+
                     if (this.isDisabled)
                     {
                         return;
@@ -91,31 +117,31 @@
 					{
 						BX.PreventDefault(e);
 					}
-
 					this.getPopupWindow().show();
 				}.bind(this), true);
 
-				this.targetElement.addEventListener("focus", function()
-				{
-                    if (this.isDisabled)
-                    {
-                        return;
-                    }
-
-					this.getPopupWindow().show();
-
-					if(!this.popupAlertContainer)
+				setTimeout(function() {
+					this.targetElement.addEventListener("focus", function()
 					{
-						return;
-					}
-				}.bind(this), true);
+						if (this.isDisabled)
+						{
+							return;
+						}
+
+						this.getPopupWindow().show();
+
+						if(!this.popupAlertContainer)
+						{
+							return;
+						}
+					}.bind(this), true);
+				}.bind(this), 100);
 
 				BX.bind(
 					this.targetElement,
 					"keyup",
 					BX.throttle(
 						function(e) {
-
                             if (this.isDisabled)
                             {
                                 return;
@@ -145,7 +171,7 @@
 						1000
 					)
 				);
-				
+
 				this.targetElement.addEventListener("keyup", function(e)
 				{
                     if (this.isDisabled)
@@ -242,7 +268,6 @@
 						this.getPopupWindow().show();
 						return;
 					}
-
 					if (e.keyCode === 9 && this.targetElement.value === '' && !this.popupWindow)
 					{
 						this.getPopupWindow().show();
@@ -254,36 +279,30 @@
 						this.destroyPopupWindow();
 					}
 				}.bind(this));
-
-				if (this.events)
-				{
-					for (var eventName in this.events)
-					{
-						if (BX.type.isFunction(this.events[eventName]))
-						{
-							BX.addCustomEvent(this, "BX.UI.Dropdown:" + eventName, this.events[eventName]);
-						}
-					}
-				}
-			},
-			cancelCreationOnBlur: function()
-			{
-				if(!this.enableCreation)
-				{
-					this.targetElement.addEventListener("blur", function()
-					{
-						this.resetInputValue();
-					}.bind(this));
-				}
 			},
 			onDocumentClick: function()
 			{
-				if((this.CurrentItem && this.CurrentItem.title.length !== this.targetElement.value.length)
-					|| (!this.CurrentItem && this.targetElement.value.length > 0)
-				)
+				if(this.isTargetElementChanged())
 				{
-					this.onEmptyValueEvent();
+					if(!this.enableCreationOnBlur)
+					{
+						this.resetInputValue();
+						this.setItems(this.getDefaultItems());
+						BX.cleanNode(this.popupAlertContainer);
+						this.newAlertContainer = null;
+
+						return;
+					}
+					else
+					{
+						this.onEmptyValueEvent();
+					}
 				}
+			},
+			isTargetElementChanged: function()
+			{
+				return (this.CurrentItem && this.CurrentItem.title.length !== this.targetElement.value.length)
+					|| (!this.CurrentItem && this.targetElement.value.length > 0);
 			},
 			getDefaultItems: function()
 			{
@@ -327,34 +346,53 @@
 					this.setItems(this.getDefaultItems());
 					loader.classList.remove('ui-dropdown-loader-active');
 					BX.cleanNode(this.popupAlertContainer);
-					this.alertEmptyContainer = null;
+					this.newAlertContainer = null;
 
 					BX.onCustomEvent(this, "BX.UI.Dropdown:onReset", [this]);
 				}
-				else if(this.targetElement.value.length >= 2)
+				else if(this.targetElement.value.length >= this.minSearchStringLength)
 				{
+					BX.onCustomEvent(this, "BX.UI.Dropdown:onBeforeSearchStart", [this, this.targetElement.value]);
 					//this.setItems(this.searchItemsByStr(this.targetElement.value));
-					this.searchItemsByStr(this.targetElement.value).then(
+					clearTimeout(this.ajaxRequestTimer);
+					this.ajaxRequestTimer = setTimeout(this.searchItemsByStrDelayed.bind(this), this.autocompleteDelay);
+
+					loader.classList.add('ui-dropdown-loader-active');
+				}
+			},
+			searchItemsByStrDelayed: function()
+			{
+				var loader = this.getItemsListContainer();
+				var eventData = {
+					searchQuery: this.targetElement.value
+				};
+				BX.onCustomEvent(this, "BX.UI.Dropdown:onSearchStart", [this, eventData]);
+
+				this.searchItemsByStr(eventData.searchQuery)
+					.then(
 						function (items)
 						{
-                            if (this.isDisabled)
-                            {
-                                return;
-                            }
-
-							if(!this.alertEmptyContainer)
+							BX.onCustomEvent(this, "BX.UI.Dropdown:onSearchComplete", [this, items]);
+							return items;
+						}.bind(this))
+					.then(
+						function (items)
+						{
+							if(!this.newAlertContainer && this.enableCreation &&
+								BX.Type.isDomNode(this.popupAlertContainer))
 							{
-								this.popupAlertContainer.appendChild(this.getAlertEmptyContainer(items));
+								var newAlertContainer = this.getNewAlertContainer(items);
+								if (BX.Type.isDomNode(newAlertContainer))
+								{
+									this.popupAlertContainer.appendChild(newAlertContainer);
+								}
 								BX.bind(document, "click", this.documentClickHandler);
 							}
 							this.setItems(items);
 							loader.classList.remove('ui-dropdown-loader-active');
 
 						}.bind(this)
-					);
-
-					loader.classList.add('ui-dropdown-loader-active');
-				}
+				);
 			},
 			searchItemsByStr: function(target)
 			{
@@ -395,11 +433,18 @@
 								this.popupWindow = null;
 								this.itemListContainer = null;
 								this.itemListInnerContainer = null;
-								this.alertEmptyContainer = null;
+								this.newAlertContainer = null;
 								this.popupAlertContainer = null;
 							}.bind(this)
 						}
 					});
+
+					if(this.isEmbedded && this.quickForm)
+					{
+						this.popupWindow.setOffset({
+							offsetLeft: this.getQuickFormOffsetWidth(),
+						});
+					}
 				}
 
 				this.setWidthPopup();
@@ -407,11 +452,23 @@
 
 				return this.popupWindow;
 			},
+			getQuickFormOffsetWidth: function()
+			{
+				var currentElement = BX.findParent(this.getPopupWindow().bindElement, {className: 'crm-kanban-quick-form'});
+
+				this.popupWindow.popupContainer.style.width = currentElement.offsetWidth + "px";
+				var equalWidth = - (this.targetElement.getBoundingClientRect().left - currentElement.getBoundingClientRect().left);
+
+				return equalWidth;
+			},
 			setWidthPopup: function()
 			{
-				if(this.popupWindow && this.targetElement)
+				if(!this.isEmbedded && this.quickForm)
 				{
-					this.popupWindow.popupContainer.style.width = this.targetElement.offsetWidth + "px"
+					if(this.popupWindow && this.targetElement)
+					{
+						this.popupWindow.popupContainer.style.width = this.targetElement.offsetWidth + "px"
+					}
 				}
 			},
 			onEmptyValueEvent: function()
@@ -426,7 +483,7 @@
 
 							this.setItems(this.getDefaultItems());
 							BX.cleanNode(this.popupAlertContainer);
-							this.alertEmptyContainer = null;
+							this.newAlertContainer = null;
 						}
 						else
 						{
@@ -470,7 +527,6 @@
 			},
 			getPopupAlertContainer: function()
 			{
-
 				if(!this.popupAlertContainer)
 				{
 					this.popupAlertContainer = BX.create("div", {
@@ -480,24 +536,24 @@
 
 				return this.popupAlertContainer;
 			},
-			getAlertEmptyContainer: function(items)
+			getNewAlertContainer: function(items)
 			{
-				if(!this.alertEmptyContainer)
+				if(!this.newAlertContainer)
 				{
-					this.alertEmptyContainer = BX.create('div', {
+					this.newAlertContainer = BX.create('div', {
 						props: {
-							className: 'ui-dropdown-alert-new'
+							className: 'ui-dropdown-alert'
 						},
 						events: {
 							click: this.onEmptyValueEvent.bind(this)
 						},
 						children: [
-							this.alertEmptyContainerValue = BX.create('div', {
-								attrs: { className: 'ui-dropdown-alert-new-name' },
+							this.alertContainerValue = BX.create('div', {
+								attrs: { className: 'ui-dropdown-alert-name' },
 								text: this.targetElement.value
 							}),
 							BX.create('div', {
-								attrs: { className: 'ui-dropdown-alert-new-text' },
+								attrs: { className: 'ui-dropdown-alert-text' },
 								text: BX.prop.getString(this.messages, this.enableCreation ? "creationLegend" : "notFound", "")
 							})
 						]
@@ -505,28 +561,28 @@
 
 					this.targetElement.addEventListener("input", function()
 					{
-						this.alertEmptyContainerValue.innerHTML = this.targetElement.value;
+						this.alertContainerValue.textContent = this.targetElement.value;
 					}.bind(this));
 
 					if(!this.enableCreation)
 					{
 						this.targetElement.addEventListener("input", function()
 						{
-							this.alertEmptyContainerValue.style.display = "none";
+							this.alertContainerValue.style.display = "none";
 						}.bind(this));
 					}
 				}
 
 				if(items.length > 0 && !this.enableCreation)
 				{
-					this.alertEmptyContainer.style.display = "none";
+					this.newAlertContainer.style.display = "none";
 				}
 				else
 				{
-					this.alertEmptyContainer.style.display = "";
+					this.newAlertContainer.style.display = "";
 				}
 
-				return this.alertEmptyContainer;
+				return this.newAlertContainer;
 			},
 			getItemsListContainer: function()
 			{
@@ -562,9 +618,11 @@
 
 					var phones = BX.prop.getArray(attrs, "phone", []);
 					var emails = BX.prop.getArray(attrs, "email", []);
+					var webs = BX.prop.getArray(attrs, "web", []);
 
 					var phone = phones.length > 0 ? phones[0].value : "";
 					var email = emails.length > 0 ? emails[0].value : "";
+					var web = (webs.length > 0 ? webs[0].value : '');
 
 					item.node = BX.create('div', {
 						attrs: {
@@ -600,6 +658,12 @@
 											className: 'ui-dropdown-contact-info-item ui-dropdown-item-email'
 										},
 										text: email
+									}) : null,
+									web !== "" ? BX.create('div', {
+										attrs: {
+											className: 'ui-dropdown-contact-info-item ui-dropdown-item-web'
+										},
+										text: web
 									}) : null
 								]
 							})
@@ -685,7 +749,7 @@
 			},
 			handleUpArrow: function()
 			{
-				if(this.alertEmptyContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+				if(this.newAlertContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 				{
 					if (this.items && this.items.length > 0)
 					{
@@ -725,14 +789,14 @@
 			{
 				var highlightElementIndex = this.getHighlightItemIndex();
 
-				if(this.alertEmptyContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+				if(this.newAlertContainer && this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 				{
 					return;
 				}
 
 				if (!this.items || this.items.length === 0)
 				{
-					if(this.alertEmptyContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+					if(this.newAlertContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 					{
 						this.popupAlertContainer.classList.add('ui-dropdown-item-highlight');
 					}
@@ -742,7 +806,7 @@
 
 				if(highlightElementIndex === this.items.length - 1)
 				{
-					if(this.alertEmptyContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
+					if(this.newAlertContainer && !this.popupAlertContainer.classList.contains('ui-dropdown-item-highlight'))
 					{
 						this.cleanHighlightingItem();
 						this.popupAlertContainer.classList.add('ui-dropdown-item-highlight');
@@ -778,7 +842,8 @@
 				if(deltaBottom < 0)
 				{
 					parent.scrollTop = parent.scrollTop + Math.abs(deltaBottom)
-				} else if(deltaTop > 0)
+				}
+				else if(deltaTop > 0)
 				{
 					parent.scrollTop = parent.scrollTop - deltaTop
 				}
@@ -812,7 +877,6 @@
 				}
 				return result;
 			},
-
 			getItemIndex: function(item)
 			{
 				var items = this.getItems();

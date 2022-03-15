@@ -10,11 +10,9 @@ namespace Bitrix\Sender;
 use Bitrix\Main\Entity;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Type as MainType;
-
-use Bitrix\Sender\Posting\Builder as PostingBuilder;
 use Bitrix\Sender\Integration;
 use Bitrix\Sender\Internals\Model;
-
+use Bitrix\Sender\Posting\Builder as PostingBuilder;
 
 Loc::loadMessages(__FILE__);
 
@@ -223,16 +221,16 @@ class PostingTable extends Entity\DataManager
 		}
 	}
 
-
 	/**
 	 * @param $postingId
 	 * @param bool $checkDuplicate
+	 * @param bool $prepareFields
+	 *
 	 * @return bool
-	 * @throws \Bitrix\Main\ArgumentException
 	 */
-	public static function initGroupRecipients($postingId, $checkDuplicate = true)
+	public static function initGroupRecipients($postingId, $checkDuplicate = true, $prepareFields = true)
 	{
-		PostingBuilder::create()->run($postingId, $checkDuplicate);
+		PostingBuilder::create()->run($postingId, $checkDuplicate, $prepareFields);
 
 		return true;
 	}
@@ -677,7 +675,13 @@ class PostingRecipientTable extends Entity\DataManager
 		return array(
 			self::SEND_RESULT_NONE => Loc::getMessage('SENDER_POSTING_RECIPIENT_STATUS_N'),
 			self::SEND_RESULT_SUCCESS => Loc::getMessage('SENDER_POSTING_RECIPIENT_STATUS_S'),
-			self::SEND_RESULT_ERROR => Loc::getMessage('SENDER_POSTING_RECIPIENT_STATUS_E')
+			self::SEND_RESULT_ERROR => Loc::getMessage('SENDER_POSTING_RECIPIENT_STATUS_E'),
+			self::SEND_RESULT_DENY => Loc::getMessage('SENDER_POSTING_RECIPIENT_STATUS_D')
 		);
+	}
+
+	public static function hasUnprocessed($postingId, $threadId = null)
+	{
+		return (static::getCount(['=POSTING_ID' => $postingId, '=STATUS' => self::SEND_RESULT_NONE]) > 0);
 	}
 }

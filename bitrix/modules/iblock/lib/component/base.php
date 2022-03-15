@@ -37,6 +37,8 @@ abstract class Base extends \CBitrixComponent
 	/** @var ErrorCollection */
 	protected $errorCollection;
 
+	protected $separateLoading = false;
+
 	protected $selectFields = array();
 	protected $filterFields = array();
 	protected $sortFields = array();
@@ -219,6 +221,23 @@ abstract class Base extends \CBitrixComponent
 	}
 
 	/**
+	 * @param $state
+	 * @return void
+	 */
+	protected function setSeparateLoading($state)
+	{
+		$this->separateLoading = (bool)$state;
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected function isSeparateLoading()
+	{
+		return $this->separateLoading;
+	}
+
+	/**
 	 * Return settings script path with modified time postfix.
 	 *
 	 * @param string $componentPath		Path to component.
@@ -227,6 +246,13 @@ abstract class Base extends \CBitrixComponent
 	 */
 	public static function getSettingsScript($componentPath, $settingsName)
 	{
+		if ($settingsName === 'filter_conditions')
+		{
+			if (Loader::includeModule('catalog'))
+			{
+				\CJSCore::Init(['core_condtree']);
+			}
+		}
 		$path = $componentPath.'/settings/'.$settingsName.'/script.js';
 		$file = new Main\IO\File(Main\Application::getDocumentRoot().$path);
 
@@ -304,6 +330,11 @@ abstract class Base extends \CBitrixComponent
 		{
 			$params['PRODUCT_ID_VARIABLE'] = 'id';
 		}
+		$params['ACTION_COMPARE_VARIABLE'] = isset($params['ACTION_COMPARE_VARIABLE']) ? trim($params['ACTION_COMPARE_VARIABLE']) : '';
+		if ($params['ACTION_COMPARE_VARIABLE'] == '' || !preg_match(self::PARAM_TITLE_MASK, $params['ACTION_COMPARE_VARIABLE']))
+		{
+			$params['ACTION_COMPARE_VARIABLE'] = $params['ACTION_VARIABLE'];
+		}
 
 		$params['PRODUCT_QUANTITY_VARIABLE'] = isset($params['PRODUCT_QUANTITY_VARIABLE']) ? trim($params['PRODUCT_QUANTITY_VARIABLE']) : '';
 		if ($params['PRODUCT_QUANTITY_VARIABLE'] == '' || !preg_match(self::PARAM_TITLE_MASK, $params['PRODUCT_QUANTITY_VARIABLE']))
@@ -317,12 +348,26 @@ abstract class Base extends \CBitrixComponent
 			$params['PRODUCT_PROPS_VARIABLE'] = 'prop';
 		}
 
-		$params['SET_TITLE'] = $params['SET_TITLE'] !== 'N';
-		$params['SET_BROWSER_TITLE'] = isset($params['SET_BROWSER_TITLE']) && $params['SET_BROWSER_TITLE'] === 'N' ? 'N' : 'Y';
-		$params['SET_META_KEYWORDS'] = isset($params['SET_META_KEYWORDS']) && $params['SET_META_KEYWORDS'] === 'N' ? 'N' : 'Y';
-		$params['SET_META_DESCRIPTION'] = isset($params['SET_META_DESCRIPTION']) && $params['SET_META_DESCRIPTION'] === 'N' ? 'N' : 'Y';
-		$params['ADD_SECTIONS_CHAIN'] = isset($params['ADD_SECTIONS_CHAIN']) && $params['ADD_SECTIONS_CHAIN'] === 'Y';
+		// landing mode
+		if (
+			isset($params['ALLOW_SEO_DATA'])
+			&& ($params['ALLOW_SEO_DATA'] === 'Y' || $params['ALLOW_SEO_DATA'] === 'N')
+		)
+		{
+			$params['SET_TITLE'] = $params['ALLOW_SEO_DATA'] === 'Y';
+			$params['SET_BROWSER_TITLE'] = $params['ALLOW_SEO_DATA'];
+			$params['SET_META_KEYWORDS'] = $params['ALLOW_SEO_DATA'];
+			$params['SET_META_DESCRIPTION'] = $params['ALLOW_SEO_DATA'];
+		}
+		else
+		{
+			$params['SET_TITLE'] = $params['SET_TITLE'] !== 'N';
+			$params['SET_BROWSER_TITLE'] = isset($params['SET_BROWSER_TITLE']) && $params['SET_BROWSER_TITLE'] === 'N' ? 'N' : 'Y';
+			$params['SET_META_KEYWORDS'] = isset($params['SET_META_KEYWORDS']) && $params['SET_META_KEYWORDS'] === 'N' ? 'N' : 'Y';
+			$params['SET_META_DESCRIPTION'] = isset($params['SET_META_DESCRIPTION']) && $params['SET_META_DESCRIPTION'] === 'N' ? 'N' : 'Y';
+		}
 		$params['SET_LAST_MODIFIED'] = isset($params['SET_LAST_MODIFIED']) && $params['SET_LAST_MODIFIED'] === 'Y';
+		$params['ADD_SECTIONS_CHAIN'] = isset($params['ADD_SECTIONS_CHAIN']) && $params['ADD_SECTIONS_CHAIN'] === 'Y';
 		$params['DISPLAY_COMPARE'] = isset($params['DISPLAY_COMPARE']) && $params['DISPLAY_COMPARE'] === 'Y';
 		$params['COMPARE_PATH'] = isset($params['COMPARE_PATH']) ? trim($params['COMPARE_PATH']) : '';
 		$params['COMPARE_NAME'] = isset($params['COMPARE_NAME']) ? trim($params['COMPARE_NAME']) : 'CATALOG_COMPARE_LIST';
@@ -1624,16 +1669,93 @@ abstract class Base extends \CBitrixComponent
 		if (!empty($this->globalFilter))
 			$globalFilter = $this->convertFilter($this->globalFilter);
 
-		$elementIterator = \CIBlockElement::GetList(
-			$this->sortFields,
-			array_merge($globalFilter, $filterFields),
-			false,
-			$this->navParams,
-			$selectFields
-		);
+		$iteratorParams = [
+			'select' => $selectFields,
+			'filter' => array_merge($globalFilter, $filterFields),
+			'order' => $this->sortFields,
+			'navigation' => $this->navParams
+		];
+		if ($this->isSeparateLoading() && $iblockId > 0)
+		{
+			$elementIterator = $this->getSeparateList($iteratorParams);
+		}
+		else
+		{
+			$elementIterator = $this->getFullIterator($iteratorParams);
+		}
+		unset($iteratorParams);
+
 		$elementIterator->SetUrlTemplates($this->arParams['DETAIL_URL']);
 
 		return $elementIterator;
+	}
+
+	/**
+	 * @param array $params
+	 * @return \CIBlockResult
+	 */
+	protected function getSeparateList(array $params)
+	{
+		$list = [];
+
+		$selectFields = ['ID', 'IBLOCK_ID'];
+		if (!empty($params['order']))
+		{
+			$selectFields = array_unique(array_merge(
+				$selectFields,
+				array_keys($params['order'])
+			));
+		}
+
+		$iterator = \CIBlockElement::GetList(
+			$params['order'],
+			$params['filter'],
+			false,
+			$params['navigation'],
+			$selectFields
+		);
+		while ($row = $iterator->Fetch())
+		{
+			$id = (int)$row['ID'];
+			$list[$id] = $row;
+		}
+		unset($row);
+
+		if (!empty($list))
+		{
+			$fullIterator = \CIBlockElement::GetList(
+				[],
+				['IBLOCK_ID' => $params['filter']['IBLOCK_ID'], 'ID' => array_keys($list), 'SITE_ID' => $this->getSiteId()],
+				false,
+				false,
+				$params['select']
+			);
+			while ($row = $fullIterator->Fetch())
+			{
+				$id = (int)$row['ID'];
+				$list[$id] = $list[$id] + $row;
+			}
+			unset($row, $fullIterator);
+
+			$iterator->InitFromArray(array_values($list));
+		}
+
+		return $iterator;
+	}
+
+	/**
+	 * @param array $params
+	 * @return \CIBlockResult
+	 */
+	protected function getFullIterator(array $params)
+	{
+		return \CIBlockElement::GetList(
+			$params['order'],
+			$params['filter'],
+			false,
+			$params['navigation'],
+			$params['select']
+		);
 	}
 
 	/**
@@ -1656,11 +1778,31 @@ abstract class Base extends \CBitrixComponent
 	 */
 	protected function getSelect()
 	{
-		return [
+		$result = [
 			'ID', 'IBLOCK_ID', 'CODE', 'XML_ID', 'NAME', 'ACTIVE', 'DATE_ACTIVE_FROM', 'DATE_ACTIVE_TO', 'SORT',
 			'PREVIEW_TEXT', 'PREVIEW_TEXT_TYPE', 'DETAIL_TEXT', 'DETAIL_TEXT_TYPE', 'DATE_CREATE', 'CREATED_BY', 'TAGS',
 			'TIMESTAMP_X', 'MODIFIED_BY', 'IBLOCK_SECTION_ID', 'DETAIL_PAGE_URL', 'DETAIL_PICTURE', 'PREVIEW_PICTURE'
 		];
+
+		$checkPriceProperties = (
+			!$this->useCatalog
+			|| (
+				isset($this->arParams['IBLOCK_ID'])
+				&& $this->arParams['IBLOCK_ID'] > 0
+				&& !isset($this->storage['CATALOGS'][$this->arParams['IBLOCK_ID']])
+			)
+		);
+
+		if ($checkPriceProperties && !empty($this->storage['PRICES']))
+		{
+			foreach ($this->storage['PRICES'] as $row)
+			{
+				if (!empty($row['SELECT']))
+					$result[] = $row['SELECT'];
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1732,7 +1874,7 @@ abstract class Base extends \CBitrixComponent
 		if (!empty($order))
 		{
 			foreach (array_keys($order) as $field)
-				$select[] = strtoupper($field);
+				$select[] = mb_strtoupper($field);
 			unset($field);
 		}
 		if (!empty($select))
@@ -1981,7 +2123,7 @@ abstract class Base extends \CBitrixComponent
 		{
 			$name = $conditionNameMap[$condition['CLASS_ID']];
 		}
-		elseif (strpos($condition['CLASS_ID'], 'CondIBProp') !== false)
+		elseif (mb_strpos($condition['CLASS_ID'], 'CondIBProp') !== false)
 		{
 			$name = $condition['CLASS_ID'];
 		}
@@ -2055,10 +2197,10 @@ abstract class Base extends \CBitrixComponent
 				}
 				else
 				{
-					if (($ind = strpos($name, 'CondIBProp')) !== false)
+					if (($ind = mb_strpos($name, 'CondIBProp')) !== false)
 					{
 						list($prefix, $iblock, $propertyId) = explode(':', $name);
-						$operator = $ind > 0 ? substr($prefix, 0, $ind) : '';
+						$operator = $ind > 0? mb_substr($prefix, 0, $ind) : '';
 
 						$catalogInfo = \CCatalogSku::GetInfoByIBlock($iblock);
 						if (!empty($catalogInfo))
@@ -2217,6 +2359,7 @@ abstract class Base extends \CBitrixComponent
 				$element['~CATALOG_QUANTITY_TRACE'] = $element['PRODUCT']['QUANTITY_TRACE'];
 				$element['CATALOG_QUANTITY_TRACE'] = $element['PRODUCT']['QUANTITY_TRACE'];
 				$element['~CATALOG_CAN_BUY_ZERO'] = $element['PRODUCT']['CAN_BUY_ZERO'];
+				$element['CATALOG_CAN_BUY_ZERO'] = $element['PRODUCT']['CAN_BUY_ZERO'];
 				$element['~CATALOG_SUBSCRIBE'] = $element['PRODUCT']['SUBSCRIBE'];
 				$element['CATALOG_SUBSCRIBE'] = $element['PRODUCT']['SUBSCRIBE'];
 			}
@@ -3277,11 +3420,15 @@ abstract class Base extends \CBitrixComponent
 	 */
 	protected function initUrlTemplates()
 	{
-		/** @global \CMain $APPLICATION */
-		global $APPLICATION;
-
 		$actionVar = $this->arParams['ACTION_VARIABLE'];
 		$productIdVar = $this->arParams['PRODUCT_ID_VARIABLE'];
+		$compareActionVar = $this->arParams['ACTION_COMPARE_VARIABLE'];
+
+		$clearParams = Main\HttpRequest::getSystemParameters();
+		$clearParams[] = $actionVar;
+		$clearParams[] = $productIdVar;
+		$clearParams[] = $compareActionVar;
+		$clearParams[] = '';
 
 		if (!empty($this->arParams['CUSTOM_CURRENT_PAGE']))
 		{
@@ -3289,51 +3436,47 @@ abstract class Base extends \CBitrixComponent
 		}
 		else
 		{
-			$pageUrl = $this->request->isAjaxRequest()
-				? $this->arParams['CURRENT_BASE_PAGE']
-				: $APPLICATION->GetCurPageParam();
-		}
-
-		$currentPath = \CHTTP::urlDeleteParams(
-			$pageUrl,
-			array($productIdVar, $actionVar, ''),
-			array('delete_system_params' => true)
-		);
-		$currentPath .= (stripos($currentPath, '?') === false ? '?' : '&');
-
-		if ($this->arParams['USE_COMPARE_LIST'] == 'Y')
-		{
-			$comparePath = $currentPath;
-		}
-		else
-		{
-			if ($this->arParams['COMPARE_PATH'] == '')
+			if ($this->request->isAjaxRequest())
 			{
-				$comparePath = $currentPath;
+				$pageUrl = $this->arParams['CURRENT_BASE_PAGE'];
 			}
 			else
 			{
-				$comparePath = \CHTTP::urlDeleteParams(
-					$this->arParams['COMPARE_PATH'],
-					array(''),
-					array('delete_system_params' => true)
-				);
-				$comparePath .= (stripos($comparePath, '?') === false ? '?' : '&');
+				$pageUrl = Main\Application::getInstance()->getContext()->getRequest()->getDecodedUri();
+
 			}
 		}
+		$currentUri = new Main\Web\Uri($pageUrl);
 
-		$urls = array();
-		$urls['~BUY_URL_TEMPLATE'] = $currentPath.$actionVar.'='.self::ACTION_BUY.'&'.$productIdVar.'=#ID#';
-		$urls['~ADD_URL_TEMPLATE'] = $currentPath.$actionVar.'='.self::ACTION_ADD_TO_BASKET.'&'.$productIdVar.'=#ID#';
-		$urls['~SUBSCRIBE_URL_TEMPLATE'] = $currentPath.$actionVar.'='.self::ACTION_SUBSCRIBE.'&'.$productIdVar.'=#ID#';
-		$urls['~COMPARE_URL_TEMPLATE'] = $comparePath.$actionVar.'='.self::ACTION_ADD_TO_COMPARE.'&'.$productIdVar.'=#ID#';
-		$urls['~COMPARE_DELETE_URL_TEMPLATE'] = $comparePath.$actionVar.'='.self::ACTION_DELETE_FROM_COMPARE.'&'.$productIdVar.'=#ID#';
+		if ($this->arParams['USE_COMPARE_LIST'] == 'N' && $this->arParams['COMPARE_PATH'] != '')
+		{
+			$compareUri = new Main\Web\Uri($this->arParams['COMPARE_PATH']);
+		}
+		else
+		{
+			$compareUri = $currentUri;
+		}
 
-		$urls['BUY_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~BUY_URL_TEMPLATE']);
-		$urls['ADD_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~ADD_URL_TEMPLATE']);
-		$urls['SUBSCRIBE_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~SUBSCRIBE_URL_TEMPLATE']);
-		$urls['COMPARE_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~COMPARE_URL_TEMPLATE']);
-		$urls['COMPARE_DELETE_URL_TEMPLATE'] = Main\Text\HtmlFilter::encode($urls['~COMPARE_DELETE_URL_TEMPLATE']);
+		$currentUri->deleteParams($clearParams);
+		$compareUri->deleteParams($clearParams);
+
+		$urls = [];
+		$urls['BUY_URL_TEMPLATE'] = $currentUri->addParams([$actionVar => self::ACTION_BUY, $productIdVar => '#ID#'])->getUri();
+		$urls['ADD_URL_TEMPLATE'] = $currentUri->addParams([$actionVar => self::ACTION_ADD_TO_BASKET, $productIdVar => '#ID#'])->getUri();
+		$urls['SUBSCRIBE_URL_TEMPLATE'] = $currentUri->addParams([$actionVar => self::ACTION_SUBSCRIBE, $productIdVar => '#ID#'])->getUri();
+
+		$urls['COMPARE_URL_TEMPLATE'] = $compareUri->addParams([$compareActionVar => self::ACTION_ADD_TO_COMPARE, $productIdVar => '#ID#'])->getUri();
+		$urls['COMPARE_DELETE_URL_TEMPLATE'] = $compareUri->addParams([$compareActionVar => self::ACTION_DELETE_FROM_COMPARE, $productIdVar => '#ID#'])->getUri();
+
+		unset($compareUri, $currentUri, $clearParams);
+
+		foreach (array_keys($urls) as $index)
+		{
+			$value = str_replace('%23ID%23', '#ID#', $urls[$index]); // format compatibility
+			$urls['~'.$index] = $value;
+			$urls[$index] = Main\Text\HtmlFilter::encode($value, ENT_QUOTES);
+		}
+		unset($index);
 
 		$this->storage['URLS'] = $urls;
 	}
@@ -3429,7 +3572,7 @@ abstract class Base extends \CBitrixComponent
 				$element['MIN_PRICE'] = \CIBlockPriceTools::getMinPriceFromList($element['PRICES']);
 			}
 
-			$element['CAN_BUY'] = \CIBlockPriceTools::CanBuy($element['IBLOCK_ID'], $this->storage['PRICES'], $element);
+			$element['CAN_BUY'] = !empty($element['PRICES']);
 		}
 	}
 
@@ -3560,7 +3703,7 @@ abstract class Base extends \CBitrixComponent
 			$checkFields = array();
 			foreach (array_keys($offersOrder) as $code)
 			{
-				$code = strtoupper($code);
+				$code = mb_strtoupper($code);
 				if ($code == 'ID' || $code == 'AVAILABLE')
 					continue;
 				$checkFields[] = $code;
@@ -3661,6 +3804,7 @@ abstract class Base extends \CBitrixComponent
 					$row['~CATALOG_QUANTITY_TRACE'] = $row['PRODUCT']['QUANTITY_TRACE'];
 					$row['CATALOG_QUANTITY_TRACE'] = $row['PRODUCT']['QUANTITY_TRACE'];
 					$row['~CATALOG_CAN_BUY_ZERO'] = $row['PRODUCT']['CAN_BUY_ZERO'];
+					$row['CATALOG_CAN_BUY_ZERO'] = $row['PRODUCT']['CAN_BUY_ZERO'];
 					$row['~CATALOG_SUBSCRIBE'] = $row['PRODUCT']['SUBSCRIBE'];
 					$row['CATALOG_SUBSCRIBE'] = $row['PRODUCT']['SUBSCRIBE'];
 				}
@@ -3729,7 +3873,7 @@ abstract class Base extends \CBitrixComponent
 				$propertyList = $this->getPropertyList($catalog['IBLOCK_ID'], $loadPropertyCodes);
 				unset($loadPropertyCodes);
 
-				if (!empty($propertyList))
+				if (!empty($propertyList) || $this->useDiscountCache)
 				{
 					\CIBlockElement::GetPropertyValuesArray($offers, $catalog['IBLOCK_ID'], $offersFilter);
 					foreach ($offers as &$row)
@@ -3742,22 +3886,25 @@ abstract class Base extends \CBitrixComponent
 								\CCatalogDiscount::SetProductPropertiesCache($row['ID'], $row["PROPERTIES"]);
 						}
 
-						foreach ($propertyList as $pid)
+						if (!empty($propertyList))
 						{
-							if (!isset($row["PROPERTIES"][$pid]))
-								continue;
-							$prop = &$row["PROPERTIES"][$pid];
-							$boolArr = is_array($prop["VALUE"]);
-							if(
-								($boolArr && !empty($prop["VALUE"])) ||
-								(!$boolArr && (string)$prop["VALUE"] !== '')
-							)
+							foreach ($propertyList as $pid)
 							{
-								$row["DISPLAY_PROPERTIES"][$pid] = \CIBlockFormatProperties::GetDisplayValue($row, $prop, "catalog_out");
+								if (!isset($row["PROPERTIES"][$pid]))
+									continue;
+								$prop = &$row["PROPERTIES"][$pid];
+								$boolArr = is_array($prop["VALUE"]);
+								if (
+									($boolArr && !empty($prop["VALUE"])) ||
+									(!$boolArr && (string)$prop["VALUE"] !== '')
+								)
+								{
+									$row["DISPLAY_PROPERTIES"][$pid] = \CIBlockFormatProperties::GetDisplayValue($row, $prop, "catalog_out");
+								}
+								unset($boolArr, $prop);
 							}
-							unset($boolArr, $prop);
+							unset($pid);
 						}
-						unset($pid);
 					}
 					unset($row);
 				}
@@ -3820,8 +3967,8 @@ abstract class Base extends \CBitrixComponent
 	protected function getOffersSort()
 	{
 		$offersOrder = array(
-			$this->arParams['OFFERS_SORT_FIELD'] => $this->arParams['OFFERS_SORT_ORDER'],
-			$this->arParams['OFFERS_SORT_FIELD2'] => $this->arParams['OFFERS_SORT_ORDER2']
+			mb_strtoupper($this->arParams['OFFERS_SORT_FIELD']) => $this->arParams['OFFERS_SORT_ORDER'],
+			mb_strtoupper($this->arParams['OFFERS_SORT_FIELD2']) => $this->arParams['OFFERS_SORT_ORDER2']
 		);
 		if (!isset($offersOrder['ID']))
 			$offersOrder['ID'] = 'DESC';
@@ -4028,14 +4175,13 @@ abstract class Base extends \CBitrixComponent
 		}
 		else
 		{
-			$action = strtoupper($this->request->get($this->arParams['ACTION_VARIABLE']));
+			$action = mb_strtoupper($this->request->get($this->arParams['ACTION_VARIABLE']));
 		}
 
 		$productId = (int)$this->request->get($this->arParams['PRODUCT_ID_VARIABLE']);
 
 		if (
 			($action == self::ACTION_ADD_TO_BASKET || $action == self::ACTION_BUY || $action == self::ACTION_SUBSCRIBE)
-			&& $productId > 0
 			&& Loader::includeModule('sale')
 			&& Loader::includeModule('catalog')
 		)
@@ -4166,11 +4312,20 @@ abstract class Base extends \CBitrixComponent
 		$quantity = 0;
 		$productProperties = array();
 
-		$product = $this->getProductInfo($productId);
-		if (empty($product))
+		$productId = (int)$productId;
+		if ($productId <= 0)
 		{
-			$errorMsg = Loc::getMessage('CATALOG_PRODUCT_NOT_FOUND');
+			$errorMsg = Loc::getMessage('CATALOG_PRODUCT_ID_IS_ABSENT');
 			$successfulAdd = false;
+		}
+		if ($successfulAdd)
+		{
+			$product = $this->getProductInfo($productId);
+			if (empty($product))
+			{
+				$errorMsg = Loc::getMessage('CATALOG_PRODUCT_NOT_FOUND');
+				$successfulAdd = false;
+			}
 		}
 		if ($successfulAdd)
 		{
@@ -5095,7 +5250,12 @@ abstract class Base extends \CBitrixComponent
 		);
 	}
 
-	protected function getEmptyPriceMatrix()
+	/**
+	 * Returns old price result format for product with price ranges. Do not use this method.
+	 *
+	 * @return array
+	 */
+	protected function getEmptyPriceMatrix(): array
 	{
 		return array(
 			'ROWS' => array(),

@@ -1,13 +1,13 @@
 <section class="landing-block g-pt-30 g-pb-20">
 
 	<div class="container">
-		<div class="row">
-			<div class="landing-block-card js-animation fadeIn col-sm-6 col-md-6">
+		<div class="row landing-block-inner">
+			<div class="landing-block-card js-animation fadeIn col-sm-6 col-md-6 col-lg-6">
 				<article class="u-shadow-v28 g-bg-white">
 					<div class="landing-block-node-img-container">
 						<img class="landing-block-node-img img-fluid w-100"
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/500x335/img1.jpg" alt="">
-						<div class="landing-block-node-svg-container g-pos-rel">
+						<div class="landing-block-node-svg-container g-pointer-events-none g-pos-rel">
 							<svg class="g-hidden-col-1 g-hidden-col-2 g-pos-abs g-left-0 g-right-0 g-bottom-0"
 								 version="1.1" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"
 								 xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="140px"
@@ -27,22 +27,22 @@
 					<div class="g-pos-rel">
 						<div class="g-pos-rel g-z-index-1 g-pa-30">
 							<h3 class="h5 mb-3">
-								<a class="landing-block-node-link u-link-v5 g-color-main g-color-primary--hover" href="#">Free
+								<a class="landing-block-node-link landing-semantic-link-image-medium u-link-v5 g-color-main g-color-primary--hover" href="#">Free
 									virtual conference to take your agile ux skills to the next</a>
 							</h3>
-							<a class="landing-block-node-link-more u-link-v5 g-color-text g-color-primary--hover g-font-weight-500"
+							<a class="landing-block-node-link-more landing-semantic-link-image-medium u-link-v5 g-color-text g-color-primary--hover"
 							   href="#">Read More</a>
 						</div>
 					</div>
 				</article>
 			</div>
 
-			<div class="landing-block-card js-animation fadeIn col-sm-6 col-md-6">
+			<div class="landing-block-card js-animation fadeIn col-sm-6 col-md-6 col-lg-6">
 				<article class="u-shadow-v28 g-bg-white">
 					<div class="landing-block-node-img-container">
 						<img class="landing-block-node-img img-fluid w-100"
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/500x335/img2.jpg" alt="">
-						<div class="landing-block-node-svg-container g-pos-rel">
+						<div class="landing-block-node-svg-container g-pointer-events-none g-pos-rel">
 							<svg class="g-hidden-col-1 g-hidden-col-2 g-pos-abs g-left-0 g-right-0 g-bottom-0"
 								 version="1.1" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"
 								 xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="140px"
@@ -62,10 +62,10 @@
 					<div class="g-pos-rel">
 						<div class="g-pos-rel g-z-index-1 g-pa-30">
 							<h3 class="h5 mb-3">
-								<a class="landing-block-node-link u-link-v5 g-color-main g-color-primary--hover" href="#">Free
+								<a class="landing-block-node-link landing-semantic-link-image-medium u-link-v5 g-color-main g-color-primary--hover" href="#">Free
 									virtual conference to take your agile ux skills to the next</a>
 							</h3>
-							<a class="landing-block-node-link-more u-link-v5 g-color-text g-color-primary--hover g-font-weight-500"
+							<a class="landing-block-node-link-more landing-semantic-link-image-medium u-link-v5 g-color-text g-color-primary--hover"
 							   href="#">Read More</a>
 						</div>
 					</div>

@@ -17,8 +17,8 @@ if ($USER->IsAdmin()){
 
 <?
 $APPLICATION->IncludeComponent(
-	"bitrix:catalog",
-	".default",
+	"bitrix:catalog", 
+	".default", 
 	array(
 		"ELEMENT_SORT_ADDITIONAL" => false,
 		"BY_LINK" => "N",
@@ -185,7 +185,7 @@ $APPLICATION->IncludeComponent(
 			1 => "PROP2",
 			2 => "PROP3",
 		),
-		"LIST_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false}]",
+		"LIST_PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false},{'VARIANT':'3','BIG_DATA':false}]",
 		"LIST_PROPERTY_CODE" => array(
 			0 => "CHASTOTA_H_H",
 			1 => "MAX_KR_MOM",
@@ -215,7 +215,7 @@ $APPLICATION->IncludeComponent(
 		"PAGER_SHOW_ALWAYS" => "N",
 		"PAGER_TEMPLATE" => "arrows",
 		"PAGER_TITLE" => "Товары",
-		"PAGE_ELEMENT_COUNT" => "44",
+		"PAGE_ELEMENT_COUNT" => "40",
 		"PARTIAL_PRODUCT_PROPERTIES" => "",
 		"PATH_TO_SHIPPING" => "/delivery/",
 		"PRICE_CODE" => array(

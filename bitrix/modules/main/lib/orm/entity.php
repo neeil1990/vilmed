@@ -17,6 +17,7 @@ use Bitrix\Main\ORM\Fields\ScalarField;
 use Bitrix\Main\ORM\Objectify\EntityObject;
 use Bitrix\Main\ORM\Objectify\Collection;
 use Bitrix\Main\ORM\Query\Query;
+use Bitrix\Main\Text\StringHelper;
 
 /**
  * Base entity
@@ -115,14 +116,20 @@ class Entity
 		if (empty(self::$instances[$className]))
 		{
 			/** @var Entity $entity */
-			$entity = new static;
-			$entity->initialize($className);
-			$entity->postInitialize();
+			$entityClass = $className::getEntityClass();
 
-			// call user-defined postInitialize
-			$className::postInitialize($entity);
+			// in case of calling Table class was not ended with entity initialization
+			if (empty(self::$instances[$className]))
+			{
+				$entity = new $entityClass;
+				$entity->initialize($className);
+				$entity->postInitialize();
 
-			self::$instances[$className] = $entity;
+				// call user-defined postInitialize
+				$className::postInitialize($entity);
+
+				self::$instances[$className] = $entity;
+			}
 		}
 
 		return self::$instances[$className];
@@ -154,7 +161,7 @@ class Entity
 		{
 			if (!empty($fieldInfo['reference']))
 			{
-				if (is_string($fieldInfo['data_type']) && strpos($fieldInfo['data_type'], '\\') === false)
+				if (is_string($fieldInfo['data_type']) && mb_strpos($fieldInfo['data_type'], '\\') === false)
 				{
 					// if reference has no namespace, then it'is in the same namespace
 					$fieldInfo['data_type'] = $this->getNamespace().$fieldInfo['data_type'];
@@ -176,14 +183,14 @@ class Entity
 			}
 			else
 			{
-				$fieldClass = Entity::snake2camel($fieldInfo['data_type']) . 'Field';
+				$fieldClass = StringHelper::snake2camel($fieldInfo['data_type']) . 'Field';
 				$fieldClass = '\\Bitrix\\Main\\Entity\\'.$fieldClass;
 
-				if (strlen($fieldInfo['data_type']) && class_exists($fieldClass))
+				if (mb_strlen($fieldInfo['data_type']) && class_exists($fieldClass))
 				{
 					$field = new $fieldClass($fieldName, $fieldInfo);
 				}
-				elseif (strlen($fieldInfo['data_type']) && class_exists($fieldInfo['data_type']))
+				elseif (mb_strlen($fieldInfo['data_type']) && class_exists($fieldInfo['data_type']))
 				{
 					$fieldClass = $fieldInfo['data_type'];
 					$field = new $fieldClass($fieldName, $fieldInfo);
@@ -236,7 +243,7 @@ class Entity
 	{
 		// basic properties
 		$classPath = explode('\\', ltrim($this->className, '\\'));
-		$this->name = substr(end($classPath), 0, -5);
+		$this->name = mb_substr(end($classPath), 0, -5);
 
 		// default db table name
 		if (is_null($this->dbTableName))
@@ -259,17 +266,17 @@ class Entity
 					continue;
 				}
 
-				$this->dbTableName .= strtolower($_pathElem).'_';
+				$this->dbTableName .= mb_strtolower($_pathElem).'_';
 			}
 
 			// add class
 			if ($this->name !== end($_classPath))
 			{
-				$this->dbTableName .= Entity::camel2snake($this->name);
+				$this->dbTableName .= StringHelper::camel2snake($this->name);
 			}
 			else
 			{
-				$this->dbTableName = substr($this->dbTableName, 0, -1);
+				$this->dbTableName = mb_substr($this->dbTableName, 0, -1);
 			}
 		}
 
@@ -335,7 +342,7 @@ class Entity
 	{
 		$className = $entityName;
 
-		if (!strlen($className))
+		if ($className == '')
 		{
 			// entity without name
 			$className = 'NNM_Object';
@@ -430,7 +437,7 @@ class Entity
 	 */
 	protected function appendField(Field $field)
 	{
-		if (isset($this->fields[strtoupper($field->getName())]) && !$this->isClone)
+		if (isset($this->fields[StringHelper::strtoupper($field->getName())]) && !$this->isClone)
 		{
 			trigger_error(sprintf(
 				'Entity `%s` already has Field with name `%s`.', $this->getFullName(), $field->getName()
@@ -445,7 +452,7 @@ class Entity
 			$this->references[$field->getRefEntityName()][] = $field;
 		}
 
-		$this->fields[strtoupper($field->getName())] = $field;
+		$this->fields[StringHelper::strtoupper($field->getName())] = $field;
 
 		if ($field instanceof ScalarField && $field->isPrimary())
 		{
@@ -479,7 +486,7 @@ class Entity
 			$newRefField = new Reference($refFieldName, $newFieldInfo['data_type'], $newFieldInfo['reference'][0], $newFieldInfo['reference'][1]);
 			$newRefField->setEntity($this);
 
-			$this->fields[strtoupper($refFieldName)] = $newRefField;
+			$this->fields[StringHelper::strtoupper($refFieldName)] = $newRefField;
 		}
 
 		return true;
@@ -502,7 +509,7 @@ class Entity
 
 	public function getReferencesCountTo($refEntityName)
 	{
-		if (array_key_exists($key = strtolower($refEntityName), $this->references))
+		if (array_key_exists($key = mb_strtolower($refEntityName), $this->references))
 		{
 			return count($this->references[$key]);
 		}
@@ -513,7 +520,7 @@ class Entity
 
 	public function getReferencesTo($refEntityName)
 	{
-		if (array_key_exists($key = strtolower($refEntityName), $this->references))
+		if (array_key_exists($key = mb_strtolower($refEntityName), $this->references))
 		{
 			return $this->references[$key];
 		}
@@ -537,7 +544,7 @@ class Entity
 	{
 		if ($this->hasField($name))
 		{
-			return $this->fields[strtoupper($name)];
+			return $this->fields[StringHelper::strtoupper($name)];
 		}
 
 		throw new Main\ArgumentException(sprintf(
@@ -547,7 +554,7 @@ class Entity
 
 	public function hasField($name)
 	{
-		return isset($this->fields[strtoupper($name)]);
+		return isset($this->fields[StringHelper::strtoupper($name)]);
 	}
 
 	/**
@@ -603,18 +610,18 @@ class Entity
 		{
 			$this->u_fields = array();
 
-			if (strlen($this->uf_id))
+			if($this->uf_id <> '')
 			{
 				/** @var \CUserTypeManager $USER_FIELD_MANAGER */
 				global $USER_FIELD_MANAGER;
 
-				foreach ($USER_FIELD_MANAGER->getUserFields($this->uf_id) as $info)
+				foreach($USER_FIELD_MANAGER->getUserFields($this->uf_id) as $info)
 				{
 					$this->u_fields[$info['FIELD_NAME']] = new UField($info);
 					$this->u_fields[$info['FIELD_NAME']]->setEntity($this);
 
 					// add references for ufield (UF_DEPARTMENT_BY)
-					if ($info['USER_TYPE_ID'] == 'iblock_section')
+					if($info['USER_TYPE_ID'] == 'iblock_section')
 					{
 						$info['FIELD_NAME'] .= '_BY';
 						$this->u_fields[$info['FIELD_NAME']] = new UField($info);
@@ -634,12 +641,12 @@ class Entity
 
 	public function getFullName()
 	{
-		return substr($this->className, 0, -5);
+		return mb_substr($this->className, 0, -5);
 	}
 
 	public function getNamespace()
 	{
-		return substr($this->className, 0, strrpos($this->className, '\\')+1);
+		return mb_substr($this->className, 0, mb_strrpos($this->className, '\\') + 1);
 	}
 
 	public function getModule()
@@ -651,9 +658,9 @@ class Entity
 			// \Thing -> ""
 			$parts = explode("\\", $this->className);
 			if($parts[1] == "Bitrix")
-				$this->module = strtolower($parts[2]);
+				$this->module = mb_strtolower($parts[2]);
 			elseif(!empty($parts[1]) && isset($parts[2]))
-				$this->module = strtolower($parts[1].".".$parts[2]);
+				$this->module = mb_strtolower($parts[1].".".$parts[2]);
 			else
 				$this->module = "";
 		}
@@ -737,12 +744,12 @@ class Entity
 	 */
 	public static function normalizeEntityClass($entityName)
 	{
-		if (strtolower(substr($entityName, -5)) !== 'table')
+		if (mb_strtolower(mb_substr($entityName, -5)) !== 'table')
 		{
 			$entityName .= 'Table';
 		}
 
-		if (substr($entityName, 0, 1) !== '\\')
+		if (mb_substr($entityName, 0, 1) !== '\\')
 		{
 			$entityName = '\\'.$entityName;
 		}
@@ -753,7 +760,7 @@ class Entity
 	public static function getEntityClassParts($class)
 	{
 		$class = static::normalizeEntityClass($class);
-		$lastPos = strrpos($class, '\\');
+		$lastPos = mb_strrpos($class, '\\');
 
 		if($lastPos === 0)
 		{
@@ -762,9 +769,9 @@ class Entity
 		}
 		else
 		{
-			$namespace = substr($class, 1, $lastPos-1);
+			$namespace = mb_substr($class, 1, $lastPos - 1);
 		}
-		$name = substr($class, $lastPos+1, -5);
+		$name = mb_substr($class, $lastPos + 1, -5);
 
 		return compact('namespace', 'name');
 	}
@@ -776,7 +783,7 @@ class Entity
 			$this->code = '';
 
 			// get absolute path to class
-			$class_path = explode('\\', strtoupper(ltrim($this->className, '\\')));
+			$class_path = explode('\\', mb_strtoupper(ltrim($this->className, '\\')));
 
 			// cut class name to leave namespace only
 			$class_path = array_slice($class_path, 0, -1);
@@ -794,7 +801,7 @@ class Entity
 			}
 
 			// glue entity name
-			$this->code .= strtoupper(Entity::camel2snake($this->getName()));
+			$this->code .= mb_strtoupper(StringHelper::camel2snake($this->getName()));
 		}
 
 		return $this->code;
@@ -805,27 +812,53 @@ class Entity
 		return $this->getCode().'_ENTITY';
 	}
 
-	public static function camel2snake($str)
+	public function getTitle()
 	{
-		return strtolower(preg_replace('/(.)([A-Z])/', '$1_$2', $str));
+		$dataClass = $this->getDataClass();
+		$title = $dataClass::getTitle();
+
+		if ($title === null)
+		{
+			$title = Main\Localization\Loc::getMessage($this->getLangCode());
+		}
+
+		return $title;
 	}
 
+	/**
+	 * @deprecated Use Bitrix\StringHelper::camel2snake instead
+	 *
+	 * @param $str
+	 *
+	 * @return string
+	 */
+	public static function camel2snake($str)
+	{
+		return StringHelper::camel2snake($str);
+	}
+
+	/**
+	 * @deprecated Use Bitrix\StringHelper::snake2camel instead
+	 *
+	 * @param $str
+	 *
+	 * @return mixed
+	 */
 	public static function snake2camel($str)
 	{
-		$str = str_replace('_', ' ', strtolower($str));
-		return str_replace(' ', '', ucwords($str));
+		return StringHelper::snake2camel($str);
 	}
 
 	public static function normalizeName($entityName)
 	{
-		if (substr($entityName, 0, 1) !== '\\')
+		if (mb_substr($entityName, 0, 1) !== '\\')
 		{
 			$entityName = '\\'.$entityName;
 		}
 
-		if (strtolower(substr($entityName, -5)) === 'table')
+		if (mb_strtolower(mb_substr($entityName, -5)) === 'table')
 		{
-			$entityName = substr($entityName, 0, -5);
+			$entityName = mb_substr($entityName, 0, -5);
 		}
 
 		return $entityName;
@@ -848,7 +881,7 @@ class Entity
 	{
 		if ($entity_name === null)
 		{
-			$entity_name = 'Tmp'.randString();
+			$entity_name = 'Tmp'.randString().'x';
 		}
 		elseif (!preg_match('/^[a-z0-9_]+$/i', $entity_name))
 		{
@@ -923,7 +956,7 @@ class Entity
 		// generate class content
 		$eval = 'class '.$entity_name.'Table extends '.DataManager::class.' {'.PHP_EOL;
 		$eval .= 'public static function getMap() {'.PHP_EOL;
-		$eval .= 'return '.var_export(array('TMP_ID' => array('data_type' => 'integer', 'primary' => true)), true).';'.PHP_EOL;
+		$eval .= 'return '.var_export(['TMP_ID' => ['data_type' => 'integer', 'primary' => true, 'auto_generated' => true]], true).';'.PHP_EOL;
 		$eval .= '}';
 		$eval .= 'public static function getTableName() {'.PHP_EOL;
 		$eval .= 'return '.var_export($query_string, true).';'.PHP_EOL;
@@ -945,7 +978,7 @@ class Entity
 	/**
 	 * @param string               $entityName
 	 * @param null|array[]|Field[] $fields
-	 * @param array                $parameters [namespace, table_name, uf_id]
+	 * @param array                $parameters [namespace, table_name, uf_id, parent, parent_map, default_scope]
 	 *
 	 * @return Entity
 	 *
@@ -957,7 +990,7 @@ class Entity
 		$classCode = '';
 		$classCodeEnd = '';
 
-		if (strtolower(substr($entityName, -5)) !== 'table')
+		if (mb_strtolower(mb_substr($entityName, -5)) !== 'table')
 		{
 			$entityName .= 'Table';
 		}
@@ -970,6 +1003,7 @@ class Entity
 			));
 		}
 
+		/** @var DataManager $fullEntityName */
 		$fullEntityName = $entityName;
 
 		// namespace configuration
@@ -977,7 +1011,7 @@ class Entity
 		{
 			$namespace = $parameters['namespace'];
 
-			if (!preg_match('/^[a-z0-9\\\\]+$/i', $namespace))
+			if (!preg_match('/^[a-z0-9_\\\\]+$/i', $namespace))
 			{
 				throw new Main\ArgumentException(sprintf(
 					'Invalid namespace name `%s`', $namespace
@@ -990,8 +1024,10 @@ class Entity
 			$fullEntityName = '\\'.$namespace.'\\'.$fullEntityName;
 		}
 
+		$parentClass = !empty($parameters['parent']) ? $parameters['parent'] : DataManager::class;
+
 		// build entity code
-		$classCode = $classCode."class {$entityName} extends \\".DataManager::class." {";
+		$classCode = $classCode."class {$entityName} extends \\".$parentClass." {";
 		$classCodeEnd = '}'.$classCodeEnd;
 
 		if (!empty($parameters['table_name']))
@@ -1004,10 +1040,25 @@ class Entity
 			$classCode .= 'public static function getUfId(){return '.var_export($parameters['uf_id'], true).';}';
 		}
 
+		if (!empty($parameters['default_scope']))
+		{
+			$classCode .= 'public static function setDefaultScope($query){'.$parameters['default_scope'].'}';
+		}
+
+		if (isset($parameters['parent_map']) && $parameters['parent_map'] == false)
+		{
+			$classCode .= 'public static function getMap(){return [];}';
+		}
+
+		if(isset($parameters['object_parent']) && is_a($parameters['object_parent'], EntityObject::class, true))
+		{
+			$classCode .= 'public static function getObjectParentClass(){return '.var_export($parameters['object_parent'], true).';}';
+		}
+
 		// create entity
 		eval($classCode.$classCodeEnd);
 
-		$entity = self::getInstance($fullEntityName);
+		$entity = $fullEntityName::getEntity();
 
 		// add fields
 		if (!empty($fields))
@@ -1028,15 +1079,23 @@ class Entity
 	public function compileDbTableStructureDump()
 	{
 		$fields = $this->getScalarFields();
+
+		/** @var Main\DB\MysqlCommonConnection $connection */
 		$connection = $this->getConnection();
 
-		$autocomplete = array();
+		$autocomplete = [];
+		$unique = [];
 
 		foreach ($fields as $field)
 		{
 			if ($field->isAutocomplete())
 			{
 				$autocomplete[] = $field->getName();
+			}
+
+			if ($field->isUnique())
+			{
+				$unique[] = $field->getName();
 			}
 		}
 
@@ -1045,6 +1104,13 @@ class Entity
 
 		// create table
 		$connection->createTable($this->getDBTableName(), $fields, $this->getPrimaryArray(), $autocomplete);
+
+		// create indexes
+		foreach ($unique as $fieldName)
+		{
+			$connection->createIndex($this->getDBTableName(), $fieldName, [$fieldName], null,
+				Main\DB\MysqlCommonConnection::INDEX_UNIQUE);
+		}
 
 		// stop collecting queries
 		$connection->enableQueryExecuting();
@@ -1069,7 +1135,7 @@ class Entity
 			return $dataClass::getObjectClass();
 		}
 
-		$baseObjectClass = '\\'.EntityObject::class;
+		$baseObjectClass = '\\'.$dataClass::getObjectParentClass();
 		$objectClassName = static::getDefaultObjectClassName($classParts['name']);
 
 		$eval = "";
@@ -1107,7 +1173,7 @@ class Entity
 			return $dataClass::getCollectionClass();
 		}
 
-		$baseCollectionClass = '\\'.Collection::class;
+		$baseCollectionClass = '\\'.$dataClass::getCollectionParentClass();
 		$collectionClassName = static::getDefaultCollectionClassName($classParts['name']);
 
 		$eval = "";
@@ -1267,54 +1333,34 @@ class Entity
 	 */
 	public function cleanCache()
 	{
-		$cache = Main\Application::getInstance()->getManagedCache();
-		$cache->cleanDir($this->getCacheDir());
+		if($this->getCacheTtl(100) > 0)
+		{
+			//cache might be disabled in .settings.php via *_max_ttl = 0 option
+			$cache = Main\Application::getInstance()->getManagedCache();
+			$cache->cleanDir($this->getCacheDir());
+		}
 	}
 
 	/**
 	 * Sets a flag indicating full text index support for a field.
 	 *
+	 * @deprecated Does nothing, mysql 5.6 has fulltext always enabled.
 	 * @param string $field
 	 * @param bool   $mode
-	 *
-	 * @throws Main\ArgumentNullException
-	 * @throws Main\ArgumentOutOfRangeException
 	 */
 	public function enableFullTextIndex($field, $mode = true)
 	{
-		$table = $this->getDBTableName();
-		$options = array();
-		$optionString = Main\Config\Option::get("main", "~ft_".$table);
-		if($optionString <> '')
-		{
-			$options = unserialize($optionString);
-		}
-		$options[strtoupper($field)] = $mode;
-		Main\Config\Option::set("main", "~ft_".$table, serialize($options));
 	}
 
 	/**
 	 * Returns true if full text index is enabled for a field.
 	 *
+	 * @deprecated Always returns true, mysql 5.6 has fulltext always enabled.
 	 * @param string $field
-	 *
 	 * @return bool
-	 * @throws Main\ArgumentNullException
-	 * @throws Main\ArgumentOutOfRangeException
 	 */
 	public function fullTextIndexEnabled($field)
 	{
-		$table = $this->getDBTableName();
-		$optionString = Main\Config\Option::get("main", "~ft_".$table);
-		if($optionString <> '')
-		{
-			$field = strtoupper($field);
-			$options = unserialize($optionString);
-			if(isset($options[$field]) && $options[$field] === true)
-			{
-				return true;
-			}
-		}
-		return false;
+		return true;
 	}
 }

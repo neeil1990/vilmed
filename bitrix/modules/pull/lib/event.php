@@ -8,16 +8,26 @@ class Event
 {
 	const SHARED_CHANNEL = 0;
 
+	private static $backgroundContext = false;
+
 	private static $messages = array();
 	private static $deferredMessages = array();
 	private static $push = array();
 	private static $error = false;
 
-	public static function add($recipient, $parameters, $channelType = \CPullChannel::TYPE_PRIVATE)
+	public static function add($recipient, array $parameters, $channelType = \CPullChannel::TYPE_PRIVATE)
 	{
 		if (!isset($parameters['module_id']))
 		{
 			self::$error = new Error(__METHOD__, 'EVENT_PARAMETERS_FORMAT', Loc::getMessage('PULL_EVENT_PARAMETERS_FORMAT_ERROR'), $parameters);
+			return false;
+		}
+
+		$badUnicodeSymbolsPath = Common::findInvalidUnicodeSymbols($parameters);
+		if($badUnicodeSymbolsPath)
+		{
+			$warning = 'Parameters array contains invalid UTF-8 characters by the path ' . $badUnicodeSymbolsPath;
+			self::$error = new Error(__METHOD__, 'EVENT_BAD_ENCODING', $warning, $parameters);
 			return false;
 		}
 
@@ -109,7 +119,10 @@ class Event
 		}
 
 
-		if (defined('BX_CHECK_AGENT_START') && !defined('BX_WITH_ON_AFTER_EPILOG'))
+		if (
+			self::$backgroundContext
+			|| defined('BX_CHECK_AGENT_START') && !defined('BX_WITH_ON_AFTER_EPILOG')
+		)
 		{
 			self::send();
 		}
@@ -225,7 +238,10 @@ class Event
 			self::$push[$pushCode]['users'] = array_unique(array_values($users));
 		}
 
-		if (defined('BX_CHECK_AGENT_START') && !defined('BX_WITH_ON_AFTER_EPILOG'))
+		if (
+			self::$backgroundContext
+			|| defined('BX_CHECK_AGENT_START') && !defined('BX_WITH_ON_AFTER_EPILOG')
+		)
 		{
 			self::send();
 		}
@@ -259,7 +275,7 @@ class Event
 
 	private static function executePushEvent($parameters)
 	{
-		if (!defined('BX_PULL_EPILOG_AFTER') && $parameters['hasPushCallback'])
+		if (!self::$backgroundContext && $parameters['hasPushCallback'])
 		{
 			return null;
 		}
@@ -296,6 +312,7 @@ class Event
 		$data['sub_tag'] = isset($data['sub_tag'])? $data['sub_tag']: '';
 		$data['app_id'] = isset($data['app_id'])? $data['app_id']: '';
 		$data['send_immediately'] = $data['send_immediately'] == 'Y'? 'Y': 'N';
+		$data['important'] = $data['important'] == 'Y'? 'Y': 'N';
 
 		$users = Array();
 		foreach ($parameters['users'] as $userId)
@@ -313,6 +330,7 @@ class Event
 			'USER_ID' => $users,
 			'SKIP_USERS' => is_array($data['skip_users'])? $data['skip_users']: Array(),
 			'MESSAGE' => $data['message'],
+			'EXPIRY' => $data['expiry'],
 			'PARAMS' => $data['params'],
 			'ADVANCED_PARAMS' => $data['advanced_params'],
 			'BADGE' => $data['badge'],
@@ -321,6 +339,7 @@ class Event
 			'SUB_TAG' => $data['sub_tag'],
 			'APP_ID' => $data['app_id'],
 			'SEND_IMMEDIATELY' => $data['send_immediately'],
+			'IMPORTANT' => $data['important'],
 		));
 
 		return true;
@@ -328,7 +347,7 @@ class Event
 
 	public static function send()
 	{
-		if (defined('BX_PULL_EPILOG_AFTER'))
+		if (self::$backgroundContext)
 		{
 			self::processDeferredMessages();
 		}
@@ -352,7 +371,14 @@ class Event
 			return true;
 		}
 
-		if(\CPullOptions::GetQueueServerVersion() >= 4 && \CPullOptions::IsProtobufSupported() && \CPullOptions::IsProtobufEnabled())
+		if (!\CPullOptions::GetQueueServerStatus())
+		{
+			self::$messages = [];
+
+			return true;
+		}
+
+		if(Config::isProtobufUsed())
 		{
 			if(ProtobufTransport::sendMessages(self::$messages))
 			{
@@ -424,19 +450,23 @@ class Event
 
 	public static function onAfterEpilog()
 	{
-		define('BX_PULL_EPILOG_AFTER', true);
-
-		if(defined("BX_FORK_AGENTS_AND_EVENTS_FUNCTION"))
+		if (
+			defined("BX_FORK_AGENTS_AND_EVENTS_FUNCTION")
+			&& \CMain::forkActions(array(__CLASS__, "sendInBackground"))
+		)
 		{
-			if(\CMain::forkActions(array(__CLASS__, "send")))
-			{
-				return true;
-			}
+			return true;
 		}
 
-		self::send();
+		self::sendInBackground();
 
 		return true;
+	}
+
+	public static function sendInBackground()
+	{
+		self::$backgroundContext = true;
+		self::send();
 	}
 
 	public static function getChannelIds($users, $type = \CPullChannel::TYPE_PRIVATE)
@@ -476,7 +506,7 @@ class Event
 			'select' => Array('USER_ID', 'CHANNEL_ID', 'USER_ACTIVE' => 'USER.ACTIVE'),
 			'filter' => Array(
 				'=CHANNEL_ID' => $channels
- 			)
+			)
 		));
 		while ($row = $orm->fetch())
 		{
@@ -501,15 +531,8 @@ class Event
 			return false;
 		}
 
-		$parameters['module_id'] = strtolower($parameters['module_id']);
-		if (isset($parameters['expire']))
-		{
-			$parameters['expire'] = intval($parameters['expire']);
-		}
-		else
-		{
-			$parameters['expire'] = 86400;
-		}
+		$parameters['module_id'] = mb_strtolower($parameters['module_id']);
+		$parameters['expiry'] = (int)($parameters['expiry'] ?? 86400);
 
 		if (isset($parameters['paramsCallback']))
 		{
@@ -570,7 +593,7 @@ class Event
 
 	private static function preparePushParameters($parameters)
 	{
-		$parameters['module_id'] = strtolower($parameters['module_id']);
+		$parameters['module_id'] = mb_strtolower($parameters['module_id']);
 
 		if (isset($parameters['pushParamsCallback']))
 		{
@@ -679,7 +702,7 @@ class Event
 
 		if (is_string($variable))
 		{
-			$bytes += strlen($variable);
+			$bytes += mb_strlen($variable);
 		}
 		else if (is_array($variable))
 		{
@@ -690,7 +713,7 @@ class Event
 		}
 		else
 		{
-			$bytes += strlen((string)$variable);
+			$bytes += mb_strlen((string)$variable);
 		}
 
 		return $bytes;
@@ -698,7 +721,7 @@ class Event
 
 	private static function isChannelEntity($entity)
 	{
-		return is_string($entity) && strlen($entity) == 32;
+		return is_string($entity) && mb_strlen($entity) == 32;
 	}
 
 	public static function getLastError()

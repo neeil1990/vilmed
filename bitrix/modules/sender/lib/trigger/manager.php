@@ -161,11 +161,21 @@ class Manager
 	 */
 	protected static function stop($chain, $data, $setGoal)
 	{
+		if(!$data || empty($data['EMAIL']))
+		{
+			return;
+		}
+
+		$code = $data['EMAIL'];
+		$typeId = Recipient\Type::detect($data['EMAIL']);
+		$code = Recipient\Normalizer::normalize($code, $typeId);
+
 		// if mailing continue, then stop it
 		$recipientDb = PostingRecipientTable::getList(array(
 			'select' => array('ID', 'ROOT_ID', 'POSTING_ID', 'STATUS', 'POSTING_STATUS' => 'POSTING.STATUS'),
 			'filter' => array(
-				'=CONTACT_ID' => $data['CONTACT_ID'],
+				'=CONTACT.CODE' => $code,
+				'=CONTACT.TYPE_ID' => $typeId,
 				'=POSTING.MAILING_ID' => $chain['MAILING_ID'],
 				'=STATUS' => array(
 					PostingRecipientTable::SEND_RESULT_NONE,
@@ -210,7 +220,8 @@ class Manager
 		$recipientDb = PostingRecipientTable::getList(array(
 			'select' => array('ID', 'DATE_DENY'),
 			'filter' => array(
-				'=CONTACT_ID' => $data['CONTACT_ID'],
+				'=CONTACT.CODE' => $code,
+				'=CONTACT.TYPE_ID' => $typeId,
 				'=POSTING.MAILING_ID' => $chain['MAILING_ID'],
 				'=STATUS' => array(
 					PostingRecipientTable::SEND_RESULT_SUCCESS
@@ -274,7 +285,7 @@ class Manager
 	 */
 	protected static function preventMailEvent(array $emailEvent)
 	{
-		if(isset($emailEvent['EVENT_NAME']) && strlen($emailEvent['EVENT_NAME'])>0)
+		if(isset($emailEvent['EVENT_NAME']) && $emailEvent['EVENT_NAME'] <> '')
 		{
 			if(!empty($emailEvent['FILTER']) && is_array($emailEvent['FILTER']))
 			{
@@ -845,7 +856,7 @@ class Manager
 			$isSend = false;
 
 			$settings = new Settings();
-			if(strlen($settings->getEndpoint('CODE')) <= 0)
+			if($settings->getEndpoint('CODE') == '')
 			{
 				// send certainly
 				$isSend = true;
@@ -928,7 +939,7 @@ class Manager
 			return;
 		}
 
-		foreach($mailingParams[$chainId] as  $mailingParamsItem)
+		foreach($mailingParams[$chainId] as $chainKey => $mailingParamsItem)
 		{
 			$postingId = $mailingParamsItem['POSTING_ID'];
 			$childChain = $mailingParamsItem['CHAIN'];
@@ -963,12 +974,12 @@ class Manager
 
 			// add recipient
 			PostingTable::addRecipient($recipient, true);
-			if(empty($mailingParams[$chainId]['CHAIN']['POSTING_ID']))
+			if(empty($childChain['POSTING_ID']))
 			{
 				$chainUpdateDb = Model\LetterTable::update($childChain['ID'], array('POSTING_ID' => $postingId));
 				if($chainUpdateDb->isSuccess())
 				{
-					$mailingParams[$chainId]['CHAIN']['POSTING_ID'] = $postingId;
+					$mailingParams[$chainId][$chainKey]['CHAIN']['POSTING_ID'] = $postingId;
 				}
 			}
 		}

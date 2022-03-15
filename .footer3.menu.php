@@ -22,7 +22,7 @@ $aMenuLinks = Array(
 		"" 
 	),
 	Array(
-		"Обзоры и советы", 
+		"Советы при выборе", 
 		"/reviews/", 
 		Array(), 
 		Array(), 

@@ -37,6 +37,7 @@ $domains = $arResult['DOMAINS'];
 $row = $arResult['SITE'];
 $hooks = $arResult['HOOKS'];
 $request = \bitrix\Main\HttpContext::getCurrent()->getRequest();
+$landingKeys = array_keys($arResult['LANDINGS']);
 
 // title
 Manager::setPageTitle(
@@ -59,7 +60,7 @@ $uriSave->addParams(array(
 ));
 
 // domain
-if (\Bitrix\Main\Loader::includeModule('bitrix24'))
+if (Manager::isB24())
 {
 	$domainName = isset($domains[$row['DOMAIN_ID']['CURRENT']]['DOMAIN'])
 				? $domains[$row['DOMAIN_ID']['CURRENT']]['DOMAIN']
@@ -73,14 +74,14 @@ else
 
 <form action="<?= \htmlspecialcharsbx($uriSave->getUri());?>" method="post" class="ui-form ui-form-gray-padding landing-form-collapsed landing-form-settings" id="landing-site-set-form">
 	<input type="hidden" name="fields[SAVE_FORM]" value="Y" />
-	<input type="hidden" name="fields[TYPE]" value="<?= $arParams['TYPE'];?>" />
+	<input type="hidden" name="fields[TYPE]" value="<?= $row['TYPE']['CURRENT'];?>" />
 	<input type="hidden" name="fields[CODE]" value="<?= $row['CODE']['CURRENT'];?>" />
 	<input type="hidden" name="fields[TPL_ID]" value="<?= $row['TPL_ID']['CURRENT'];?>" />
 	<input type="hidden" name="fields[LANDING_ID_404]" value="<?= $row['LANDING_ID_404']['CURRENT'];?>" />
 	<input type="hidden" name="fields[LANDING_ID_INDEX]" value="<?= $row['LANDING_ID_INDEX']['CURRENT'];?>" />
 	<input type="hidden" name="fields[DOMAIN_ID]" value="<?= $domainName;?>" />
 	<?if (count($arResult['LANDINGS']) == 1):?>
-		<input name="fields[LANDING_ID_INDEX]" type="hidden" value="<?= array_pop(array_keys($arResult['LANDINGS']))?>" />
+		<input name="fields[LANDING_ID_INDEX]" type="hidden" value="<?= array_pop($landingKeys);?>" />
 	<?endif;?>
 	<?= bitrix_sessid_post();?>
 	<input type="hidden" name="fields[TITLE]" value="<?= $row['TITLE']['CURRENT'];?>" />
@@ -98,7 +99,7 @@ else
 							?>
 							<tr class="landing-form-title-catalog">
 								<td colspan="2">
-									<?=Loc::getMessage('LANDING_TPL_HOOK_SETT_HEADER_'.strtoupper($header));?></td>
+									<?=Loc::getMessage('LANDING_TPL_HOOK_SETT_HEADER_'.mb_strtoupper($header));?></td>
 							</tr>
 							<?
 						}
@@ -117,7 +118,7 @@ else
 									$additionalCss = ' landing-form-select-multi';
 								}
 								?>
-								<tr id="row_<?= strtolower($code);?>">
+								<tr id="row_<?= mb_strtolower($code);?>">
 									<td class="ui-form-label">
 										<div class="landing-form-label-inner">
 											<?= $label ? $label :$field->getLabel();?>
@@ -176,13 +177,13 @@ else
 											<?else:?>
 												<?
 												$field->viewForm(array(
-													'id' => 'settings_' . strtolower($code),
+													'id' => 'settings_'.mb_strtolower($code),
 													'class' => $template->getCssByType($field->getType()) . $additionalCss,
 													'name_format' => 'fields[ADDITIONAL_FIELDS][#field_code#]'
 												 ));
 												?>
 												<?if ($field->getType() == 'checkbox'):?>
-												<label for="settings_<?= strtolower($code);?>">
+												<label for="settings_<?= mb_strtolower($code);?>">
 													<?= $field->getLabel();?>
 												</label>
 												<?endif;?>
@@ -216,7 +217,7 @@ else
 									</label>
 									<div class="landing-form-wrapper">
 										<?$APPLICATION->IncludeComponent(
-											'bitrix:main.userconsent.selector',
+											'bitrix:landing.userconsent.selector',
 											'',
 											array(
 												'ID' => $agreementId,
@@ -234,7 +235,7 @@ else
 		</div>
 	</div>
 
-	<div class="<?if ($request->get('IFRAME') == 'Y'){?>landing-edit-footer-fixed <?}?>pinable-block">
+	<div class="<?if (false && $request->get('IFRAME') == 'Y'){?>landing-edit-footer-fixed <?}?>pinable-block">
 		<div class="landing-form-footer-container">
 			<button id="landing-save-btn" type="submit" class="ui-btn ui-btn-success"  name="submit"  value="<?= Loc::getMessage('LANDING_TPL_BUTTON_SAVE')?>" id="" title="<?= Loc::getMessage('LANDING_TPL_BUTTON_SAVE_AND_SHOW')?>" >
 				<?= Loc::getMessage('LANDING_TPL_BUTTON_' . ($arParams['SITE_ID'] ? 'SAVE' : 'ADD'));?>
@@ -255,8 +256,11 @@ else
 		top.window['landingSettingsSaved'] = false;
 		<?if ($arParams['SUCCESS_SAVE']):?>
 		top.window['landingSettingsSaved'] = true;
-		top.BX.onCustomEvent('BX.Main.Filter:apply');
+		top.BX.onCustomEvent('BX.Landing.Filter:apply');
 		editComponent.actionClose();
 		<?endif;?>
+		BX.Landing.Env.createInstance({
+			params: {type: '<?= $arParams['TYPE'];?>'}
+		});
 	});
 </script>

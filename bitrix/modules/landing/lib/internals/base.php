@@ -106,6 +106,10 @@ class BaseTable
 		{
 			$fields['MODIFIED_BY_ID'] = $uid;
 		}
+		else if (!$fields['MODIFIED_BY_ID'])
+		{
+			unset($fields['MODIFIED_BY_ID']);
+		}
 		if (!isset($fields['DATE_MODIFY']))
 		{
 			$fields['DATE_MODIFY'] = $date;
@@ -145,11 +149,6 @@ class BaseTable
 		{
 			$params = $class::setAccessFilter($params);
 		}
-		//@tmp
-		if (isset($params['filter']['CHECK_PERMISSIONS']))
-		{
-			unset($params['filter']['CHECK_PERMISSIONS']);
-		}
 
 		/** @var \Bitrix\Main\ORM\Data\DataManager $class */
 		return $class::getList($params);
@@ -164,9 +163,9 @@ class BaseTable
 	public static function callback($code, $callback)
 	{
 		$class = self::getCallingClass();
-		if (substr(strtolower($class), -5) == 'table')
+		if (mb_substr(mb_strtolower($class), -5) == 'table')
 		{
-			$class = substr($class, 0, -5);
+			$class = mb_substr($class, 0, -5);
 			if ($class)
 			{
 				$eventManager = \Bitrix\Main\EventManager::getInstance();

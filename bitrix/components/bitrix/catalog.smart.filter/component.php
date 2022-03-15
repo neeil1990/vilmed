@@ -357,7 +357,7 @@ foreach($arResult["ITEMS"] as $PID => $arItem)
 			{
 				$arResult["ITEMS"][$PID]["VALUES"][$key]["HTML_VALUE"] = htmlspecialcharsbx($_CHECK[$ar["CONTROL_NAME"]]);
 				$arResult["ITEMS"][$PID]["DISPLAY_EXPANDED"] = "Y";
-				if ($arResult["FACET_FILTER"] && strlen($_CHECK[$ar["CONTROL_NAME"]]) > 0)
+				if ($arResult["FACET_FILTER"] && $_CHECK[$ar["CONTROL_NAME"]] <> '')
 				{
 					if ($key == "MIN")
 						$this->facet->addNumericPropertyFilter($PID, ">=", $_CHECK[$ar["CONTROL_NAME"]]);
@@ -369,7 +369,7 @@ foreach($arResult["ITEMS"] as $PID => $arItem)
 			{
 				$arResult["ITEMS"][$PID]["VALUES"][$key]["HTML_VALUE"] = htmlspecialcharsbx($_CHECK[$ar["CONTROL_NAME"]]);
 				$arResult["ITEMS"][$PID]["DISPLAY_EXPANDED"] = "Y";
-				if ($arResult["FACET_FILTER"] && strlen($_CHECK[$ar["CONTROL_NAME"]]) > 0)
+				if ($arResult["FACET_FILTER"] && $_CHECK[$ar["CONTROL_NAME"]] <> '')
 				{
 					if ($key == "MIN")
 						$this->facet->addPriceFilter($arResult["PRICES"][$PID]["ID"], ">=", $_CHECK[$ar["CONTROL_NAME"]]);
@@ -381,7 +381,7 @@ foreach($arResult["ITEMS"] as $PID => $arItem)
 			{
 				$arResult["ITEMS"][$PID]["VALUES"][$key]["HTML_VALUE"] = htmlspecialcharsbx($_CHECK[$ar["CONTROL_NAME"]]);
 				$arResult["ITEMS"][$PID]["DISPLAY_EXPANDED"] = "Y";
-				if ($arResult["FACET_FILTER"] && strlen($_CHECK[$ar["CONTROL_NAME"]]) > 0)
+				if ($arResult["FACET_FILTER"] && $_CHECK[$ar["CONTROL_NAME"]] <> '')
 				{
 					if ($key == "MIN")
 						$this->facet->addDatetimePropertyFilter($PID, ">=", MakeTimeStamp($_CHECK[$ar["CONTROL_NAME"]], FORMAT_DATE));
@@ -464,6 +464,19 @@ if ($_CHECK)
 							unset($facetIndex[$pp][$row["VALUE"]]["DISABLED"]);
 							$facetIndex[$pp][$row["VALUE"]]["ELEMENT_COUNT"] = $row["ELEMENT_COUNT"];
 						}
+						elseif (isset($arResult["ITEMS"][$pp]["VALUES"]))
+						{
+							if (isset($arResult["ITEMS"][$pp]["VALUES"]["MIN"]))
+							{
+								unset($arResult["ITEMS"][$pp]["VALUES"]["MIN"]["DISABLED"]);
+								$arResult["ITEMS"][$pp]["VALUES"]["MIN"]["ELEMENT_COUNT"] = $row["ELEMENT_COUNT"];
+							}
+							if (isset($arResult["ITEMS"][$pp]["VALUES"]["MAX"]))
+							{
+								unset($arResult["ITEMS"][$pp]["VALUES"]["MAX"]["DISABLED"]);
+								$arResult["ITEMS"][$pp]["VALUES"]["MAX"]["ELEMENT_COUNT"] = $row["ELEMENT_COUNT"];
+							}
+						}
 					}
 				}
 				else
@@ -478,7 +491,7 @@ if ($_CHECK)
 						)
 						{
 							$currency = $row["VALUE"];
-							$existCurrency = strlen($currency) > 0;
+							$existCurrency = $currency <> '';
 							if ($existCurrency)
 								$currency = $this->facet->lookupDictionaryValue($currency);
 
@@ -570,17 +583,21 @@ foreach($arResult["ITEMS"] as $PID => $arItem)
 {
 	if(isset($arItem["PRICE"]))
 	{
-		if(strlen($arItem["VALUES"]["MIN"]["HTML_VALUE"]) && strlen($arItem["VALUES"]["MAX"]["HTML_VALUE"]))
+		if($arItem["VALUES"]["MIN"]["HTML_VALUE"] <> '' && $arItem["VALUES"]["MAX"]["HTML_VALUE"] <> '')
 			${$FILTER_NAME}["><CATALOG_PRICE_".$arItem["ID"]] = array($arItem["VALUES"]["MIN"]["HTML_VALUE"], $arItem["VALUES"]["MAX"]["HTML_VALUE"]);
-		elseif(strlen($arItem["VALUES"]["MIN"]["HTML_VALUE"]))
+		elseif($arItem["VALUES"]["MIN"]["HTML_VALUE"] <> '')
+		{
 			${$FILTER_NAME}[">=CATALOG_PRICE_".$arItem["ID"]] = $arItem["VALUES"]["MIN"]["HTML_VALUE"];
-		elseif(strlen($arItem["VALUES"]["MAX"]["HTML_VALUE"]))
+		}
+		elseif($arItem["VALUES"]["MAX"]["HTML_VALUE"] <> '')
+		{
 			${$FILTER_NAME}["<=CATALOG_PRICE_".$arItem["ID"]] = $arItem["VALUES"]["MAX"]["HTML_VALUE"];
+		}
 	}
 	elseif($arItem["PROPERTY_TYPE"] == "N")
 	{
-		$existMinValue = (strlen($arItem["VALUES"]["MIN"]["HTML_VALUE"]) > 0);
-		$existMaxValue = (strlen($arItem["VALUES"]["MAX"]["HTML_VALUE"]) > 0);
+		$existMinValue = ($arItem["VALUES"]["MIN"]["HTML_VALUE"] <> '');
+		$existMaxValue = ($arItem["VALUES"]["MAX"]["HTML_VALUE"] <> '');
 		if ($existMinValue || $existMaxValue)
 		{
 			$filterKey = '';
@@ -617,8 +634,8 @@ foreach($arResult["ITEMS"] as $PID => $arItem)
 	}
 	elseif($arItem["DISPLAY_TYPE"] == "U")
 	{
-		$existMinValue = (strlen($arItem["VALUES"]["MIN"]["HTML_VALUE"]) > 0);
-		$existMaxValue = (strlen($arItem["VALUES"]["MAX"]["HTML_VALUE"]) > 0);
+		$existMinValue = ($arItem["VALUES"]["MIN"]["HTML_VALUE"] <> '');
+		$existMaxValue = ($arItem["VALUES"]["MAX"]["HTML_VALUE"] <> '');
 		if ($existMinValue || $existMaxValue)
 		{
 			$filterKey = '';
@@ -736,6 +753,11 @@ if ($arResult["FACET_FILTER"] && $this->arResult["CURRENCIES"])
 		"FROM" => array_keys($arResult["CURRENCIES"]),
 		"TO" => $this->convertCurrencyId,
 	);
+}
+
+if (!empty($preFilter))
+{
+	${$FILTER_NAME} = array_merge($preFilter, ${$FILTER_NAME});
 }
 
 /*Save to session if needed*/

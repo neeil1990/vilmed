@@ -1,6 +1,9 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
 
 $this->setFrameMode(true);
+//STRICT_SECTION_CHECK
+$arResult["VARIABLES"]["SECTION_CODE"] = str_replace(' ', '-', $arResult["VARIABLES"]["SECTION_CODE"]);
+$arResult["VARIABLES"]["ELEMENT_CODE"] = str_replace(' ', '-', $arResult["VARIABLES"]["ELEMENT_CODE"]);
 
 use Bitrix\Main\Loader,
 	Bitrix\Main\Localization\Loc,

@@ -44,6 +44,16 @@ Disallow: /catalog/newproduct/
 Disallow: /catalog/saleleader/
 Disallow: /catalog/compare/
 Disallow: /test/
+Disallow: /returns/
+Disallow: /auth/
+Disallow: /faq/
+Disallow: /personal/
+Disallow: /about/certificates/
+Disallow: /howtobuy/
+Disallow: /about/details/
+Disallow: /about/employees/
+Disallow: /about/responses/
+Disallow: /map/
 #################################################
 Allow: /bitrix/components/
 Allow: /bitrix/cache/

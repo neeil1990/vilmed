@@ -13,7 +13,7 @@ return array(
 	'fields' => array(
 		'ADDITIONAL_FIELDS' => array(
 			'THEME_CODE' => 'events',
-			'THEME_CODE_TYPO' => 'events',
+
 			'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/events/preview.jpg',
 			'METAOG_TITLE' => Loc::getMessage('LANDING_DEMO_EVENTS_TITLE'),
 			'METAOG_DESCRIPTION' => Loc::getMessage('LANDING_DEMO_EVENTS_DESCRIPTION'),
@@ -26,7 +26,7 @@ return array(
 			array (
 				'CODE' => '0.menu_11_event',
 				'SORT' => '-100',
-				'CONTENT' => '<header class="landing-block landing-block u-header landing-ui-pattern-transparent u-header--floating g-z-index-9999">
+				'CONTENT' => '<header class="landing-block landing-block u-header u-header--sticky u-header--float g-z-index-9999">
 	<div class="u-header__section g-bg-darkblue-opacity-0_7 g-transition-0_3 g-py-10" data-header-fix-moment-exclude="g-bg-darkblue-opacity-0_7" data-header-fix-moment-classes="u-header__section--light g-bg-white-opacity-0_9">
 		<nav class="navbar navbar-expand-lg g-py-0 g-px-10">
 			<div class="container">
@@ -125,7 +125,7 @@ return array(
 					</div>
 
 					<div class="col-md-3 text-md-right g-px-5">
-						<a class="landing-block-node-button btn btn-lg text-uppercase u-btn-white g-font-weight-700 g-font-size-11 g-color-white--hover g-bg-primary--hover g-brd-none rounded-0 g-py-18" href="#">Register Now</a>
+						<a class="landing-block-node-button btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-white rounded-0 g-py-18" href="#">Register Now</a>
 					</div>
 				</div>
 			</div>
@@ -183,7 +183,7 @@ return array(
 							<div class="u-heading-v1-4 g-brd-gray-light-v2 w-100 g-mb-20 g-mb-0--sm">
 								<div class="landing-block-node-card-time text-center g-pos-rel g-width-110 g-line-height-1_6 g-font-weight-600 g-color-white g-font-size-14 g-bg-gray-dark-v1 g-bg-primary--parent-hover g-py-5 g-px-10 mx-auto g-ml-0--md g-transition-0_2 g-transition--ease-in">15:30 - 17:30</div>
 							</div>
-							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto">
+							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto g-pointer-events-before-after-none">
 									<img class="landing-block-node-card-img img-fluid g-rounded-50x" src="https://cdn.bitrix24.site/bitrix/images/landing/business/200x200/img1.jpg" alt="" />
 								</div>
 						</div>
@@ -221,7 +221,7 @@ return array(
 							<div class="u-heading-v1-4 g-brd-gray-light-v2 w-100 g-mb-20 g-mb-0--sm">
 								<div class="landing-block-node-card-time text-center g-pos-rel g-width-110 g-line-height-1_6 g-font-weight-600 g-color-white g-font-size-14 g-bg-gray-dark-v1 g-bg-primary--parent-hover g-py-5 g-px-10 mx-auto g-ml-0--md g-transition-0_2 g-transition--ease-in">17:45 - 18:45</div>
 							</div>
-							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto">
+							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto g-pointer-events-before-after-none">
 									<img class="landing-block-node-card-img img-fluid g-rounded-50x" src="https://cdn.bitrix24.site/bitrix/images/landing/business/200x200/img2.jpg" alt="" />
 								</div>
 						</div>
@@ -260,7 +260,7 @@ return array(
 							<div class="u-heading-v1-4 g-brd-gray-light-v2 w-100 g-mb-20 g-mb-0--sm">
 								<div class="landing-block-node-card-time text-center g-pos-rel g-width-110 g-line-height-1_6 g-font-weight-600 g-color-white g-font-size-14 g-bg-gray-dark-v1 g-bg-primary--parent-hover g-py-5 g-px-10 mx-auto g-ml-0--md g-transition-0_2 g-transition--ease-in">19:00 - 21:00</div>
 							</div>
-							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto">
+							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto g-pointer-events-before-after-none">
 									<img class="landing-block-node-card-img img-fluid g-rounded-50x" src="https://cdn.bitrix24.site/bitrix/images/landing/business/200x200/img3.jpg" alt="" />
 								</div>
 						</div>
@@ -299,7 +299,7 @@ return array(
 							<div class="u-heading-v1-4 g-brd-gray-light-v2 w-100 g-mb-20 g-mb-0--sm">
 								<div class="landing-block-node-card-time text-center g-pos-rel g-width-110 g-line-height-1_6 g-font-weight-600 g-color-white g-font-size-14 g-bg-gray-dark-v1 g-bg-primary--parent-hover g-py-5 g-px-10 mx-auto g-ml-0--md g-transition-0_2 g-transition--ease-in">21:15 - 22:00</div>
 							</div>
-							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto">
+							<div class="landing-block-node-card-img-container d-md-flex px-0 u-bg-overlay g-width-120 g-width-170--md g-height-120 g-height-170--md g-bg-black-opacity-0_3--after g-bg-white-opacity-0--after--parent-hover g-overflow-hidden g-rounded-50x g-mr-30--md mx-auto g-mb-15 g-mb-0--md g-transition-0_2 g-transition--ease-in col-auto g-pointer-events-before-after-none">
 									<img class="landing-block-node-card-img img-fluid g-rounded-50x" src="https://cdn.bitrix24.site/bitrix/images/landing/business/200x200/img4.jpg" alt="" />
 								</div>
 						</div>
@@ -357,7 +357,7 @@ return array(
 
 		<div class="landing-block-node-text g-color-white-opacity-0_7 g-mb-35">Nam sed erat aliquet libero aliquet commodo. Donec euismod augue non quam finibus, nec iaculis tellus gravida. Integer <p>efficitur eros ut dui laoreet, ut blandit turpis tincidunt.</p></div>
 		<div class="landing-block-node-button-container">
-			<a href="//www.youtube.com/watch?v=q4d8g9Dn3ww" class="landing-block-node-button btn btn-xl u-btn-primary text-uppercase g-font-weight-700 g-font-size-12 g-rounded-50 g-py-15 g-px-40 g-mb-15" target="_popup" data-url="//www.youtube.com/embed/q4d8g9Dn3ww?autoplay=1&amp;controls=1&amp;loop=0&amp;rel=0&amp;start=0&amp;html5=1&amp;v=q4d8g9Dn3ww">WATCH VIDEO</a>
+			<a href="//www.youtube.com/watch?v=q4d8g9Dn3ww" class="landing-block-node-button btn g-btn-primary g-btn-type-solid g-btn-px-l g-btn-size-md g-btn-primary text-uppercase g-rounded-50 g-py-15 g-mb-15" target="_popup" data-url="//www.youtube.com/embed/q4d8g9Dn3ww?autoplay=1&amp;controls=1&amp;loop=0&amp;rel=0&amp;start=0&amp;html5=1&amp;v=q4d8g9Dn3ww">WATCH VIDEO</a>
 		</div>
 	</div>
 </section>',
@@ -383,7 +383,7 @@ return array(
 				'SORT' => '3000',
 				'CONTENT' => '<section class="landing-block g-pt-10 g-pb-20">
 	<div class="container">
-		<div class="row">
+		<div class="row landing-block-inner">
 
 			<div class="landing-block-card landing-block-node-block col-md-4 g-mb-30 g-mb-0--md g-pt-10 js-animation fadeIn">
 				<img class="landing-block-node-img img-fluid g-mb-30" src="https://cdn.bitrix24.site/bitrix/images/landing/business/1000x667/img1.jpg" alt="" data-fileid="-1" data-filehash="9eef207add73028ae50f74a9033c20cb" />
@@ -438,7 +438,7 @@ return array(
 				'CONTENT' => '<section class="landing-block g-bg-gray-light-v5 g-pt-30 g-pb-20">
 
         <div class="container">
-            <div class="row">
+            <div class="row landing-block-inner">
 
                 <div class="landing-block-card col-sm-6 col-md-4 js-animation fadeIn">
                     <article class="u-shadow-v28 g-bg-white">
@@ -537,7 +537,7 @@ return array(
 				'CONTENT' => '<section class="landing-block g-bg-gray-light-v5 g-pt-30 g-pb-20">
 
         <div class="container">
-            <div class="row">
+            <div class="row landing-block-inner">
 
                 <div class="landing-block-card col-sm-6 col-md-4 js-animation fadeIn">
                     <article class="u-shadow-v28 g-bg-white">
@@ -651,7 +651,7 @@ return array(
 				'CONTENT' => '<section class="landing-block g-pt-30 g-pb-20">
         <div class="container">
 
-            <div class="row no-gutters">
+            <div class="row no-gutters landing-block-inner">
 
                 <div class="landing-block-card js-animation col-md-4 g-mb-30 g-mb-0--md fadeInUp">
                     <article class="text-center g-brd-around g-color-gray g-brd-gray-light-v5 g-pa-10">
@@ -670,7 +670,7 @@ return array(
 
                             <ul class="landing-block-node-price-list list-unstyled g-mb-25"><li class="landing-block-node-price-list-item g-brd-bottom g-brd-gray-light-v3 g-py-12">Sed arcu erat, facilisis at tortor vel, blandit tristique enim. Donec dapibus neque consectetur tellus pretium, eget lacinia velit ullamcorper.</li></ul>
                             <div class="landing-block-node-price-container">
-                            	<a class="landing-block-node-price-button btn btn-md text-uppercase u-btn-primary rounded-0 g-px-15" href="#" target="_self">REGISTER NOW</a>
+                            	<a class="landing-block-node-price-button btn g-btn-type-solid g-btn-size-md g-btn-px-m text-uppercase g-btn-primary rounded-0" href="#" target="_self">REGISTER NOW</a>
                         	</div>
                         </div>
                     </article>
@@ -693,7 +693,7 @@ return array(
 
                             <ul class="landing-block-node-price-list list-unstyled g-mb-25"><li class="landing-block-node-price-list-item g-brd-bottom g-brd-gray-light-v3 g-py-12">Sed arcu erat, facilisis at tortor vel, blandit tristique enim. Donec dapibus neque consectetur tellus pretium, eget lacinia velit ullamcorper.</li></ul>
                             <div class="landing-block-node-price-container">
-                            	<a class="landing-block-node-price-button btn btn-md text-uppercase u-btn-primary rounded-0 g-px-15" href="#" target="_self">REGISTER NOW</a>
+                            	<a class="landing-block-node-price-button btn g-btn-type-solid g-btn-size-md g-btn-px-m text-uppercase g-btn-primary rounded-0" href="#" target="_self">REGISTER NOW</a>
                         	</div>
                         </div>
                     </article>
@@ -717,7 +717,7 @@ return array(
                             <ul class="landing-block-node-price-list list-unstyled g-mb-25"><li class="landing-block-node-price-list-item g-brd-bottom g-brd-gray-light-v3 g-py-12">Sed arcu erat, facilisis at tortor vel, blandit tristique enim. Donec dapibus neque consectetur tellus pretium, eget lacinia velit ullamcorper.</li></ul>
 
                             <div class="landing-block-node-price-container">
-                            	<a class="landing-block-node-price-button btn btn-md text-uppercase u-btn-primary rounded-0 g-px-15" href="#" target="_self">REGISTER NOW</a>
+                            	<a class="landing-block-node-price-button btn g-btn-type-solid g-btn-size-md g-btn-px-m text-uppercase g-btn-primary rounded-0" href="#" target="_self">REGISTER NOW</a>
                         	</div>
                         </div>
                     </article>

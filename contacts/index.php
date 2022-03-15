@@ -1,4 +1,6 @@
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
+$APPLICATION->SetPageProperty("description", "Контакты компании Vilmed: номера, адреса, e-mail ящики");
+$APPLICATION->SetPageProperty("title", "Контакты компании Vilmed");
 $APPLICATION->SetTitle("Контакты");?><p>
 	 Мы осуществляем доставку по всей России, в крупных городах возможна адресная доставка "до двери". Подробнее об этом в <a href="/delivery/">Доставка</a>.&nbsp;
 </p>

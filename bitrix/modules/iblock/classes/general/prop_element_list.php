@@ -24,6 +24,9 @@ class CIBlockPropertyElementList
 			"PrepareSettings" =>array(__CLASS__, "PrepareSettings"),
 			"GetSettingsHTML" =>array(__CLASS__, "GetSettingsHTML"),
 			"GetExtendedValue" => array(__CLASS__,  "GetExtendedValue"),
+			'GetUIEntityEditorProperty' => array(__CLASS__, 'GetUIEntityEditorProperty'),
+			'GetUIEntityEditorPropertyEditHtml' => array(__CLASS__, 'GetUIEntityEditorPropertyEditHtml'),
+			'GetUIEntityEditorPropertyViewHtml' => array(__CLASS__, 'GetUIEntityEditorPropertyViewHtml'),
 		);
 	}
 
@@ -163,7 +166,7 @@ class CIBlockPropertyElementList
 		}
 		else
 		{
-			if(end($values) != "" || substr(key($values), 0, 1) != "n")
+			if(end($values) != "" || mb_substr(key($values), 0, 1) != "n")
 				$values["n".($max_n+1)] = "";
 
 			$name = $strHTMLControlName["VALUE"]."VALUE";
@@ -185,7 +188,7 @@ class CIBlockPropertyElementList
 			}
 			$html .= '</table>';
 
-			$html .= '<input type="button" value="'.Loc::getMessage("IBLOCK_PROP_ELEMENT_LIST_ADD").'" onClick="if(window.addNewRow){addNewRow(\'tb'.md5($name).'\', -1)}else{addNewTableRow(\'tb'.md5($name).'\', 1, /\[(n)([0-9]*)\]/g, 2)}">';
+			$html .= '<input type="button" value="'.Loc::getMessage("IBLOCK_PROP_ELEMENT_LIST_ADD").'" onClick="BX.IBlock.Tools.addNewRow(\'tb'.md5($name).'\', -1)">';
 		}
 		return  $html;
 	}
@@ -226,6 +229,10 @@ class CIBlockPropertyElementList
 	{
 		$fields["type"] = "list";
 		$fields["items"] = self::getItemsForUiFilter($arProperty);
+		$fields["operators"] = array(
+			"default" => "=",
+			"enum" => "@"
+		);
 	}
 
 	private static function getItemsForUiFilter($arProperty)
@@ -324,7 +331,17 @@ class CIBlockPropertyElementList
 					$arFilter['CHECK_PERMISSIONS'] = 'Y';
 					$arFilter['MIN_PERMISSION'] = 'R';
 				}
-				$rsElements = CIBlockElement::GetList(array(), $arFilter, false, false, array("ID","IBLOCK_ID","NAME","DETAIL_PAGE_URL"));
+				$rsElements = CIBlockElement::GetList(
+					array(),
+					$arFilter,
+					false,
+					false,
+					array("ID","IBLOCK_ID","NAME","DETAIL_PAGE_URL")
+				);
+				if (isset($strHTMLControlName['DETAIL_URL']))
+				{
+					$rsElements->SetUrlTemplates($strHTMLControlName['DETAIL_URL']);
+				}
 				$cache[$arValue['VALUE']] = $rsElements->GetNext(true, true);
 				unset($rsElements);
 			}
@@ -422,7 +439,7 @@ class CIBlockPropertyElementList
 	public static function GetExtendedValue($arProperty, $value)
 	{
 		$html = self::GetPublicViewHTML($arProperty, $value, array('MODE' => 'SIMPLE_TEXT'));
-		if (strlen($html))
+		if($html <> '')
 		{
 			$text = htmlspecialcharsback($html);
 			return array(
@@ -495,5 +512,37 @@ class CIBlockPropertyElementList
 			}
 		}
 		return $cache[$IBLOCK_ID];
+	}
+
+	public static function GetUIEntityEditorProperty($settings, $value)
+	{
+		return [
+			'type' => 'custom'
+		];
+	}
+
+	public static function GetUIEntityEditorPropertyEditHtml(array $params = []) : string
+	{
+		$settings = $params['SETTINGS'] ?? [];
+		$value = $params['VALUE'] ?? '';
+		$paramsHTMLControl = [
+			'MODE' => 'iblock_element_admin',
+			'VALUE' => $params['FIELD_NAME'] ?? '',
+		];
+		return self::GetPropertyFieldHtml($settings, $value, $paramsHTMLControl);
+	}
+
+	public static function GetUIEntityEditorPropertyViewHtml(array $params = []) : string
+	{
+		$settings = $params['SETTINGS'] ?? [];
+		$value = $params['VALUE'] ?? '';
+		return self::GetPublicViewHTML(
+			$settings,
+			['VALUE' => $value],
+			[
+				'MODE' => 'FORM_FILL',
+				'VALUE' => $params['FIELD_NAME'] ?? '',
+			]
+		);
 	}
 }
