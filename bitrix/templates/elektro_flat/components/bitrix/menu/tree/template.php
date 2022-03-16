@@ -21,13 +21,23 @@ global $arSetting;
                 <? if($more): ?>
                     <span class="more" onclick="$(this).toggleClass('open'); $(this).closest('.parent').find('.submenu').toggleClass('show');"></span>
                 <? endif; ?>
-				<a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?></a>
+
+                <? if(in_array($arItem["PARAMS"]["ID"], $arResult['PROPERTIES']['UF_DELETE_INDEX'])): ?>
+                    <a href="<?=$arItem['LINK']?>" data-text_script='<?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?>'></a>
+                <? else: ?>
+                    <a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?></a>
+                <? endif; ?>
+
 				<?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "HEADER"):?><span class="arrow"></span><?endif;?>
 				<ul class="submenu">
 		<?else:
 			if($arItem["PERMISSION"] > "D"):?>
 				<li<?if($arItem["SELECTED"]):?> class="selected"<?endif?>>
-					<a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?></a>
+                    <? if(in_array($arItem["PARAMS"]["ID"], $arResult['PROPERTIES']['UF_DELETE_INDEX'])): ?>
+                        <a href="<?=$arItem['LINK']?>" data-text_script="<?=$arItem["TEXT"]?>"></a>
+                    <? else: ?>
+                        <a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?></a>
+                    <? endif; ?>
 				</li>
 			<?endif;
 		endif;
