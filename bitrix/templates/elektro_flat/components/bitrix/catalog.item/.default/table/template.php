@@ -49,6 +49,7 @@ $arElement['DETAIL_PAGE_URL'] = "/product/".$arElement['CODE']."/";
 			</a>
 		</div>
 	</div>
+
 	<?//ITEM_TITLE//?>
 	<div class="item-all-title">
 		<a class="item-title" href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>" itemprop="url">
