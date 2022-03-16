@@ -67,7 +67,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 				$arCurSection["VIEW_COLLECTION"] = true;
 			};
 			$arCurSection["SECTION_TITLE_H1"] = $arSection["UF_SECTION_TITLE_H1"];
-			
+
 			if(isset($arSection["UF_YOUTUBE_BG"]) && !empty($arSection["UF_YOUTUBE_BG"])) {
 				$arCurSection["BACKGROUND_YOUTUBE"] = $arSection["UF_YOUTUBE_BG"];
 			}
@@ -580,10 +580,10 @@ $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
         "BY_LINK" => $arParams["BY_LINK"],
 		"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
 		"IBLOCK_ID" => $arParams["IBLOCK_ID"],
-		"ELEMENT_SORT_FIELD" => "PROPERTY_NOT_STOCK",
-		"ELEMENT_SORT_ORDER" => "asc",
-		"ELEMENT_SORT_FIELD2" => $sort,
-		"ELEMENT_SORT_ORDER2" => $sort_order,
+        "ELEMENT_SORT_FIELD" => $sort,
+        "ELEMENT_SORT_ORDER" => $sort_order,
+        "ELEMENT_SORT_FIELD2" => "id",
+        "ELEMENT_SORT_ORDER2" => "asc",
 		"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
 		"META_KEYWORDS" => $arParams["LIST_META_KEYWORDS"],
 		"META_DESCRIPTION" => $arParams["LIST_META_DESCRIPTION"],
