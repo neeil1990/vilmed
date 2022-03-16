@@ -6,6 +6,8 @@ if(count($arResult) < 1)
 	return;
 
 global $arSetting;
+
+$JS_HIDE = explode("\r\n", str_replace([' ', '.'], '', $arResult['PROPERTIES']['UF_DELETE_INDEX']));
 ?>
 
 <ul class="left-menu">
@@ -22,7 +24,7 @@ global $arSetting;
                     <span class="more" onclick="$(this).toggleClass('open'); $(this).closest('.parent').find('.submenu').toggleClass('show');"></span>
                 <? endif; ?>
 
-                <? if(in_array($arItem["PARAMS"]["ID"], $arResult['PROPERTIES']['UF_DELETE_INDEX'])): ?>
+                <? if(in_array($arItem["PARAMS"]["ID"], $JS_HIDE)): ?>
                     <a href="<?=$arItem['LINK']?>" data-text_script='<?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?>'></a>
                 <? else: ?>
                     <a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?><?if($arSetting["CATALOG_LOCATION"]["VALUE"] == "LEFT"):?><span class="arrow"></span><?endif;?></a>
@@ -33,7 +35,7 @@ global $arSetting;
 		<?else:
 			if($arItem["PERMISSION"] > "D"):?>
 				<li<?if($arItem["SELECTED"]):?> class="selected"<?endif?>>
-                    <? if(in_array($arItem["PARAMS"]["ID"], $arResult['PROPERTIES']['UF_DELETE_INDEX'])): ?>
+                    <? if(in_array($arItem["PARAMS"]["ID"], $JS_HIDE)): ?>
                         <a href="<?=$arItem['LINK']?>" data-text_script="<?=$arItem["TEXT"]?>"></a>
                     <? else: ?>
                         <a href="<?=$arItem['LINK']?>"><?=$arItem["TEXT"]?></a>
