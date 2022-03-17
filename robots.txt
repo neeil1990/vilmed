@@ -62,3 +62,4 @@ Allow: /bitrix/templates/
 Allow: /bitrix/panel/
 Host: https://vilmed.ru/
 Sitemap: https://vilmed.ru/sitemap.xml
+#################################################
