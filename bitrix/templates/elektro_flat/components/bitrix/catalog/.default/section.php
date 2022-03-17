@@ -51,6 +51,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["META_TITLE"] = $arSection["UF_META_TITLE"];
 			$arCurSection["META_KEYWORDS"] = $arSection["UF_META_KEYWORDS"];
 			$arCurSection["META_DESCRIPTION"] = $arSection["UF_META_DESCRIPTION"];
+			$arCurSection["TAGS_ACTIVE"] = $arSection['UF_TAGS_ACTIVE'];
 			$arCurSection["TAGS_LIST"] = ($arSection['UF_TAGS_LIST']) ?: false;
 			$arCurSection["TAGS_TITLE"] = ($arSection['UF_TAGS_TITLE']) ?: false;
 			$arCurSection["COUNT_ELEMENT_PAGE"] = ($arSection['UF_COUNT']) ?: false;
@@ -244,7 +245,7 @@ if(!empty($arCurSection)) {
 
     <div class="clear"></div>
 
-    <? if($arCurSection["TAGS_LIST"]): ?>
+    <? if($arCurSection["TAGS_LIST"] && $arCurSection["TAGS_ACTIVE"]): ?>
     <? if($arCurSection["TAGS_TITLE"]): ?>
     <div class="h1"><?=$arCurSection["TAGS_TITLE"]?></div>
     <? endif; ?>
