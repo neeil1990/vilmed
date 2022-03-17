@@ -6599,6 +6599,7 @@ a.catalog_item_toogle_filter_reset{
 .set-constructor,
 .kit-items,
 .filtered-items,
+.recommended-items,
 .bigdata-items{
 	width:100%;
 	float:left;
@@ -6610,6 +6611,7 @@ a.catalog_item_toogle_filter_reset{
 .set-constructor .h3,
 .kit-items .h3,
 .filtered-items .h3,
+.recommended-items .h3,
 .bigdata-items .h3{
 	width:100%;
 	margin:0px;
@@ -12135,6 +12137,7 @@ transform: translateX(-8px);
 	.set-constructor-items,
 	.kit-items,
 	.filtered-items,
+	.recommended-items,
 	.bigdata-items{
 		margin:24px 0px 0px 0px;
 	}
@@ -12143,6 +12146,7 @@ transform: translateX(-8px);
 	.set-constructor-items .h3,
 	.kit-items .h3,
 	.filtered-items .h3,
+	.recommended-items .h3,
 	.bigdata-items .h3{
 		padding:0px;
 	}

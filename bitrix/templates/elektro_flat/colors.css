@@ -4649,6 +4649,7 @@ a.catalog_item_toogle_filter_reset:hover{
 .set-constructor .h3,
 .kit-items .h3,
 .filtered-items .h3,
+.recommended-items .h3,
 .bigdata-items .h3{
 	font-size:18px;
 	font-weight:600;
