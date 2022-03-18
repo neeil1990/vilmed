@@ -245,7 +245,7 @@ if(!empty($arCurSection)) {
 
     <div class="clear"></div>
 
-    <? if($arCurSection["TAGS_LIST"] && $arCurSection["TAGS_ACTIVE"]): ?>
+    <? if($arCurSection["TAGS_LIST"] && !$arCurSection["TAGS_ACTIVE"]): ?>
     <? if($arCurSection["TAGS_TITLE"]): ?>
     <div class="h1"><?=$arCurSection["TAGS_TITLE"]?></div>
     <? endif; ?>

@@ -339,7 +339,7 @@ Loc::loadMessages(__FILE__);?>
                                                 $db_listTag = CIBlockSection::GetList([], ['IBLOCK_ID' => 24, 'CODE' => $sectionCode, 'UF_TAGS_LIST_BAR' => '%'], true, ['UF_TAGS_LIST_BAR', 'UF_TAGS_BAR_TITLE', 'UF_TAGS_ACTIVE']);
                                                 $ar_resultTag = $db_listTag->GetNext();
                                                 ?>
-                                                <? if($ar_resultTag && $ar_resultTag['UF_TAGS_ACTIVE']): ?>
+                                                <? if($ar_resultTag && !$ar_resultTag['UF_TAGS_ACTIVE']):?>
                                                     <div class="tag_menu">
                                                         <? if($ar_resultTag['UF_TAGS_BAR_TITLE']): ?>
                                                             <div class="h3"><?=$ar_resultTag['UF_TAGS_BAR_TITLE']?></div>
