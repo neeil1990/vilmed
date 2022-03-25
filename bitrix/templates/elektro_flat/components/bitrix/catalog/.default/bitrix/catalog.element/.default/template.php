@@ -262,7 +262,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 									"MODE" => "php",
 									"SHOW_BORDER" => false,
 								));
-								?>								
+								?>
 								<meta content="<?=($isOfferDetailImg ? $arOffer['DETAIL_PICTURE']['SRC'] : $isDetailImg ? $arResult['DETAIL_PICTURE']['SRC'] : SITE_TEMPLATE_PATH.'/images/no-photo.jpg');?>" itemprop="image" />
 								<?if($isOfferDetailImg || $isDetailImg) {?>
 									<a <?=($key == $arResult['OFFERS_SELECTED'] ? 'rel="lightbox" ' : '');?>class="catalog-detail-images fancybox" id="catalog-detail-images-<?=$arItemIDs['ID'].'-'.$arOffer['ID']?>" href="<?=($isOfferDetailImg ? $arOffer['DETAIL_PICTURE']['SRC'] : $arResult['DETAIL_PICTURE']['SRC']);?>">
@@ -440,12 +440,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							<meta content="5" itemprop="bestRating" />
 						</div>
 					</div>
-					<?//DETAIL_PREVIEW_TEXT//
-					if(!empty($arResult["PREVIEW_TEXT"])) {?>
-						<div class="catalog-detail-preview-text" itemprop="description">
-							<?=$arResult["PREVIEW_TEXT"]?>
-						</div>
-					<?}
+					<?
 					//DETAIL_GIFT//
 					if(!empty($arResult["PROPERTIES"]["GIFT"]["FULL_VALUE"])) {?>
 						<div class="catalog-detail-gift">
