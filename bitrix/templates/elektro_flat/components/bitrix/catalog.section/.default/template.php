@@ -44,6 +44,15 @@ $containerName = "container-".$navParams["NavNum"];
 			<!-- items-container -->
 			<?foreach($arResult["ITEMS"] as $id => $item) {
 
+                if($arParams['DELIMITER_ADDITIONAL_PRODUCT'] === $item['ID']){
+                ?>
+                    </div>
+                    <div class="clr"></div>
+                    <h2 style="margin-top: 15px">Возможно, Вас заинтересует:</h2>
+                    <div class="catalog-item-<?=$arParams['TYPE']?>-view" data-entity="<?=$containerName?>">
+                <?
+                }
+
 				$APPLICATION->IncludeComponent("bitrix:catalog.item", "",
 					array(
 						"RESULT" => array(
@@ -56,15 +65,6 @@ $containerName = "container-".$navParams["NavNum"];
 					$component,
 					array("HIDE_ICONS" => "Y")
 				);
-
-                if($arParams['DELIMITER_ADDITIONAL_PRODUCT'] == $item['ID']){
-                    ?>
-                    </div>
-                    <div class="clr"></div>
-                    <h2 style="margin-top: 15px">Возможно, Вас заинтересует:</h2>
-                    <div class="catalog-item-<?=$arParams['TYPE']?>-view" data-entity="<?=$containerName?>">
-                    <?
-                }
 
 			}?>
 			<!-- items-container -->

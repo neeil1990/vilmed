@@ -550,10 +550,14 @@ if($current_element_cnt < $SectionElementsCount){
                 );
 
                 $arAdditionalIds = [];
+                $firstAdditionalProduct = null;
                 $res = CIBlockElement::GetList(Array(), $arFilter, false, ['nTopCount' => ($SectionElementsCount - $current_element_cnt)], ['ID']);
                 while($ob = $res->GetNextElement()){
                     $arFields = $ob->GetFields();
                     $arAdditionalIds[] = $arFields['ID'];
+
+                    if($firstAdditionalProduct === null)
+                        $firstAdditionalProduct = (int)$arFields['ID'];
                 }
 
                 $arParams["BY_LINK"] = "Y";
@@ -562,8 +566,6 @@ if($current_element_cnt < $SectionElementsCount){
                     $arAdditionalIds = array_merge($arCurrentIds, $arAdditionalIds);
 
                 $GLOBALS[$arParams['FILTER_NAME']] = ['ID' => $arAdditionalIds];
-
-				$arParams["ELEMENT_SORT_ADDITIONAL"] = ($arParams['ELEMENT_SORT_ADDITIONAL']) ? $arAdditionalIds : false;
                 ?>
                 <script>
                     $('.count_items span').text(<?=count($arAdditionalIds)?>);
@@ -577,8 +579,7 @@ if($current_element_cnt < $SectionElementsCount){
 }
 
 $arSectionParams = array(
-    "DELIMITER_ADDITIONAL_PRODUCT" => (end($arCurrentIds)) ?: false,
-    "ELEMENT_SORT_ADDITIONAL" => $arParams["ELEMENT_SORT_ADDITIONAL"],
+    "DELIMITER_ADDITIONAL_PRODUCT" => $firstAdditionalProduct,
     "BY_LINK" => $arParams["BY_LINK"],
     "IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
     "IBLOCK_ID" => $arParams["IBLOCK_ID"],
