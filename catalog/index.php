@@ -122,9 +122,9 @@ $APPLICATION->IncludeComponent(
 		"DISPLAY_TOP_PAGER" => "N",
 		"DROP_DOWN_LIST_PROP_FILTER" => "",
 		"ELEMENT_SORT_FIELD" => "sort",
-		"ELEMENT_SORT_FIELD2" => "",
+		"ELEMENT_SORT_FIELD2" => "id",
 		"ELEMENT_SORT_ORDER" => "asc",
-		"ELEMENT_SORT_ORDER2" => "",
+		"ELEMENT_SORT_ORDER2" => "desc",
 		"FIELDS" => array(
 			0 => "TITLE",
 			1 => "ADDRESS",

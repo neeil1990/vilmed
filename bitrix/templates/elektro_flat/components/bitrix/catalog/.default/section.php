@@ -563,7 +563,7 @@ if($current_element_cnt < $SectionElementsCount){
 
                 $GLOBALS[$arParams['FILTER_NAME']] = ['ID' => $arAdditionalIds];
 
-                $arParams["ELEMENT_SORT_ADDITIONAL"] = $arAdditionalIds;
+				$arParams["ELEMENT_SORT_ADDITIONAL"] = ($arParams['ELEMENT_SORT_ADDITIONAL']) ? $arAdditionalIds : false;
                 ?>
                 <script>
                     $('.count_items span').text(<?=count($arAdditionalIds)?>);
@@ -584,8 +584,8 @@ $arSectionParams = array(
     "IBLOCK_ID" => $arParams["IBLOCK_ID"],
     "ELEMENT_SORT_FIELD" => $sort,
     "ELEMENT_SORT_ORDER" => $sort_order,
-    "ELEMENT_SORT_FIELD2" => "id",
-    "ELEMENT_SORT_ORDER2" => "asc",
+    "ELEMENT_SORT_FIELD2" => $arParams["ELEMENT_SORT_FIELD2"],
+    "ELEMENT_SORT_ORDER2" => $arParams["ELEMENT_SORT_ORDER2"],
     "PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
     "META_KEYWORDS" => $arParams["LIST_META_KEYWORDS"],
     "META_DESCRIPTION" => $arParams["LIST_META_DESCRIPTION"],
