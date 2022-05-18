@@ -532,7 +532,7 @@ if($current_element_cnt < $SectionElementsCount){
             if($element_cnt > $SectionElementsCount){
 
                 $arCurrentIds = [];
-                $res = CIBlockElement::GetList(Array("PROPERTY_NOT_STOCK" => "asc", $sort => $sort_order), ["IBLOCK_ID" => $arParams['IBLOCK_ID'], "SECTION_ID" => $arCurSection['ID'], "ACTIVE" => "Y", "INCLUDE_SUBSECTIONS" => "Y"], false, false, ["ID"]);
+                $res = CIBlockElement::GetList(Array($sort => $sort_order, $arParams["ELEMENT_SORT_FIELD2"] => $arParams["ELEMENT_SORT_ORDER2"]), ["IBLOCK_ID" => $arParams['IBLOCK_ID'], "SECTION_ID" => $arCurSection['ID'], "ACTIVE" => "Y", "INCLUDE_SUBSECTIONS" => "Y"], false, false, ["ID"]);
                 while($ob = $res->GetNextElement())
                 {
                     $arFields = $ob->GetFields();
@@ -562,8 +562,12 @@ if($current_element_cnt < $SectionElementsCount){
 
                 $arParams["BY_LINK"] = "Y";
 
-                if($arCurrentIds)
+                if($arCurrentIds){
+
                     $arAdditionalIds = array_merge($arCurrentIds, $arAdditionalIds);
+                    $sort = 'ID';
+                    $sort_order = $arAdditionalIds;
+                }
 
                 $GLOBALS[$arParams['FILTER_NAME']] = ['ID' => $arAdditionalIds];
                 ?>
