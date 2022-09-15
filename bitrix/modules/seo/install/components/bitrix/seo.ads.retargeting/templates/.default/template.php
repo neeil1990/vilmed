@@ -1,12 +1,12 @@
 <?
 if(!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 
-use \Bitrix\Main\Localization\Loc;
-use \Bitrix\Main\UI\Extension;
+use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\UI\Extension;
 
 /** @var array $arParams */
 
-Extension::load(['ui.hint', 'seo.ads.client_selector']);
+Extension::load(['ui.hint', 'seo.ads.client_selector','seo.ads.login']);
 
 $containerNodeId = $arParams['CONTAINER_NODE_ID'];
 $destroyEventName = $arParams['JS_DESTROY_EVENT_NAME'];
@@ -40,12 +40,25 @@ $multiClients = array_key_exists('CLIENTS', $arParams['PROVIDER']);
 
 	<div data-bx-ads-block="login" style="display: none;" class="crm-ads-rtg-popup-settings">
 		<div class="crm-ads-rtg-popup-social crm-ads-rtg-popup-social-<?=$type?>">
-			<span
-				id="seo-ads-login-btn"
-				onclick="BX.util.popup('<?=htmlspecialcharsbx($provider['AUTH_URL'])?>', 800, 600);"
-				class="webform-small-button webform-small-button-transparent">
-				<?=Loc::getMessage('CRM_ADS_RTG_LOGIN')?>
-			</span>
+
+			<?php if($type === 'google'):?>
+				<div class="crm-ads-goo-btn-container">
+					<div
+						id="seo-ads-login-btn"
+						class="crm-ads-goo-btn"
+					>
+						<div class="crm-ads-goo-btn-icon"></div>
+						<div class="crm-ads-goo-btn-text"><?php echo Loc::getMessage('CRM_ADS_RTG_LOGIN_GOOGLE')?></div>
+					</div>
+				</div>
+			<?php else:?>
+				<span
+					id="seo-ads-login-btn"
+					class="webform-small-button webform-small-button-transparent"
+				>
+					<?=Loc::getMessage('CRM_ADS_RTG_LOGIN')?>
+				</span>
+			<?php endif;?>
 		</div>
 	</div>
 
@@ -116,7 +129,7 @@ $multiClients = array_key_exists('CLIENTS', $arParams['PROVIDER']);
 				<div class="crm-ads-rtg-popup-settings">
 					<label for="crm_ads_checker_email" class="crm-ads-rtg-popup-chk-label">
 						<?=Loc::getMessage('CRM_ADS_RTG_CREATE_LOOKALIKE_SIZE')?>:
-						<span data-hint="<?=htmlspecialcharsbx(Loc::getMessage('CRM_ADS_RTG_CREATE_LOOKALIKE_SIZE_HINT'))?>"></span>
+						<span data-hint="<?=htmlspecialcharsbx(Loc::getMessage('CRM_ADS_RTG_CREATE_LOOKALIKE_SIZE_HINT'))?>" data-hint-html=""></span>
 					</label>
 					<br>
 
@@ -160,7 +173,7 @@ $multiClients = array_key_exists('CLIENTS', $arParams['PROVIDER']);
 						<span data-hint="<?=htmlspecialcharsbx(
 							Loc::getMessage('CRM_ADS_RTG_AUDIENCE_TYPE_HINT_' . $typeUpped)
 							. ' ' . Loc::getMessage('CRM_ADS_RTG_AUDIENCE_ADD_HINT_' . $typeUpped, ['#BR#' => '<br>'])
-						)?>"></span>
+						)?>" data-hint-html=""></span>
 					</div>
 
 					<table class="crm-ads-rtg-table">
@@ -199,7 +212,7 @@ $multiClients = array_key_exists('CLIENTS', $arParams['PROVIDER']);
 						<span data-hint="<?=htmlspecialcharsbx(
 							Loc::getMessage('CRM_ADS_RTG_AUDIENCE_TYPE_HINT_' . $typeUpped)
 							. ' ' . Loc::getMessage('CRM_ADS_RTG_AUDIENCE_ADD_HINT_' . $typeUpped, ['#BR#' => '<br>'])
-						)?>"></span>
+						)?>" data-hint-html=""></span>
 					</div>
 					<table class="crm-ads-rtg-table">
 						<tr>
@@ -324,8 +337,7 @@ $multiClients = array_key_exists('CLIENTS', $arParams['PROVIDER']);
 </script>
 
 <script>
-	BX.ready(function () {
-
+		BX.ready(function () {
 		var r = (Date.now()/1000|0);
 		BX.loadCSS('<?=$this->GetFolder()?>/configurator.css?' + r);
 		BX.loadScript('<?=$this->GetFolder()?>/configurator.js?' + r, function()

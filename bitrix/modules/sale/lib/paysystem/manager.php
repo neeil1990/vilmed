@@ -14,7 +14,6 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Request;
 use Bitrix\Sale\Basket;
 use Bitrix\Sale\BusinessValue;
-use Bitrix\Sale\Internals\EntityCollection;
 use Bitrix\Sale\Internals\PaySystemActionTable;
 use Bitrix\Sale\Internals\PaySystemRestHandlersTable;
 use Bitrix\Sale\Internals\ServiceRestrictionTable;
@@ -39,6 +38,8 @@ final class Manager
 	const HANDLER_INDEPENDENT_FALSE = false;
 
 	const EVENT_ON_GET_HANDLER_DESC = 'OnSaleGetHandlerDescription';
+	const EVENT_ON_PAYSYSTEM_UPDATE = 'OnSalePaySystemUpdate';
+
 	const CACHE_ID = "BITRIX_SALE_INNER_PS_ID";
 	const TTL = 31536000;
 	/**
@@ -85,7 +86,7 @@ final class Manager
 	 */
 	public static function getById($id)
 	{
-		if ($id <= 0)
+		if ((int)$id <= 0)
 			return false;
 
 		$params = array(
@@ -115,20 +116,44 @@ final class Manager
 	/**
 	 * @param $primary
 	 * @param array $data
-	 * @return \Bitrix\Main\Entity\UpdateResult
+	 * @return \Bitrix\Main\ORM\Data\UpdateResult
 	 * @throws \Exception
 	 */
-	public static function update($primary, array $data)
+	public static function update($primary, array $data): \Bitrix\Main\ORM\Data\UpdateResult
 	{
-		return PaySystemActionTable::update($primary, $data);
+		$oldFields = PaySystemActionTable::getByPrimary($primary)->fetch();
+		if ($oldFields)
+		{
+			$newFields = array_merge($oldFields, $data);
+			
+			$data['PS_CLIENT_TYPE'] = (new Service($newFields))->getClientTypeFromHandler();	
+		}
+		
+		$updateResult = PaySystemActionTable::update($primary, $data);
+		if ($updateResult->isSuccess())
+		{
+			$oldFields = array_intersect_key($oldFields, $data);
+			$eventParams = [
+				'PAY_SYSTEM_ID' => $primary,
+				'OLD_FIELDS' => $oldFields,
+				'NEW_FIELDS' => $data,
+			];
+			$event = new Event('sale', self::EVENT_ON_PAYSYSTEM_UPDATE, $eventParams);
+			$event->send();
+		}
+
+		return $updateResult;
 	}
 
 	/**
 	 * @param array $data
-	 * @return \Bitrix\Main\Entity\AddResult
+	 * @return \Bitrix\Main\ORM\Data\AddResult
+	 * @throws \Exception
 	 */
-	public static function add(array $data)
+	public static function add(array $data): \Bitrix\Main\ORM\Data\AddResult
 	{
+		$data['PS_CLIENT_TYPE'] = (new Service($data))->getClientTypeFromHandler();
+		
 		return PaySystemActionTable::add($data);
 	}
 
@@ -292,6 +317,38 @@ final class Manager
 	}
 
 	/**
+	 * @param Order $order
+	 * @param float|null $sum
+	 * @param int $mode
+	 * @return array
+	 * @throws ArgumentException
+	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
+	 * @throws \Bitrix\Main\NotImplementedException
+	 * @throws \Bitrix\Main\NotSupportedException
+	 * @throws \Bitrix\Main\SystemException
+	 */
+	public static function getListWithRestrictionsByOrder(Order $order, float $sum = null, int $mode = Restrictions\Manager::MODE_CLIENT): array
+	{
+		/** @var Order $orderClone */
+		$orderClone = $order->createClone();
+
+		$orderPrice = $orderClone->getPrice();
+		$paymentSum = $orderPrice;
+		if ($sum && $sum >= 0 && $sum <= $orderPrice)
+		{
+			$paymentSum = $sum;
+		}
+
+		$paymentCollection = $orderClone->getPaymentCollection();
+		$payment = $paymentCollection->createItem();
+		$payment->setFields([
+			'SUM' => $paymentSum,
+		]);
+
+		return self::getListWithRestrictions($payment, $mode);
+	}
+
+	/**
 	 * @param Payment $payment
 	 * @param int $mode
 	 * @return array
@@ -302,27 +359,53 @@ final class Manager
 	{
 		$result = array();
 
-		$dbRes = self::getList(array(
-			'filter' => array('ACTIVE' => 'Y', 'ENTITY_REGISTRY_TYPE' => $payment::getRegistryType()),
-			'order' => array('SORT' => 'ASC', 'NAME' => 'ASC')
-		));
+		$filter = [
+			'=ACTIVE' => 'Y',
+			'=ENTITY_REGISTRY_TYPE' => $payment::getRegistryType(),
+		];
+		
+		$bindingPaySystemIds = [];
+		if ($mode == Restrictions\Manager::MODE_CLIENT)
+		{
+			$bindingPaySystemIds = PaymentAvailablesPaySystems::getAvailablePaySystemIdsByPaymentId($payment->getId());
+			if ($bindingPaySystemIds)
+			{
+				$filter['=ID'] = $bindingPaySystemIds;
+			}
+		}
+
+		$dbRes = self::getList([
+			'filter' => $filter,
+			'order' => [
+				'SORT' => 'ASC',
+				'NAME' => 'ASC',
+			],
+		]);
 
 		while ($paySystem = $dbRes->fetch())
 		{
-			if ($mode == Restrictions\Manager::MODE_MANAGER)
+			if ($bindingPaySystemIds)
+			{
+				$result[$paySystem['ID']] = $paySystem;
+			}
+			elseif ($mode == Restrictions\Manager::MODE_MANAGER)
 			{
 				$checkServiceResult = Restrictions\Manager::checkService($paySystem['ID'], $payment, $mode);
 				if ($checkServiceResult != Restrictions\Manager::SEVERITY_STRICT)
 				{
 					if ($checkServiceResult == Restrictions\Manager::SEVERITY_SOFT)
+					{
 						$paySystem['RESTRICTED'] = $checkServiceResult;
+					}
 					$result[$paySystem['ID']] = $paySystem;
 				}
 			}
-			else if ($mode == Restrictions\Manager::MODE_CLIENT)
+			elseif ($mode == Restrictions\Manager::MODE_CLIENT)
 			{
 				if (Restrictions\Manager::checkService($paySystem['ID'], $payment, $mode) === Restrictions\Manager::SEVERITY_NONE)
+				{
 					$result[$paySystem['ID']] = $paySystem;
+				}
 			}
 		}
 
@@ -490,25 +573,47 @@ final class Manager
 
 	/**
 	 * @param $folder
-	 * @return null|string
+	 * @return string|null
+	 * @throws \Bitrix\Main\ArgumentNullException
+	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
 	 */
-	public static function getPathToHandlerFolder($folder)
+	public static function getPathToHandlerFolder($folder): ?string
 	{
-		$documentRoot = Application::getDocumentRoot();
-
-		if (mb_strpos($folder, '/') !== false)
+		if (!$folder)
 		{
-			return $folder;
+			return null;
+		}
+
+		$documentRoot = Application::getDocumentRoot();
+		$dirs = self::getHandlerDirectories();
+
+		if (mb_strpos($folder, DIRECTORY_SEPARATOR) !== false)
+		{
+			$folderWithoutHandlerName = array_slice(explode(DIRECTORY_SEPARATOR, $folder), 1, -1);
+			$folderWithoutHandlerName = implode(DIRECTORY_SEPARATOR, $folderWithoutHandlerName);
+
+			$handlersDirectory = new Directory($folderWithoutHandlerName);
+			$handlersDirectoryPhysicalPath = DIRECTORY_SEPARATOR.$handlersDirectory->getPhysicalPath().DIRECTORY_SEPARATOR;
+
+			foreach ($dirs as $dir)
+			{
+				if ($documentRoot.$dir !== $documentRoot.$handlersDirectoryPhysicalPath)
+				{
+					continue;
+				}
+
+				return Directory::isDirectoryExists($documentRoot.$folder) ? $folder : null;
+			}
 		}
 		else
 		{
-			$dirs = self::getHandlerDirectories();
-
 			foreach ($dirs as $dir)
 			{
 				$path = $dir.$folder;
 				if (!Directory::isDirectoryExists($documentRoot.$path))
+				{
 					continue;
+				}
 
 				return $path;
 			}
@@ -593,7 +698,7 @@ final class Manager
 	 */
 	public static function getObjectById($id)
 	{
-		if ($id <= 0)
+		if ((int)$id <= 0)
 			return null;
 
 		$data = Manager::getById($id);
@@ -642,42 +747,44 @@ final class Manager
 	 */
 	public static function getBusValueGroups()
 	{
-		return array(
-			'CONNECT_SETTINGS_ALFABANK' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ALFABANK'), 'SORT' => 100),
-			'CONNECT_SETTINGS_AUTHORIZE' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_AUTHORIZE'), 'SORT' => 100),
-			'CONNECT_SETTINGS_YANDEX' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_YANDEX'), 'SORT' => 100),
-			'CONNECT_SETTINGS_YANDEX_INVOICE' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_YANDEX_INVOICE'), 'SORT' => 100),
-			'CONNECT_SETTINGS_WEBMONEY' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_WEBMONEY'), 'SORT' => 100),
-			'CONNECT_SETTINGS_ASSIST' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ASSIST'), 'SORT' => 100),
-			'CONNECT_SETTINGS_ROBOXCHANGE' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ROBOXCHANGE'), 'SORT' => 100),
-			'CONNECT_SETTINGS_QIWI' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_QIWI'), 'SORT' => 100),
-			'CONNECT_SETTINGS_PAYPAL' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_PAYPAL'), 'SORT' => 100),
-			'CONNECT_SETTINGS_PAYMASTER' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_PAYMASTER'), 'SORT' => 100),
-			'CONNECT_SETTINGS_LIQPAY' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_LIQPAY'), 'SORT' => 100),
-			'CONNECT_SETTINGS_BILL' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILL'), 'SORT' => 100),
-			'CONNECT_SETTINGS_BILLDE' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLDE'), 'SORT' => 100),
-			'CONNECT_SETTINGS_BILLEN' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLEN'), 'SORT' => 100),
-			'CONNECT_SETTINGS_BILLUA' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLUA'), 'SORT' => 100),
-			'CONNECT_SETTINGS_BILLLA' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLLA'), 'SORT' => 100),
-			'CONNECT_SETTINGS_SBERBANK' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_SBERBANK'), 'SORT' => 100),
-			'GENERAL_SETTINGS' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_GENERAL_SETTINGS'), 'SORT' => 100),
-			'COLUMN_SETTINGS' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_COLUMN'), 'SORT' => 100),
-			'VISUAL_SETTINGS' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_VISUAL'), 'SORT' => 100),
-			'PAYMENT' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_PAYMENT'), 'SORT' => 200),
-			'PAYSYSTEM' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_PAYSYSTEM'), 'SORT' => 500),
-			'PS_OTHER' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_PS_OTHER'), 'SORT' => 10000),
-			'CONNECT_SETTINGS_UAPAY' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_UAPAY'), 'SORT' => 100),
-			'CONNECT_SETTINGS_ADYEN' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ADYEN'), 'SORT' => 100),
-			'CONNECT_SETTINGS_APPLE_PAY' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_APPLE_PAY'), 'SORT' => 200),
-			'CONNECT_SETTINGS_SKB' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_SKB'), 'SORT' => 100),
-			'CONNECT_SETTINGS_BEPAID' => array('NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BEPAID'), 'SORT' => 100),
-		);
+		return [
+			'CONNECT_SETTINGS_ALFABANK' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ALFABANK'), 'SORT' => 100],
+			'CONNECT_SETTINGS_AUTHORIZE' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_AUTHORIZE'), 'SORT' => 100],
+			'CONNECT_SETTINGS_YANDEX' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_YANDEX'), 'SORT' => 100],
+			'CONNECT_SETTINGS_YANDEX_INVOICE' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_YANDEX_INVOICE'), 'SORT' => 100],
+			'CONNECT_SETTINGS_WEBMONEY' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_WEBMONEY'), 'SORT' => 100],
+			'CONNECT_SETTINGS_ASSIST' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ASSIST'), 'SORT' => 100],
+			'CONNECT_SETTINGS_ROBOXCHANGE' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ROBOXCHANGE'), 'SORT' => 100],
+			'CONNECT_SETTINGS_QIWI' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_QIWI'), 'SORT' => 100],
+			'CONNECT_SETTINGS_PAYPAL' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_PAYPAL'), 'SORT' => 100],
+			'CONNECT_SETTINGS_PAYMASTER' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_PAYMASTER'), 'SORT' => 100],
+			'CONNECT_SETTINGS_LIQPAY' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_LIQPAY'), 'SORT' => 100],
+			'CONNECT_SETTINGS_BILL' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILL'), 'SORT' => 100],
+			'CONNECT_SETTINGS_BILLDE' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLDE'), 'SORT' => 100],
+			'CONNECT_SETTINGS_BILLEN' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLEN'), 'SORT' => 100],
+			'CONNECT_SETTINGS_BILLUA' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLUA'), 'SORT' => 100],
+			'CONNECT_SETTINGS_BILLLA' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BILLLA'), 'SORT' => 100],
+			'CONNECT_SETTINGS_SBERBANK' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_SBERBANK'), 'SORT' => 100],
+			'GENERAL_SETTINGS' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_GENERAL_SETTINGS'), 'SORT' => 100],
+			'COLUMN_SETTINGS' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_COLUMN'), 'SORT' => 100],
+			'VISUAL_SETTINGS' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_VISUAL'), 'SORT' => 100],
+			'PAYMENT' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_PAYMENT'), 'SORT' => 200],
+			'PAYSYSTEM' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_PAYSYSTEM'), 'SORT' => 500],
+			'PS_OTHER' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_PS_OTHER'), 'SORT' => 10000],
+			'CONNECT_SETTINGS_UAPAY' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_UAPAY'), 'SORT' => 100],
+			'CONNECT_SETTINGS_ADYEN' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_ADYEN'), 'SORT' => 100],
+			'CONNECT_SETTINGS_APPLE_PAY' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_APPLE_PAY'), 'SORT' => 200],
+			'CONNECT_SETTINGS_SKB' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_SKB'), 'SORT' => 100],
+			'CONNECT_SETTINGS_BEPAID' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_BEPAID'), 'SORT' => 100],
+			'CONNECT_SETTINGS_WOOPPAY' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_WOOPPAY'), 'SORT' => 100],
+			'CONNECT_SETTINGS_PLATON' => ['NAME' => Loc::getMessage('SALE_PS_MANAGER_GROUP_CONNECT_SETTINGS_PLATON'), 'SORT' => 100],
+		];
 	}
 
 	/**
 	 * @param $primary
-	 * @return \Bitrix\Main\Entity\DeleteResult
-	 * @throws \Bitrix\Main\ArgumentException
+	 * @return \Bitrix\Main\Entity\DeleteResult|\Bitrix\Main\ORM\Data\DeleteResult
+	 * @throws ArgumentException
 	 * @throws \Bitrix\Main\ObjectPropertyException
 	 * @throws \Bitrix\Main\SystemException
 	 */
@@ -712,7 +819,22 @@ final class Manager
 
 		BusinessValue::delete(Service::PAY_SYSTEM_PREFIX.$primary);
 
-		return PaySystemActionTable::delete($primary);
+		$service = Manager::getObjectById($primary);
+
+		$deleteResult = PaySystemActionTable::delete($primary);
+		if ($deleteResult->isSuccess())
+		{
+			if ($service && $service->isSupportPrintCheck())
+			{
+				$onDeletePaySystemResult = Cashbox\EventHandler::onDeletePaySystem($service);
+				if (!$onDeletePaySystemResult->isSuccess())
+				{
+					$deleteResult->addErrors($onDeletePaySystemResult->getErrors());
+				}
+			}
+		}
+
+		return $deleteResult;
 	}
 
 	/**
@@ -831,8 +953,20 @@ final class Manager
 	 */
 	public static function isRestHandler($handler)
 	{
-		$dbRes = PaySystemRestHandlersTable::getList(array('filter' => array('CODE' => $handler)));
-		return (bool)$dbRes->fetch();
+		static $result = [];
+
+		if (isset($result[$handler]))
+		{
+			return $result[$handler];
+		}
+
+		$handlerData = PaySystemRestHandlersTable::getList([
+			'filter' => ['=CODE' => $handler],
+			'limit' => 1,
+		])->fetch();
+		$result[$handler] = (bool)$handlerData;
+
+		return $result[$handler] ?? false;
 	}
 
 	/**
@@ -840,29 +974,32 @@ final class Manager
 	 * @return array
 	 * @throws \Bitrix\Main\ArgumentNullException
 	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
+	 * @throws \Bitrix\Main\SystemException
 	 */
-	public static function includeHandler($actionFile)
+	public static function includeHandler($actionFile): array
 	{
 		$className = '';
 		$handlerType = '';
 
-		$name = self::getFolderFromClassName($actionFile);
-
-		foreach (self::getHandlerDirectories() as $type => $path)
+		if ($name = self::getFolderFromClassName($actionFile))
 		{
-			if (File::isFileExists($_SERVER['DOCUMENT_ROOT'].$path.$name.'/handler.php'))
+			$documentRoot = Application::getDocumentRoot();
+			foreach (self::getHandlerDirectories() as $type => $path)
 			{
-				$className = self::getClassNameFromPath($actionFile);
-				if (!class_exists($className))
-					require_once($_SERVER['DOCUMENT_ROOT'].$path.$name.'/handler.php');
-
-				if (class_exists($className))
+				if (File::isFileExists($documentRoot.$path.$name.'/handler.php'))
 				{
-					$handlerType = $type;
-					break;
-				}
+					$className = self::getClassNameFromPath($actionFile);
+					if (!class_exists($className))
+						require_once($documentRoot.$path.$name.'/handler.php');
 
-				$className = '';
+					if (class_exists($className))
+					{
+						$handlerType = $type;
+						break;
+					}
+
+					$className = '';
+				}
 			}
 		}
 

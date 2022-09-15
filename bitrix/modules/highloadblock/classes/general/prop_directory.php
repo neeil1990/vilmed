@@ -26,7 +26,7 @@ class CIBlockPropertyDirectory
 	 *
 	 * @return array
 	 */
-	public static function GetUserTypeDescription()
+	public static function GetUserTypeDescription(): array
 	{
 		return array(
 			'PROPERTY_TYPE' => 'S',
@@ -35,7 +35,6 @@ class CIBlockPropertyDirectory
 			'GetSettingsHTML' => array(__CLASS__, 'GetSettingsHTML'),
 			'GetPropertyFieldHtml' => array(__CLASS__, 'GetPropertyFieldHtml'),
 			'PrepareSettings' => array(__CLASS__, 'PrepareSettings'),
-			'GetOptionsData' => array(__CLASS__, 'GetOptionsData'), //TODO: remove this row after iblock 19.0.0 will be stabled
 			'GetAdminListViewHTML' => array(__CLASS__, 'GetAdminListViewHTML'),
 			'GetPublicViewHTML' => array(__CLASS__, 'GetPublicViewHTML'),
 			'GetPublicEditHTML' => array(__CLASS__, 'GetPublicEditHTML'),
@@ -57,7 +56,7 @@ class CIBlockPropertyDirectory
 	 * @param array $arProperty				Property description.
 	 * @return array
 	 */
-	public static function PrepareSettings($arProperty)
+	public static function PrepareSettings($arProperty): array
 	{
 		$size = 1;
 		$width = 0;
@@ -133,7 +132,7 @@ class CIBlockPropertyDirectory
 	 * @param array $arPropertyFields		Property fields for edit form.
 	 * @return string
 	 */
-	public static function GetSettingsHTML($arProperty, $strHTMLControlName, &$arPropertyFields)
+	public static function GetSettingsHTML($arProperty, $strHTMLControlName, &$arPropertyFields): string
 	{
 		$iblockID = 0;
 		if (isset($arProperty['IBLOCK_ID']))
@@ -374,7 +373,7 @@ HIBSELECT;
 	 * @param array $strHTMLControlName		Control description.
 	 * @return string
 	 */
-	public static function GetPropertyFieldHtml($arProperty, $value, $strHTMLControlName)
+	public static function GetPropertyFieldHtml($arProperty, $value, $strHTMLControlName): string
 	{
 		$settings = CIBlockPropertyDirectory::PrepareSettings($arProperty);
 		$size = ($settings["size"] > 1 ? ' size="'.$settings["size"].'"' : '');
@@ -395,7 +394,7 @@ HIBSELECT;
 	 * @param array $control			Control description.
 	 * @return string
 	 */
-	public static function GetPublicEditHTML($property, $value, $control)
+	public static function GetPublicEditHTML($property, $value, $control): string
 	{
 		$multi = (isset($property['MULTIPLE']) && $property['MULTIPLE'] == 'Y');
 
@@ -418,7 +417,7 @@ HIBSELECT;
 	 * @param array $control			Control description.
 	 * @return string
 	 */
-	public static function GetPublicEditHTMLMulty($property, $value, $control)
+	public static function GetPublicEditHTMLMulty($property, $value, $control): string
 	{
 		$settings = CIBlockPropertyDirectory::PrepareSettings($property);
 		$settings['size'] = ($settings['size'] <= 1 ? 5 : $settings['size']);
@@ -439,7 +438,7 @@ HIBSELECT;
 	 * @param array $values				Current value.
 	 * @return string
 	 */
-	public static function GetOptionsHtml($arProperty, $values)
+	public static function GetOptionsHtml($arProperty, $values): string
 	{
 		$selectedValue = false;
 		$cellOption = '';
@@ -481,7 +480,7 @@ HIBSELECT;
 	 * @param array $arProperty Property description.
 	 * @return array
 	 */
-	public static function GetOptionsData($arProperty)
+	public static function GetOptionsData($arProperty): array
 	{
 		$listData = array();
 
@@ -591,7 +590,7 @@ HIBSELECT;
 		$arProperty,
 		$value,
 		/** @noinspection PhpUnusedParameterInspection */$strHTMLControlName
-	)
+	): string
 	{
 		$dataValue = self::GetExtendedValue($arProperty, $value);
 		if ($dataValue)
@@ -609,7 +608,7 @@ HIBSELECT;
 	 * @param array $strHTMLControlName		Control description.
 	 * @return string
 	 */
-	public static function GetPublicViewHTML($arProperty, $value, $strHTMLControlName)
+	public static function GetPublicViewHTML($arProperty, $value, $strHTMLControlName): string
 	{
 		$dataValue = self::GetExtendedValue($arProperty, $value);
 		if ($dataValue)
@@ -631,7 +630,7 @@ HIBSELECT;
 	 * @param array $strHTMLControlName		Control description.
 	 * @return string
 	 */
-	public static function GetAdminFilterHTML($arProperty, $strHTMLControlName)
+	public static function GetAdminFilterHTML($arProperty, $strHTMLControlName): string
 	{
 		$lAdmin = new CAdminList($strHTMLControlName["TABLE_ID"]);
 		$lAdmin->InitFilter(array($strHTMLControlName["VALUE"]));
@@ -665,16 +664,37 @@ HIBSELECT;
 		$arProperty,
 		$value,
 		/** @noinspection PhpUnusedParameterInspection */$strHTMLControlName
-	)
+	): string
 	{
+		if (!isset($value['VALUE']))
+			return '';
+
+		if (is_array($value['VALUE']) && empty($value['VALUE'])) // order not change!
+			return '';
+
 		$dataValue = self::GetExtendedValue($arProperty, $value);
-		if ($dataValue)
+		if (!empty($dataValue) && is_array($dataValue))
 		{
-			if (isset($dataValue['UF_NAME']))
-				return $dataValue['UF_NAME'];
+			$result = [];
+			if (is_array($value['VALUE']))
+			{
+				foreach ($value['VALUE'] as $item)
+				{
+					if (empty($dataValue[$item]) && !is_array($dataValue[$item]))
+					{
+						continue;
+					}
+					$result[] = $dataValue[$item]['UF_NAME'] ?? $dataValue[$item]['UF_XML_ID'];
+				}
+			}
 			else
-				return $dataValue['UF_XML_ID'];
+			{
+				$result[] = $dataValue['UF_NAME'] ?? $dataValue['UF_XML_ID'];
+			}
+
+			return implode(' / ', $result);
 		}
+
 		return '';
 	}
 
@@ -687,7 +707,7 @@ HIBSELECT;
 	 * @param bool &$filtered
 	 * @return void
 	 */
-	public static function AddFilterFields($arProperty, $strHTMLControlName, &$arFilter, &$filtered)
+	public static function AddFilterFields($arProperty, $strHTMLControlName, &$arFilter, &$filtered): void
 	{
 		$filtered = false;
 		$values = array();
@@ -755,7 +775,7 @@ HIBSELECT;
 	 * @param array $listDescr				Params for getList.
 	 * @return array
 	 */
-	private static function getEntityFieldsByFilter($tableName, $listDescr = array())
+	private static function getEntityFieldsByFilter($tableName, $listDescr = array()): array
 	{
 		$arResult = array();
 		$tableName = (string)$tableName;
@@ -819,7 +839,7 @@ HIBSELECT;
 		return $arResult;
 	}
 
-	private static function normalizeValue($value)
+	private static function normalizeValue($value): array
 	{
 		$result = [];
 		if (!is_array($value))
@@ -860,7 +880,7 @@ HIBSELECT;
 	 * @throws \Bitrix\Main\ObjectPropertyException
 	 * @throws \Bitrix\Main\SystemException
 	 */
-	private static function getDefaultXmlId($identifier)
+	private static function getDefaultXmlId($identifier): ?string
 	{
 		$result = null;
 		$entity = HL\HighloadBlockTable::compileEntity($identifier);
@@ -940,27 +960,31 @@ HIBSELECT;
 				$item['IMAGE'] = $data['UF_FILE'];
 			}
 
-			if ($settings['MULTIPLE'] !== 'Y' && $hasImages)
+			if ($hasImages)
 			{
 				$image = \CFile::GetFileArray($data['UF_FILE']) ?: null;
 				$item['IMAGE_SRC'] = $image['SRC'];
 				if ($image)
 				{
-					$item['NAME'] = "<span class=\"catalog-list-dictionary-select-icon\" style=\"background-image:url('{$image['SRC']}');\"></span> ".htmlspecialcharsbx($item['NAME']);
+					if ($settings['MULTIPLE'] === 'Y')
+					{
+						$item['HTML'] = "<span class=\"catalog-multi-list-dictionary-select-icon\" style=\"background-image:url('{$image['SRC']}');\"></span> ".htmlspecialcharsbx($item['NAME']);
+					}
+					else
+					{
+						$item['NAME'] = "<span class=\"catalog-list-dictionary-select-icon\" style=\"background-image:url('{$image['SRC']}');\"></span> ".htmlspecialcharsbx($item['NAME']);
+					}
+				}
+				else
+				{
+					if ($settings['MULTIPLE'] !== 'Y')
+					{
+						$item['NAME'] = htmlspecialcharsbx($item['NAME']);
+					}
 				}
 			}
 
 			$items[] = $item;
-		}
-
-		if (empty($items) && $gridMode)
-		{
-			$items[] = [
-				'NAME' => Loc::getMessage('HIBLOCK_PROP_DIRECTORY_EMPTY_GRID_VALUE'),
-				'TEXT' => Loc::getMessage('HIBLOCK_PROP_DIRECTORY_EMPTY_GRID_VALUE'),
-				'VALUE' => '',
-				'DESCRIPTION' => Loc::getMessage('HIBLOCK_PROP_DIRECTORY_EMPTY_GRID_VALUE'),
-			];
 		}
 
 		if ($settings['MULTIPLE'] === 'Y')
@@ -982,6 +1006,7 @@ HIBSELECT;
 				'userType' => 'directory',
 				'isHtml' => $hasImages,
 				'items' => $items,
+				'enableEmptyItem' => $settings['IS_REQUIRED'] === 'N',
 			],
 		];
 	}
@@ -1003,9 +1028,35 @@ HIBSELECT;
 		$labelHtml = '';
 		$selectedHtml = '';
 
-		foreach (static::getEntityFieldsForTable($hlTableName) as $field)
+		$entityFields = static::getEntityFieldsForTable($hlTableName);
+
+		if ($settings['IS_REQUIRED'] === 'N')
 		{
-			$checked = $field['UF_XML_ID'] === $params['VALUE'];
+			array_unshift($entityFields, [
+				'UF_XML_ID' => '0',
+				'UF_NAME' => Loc::getMessage('HIBLOCK_PROP_DIRECTORY_EMPTY_GRID_VALUE'),
+			]);
+		}
+
+		$checkedXmlId = null;
+
+		foreach ($entityFields as $field)
+		{
+			if ($field['UF_XML_ID'] === $params['VALUE'])
+			{
+				$checkedXmlId = $field['UF_XML_ID'];
+				break;
+			}
+		}
+
+		if (!$checkedXmlId && !empty($entityFields))
+		{
+			$checkedXmlId = reset($entityFields)['UF_XML_ID'];
+		}
+
+		foreach ($entityFields as $field)
+		{
+			$checked = $field['UF_XML_ID'] === $checkedXmlId;
 			$name = HtmlFilter::encode($field['UF_NAME']);
 			$xmlId = HtmlFilter::encode($field['UF_XML_ID']);
 
@@ -1097,23 +1148,6 @@ LABEL;
 						BX.removeClass(items[i].parentNode, 'selected');								
 					}
 				}
-			}
-			
-			var trNode = BX.findParent(element, {
-				tag: 'tr',
-				attribute: 'data-id'
-			});
-			if (BX.type.isDomNode(trNode) && BX.hasClass(trNode, 'main-grid-row-new'))
-			{
-				var id = trNode.getAttribute('data-id');
-				var labels = contentNode.querySelectorAll('label[data-role]');
-				for (var i in labels)
-				{
-					if (labels.hasOwnProperty(i))
-					{
-						labels[i].setAttribute('for', labels[i].getAttribute('for') + id);
-					}
-				}				
 			}
 			
 			popup = BX.Main.PopupManager.create(

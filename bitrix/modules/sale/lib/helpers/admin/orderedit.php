@@ -528,30 +528,43 @@ class OrderEdit
 			foreach($formData["PRODUCT"] as $basketCode => $productData)
 			{
 				if($productData["IS_SET_ITEM"] == "Y")
+				{
 					continue;
+				}
 
 				if(!isset($productData["PROPS"]) || !is_array($productData["PROPS"]))
+				{
 					$productData["PROPS"] = array();
+				}
 
-				$item = $basket->getExistsItem($productData["MODULE"], $productData["OFFER_ID"], $productData["PROPS"]);
+				// Always search only by $basketCode so that can add duplicates
+				$item =
+					$basketCode != self::BASKET_CODE_NEW
+					? $basket->getItemByBasketCode($basketCode)
+					: null
+				;
 
 				if($item == null && $basketCode != self::BASKET_CODE_NEW)
+				{
 					$item = $basket->getItemByBasketCode($basketCode);
+				}
 
 				if($item && $item->isBundleChild())
+				{
 					$item = null;
+				}
 
 				if($item)
 				{
 					//Let's extract cached provider product data from field
 					if(!empty($productData["PROVIDER_DATA"]) && CheckSerializedData($productData["PROVIDER_DATA"]))
 					{
-						$providerData = unserialize($productData["PROVIDER_DATA"]);
+						$providerData = unserialize($productData["PROVIDER_DATA"], ['allowed_classes' => false]);
 						self::setProviderTrustData($item, $order, $providerData);
 					}
 
 					if(!empty($productData["SET_ITEMS_DATA"]) && CheckSerializedData($productData["SET_ITEMS_DATA"]))
-						$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"]);
+						$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"], ['allowed_classes' => false]);
 
 					$res = $item->setField("QUANTITY", $item->getField("QUANTITY")+$productData["QUANTITY"]);
 
@@ -830,21 +843,31 @@ class OrderEdit
 			foreach($formData["PRODUCT"] as $basketCode => $productData)
 			{
 				if (!isset($productData["PROPS"]))
+				{
 					$productData["PROPS"] = array();
+				}
 
-				$item = $basket->getExistsItem($productData["MODULE"], $productData["OFFER_ID"], $productData["PROPS"]);
+				// Always search only by $basketCode so that can add duplicates
+				$item =
+					$basketCode != self::BASKET_CODE_NEW
+					? $basket->getItemByBasketCode($basketCode)
+					: null
+				;
 
 				if ($item == null)
+				{
 					DiscountCouponsManager::useSavedCouponsForApply(false);
-
-				if($item == null && $basketCode != self::BASKET_CODE_NEW)
-					$item = $basket->getItemByBasketCode($basketCode);
+				}
 
 				if($item && $item->isBundleChild())
+				{
 					continue;
+				}
 
 				if(!$item)
+				{
 					continue;
+				}
 
 				$itemsBasketCodes[] = $item->getBasketCode();
 			}
@@ -887,15 +910,21 @@ class OrderEdit
 				$providerData = array();
 
 				if($productData["IS_SET_ITEM"] == "Y")
+				{
 					continue;
+				}
 
 				if(!isset($productData["PROPS"]) || !is_array($productData["PROPS"]))
+				{
 					$productData["PROPS"] = array();
+				}
 
-				if(empty($productData['MANUALLY_EDITED']))
-					$item = $basket->getExistsItem($productData["MODULE"], $productData["OFFER_ID"], $productData["PROPS"]);
-				else
-					$item = $basket->getItemByBasketCode($basketCode);
+				// Always search only by $basketCode so that can add duplicates
+				$item =
+					$basketCode != self::BASKET_CODE_NEW
+					? $basket->getItemByBasketCode($basketCode)
+					: null
+				;
 
 				//sku was changed
 				if($item == null && $basketCode != self::BASKET_CODE_NEW)
@@ -967,14 +996,14 @@ class OrderEdit
 
 					if(!empty($productData["PROVIDER_DATA"]) && !self::$needUpdateNewProductPrice && CheckSerializedData($productData["PROVIDER_DATA"]))
 					{
-						$providerData = unserialize($productData["PROVIDER_DATA"]);
+						$providerData = unserialize($productData["PROVIDER_DATA"], ['allowed_classes' => false]);
 					}
 
 					if(is_array($providerData) && !empty($providerData))
 						self::setProviderTrustData($item, $order, $providerData);
 
 					if(!empty($productData["SET_ITEMS_DATA"]) && CheckSerializedData($productData["SET_ITEMS_DATA"]))
-						$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"]);
+						$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"], ['allowed_classes' => false]);
 
 					/** @var \Bitrix\Sale\Result $res */
 					$res = self::setBasketItemFields($item, $itemFields);
@@ -1189,13 +1218,13 @@ class OrderEdit
 			if(self::$isTrustProductFormData && !$isDataNeedUpdate)
 			{
 				if(!empty($productData["PROVIDER_DATA"]) && CheckSerializedData($productData["PROVIDER_DATA"]))
-					$trustData[$basketCode] = unserialize($productData["PROVIDER_DATA"]);
+					$trustData[$basketCode] = unserialize($productData["PROVIDER_DATA"], ['allowed_classes' => false]);
 
 				// if quantity changed we must get fresh data from provider
 				if(!empty($trustData[$basketCode]) && $trustData[$basketCode]["QUANTITY"] == $productData["QUANTITY"])
 				{
 					if(!empty($productData["SET_ITEMS_DATA"]) && CheckSerializedData($productData["SET_ITEMS_DATA"]))
-						$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"]);
+						$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"], ['allowed_classes' => false]);
 
 					if(is_array($trustData[$basketCode]) && !empty($trustData[$basketCode]))
 						self::setProviderTrustData($item, $order, $trustData[$basketCode]);
@@ -1471,13 +1500,13 @@ class OrderEdit
 		if(self::$isTrustProductFormData && !$needDataUpdate)
 		{
 			if(!empty($productData["PROVIDER_DATA"]) && CheckSerializedData($productData["PROVIDER_DATA"]))
-				$data[$basketCode] = unserialize($productData["PROVIDER_DATA"]);
+				$data[$basketCode] = unserialize($productData["PROVIDER_DATA"], ['allowed_classes' => false]);
 
 			// if quantity changed we must get fresh data from provider
 			if(!empty($data[$basketCode]) && $data[$basketCode] == $productData["QUANTITY"])
 			{
 				if(!empty($productData["SET_ITEMS_DATA"]) && CheckSerializedData($productData["SET_ITEMS_DATA"]))
-					$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"]);
+					$productData["SET_ITEMS"] = unserialize($productData["SET_ITEMS_DATA"], ['allowed_classes' => false]);
 
 				if(is_array($data[$basketCode]) && !empty($data[$basketCode]))
 					self::setProviderTrustData($item, $order, $data[$basketCode]);
@@ -1630,7 +1659,7 @@ class OrderEdit
 
 		if($siteId == '')
 		{
-			$res = \CSite::GetList($by="id", $order="asc", array("ACTIVE" => "Y", "DEF" => "Y"));
+			$res = \CSite::GetList("id", "asc", array("ACTIVE" => "Y", "DEF" => "Y"));
 
 			if($site = $res->Fetch())
 			{

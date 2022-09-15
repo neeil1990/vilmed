@@ -42,7 +42,25 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	public function findItemByBasketCode($basketCode)
 	{
 		if ((string)$this->getBasketCode() === (string)$basketCode)
+		{
 			return $this;
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param $xmlId
+	 * @return $this|null
+	 * @throws Main\ArgumentNullException
+	 * @throws Main\ArgumentOutOfRangeException
+	 */
+	public function findItemByXmlId($xmlId)
+	{
+		if ((string)$this->getField('XML_ID') === (string)$xmlId)
+		{
+			return $this;
+		}
 
 		return null;
 	}
@@ -63,10 +81,14 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	public function findItemById($id)
 	{
 		if ($id <= 0)
+		{
 			return null;
+		}
 
-		if ((int)$this->getId() === (int)$id)
+		if ($this->getId() === (int)$id)
+		{
 			return $this;
+		}
 
 		return null;
 	}
@@ -223,7 +245,11 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	 */
 	public static function getCustomizableFields() : array
 	{
-		return ['PRICE' => 'PRICE'];
+		return [
+			'PRICE' => 'PRICE',
+			'VAT_INCLUDED' => 'VAT_INCLUDED',
+			'VAT_RATE' => 'VAT_RATE'
+		];
 	}
 
 	/**
@@ -630,7 +656,7 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	{
 		$result = new Result();
 
-		if ($name == "QUANTITY")
+		if ($name === "QUANTITY")
 		{
 			if ($value == 0)
 			{
@@ -674,7 +700,7 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 					$result->addError(
 						new ResultError(
 							Localization\Loc::getMessage(
-								'SALE_BASKET_ITEM_WRONG_AVAILABLE_QUANTITY',
+								'SALE_BASKET_ITEM_WRONG_AVAILABLE_QUANTITY_2',
 								['#PRODUCT_NAME#' => $this->getField('NAME')]
 							),
 							'SALE_BASKET_ITEM_WRONG_AVAILABLE_QUANTITY'
@@ -689,28 +715,50 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 				$availableQuantity = $value;
 			}
 
-			if (!empty($providerData['PRICE_DATA']))
+			if (isset($providerData['PRICE_DATA']['CUSTOM_PRICE']))
 			{
-				if (isset($providerData['PRICE_DATA']['CUSTOM_PRICE']))
-				{
-					$this->markFieldCustom('PRICE');
-				}
+				$this->markFieldCustom('PRICE');
 			}
 
+			$notPurchasedQuantity = $this->getNotPurchasedQuantity();
+
 			if ($value != 0
-				&& (($deltaQuantity > 0) && (roundEx($availableQuantity, SALE_VALUE_PRECISION) < roundEx($value, SALE_VALUE_PRECISION))   // plus
-				|| ($deltaQuantity < 0) && (roundEx($availableQuantity, SALE_VALUE_PRECISION) > roundEx($value, SALE_VALUE_PRECISION)))
-			)   // minus
+				&& (
+					(
+						$deltaQuantity > 0
+						&& roundEx($availableQuantity, SALE_VALUE_PRECISION) < roundEx($notPurchasedQuantity, SALE_VALUE_PRECISION)
+					) // plus
+					|| (
+						$deltaQuantity < 0
+						&& roundEx($availableQuantity, SALE_VALUE_PRECISION) > roundEx($notPurchasedQuantity, SALE_VALUE_PRECISION)
+					) // minus
+				)
+			)
 			{
 				if ($deltaQuantity > 0)
 				{
-					$mess = Localization\Loc::getMessage(
-						'SALE_BASKET_AVAILABLE_FOR_PURCHASE_QUANTITY',
-						[
-							'#PRODUCT_NAME#' => $this->getField('NAME'),
-							'#AVAILABLE_QUANTITY#' => $availableQuantity
-						]
-					);
+					$canAddCount = $availableQuantity - $this->getReservedQuantity();
+					if ($canAddCount > 0)
+					{
+						$mess = Localization\Loc::getMessage(
+							'SALE_BASKET_AVAILABLE_FOR_ADDING_QUANTITY_IS_LESS',
+							[
+								'#PRODUCT_NAME#' => $this->getField('NAME'),
+								'#QUANTITY#' => $oldValue,
+								'#ADD#' => $canAddCount,
+							]
+						);
+					}
+					else
+					{
+						$mess = Localization\Loc::getMessage(
+							'SALE_BASKET_AVAILABLE_FOR_ADDING_QUANTITY_IS_ZERO',
+							[
+								'#PRODUCT_NAME#' => $this->getField('NAME'),
+								'#QUANTITY#' => $oldValue,
+							]
+						);
+					}
 				}
 				else
 				{
@@ -802,7 +850,10 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 				$result->addWarnings($r->getWarnings());
 			}
 
-			if (($name === 'BASE_PRICE') || ($name === 'DISCOUNT_PRICE'))
+			if (
+				$name === 'BASE_PRICE'
+				|| $name === 'DISCOUNT_PRICE'
+			)
 			{
 				if (!$this->isCustomPrice())
 				{
@@ -927,12 +978,11 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	}
 
 	/**
-	 * @return float|null|string
-	 * @throws Main\ArgumentNullException
+	 * @return int
 	 */
 	public function getProductId()
 	{
-		return $this->getField('PRODUCT_ID');
+		return (int)$this->getField('PRODUCT_ID');
 	}
 
 	/**
@@ -985,7 +1035,15 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	 * @return float
 	 * @throws Main\ArgumentNullException
 	 */
-	public function getQuantity()
+	public function getQuantity() : float
+	{
+		return (float)$this->getField('QUANTITY');
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getNotPurchasedQuantity() : float
 	{
 		return (float)$this->getField('QUANTITY');
 	}
@@ -1193,7 +1251,7 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 
 		$result = new Result();
 
-		$id = (int)$this->getId();
+		$id = $this->getId();
 		$isNew = $id === 0;
 
 		$this->onBeforeSave();
@@ -1241,7 +1299,8 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 			return $r;
 		}
 
-		$r = $this->saveProperties();
+		$propertyCollection = $this->getPropertyCollection();
+		$r = $propertyCollection->save();
 		if (!$r->isSuccess())
 		{
 			$result->addErrors($r->getErrors());
@@ -1289,18 +1348,6 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	}
 
 	/**
-	 * @return Result
-	 * @throws Main\ArgumentException
-	 * @throws Main\NotImplementedException
-	 */
-	private function saveProperties()
-	{
-		/** @var BasketPropertiesCollection $propertyCollection */
-		$propertyCollection = $this->getPropertyCollection();
-		return $propertyCollection->save();
-	}
-
-	/**
 	 * @throws Main\ArgumentNullException
 	 * @throws Main\ArgumentOutOfRangeException
 	 * @throws Main\ObjectNotFoundException
@@ -1311,18 +1358,11 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 		/** @var BasketItemCollection $collection */
 		$collection = $this->getCollection();
 
-		/** @var BasketBase $basket */
-		if (!$basket = $collection->getBasket())
-		{
-			throw new Main\ObjectNotFoundException('Entity "Basket" not found');
-		}
-
-		/** @var BasketBase $basket */
 		$basket = $collection->getBasket();
 
 		if ($this->getField('ORDER_ID') <= 0)
 		{
-			$orderId = (int)$collection->getOrderId();
+			$orderId = $collection->getOrderId();
 			if ($orderId > 0)
 			{
 				$this->setFieldNoDemand('ORDER_ID', $orderId);
@@ -1335,7 +1375,9 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 			{
 				$fUserId = (int)$basket->getFUserId(true);
 				if ($fUserId <= 0)
+				{
 					throw new Main\ArgumentNullException('FUSER_ID');
+				}
 
 				$this->setFieldNoDemand('FUSER_ID', $fUserId);
 			}
@@ -1535,11 +1577,16 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	/**
 	 * @return bool
 	 * @throws Main\ArgumentException
+	 * @throws Main\ArgumentNullException
+	 * @throws Main\ArgumentTypeException
 	 * @throws Main\NotImplementedException
+	 * @throws Main\ObjectNotFoundException
+	 * @throws Main\SystemException
 	 */
 	public function isChanged()
 	{
 		$isChanged = parent::isChanged();
+
 		if ($isChanged === false)
 		{
 			$propertyCollection = $this->getPropertyCollection();
@@ -1623,6 +1670,30 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	}
 
 	/**
+	 * @return null|string
+	 * @internal
+	 *
+	 */
+	public static function getEntityEventName()
+	{
+		return 'SaleBasketItem';
+	}
+
+	/**
+	 * @return array
+	 * @throws Main\ArgumentException
+	 * @throws Main\SystemException
+	 */
+	public function toArray() : array
+	{
+		$result = parent::toArray();
+
+		$result['PROPERTIES'] = $this->getPropertyCollection()->toArray();
+
+		return $result;
+	}
+
+	/**
 	 * @deprecated
 	 *
 	 * @return float
@@ -1632,15 +1703,5 @@ abstract class BasketItemBase extends Internals\CollectableEntity
 	public function getDefaultPrice()
 	{
 		return (float)$this->getField('DEFAULT_PRICE');
-	}
-
-	/**
-	 * @return null|string
-	 * @internal
-	 *
-	 */
-	public static function getEntityEventName()
-	{
-		return 'SaleBasketItem';
 	}
 }

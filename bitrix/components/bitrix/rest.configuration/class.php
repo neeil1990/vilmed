@@ -40,6 +40,7 @@ class RestConfigurationComponent extends CBitrixComponent
 		$appTag = [
 			'configuration'
 		];
+		$analyticFrom = 'configuration';
 		$this->arParams['SEF_MODE'] = isset($this->arParams['SEF_MODE']) ? $this->arParams['SEF_MODE'] : 'Y';
 		$this->arParams['SEF_FOLDER'] = isset($this->arParams['SEF_FOLDER']) ? $this->arParams['SEF_FOLDER'] : '';
 
@@ -51,6 +52,7 @@ class RestConfigurationComponent extends CBitrixComponent
 				'section' => [],
 				'import' => [],
 				'import_app' => [],
+				'import_zip' => [],
 				'import_rollback' => [],
 				'import_manifest' => [],
 				'export' => [],
@@ -64,6 +66,7 @@ class RestConfigurationComponent extends CBitrixComponent
 			'section' => 'section/#MANIFEST_CODE#/',
 			'import' => 'import/',
 			'import_app' => 'import/#APP#/',
+			'import_zip' => 'import_zip/#ZIP_ID#/',
 			'import_rollback' => 'import_rollback/#APP#/',
 			'import_manifest' => 'import_#MANIFEST_CODE#/',
 			'export' => 'export_#MANIFEST_CODE#/',
@@ -108,7 +111,7 @@ class RestConfigurationComponent extends CBitrixComponent
 			);
 			foreach ($urlTemplateList as $url => $value)
 			{
-				$key = 'PATH_TO_' . strtoupper($url);
+				$key = 'PATH_TO_'.mb_strtoupper($url);
 				$this->arResult[$key] = isset($this->arParams[$key][0]) ? $this->arParams[$key]
 					: $this->arParams['SEF_FOLDER'] . $value;
 			}
@@ -133,7 +136,7 @@ class RestConfigurationComponent extends CBitrixComponent
 					$manifestList,
 					function($manifest) use ($code)
 					{
-						return in_array($code, $manifest['PLACEMENT']);
+						return in_array($code, $manifest['PLACEMENT']) && $manifest['ACTIVE'] === 'Y';
 					}
 				);
 				if(!$manifestList)
@@ -151,7 +154,25 @@ class RestConfigurationComponent extends CBitrixComponent
 					$appTag[] = $manifest['CODE'];
 					$componentPage = 'section';
 				}
+				$analyticFrom .= '_' . mb_strtolower($code);
 			}
+		}
+		elseif ($componentPage == 'section')
+		{
+			if (!empty($variableList['MANIFEST_CODE']))
+			{
+				$manifest = Manifest::get($variableList['MANIFEST_CODE']);
+				if (!empty($manifest['CODE']))
+				{
+					$appTag[] = $manifest['CODE'];
+				}
+			}
+		}
+		$variableList['ADDITIONAL_PARAMS'] = $this->request->get('additional') ?? [];
+
+		if (!empty($this->request->get('from')))
+		{
+			$analyticFrom .= '_' . htmlspecialcharsbx($this->request->get('from'));
 		}
 
 		$appTagBanner = $appTag;
@@ -160,7 +181,7 @@ class RestConfigurationComponent extends CBitrixComponent
 		$pathTag = '';
 		if (!empty($appTag))
 		{
-			$uri = new \Bitrix\Main\Web\Uri(\Bitrix\Rest\Marketplace\Url::getMarketplaceUrl());
+			$uri = new \Bitrix\Main\Web\Uri(\Bitrix\Rest\Marketplace\Url::getMarketplaceUrl($analyticFrom));
 			$uri->addParams(['tag' => $appTag]);
 			$pathTag = $uri->getUri();
 		}
@@ -173,8 +194,8 @@ class RestConfigurationComponent extends CBitrixComponent
 				'MANIFEST_CODE' => isset($variableList['MANIFEST_CODE']) ? strval($variableList['MANIFEST_CODE']) : '',
 				'PLACEMENT_CODE' => isset($variableList['PLACEMENT_CODE']) ? strval($variableList['PLACEMENT_CODE']) : '',
 				'APP' => isset($variableList['APP']) ? strval($variableList['APP']) : '',
-				'MP_DETAIL_URL_TPL' => \Bitrix\Rest\Marketplace\Url::getApplicationDetailUrl(),
-				'MP_INDEX_PATH' => \Bitrix\Rest\Marketplace\Url::getMarketplaceUrl(),
+				'MP_DETAIL_URL_TPL' => \Bitrix\Rest\Marketplace\Url::getApplicationDetailUrl(null, $analyticFrom),
+				'MP_INDEX_PATH' => \Bitrix\Rest\Marketplace\Url::getMarketplaceUrl($analyticFrom),
 				'MP_TAG_PATH' => $pathTag,
 				'TAG' => $appTag,
 				'TAG_BANNER' => $appTagBanner
@@ -186,7 +207,7 @@ class RestConfigurationComponent extends CBitrixComponent
 
 	private function getTitle($page)
 	{
-		return Loc::getMessage('REST_CONFIGURATION_TITLE_PAGE_'.strtoupper($page));
+		return Loc::getMessage('REST_CONFIGURATION_TITLE_PAGE_'.mb_strtoupper($page));
 	}
 
 	protected function prepareResult()

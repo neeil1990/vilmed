@@ -12,6 +12,7 @@ use Bitrix\Main\Security\Sign\TimeSigner;
 use Bitrix\Main\Security\Random;
 use Bitrix\Main\Text\Base32;
 use Bitrix\Main\Security\Mfa\OtpAlgorithm;
+use Bitrix\Main\Authentication\Policy;
 
 Loc::loadMessages(__FILE__);
 
@@ -42,7 +43,8 @@ class Otp
 
 	protected $userId = null;
 	protected $userLogin = null;
-	protected $userGroupPolicy = array();
+	/* @var Policy\RulesCollection*/
+	protected $userGroupPolicy;
 	protected $active = null;
 	protected $userActive = null;
 	protected $secret = null;
@@ -913,7 +915,7 @@ class Otp
 		if (!$this->isActivated())
 			return 0;
 
-		return (int) $this->getPolicy('LOGIN_ATTEMPTS');
+		return (int) $this->getPolicy()->getLoginAttempts();
 	}
 
 	/**
@@ -926,7 +928,7 @@ class Otp
 		if (!$this->isActivated())
 			return 0;
 
-		return ((int) $this->getPolicy('STORE_TIMEOUT')) * 60;
+		return ((int) $this->getPolicy()->getStoreTimeout()) * 60;
 	}
 
 	/**
@@ -939,7 +941,7 @@ class Otp
 		if (!$this->isActivated())
 			return '255.255.255.255';
 
-		return $this->getPolicy('STORE_IP_MASK');
+		return $this->getPolicy()->getStoreIpMask();
 	}
 
 	/**
@@ -1076,18 +1078,16 @@ class Otp
 	/**
 	 * Return needed group security policy
 	 *
-	 * @param string $name Name of policy.
-	 * @return null
+	 * @return Policy\RulesCollection
 	 */
-	protected function getPolicy($name)
+	protected function getPolicy()
 	{
 		if (!$this->userGroupPolicy)
-			$this->userGroupPolicy = \CUser::getGroupPolicy($this->getUserId());
+		{
+			$this->userGroupPolicy = \CUser::getPolicy($this->getUserId());
+		}
 
-		if (isset($this->userGroupPolicy[$name]))
-			return $this->userGroupPolicy[$name];
-		else
-			return null;
+		return $this->userGroupPolicy;
 	}
 
 	/**
@@ -1112,7 +1112,6 @@ class Otp
 	 */
 	public static function verifyUser(array $params)
 	{
-		/** @global \CMain $APPLICATION */
 		global $APPLICATION;
 
 		if (!static::isOtpEnabled()) // OTP disabled in settings
@@ -1177,10 +1176,10 @@ class Otp
 				&& Option::get('security', 'otp_allow_remember') === 'Y'
 			);
 
-			if (!$isCaptchaChecked && !$_SESSION['BX_LOGIN_NEED_CAPTCHA'])
+			if (!$isCaptchaChecked && !$APPLICATION->NeedCAPTHA())
 			{
 				// Backward compatibility with old login page
-				$_SESSION['BX_LOGIN_NEED_CAPTCHA'] = true;
+				$APPLICATION->SetNeedCAPTHA(true);
 			}
 
 			$isOtpPassword = (bool) preg_match('/^\d{6}$/D', $params['OTP']);
@@ -1236,6 +1235,12 @@ class Otp
 
 			//the OTP form will be shown on the next hit, send the event
 			static::sendEvent($otp);
+
+			//write to the log ("on" by default)
+			if(Option::get("security", "otp_log") <> "N")
+			{
+				\CSecurityEvent::getInstance()->doLog("SECURITY", "SECURITY_OTP", $otp->getUserId(), "");
+			}
 		}
 
 		return $isSuccess;
@@ -1315,9 +1320,10 @@ class Otp
 	 */
 	public static function getDeferredParams()
 	{
-		if (isset($_SESSION['BX_SECURITY_OTP']) && is_array($_SESSION['BX_SECURITY_OTP']))
+		$kernelSession = Application::getInstance()->getKernelSession();
+		if (isset($kernelSession['BX_SECURITY_OTP']) && is_array($kernelSession['BX_SECURITY_OTP']))
 		{
-			return $_SESSION['BX_SECURITY_OTP'];
+			return $kernelSession['BX_SECURITY_OTP'];
 		}
 
 		return null;
@@ -1331,9 +1337,10 @@ class Otp
 	 */
 	public static function setDeferredParams($params)
 	{
+		$kernelSession = Application::getInstance()->getKernelSession();
 		if ($params === null)
 		{
-			unset($_SESSION['BX_SECURITY_OTP']);
+			unset($kernelSession['BX_SECURITY_OTP']);
 		}
 		else
 		{
@@ -1342,7 +1349,7 @@ class Otp
 			if (isset($params['PASSWORD']))
 				unset($params['PASSWORD']);
 
-			$_SESSION['BX_SECURITY_OTP'] = $params;
+			$kernelSession['BX_SECURITY_OTP'] = $params;
 		}
 	}
 
@@ -1407,7 +1414,7 @@ class Otp
 	public static function getMandatoryRights()
 	{
 		$targetRights = Option::get('security', 'otp_mandatory_rights');
-		$targetRights = unserialize($targetRights);
+		$targetRights = unserialize($targetRights, ['allowed_classes' => false]);
 		if (!is_array($targetRights))
 			$targetRights = array();
 

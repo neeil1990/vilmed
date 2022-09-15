@@ -49,12 +49,12 @@ class CComponentAjax
 		{
 			if ($_GET['bitrix_disable_ajax'] == 'N')
 			{
-				unset($_SESSION['bitrix_disable_ajax']);
+				unset(\Bitrix\Main\Application::getInstance()->getSession()['bitrix_disable_ajax']);
 			}
 
-			if ($_GET['bitrix_disable_ajax'] == 'Y' || $_SESSION['bitrix_disable_ajax'] == 'Y')
+			if ($_GET['bitrix_disable_ajax'] == 'Y' || \Bitrix\Main\Application::getInstance()->getSession()['bitrix_disable_ajax'] == 'Y')
 			{
-				$_SESSION['bitrix_disable_ajax'] = 'Y';
+				\Bitrix\Main\Application::getInstance()->getSession()['bitrix_disable_ajax'] = 'Y';
 				return null;
 			}
 		}
@@ -83,7 +83,7 @@ class CComponentAjax
 			// dirty hack: try to get breadcrumb call params
 			for ($i = 0, $cnt = count($APPLICATION->buffer_content_type); $i < $cnt; $i++)
 			{
-				if ($APPLICATION->buffer_content_type[$i]['F'][1] == 'GetNavChain')
+				if (is_array($APPLICATION->buffer_content_type[$i]['F']) && $APPLICATION->buffer_content_type[$i]['F'][1] === 'GetNavChain')
 				{
 					$this->__nav_params = $APPLICATION->buffer_content_type[$i]['P'];
 				}
@@ -93,7 +93,7 @@ class CComponentAjax
 
 			define('PUBLIC_AJAX_MODE', 1);
 
-			if (is_set($_REQUEST, 'AJAX_CALL'))
+			if (isset($_REQUEST['AJAX_CALL']))
 			{
 				$this->bIFrameMode = true;
 			}
@@ -322,6 +322,11 @@ class CComponentAjax
 
 		$this->_checkPcreLimit($data);
 		$arData = preg_split($regexp_links, $data, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+		if (!is_array($arData))
+		{
+			return;
+		}
 
 		$cData = count($arData);
 		if($cData < 2)
@@ -588,10 +593,11 @@ parent.bxcompajaxframeonload = function() {
 
 		if ($this->bJump)
 		{
-			if ($this->bIFrameMode)
-				$additional_data .= 'top.setTimeout(\'BX.scrollToNode("comp_'.$this->componentID.'")\', 100)'.";\r\n";
-			else
-				$additional_data .= 'top.BX.scrollToNode(\'comp_'.$this->componentID.'\')'.";\r\n";
+			$additional_data .= (
+				$this->bIFrameMode
+					? 'setTimeout(\'BX.scrollToNode("comp_' . $this->componentID . '")\', 100)' . ";\r\n"
+					: 'top.BX.scrollToNode(\'comp_' . $this->componentID . '\')' . ";\r\n"
+			);
 		}
 
 		$additional_data .= '</script>';

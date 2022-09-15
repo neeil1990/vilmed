@@ -1,4 +1,8 @@
-<?
+<?php
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_BTN_CLOSE"] = "Перервати імпорт";
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_BTN_CONTINUE"] = "Продовжити імпорт";
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_DESCRIPTION"] = "Якщо ви зупините процес, при повторній спробі імпорт почнеться заново і знову займе час.";
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_TITLE"] = "Ви точно хочете перервати імпорт?";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_ACCEPT_CLEAR"] = "Я хочу замінити поточні налаштування Бітрікс24 налаштуваннями із завантаженої галузевої CRM.";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_ACCEPT_CLEAR_ROLLBACK"] = "Я хочу замінити поточні налаштування Бітрікс24 налаштуваннями з обраної галузевої CRM.";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_APP_DESCRIPTION"] = "Натискаючи «Продовжити», ви погоджуєтеся з тим, що частина існуючих налаштувань Бітрікс24 може бути змінена згідно з конфігурацією галузевої CRM, що завантажується, і не підлягатиме відновленню.";
@@ -18,8 +22,8 @@ $MESS["REST_CONFIGURATION_IMPORT_INSTALL_START_BTN"] = "Продовжити";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP"] = "Імпортуємо налаштування";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_CLEAR"] = "Готуємо ваш Бітрікс24 до імпорту";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_FINISH"] = "Завершуємо роботи";
+$MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_INIT_BACKGROUND"] = "Завантажуємо контент";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_START"] = "Збираємо інформацію";
 $MESS["REST_CONFIGURATION_IMPORT_PRE_INSTALL_APP_DESCRIPTION"] = "Натисніть «Продовжити» для установки галузевого рішення «#APP_NAME#».";
 $MESS["REST_CONFIGURATION_IMPORT_PRE_INSTALL_LATER_APP_POPUP_DESCRIPTION"] = "Ви зможете встановити галузеве рішення «#APP_NAME#» в будь-який момент, знайшовши його у списку встановлених рішень. Детальніше про це читайте в нашій #HELP_DESK_LINK#";
 $MESS["REST_CONFIGURATION_IMPORT_PRE_INSTALL_LATER_APP_POPUP_HELP_DESK_LINK_LABEL"] = "статті";
-?>

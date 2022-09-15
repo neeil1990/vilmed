@@ -39,7 +39,9 @@ return array(
 			'name' => Loc::getMessage('LANDING_BLOCK_43.4.COVER_WITH_PRICE_TEXT_BUTTON_BGIMG_NODES_LANDINGBLOCKNODECARDBGIMG'),
 			'type' => 'img',
 			'allowInlineEdit' => false,
+			'useInDesigner' => false,
 			'dimensions' => array('width' => 1920, 'height' => 1080),
+			'create2xByDefault' => false,
 		),
 	),
 	'style' => array(
@@ -53,7 +55,7 @@ return array(
 			),
 			'.landing-block-node-card-title' => array(
 				'name' => Loc::getMessage('LANDING_BLOCK_43.4.COVER_WITH_PRICE_TEXT_BUTTON_BGIMG_NODES_LANDINGBLOCKNODECARDTITLE'),
-				'type' => 'typo',
+				'type' => ['typo', 'heading'],
 			),
 			'.landing-block-node-card-text' => array(
 				'name' => Loc::getMessage('LANDING_BLOCK_43.4.COVER_WITH_PRICE_TEXT_BUTTON_BGIMG_NODES_LANDINGBLOCKNODECARDTEXT'),

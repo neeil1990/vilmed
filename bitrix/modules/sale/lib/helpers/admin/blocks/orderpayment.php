@@ -109,7 +109,12 @@ class OrderPayment
 		$fields['PAY_SYSTEM_LIST'] = self::getPaySystemList($item);
 
 		$fields['CHECK'] = CheckManager::getCheckInfo($item);
+
 		$fields['CAN_PRINT_CHECK'] = $fields['PAY_SYSTEM_LIST'][$fields['PAY_SYSTEM_ID']]['CAN_PRINT_CHECK'];
+		if (Sale\Cashbox\Manager::isEnabledPaySystemPrint())
+		{
+			$fields['CAN_PRINT_CHECK'] = 'N';
+		}
 
 		$dbRes = CashboxTable::getList(array('filter' => array('=ACTIVE' => 'Y', '=ENABLED' => 'Y')));
 		$fields['HAS_ENABLED_CASHBOX'] = ($dbRes->fetch()) ? 'Y' : 'N';
@@ -399,8 +404,6 @@ class OrderPayment
 			$title = Loc::getMessage('SALE_ORDER_PAYMENT_BLOCK_NEW_PAYMENT_TITLE');
 		}
 
-		$curFormat = \CCurrencyLang::GetFormatDescription($data['CURRENCY']);
-		$currencyLang = preg_replace("/(^|[^&])#/", '$1', $curFormat["FORMAT_STRING"]);
 		$disabled = ($data['PAID'] == 'Y') ? 'readonly' : '';
 
 		$companyList = $data['COMPANIES'];
@@ -490,6 +493,7 @@ class OrderPayment
 				<input type="hidden" name="PAYMENT['.$index.'][INDEX]" value="'.$index.'" class="index">
 				<input type="hidden" name="PAYMENT['.$index.'][PAID]" id="PAYMENT_PAID_'.$index.'" value="'.(empty($paid) ? 'N' : $paid).'">
 				<input type="hidden" name="PAYMENT['.$index.'][IS_RETURN]" id="PAYMENT_IS_RETURN_'.$index.'" value="'.($post['IS_RETURN'] ? htmlspecialcharsbx($post['IS_RETURN']) : 'N').'">
+				<input type="hidden" name="PAYMENT['.$index.'][IS_RETURN_CHANGED]" id="PAYMENT_IS_RETURN_CHANGED_'.$index.'" value="N">
 				'.$hiddenPaySystemInnerId.'
 				<div class="adm-bus-component-content-container">
 					<div class="adm-bus-pay-section">
@@ -532,12 +536,21 @@ class OrderPayment
 										<tbody>
 											<tr>
 												<td class="adm-detail-content-cell-l" width="40%">'.Loc::getMessage('SALE_ORDER_PAYMENT_PAYABLE_SUM').':</td>
-												<td class="adm-detail-content-cell-r tal"><input type="text" class="adm-bus-input-price" name="PAYMENT['.$index.'][SUM]" id="PAYMENT_SUM_'.$index.'" value="'.round($sum, 2).'" '.$disabled.'> '.htmlspecialcharsbx($currencyLang).'<br></td>
+												<td class="adm-detail-content-cell-r tal">'
+												. \CCurrencyLang::getPriceControl(
+													'<input type="text" class="adm-bus-input-price" name="PAYMENT['.$index.'][SUM]" id="PAYMENT_SUM_'.$index.'" value="'.round($sum, 2).'" '.$disabled.'>',
+													$data['CURRENCY']
+												)
+												. '<br></td>
 											</tr>
 											<tr '.($priceCod > 0 ?: 'style="display: none"').'>
 												<td class="adm-detail-content-cell-l" width="40%">'.Loc::getMessage('SALE_ORDER_PAYMENT_PAYABLE_PRICE_COD').':</td>
-												<td class="adm-detail-content-cell-r tal">
-													<input type="text" class="adm-bus-input-price" name="PAYMENT['.$index.'][PRICE_COD]" id="PAYMENT_PRICE_COD_'.$index.'" value="'.round($priceCod, 2).'" readonly> '.htmlspecialcharsbx($currencyLang).'<br></td>
+												<td class="adm-detail-content-cell-r tal">'
+												. \CCurrencyLang::getPriceControl(
+													'<input type="text" class="adm-bus-input-price" name="PAYMENT['.$index.'][PRICE_COD]" id="PAYMENT_PRICE_COD_'.$index.'" value="'.round($priceCod, 2).'" readonly>',
+													$data['CURRENCY']
+												)
+												. '<br></td>
 											</tr>
 										</tbody>
 									</table>
@@ -1335,7 +1348,9 @@ class OrderPayment
 						$result->addErrors($setResult->getErrors());
 				}
 
-				if (!$canSetPaid)
+				$isReturnChanged = $payment['IS_RETURN_CHANGED'] === 'Y';
+
+				if (!$canSetPaid && !$isReturnChanged)
 				{
 					$setResult = $paymentItem->setPaid($payment['PAID']);
 					if (!$setResult->isSuccess())

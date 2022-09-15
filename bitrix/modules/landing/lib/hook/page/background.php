@@ -1,11 +1,11 @@
 <?php
 namespace Bitrix\Landing\Hook\Page;
 
-use \Bitrix\Landing\Field;
-use \Bitrix\Landing\File;
-use \Bitrix\Landing\Manager;
-use \Bitrix\Landing\PublicAction;
-use \Bitrix\Main\Localization\Loc;
+use Bitrix\Landing\Field;
+use Bitrix\Landing\File;
+use Bitrix\Landing\Manager;
+use Bitrix\Landing\PublicAction;
+use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Page\Asset;
 
 Loc::loadMessages(__FILE__);
@@ -103,14 +103,29 @@ class Background extends \Bitrix\Landing\Hook\Page
 		$color = \htmlspecialcharsbx(trim($this->fields['COLOR']->getValue()));
 		$position = trim($this->fields['POSITION']->getValue());
 
-		if ($picture)
+		$this->setBackground($picture, $color, $position);
+	}
+
+	/**
+	 * Sets background.
+	 * @param string|null $picture Picture path or id.
+	 * @param string|null $color Color code.
+	 * @param string|null $position Position code.
+	 * @return void
+	 */
+	public static function setBackground(?string $picture, ?string $color = null, ?string $position = null): void
+	{
+		/**
+		 * !!!
+		 * Also see landing.pub/templates/.default/result_modifier.php
+		 * for web form backward compatibility.
+		 */
+
+		if ($picture && is_numeric($picture) && (int)$picture > 0)
 		{
-			if ($picture > 0)
-			{
-				$picture = \htmlspecialcharsbx(
-					\Bitrix\Landing\File::getFilePath($picture)
-				);
-			}
+			$picture = \htmlspecialcharsbx(
+				File::getFilePath((int)$picture)
+			);
 		}
 
 		if ($picture)
@@ -125,6 +140,12 @@ class Background extends \Bitrix\Landing\Hook\Page
 							background-size: cover;
 							background-position: center;
 							background-repeat: no-repeat;
+						}
+						.bx-ios.bx-touch body {
+								background-attachment: scroll;
+								background-position: top;
+								background-repeat: repeat-y;
+								background-size: 100%;
 						}
 					</style>'
 				);

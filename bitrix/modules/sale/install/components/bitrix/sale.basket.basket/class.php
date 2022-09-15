@@ -194,6 +194,7 @@ class CBitrixBasketComponent extends CBitrixComponent
 			$params['PATH_TO_BASKET'] = '/personal/cart/';
 		}
 
+		$params['DETAIL_URL'] = trim((string)($params['DETAIL_URL'] ?? ''));
 		$params['QUANTITY_FLOAT'] = isset($params['QUANTITY_FLOAT']) && $params['QUANTITY_FLOAT'] === 'N' ? 'N' : 'Y';
 		$params['HIDE_COUPON'] = isset($params['HIDE_COUPON']) && $params['HIDE_COUPON'] === 'Y' ? 'Y' : 'N';
 		$params['PRICE_VAT_SHOW_VALUE'] = isset($params['PRICE_VAT_SHOW_VALUE']) && $params['PRICE_VAT_SHOW_VALUE'] === 'N' ? 'N' : 'Y';
@@ -267,7 +268,7 @@ class CBitrixBasketComponent extends CBitrixComponent
 
 				if (!empty($list))
 				{
-					$params['OFFERS_PROPS'] += $list;
+					$params['OFFERS_PROPS'] = array_merge($params['OFFERS_PROPS'], $list);
 				}
 			}
 		}
@@ -1131,7 +1132,7 @@ class CBitrixBasketComponent extends CBitrixComponent
 	{
 		if (!$basket->getOrder())
 		{
-			$userId = $this->getUserId() ?: CSaleUser::GetAnonymousUserID();
+			$userId = $this->getUserId() ?? 0;
 
 			$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 			/** @var Sale\Order $orderClass */
@@ -1781,14 +1782,18 @@ class CBitrixBasketComponent extends CBitrixComponent
 		$iblockToProductMap = [];
 		$productsData = [];
 
-		$res = CIBlockElement::GetList(
+		$elementIterator = CIBlockElement::GetList(
 			[],
 			['=ID' => $this->storage['ELEMENT_IDS']],
 			false,
 			false,
-			['ID', 'IBLOCK_ID', 'PREVIEW_PICTURE', 'DETAIL_PICTURE', 'PREVIEW_TEXT']
+			['ID', 'IBLOCK_ID', 'PREVIEW_PICTURE', 'DETAIL_PICTURE', 'PREVIEW_TEXT', 'DETAIL_PAGE_URL']
 		);
-		while ($product = $res->Fetch())
+		if ($this->arParams['DETAIL_URL'] !== '')
+		{
+			$elementIterator->SetUrlTemplates($this->arParams['DETAIL_URL']);
+		}
+		while ($product = $elementIterator->GetNext(true, false))
 		{
 			$productIndexMap[$product['ID']] = [];
 			$iblockToProductMap[$product['IBLOCK_ID']][] = $product['ID'];
@@ -1928,7 +1933,12 @@ class CBitrixBasketComponent extends CBitrixComponent
 					if ($value === null)
 						continue;
 
-					if (mb_strpos($code, 'PROPERTY_') !== false || $code === 'PREVIEW_PICTURE' || $code === 'DETAIL_PICTURE')
+					if (
+						$code === 'PREVIEW_PICTURE'
+						|| $code === 'DETAIL_PICTURE'
+						|| $code === 'DETAIL_PAGE_URL'
+						|| mb_strpos($code, 'PROPERTY_') !== false
+					)
 					{
 						$item[$code] = $value;
 					}
@@ -1939,6 +1949,12 @@ class CBitrixBasketComponent extends CBitrixComponent
 			$parentId = isset($this->storage['SKU_TO_PARENT'][$productId]) ? $this->storage['SKU_TO_PARENT'][$productId] : 0;
 			if ((int)$parentId > 0)
 			{
+				$parentDetailUrl = $productsData[$parentId]['DETAIL_PAGE_URL'] ?? '';
+				if ($parentDetailUrl !== '')
+				{
+					$item['DETAIL_PAGE_URL'] = $parentDetailUrl;
+				}
+
 				foreach ($this->arCustomSelectFields as $field)
 				{
 					$fieldVal = (mb_substr($field, -6) === '_VALUE' ? $field : $field.'_VALUE');
@@ -2177,7 +2193,7 @@ class CBitrixBasketComponent extends CBitrixComponent
 
 			if (CheckSerializedData($property['USER_TYPE_SETTINGS']))
 			{
-				$property['USER_TYPE_SETTINGS'] = unserialize($property['USER_TYPE_SETTINGS']);
+				$property['USER_TYPE_SETTINGS'] = unserialize($property['USER_TYPE_SETTINGS'], ['allowed_classes' => false]);
 			}
 
 			$formattedProperty = CIBlockFormatProperties::GetDisplayValue($item, $property, 'sale_out');
@@ -3041,7 +3057,7 @@ class CBitrixBasketComponent extends CBitrixComponent
 						if ($arProp['USER_TYPE'] == 'directory' && $arProp['USER_TYPE_SETTINGS'] !== null)
 						{
 							if (!is_array($arProp['USER_TYPE_SETTINGS']))
-								$arProp['USER_TYPE_SETTINGS'] = unserialize($arProp['USER_TYPE_SETTINGS']);
+								$arProp['USER_TYPE_SETTINGS'] = unserialize($arProp['USER_TYPE_SETTINGS'], ['allowed_classes' => false]);
 							if (self::$highLoadInclude === null)
 								self::$highLoadInclude = Loader::includeModule('highloadblock');
 							if (self::$highLoadInclude)
@@ -3117,14 +3133,18 @@ class CBitrixBasketComponent extends CBitrixComponent
 					: $absentOffers[$parentId][$id]['PROPERTIES']
 				);
 
-				foreach ($currentItemProperties as $code => $data)
+				if (is_array($currentItemProperties))
 				{
-					$data['VALUE'] = (string)$data['VALUE'];
-					if ($data['VALUE'] == '')
-						$data['VALUE'] = '-';
-					$arUsedValues[$code] = [$data['VALUE']];
+					foreach ($currentItemProperties as $code => $data)
+					{
+						$data['VALUE'] = (string)$data['VALUE'];
+						if ($data['VALUE'] == '')
+						{
+							$data['VALUE'] = '-';
+						}
+						$arUsedValues[$code] = [$data['VALUE']];
+					}
 				}
-				unset($code, $data);
 
 				if (!empty($offerList[$parentId]))
 				{
@@ -3155,6 +3175,12 @@ class CBitrixBasketComponent extends CBitrixComponent
 							$value = (string)$offerList[$parentId][$offerId]['PROPERTIES'][$propertyCode]['VALUE'];
 							if ($value == '')
 								$value = '-';
+
+							if (!isset($arUsedValues[$propertyCode]))
+							{
+								$arUsedValues[$propertyCode] = [];
+							}
+
 							if (!in_array($value, $arUsedValues[$propertyCode]))
 								$arUsedValues[$propertyCode][] = $value;
 							unset($value);
@@ -4134,6 +4160,14 @@ class CBitrixBasketComponent extends CBitrixComponent
 			$result = key($offerList);
 			if ($result === $currentOfferId)
 				return null;
+		}
+
+		if (
+			$result
+			&&\Bitrix\Main\Loader::includeModule('sale')
+		)
+		{
+			\Bitrix\Sale\Internals\FacebookConversion::onCustomizeProductHandler((int)$result);
 		}
 
 		return ($result === null ? null : $offerList[$result]);

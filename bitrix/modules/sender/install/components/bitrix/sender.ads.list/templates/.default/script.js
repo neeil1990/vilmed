@@ -40,6 +40,7 @@
 
 		this.ajaxAction = new BX.AjaxAction(this.actionUri);
 		this.userErrorHandler = new BX.Sender.ErrorHandler();
+		BX.UI.Hint.init(BX(this.gridId));
 
 		BX.addCustomEvent('Grid::updated', this.onGridUpdated.bind(this));
 	};
@@ -77,6 +78,7 @@
 	{
 		this.sendChangeStateAction('resume', letterId);
 	};
+
 	LetterList.prototype.sendChangeStateAction = function (actionName, letterId, callback)
 	{
 		var gridId = this.gridId;
@@ -156,6 +158,7 @@
 
 		BX.bind(this.buttonAdd, 'click', this.popupMenu.show.bind(this.popupMenu));
 	};
+
 	LetterList.prototype.onGridUpdated = function (grid)
 	{
 		BX.UI.Hint.init(grid.getTable());

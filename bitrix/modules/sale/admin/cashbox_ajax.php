@@ -2,6 +2,7 @@
 
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Application;
+use Bitrix\Main\Loader;
 use Bitrix\Sale\Cashbox;
 use Bitrix\Sale\Payment;
 use Bitrix\Sale\Order;
@@ -159,21 +160,31 @@ if($arResult["ERROR"] === '' && $saleModulePermissions >= "W" && check_bitrix_se
 				}
 				else
 				{
-					$arResult['STATUS'] = implode($result->getErrorMessages(), "\n");
+					$arResult['STATUS'] = implode("\n", $result->getErrorMessages());
 				}
 			}
 
 			break;
 		case "reload_settings":
-			$cashbox = array('HANDLER' => $request->get('handler'), 'KKM_ID' => $request->get('kkmId'));
+			$cashbox = [
+				'HANDLER' => $request->get('handler'),
+				'KKM_ID' => $request->get('kkmId'),
+				'SETTINGS' => [
+					"REST" => [
+						'REST_CODE' => $request->get('restCode')
+					]
+				]
+			];
 			/** @var Cashbox\Cashbox $handler */
 			$handler = $cashbox['HANDLER'];
 			if (is_subclass_of($handler, Cashbox\Cashbox::class))
 			{
-				if ($handler === '\\'.Cashbox\CashboxOrangeData::class)
+				if (is_a($handler, Cashbox\CashboxOrangeData::class, true))
 				{
 					$arResult['OFD'] = '\\'.Cashbox\TaxcomOfd::class;
 				}
+
+				$arResult['HANDLER_CODE'] = $handler::getCode();
 
 				ob_start();
 				require_once($_SERVER['DOCUMENT_ROOT']."/bitrix/modules/sale/admin/cashbox_settings.php");
@@ -304,17 +315,23 @@ if($arResult["ERROR"] === '' && $saleModulePermissions >= "W" && check_bitrix_se
 					}
 				}
 
-				$typeList = Cashbox\CheckManager::getCheckTypeMap();
-				/** @var Cashbox\Check $typeClass */
-				foreach ($typeList as $id => $typeClass)
+				$checkList = Cashbox\CheckManager::getSalesCheckList();
+
+				/** @var Cashbox\Check $check */
+				foreach ($checkList as $check)
 				{
 					if (
-						$typeClass::getSupportedEntityType() === $entityType ||
-						$typeClass::getSupportedEntityType() === Cashbox\Check::SUPPORTED_ENTITY_TYPE_ALL
+						class_exists($check) &&
+						(
+							$check::getSupportedEntityType() === $entityType ||
+							$check::getSupportedEntityType() === Cashbox\Check::SUPPORTED_ENTITY_TYPE_ALL
+						)
 					)
 					{
-						if (class_exists($typeClass))
-							$arResult['CHECK_TYPES'][] = array("ID" => $id, "NAME" => $typeClass::getName());
+						$arResult['CHECK_TYPES'][] = [
+							"ID" => $check::getType(),
+							"NAME" => $check::getName()
+						];
 					}
 				}
 

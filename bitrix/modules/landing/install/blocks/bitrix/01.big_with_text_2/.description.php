@@ -25,6 +25,7 @@ return array(
 			'name' => Loc::getMessage('LANDING_BLOCK_1_BIG_WITH_TEXT_2_NODES_LANDINGBLOCKIMG'),
 			'type' => 'img',
 			'dimensions' => array('width' => 1920, 'height' => 1080),
+			'create2xByDefault' => false,
 		),
 	),
 	'style' => array(
@@ -34,7 +35,7 @@ return array(
 		'nodes' => array(
 			'.landing-block-title' => array(
 				'name' => Loc::getMessage('LANDING_BLOCK_1_BIG_WITH_TEXT_2_STYLE_LANDINGBLOCKTITLE'),
-				'type' => array('typo', 'animation'),
+				'type' => ['typo', 'animation', 'heading'],
 			),
 			'.landing-block-button' => array(
 				'name' => Loc::getMessage('LANDING_BLOCK_1_BIG_WITH_TEXT_2_STYLE_LANDINGBLOCKBUTTON'),

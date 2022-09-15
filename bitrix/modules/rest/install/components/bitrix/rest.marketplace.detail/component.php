@@ -15,6 +15,9 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
  */
 use \Bitrix\Main\Localization\Loc;
 use \Bitrix\Main\Loader;
+use \Bitrix\Rest\Engine\Access;
+use Bitrix\Main\ModuleManager;
+
 if(!CModule::IncludeModule("rest"))
 {
 	return;
@@ -22,7 +25,17 @@ if(!CModule::IncludeModule("rest"))
 
 $request = \Bitrix\Main\Context::getCurrent()->getRequest();
 
+$arResult['SUBSCRIPTION_AVAILABLE'] = \Bitrix\Rest\Marketplace\Client::isSubscriptionAvailable();
+$arResult['SUBSCRIPTION_BUY_URL'] = \Bitrix\Rest\Marketplace\Url::getSubscriptionBuyUrl();
+$arResult['ANALYTIC_FROM'] = '';
+if (!empty($request->get('from')))
+{
+	$arResult['ANALYTIC_FROM'] = htmlspecialcharsbx($request->get('from'));
+}
+
 $arParams['APP'] = !empty($arParams['APP']) ? $arParams['APP'] : $_GET['app'];
+
+$arResult['REST_ACCESS'] = Access::isAvailable($arParams['APP']) && Access::isAvailableCount(Access::ENTITY_TYPE_APP, $arParams['APP']);
 
 $ver = false;
 
@@ -53,6 +66,16 @@ $ar = $dbApp->fetch();
 if($ver === false && $ar['ACTIVE'] === 'N' && $ar['STATUS'] === \Bitrix\Rest\AppTable::STATUS_PAID)
 {
 	$ver = intval($ar['VERSION']);
+}
+elseif (
+	$arResult['START_INSTALL']
+	&& $ar['ID'] > 0
+	&& $ar['ACTIVE'] === \Bitrix\Rest\AppTable::ACTIVE
+	&& $ar['INSTALLED'] === \Bitrix\Rest\AppTable::INSTALLED
+	&& (int)$ar['VERSION'] === (int)$_GET['ver']
+)
+{
+	$arResult['START_INSTALL'] = false;
 }
 
 if(
@@ -108,13 +131,33 @@ if($arApp)
 		$arApp["DATE_UPDATE"] = ConvertTimeStamp($stmp);
 	}
 
-	if ($arApp["BY_SUBSCRIPTION"] == "Y")
+	$subscribeFinish = \Bitrix\Rest\Marketplace\Client::getSubscriptionFinalDate();
+	$arResult["SUBSCRIPTION_ACTIVE"] = \Bitrix\Rest\Marketplace\Client::isSubscriptionAvailable();
+	$arResult["PAID_APP_IN_SUBSCRIBE"] = Access::isActiveRules() && \Bitrix\Rest\Marketplace\Client::isSubscriptionAccess();
+
+	if ($arResult["PAID_APP_IN_SUBSCRIBE"] && $arApp['TRIAL_PERIOD'] > 0)
 	{
-		if (\Bitrix\Rest\Marketplace\Client::isSubscriptionAvailable())
+		$days = (int) $arApp['TRIAL_PERIOD'];
+		$now = new \Bitrix\Main\Type\DateTime();
+		if (!$subscribeFinish || $now->getTimestamp() > $subscribeFinish->getTimestamp())
 		{
-			$arApp["STATUS"] = \Bitrix\Rest\AppTable::STATUS_PAID;
-			$arApp["DATE_FINISH"] = \Bitrix\Rest\Marketplace\Client::getSubscriptionFinalDate();
+			$arApp['TRIAL_PERIOD'] = 0;
 		}
+		else
+		{
+			$diff = $subscribeFinish->getDiff($now);
+			$subscribeFinishDays = (int) $diff->days;
+
+			if ($days > $subscribeFinishDays)
+			{
+				$arApp['TRIAL_PERIOD'] = $subscribeFinishDays;
+			}
+		}
+	}
+	if ($arApp["BY_SUBSCRIPTION"] === "Y" && $arResult["SUBSCRIPTION_ACTIVE"])
+	{
+		$arApp["STATUS"] = \Bitrix\Rest\AppTable::STATUS_PAID;
+		$arApp["DATE_FINISH"] = $subscribeFinish;
 	}
 
 	$arResult['REDIRECT_PRIORITY'] = false;
@@ -123,7 +166,16 @@ if($arApp)
 		$arResult['REDIRECT_PRIORITY'] = true;
 	}
 
+	$arApp['SILENT_INSTALL'] = $arApp['SILENT_INSTALL'] !== 'Y' ? 'N' : 'Y';
+
 	$arResult["APP"] = $arApp;
+
+	$arResult['REST_ACCESS_HELPER_CODE'] = Access::getHelperCode(Access::ACTION_INSTALL, Access::ENTITY_TYPE_APP, $arResult["APP"]);
+
+	if (!ModuleManager::isModuleInstalled('bitrix24'))
+	{
+		$arResult['POPUP_BUY_SUBSCRIPTION_PRIORITY'] = true;
+	}
 }
 
 $arResult["ADMIN"] = \CRestUtil::isAdmin();
@@ -139,8 +191,7 @@ if($request->isPost() && $request['install'] && check_bitrix_sessid())
 	}
 	else
 	{
-		$obRestDesc = new \CRestProvider();
-		$arRestDesc = $obRestDesc->getDescription();
+		$scopeList = \Bitrix\Rest\Engine\ScopeManager::getInstance()->listScope();
 		\Bitrix\Main\Localization\Loc::loadMessages($_SERVER['DOCUMENT_ROOT'].BX_ROOT.'/modules/rest/scope.php');
 		$arResult['SCOPE_DENIED'] = array();
 		if(is_array($arResult['APP']['RIGHTS']))
@@ -148,10 +199,10 @@ if($request->isPost() && $request['install'] && check_bitrix_sessid())
 			foreach($arResult['APP']['RIGHTS'] as $key => $scope)
 			{
 				$arResult['APP']['RIGHTS'][$key] = [
-					"TITLE" => Loc::getMessage("REST_SCOPE_".strtoupper($key)) ?: $scope,
-					"DESCRIPTION" => Loc::getMessage("REST_SCOPE_".strtoupper($key)."_DESCRIPTION")
+					"TITLE" => Loc::getMessage("REST_SCOPE_".mb_strtoupper($key)) ?: $scope,
+					"DESCRIPTION" => Loc::getMessage("REST_SCOPE_".mb_strtoupper($key)."_DESCRIPTION")
 				];
-				if(!array_key_exists($key, $arRestDesc))
+				if(!in_array($key, $scopeList, true))
 				{
 					$arResult['SCOPE_DENIED'][$key] = 1;
 				}
@@ -171,7 +222,7 @@ if($request->isPost() && $request['install'] && check_bitrix_sessid())
 }
 else
 {
-	if(is_array($arResult["APP"]["PRICE"]) && !empty($arResult["APP"]["PRICE"]) && $arResult['ADMIN'])
+	if($arResult["APP"]['FREE'] === 'N' && is_array($arResult["APP"]["PRICE"]) && !empty($arResult["APP"]["PRICE"]) && $arResult['ADMIN'])
 	{
 		$arResult['BUY'] = array();
 		foreach($arResult["APP"]["PRICE"] as $num => $price)
@@ -212,4 +263,3 @@ else
 
 	$this->IncludeComponentTemplate();
 }
-?>

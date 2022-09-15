@@ -18,7 +18,7 @@
 						</h3>
 
 						<div class="g-pos-rel g-line-height-1_2">
-							<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+							<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 								<p>
 									Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 									finibus dapibus. Ut ac
@@ -26,7 +26,7 @@
 								</p>
 							</div>
 							<div class="landing-block-node-card-button-container">
-								<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+								<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 								   href="#">Take a tour</a>
 							</div>
 						</div>
@@ -45,7 +45,7 @@
 						London, Great Britain
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus.
@@ -53,7 +53,7 @@
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -72,14 +72,14 @@
 						Crete, Greece
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur tortor.
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -98,14 +98,14 @@
 						Langkwai, Malaysia
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur tortor.
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -124,14 +124,14 @@
 						Bavaria, Germany
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur tortor.
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -150,7 +150,7 @@
 						Paris, France
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante.
 								Nunc venenatis risus in finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur
@@ -158,7 +158,7 @@
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -177,7 +177,7 @@
 						Hong Kong
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante.
 								Nunc venenatis risus in finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur
@@ -185,7 +185,7 @@
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -204,14 +204,14 @@
 						Venice, Italy
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur tortor.
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -230,14 +230,14 @@
 						Madrid, Spain
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur tortor.
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>
@@ -256,14 +256,14 @@
 						New York, USA
 					</h3>
 					<div class="g-pos-rel g-line-height-1_2">
-						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8">
+						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-mb-20 g-font-size-18 g-color-white-opacity-0_8" data-auto-font-scale>
 							<p>
 								Donec erat urna, tincidunt at leo non, blandit finibus ante. Nunc venenatis risus in
 								finibus dapibus. Ut ac massa sodales, mattis enim id, efficitur tortor.
 							</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-l g-btn-size-sm text-uppercase g-btn-primary rounded-0 g-py-10"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-px-m g-btn-size-md text-uppercase g-btn-primary rounded-0"
 							   href="#">Take a tour</a>
 						</div>
 					</div>

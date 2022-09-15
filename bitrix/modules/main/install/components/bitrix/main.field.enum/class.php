@@ -23,49 +23,33 @@ class EnumUfComponent extends BaseUfComponent
 	 */
 	protected function getFieldValue(): array
 	{
-		if(
-			!$this->additionalParameters['bVarsFromForm']
-			&&
-			!isset($this->additionalParameters['VALUE'])
-		)
+		return self::normalizeFieldValue(
+			EnumType::getFieldValue(($this->userField ?: []), $this->additionalParameters)
+		);
+	}
+
+	/**
+	 * @param bool $withoutEmptyValue
+	 * @return array[]
+	 */
+	public function getItems(bool $withoutEmptyValue = false): array
+	{
+		$items = [];
+
+		foreach($this->userField['USER_TYPE']['~FIELDS'] as $key => $value)
 		{
-			if(
-				isset($this->userField['ENTITY_VALUE_ID'], $this->userField['ENUM'])
-				&&
-				$this->userField['ENTITY_VALUE_ID'] <= 0
-			)
+			if($key === '' && ($this->isMultiple() || $withoutEmptyValue))
 			{
-				$value = ($this->userField['MULTIPLE'] === 'Y' ? [] : null);
-				foreach($this->userField['ENUM'] as $enum)
-				{
-					if($enum['DEF'] === 'Y')
-					{
-						if($this->userField['MULTIPLE'] === 'Y')
-						{
-							$value[] = $enum['ID'];
-						}
-						else
-						{
-							$value = $enum['ID'];
-							break;
-						}
-					}
-				}
+				continue;
 			}
-			else
-			{
-				$value = $this->userField['VALUE'];
-			}
-		}
-		elseif(isset($this->additionalParameters['VALUE']))
-		{
-			$value = $this->additionalParameters['VALUE'];
-		}
-		else
-		{
-			$value = Context::getCurrent()->getRequest()->get($this->userField['FIELD_NAME']);
+
+			$items[] = [
+				'NAME' => $value,
+				'VALUE' => $key,
+				'IS_SELECTED' => in_array($key, $this->arResult['value']),
+			];
 		}
 
-		return self::normalizeFieldValue($value);
+		return $items;
 	}
 }

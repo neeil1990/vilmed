@@ -1,5 +1,5 @@
 this.BX = this.BX || {};
-(function (exports,main_core_events,main_core) {
+(function (exports,main_core_zIndexManager,main_core_events,main_core) {
 	'use strict';
 
 	/**
@@ -98,85 +98,61 @@ this.BX = this.BX || {};
 	  return Button;
 	}();
 
-	function _templateObject8() {
-	  var data = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t<div class=\"popup-window-overlay\" id=\"popup-window-overlay-", "\"></div>\n\t\t\t\t"]);
+	function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
-	  _templateObject8 = function _templateObject8() {
-	    return data;
-	  };
+	function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
 
-	  return data;
-	}
+	var _left = /*#__PURE__*/new WeakMap();
 
-	function _templateObject7() {
-	  var data = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t<div class=\"popup-window-resize\" onmousedown=\"", "\"></div>\n\t\t\t\t"]);
+	var _top = /*#__PURE__*/new WeakMap();
 
-	  _templateObject7 = function _templateObject7() {
-	    return data;
-	  };
+	var PositionEvent = /*#__PURE__*/function (_BaseEvent) {
+	  babelHelpers.inherits(PositionEvent, _BaseEvent);
 
-	  return data;
-	}
+	  function PositionEvent() {
+	    var _this;
 
-	function _templateObject6() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"", " ", "-", "\"></div>"]);
+	    babelHelpers.classCallCheck(this, PositionEvent);
+	    _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(PositionEvent).call(this));
 
-	  _templateObject6 = function _templateObject6() {
-	    return data;
-	  };
+	    _classPrivateFieldInitSpec(babelHelpers.assertThisInitialized(_this), _left, {
+	      writable: true,
+	      value: void 0
+	    });
 
-	  return data;
-	}
+	    _classPrivateFieldInitSpec(babelHelpers.assertThisInitialized(_this), _top, {
+	      writable: true,
+	      value: void 0
+	    });
 
-	function _templateObject5() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"popup-window-buttons\">", "</div>"]);
+	    return _this;
+	  }
 
-	  _templateObject5 = function _templateObject5() {
-	    return data;
-	  };
+	  babelHelpers.createClass(PositionEvent, [{
+	    key: "left",
+	    get: function get() {
+	      return babelHelpers.classPrivateFieldGet(this, _left);
+	    },
+	    set: function set(value) {
+	      if (main_core.Type.isNumber(value)) {
+	        babelHelpers.classPrivateFieldSet(this, _left, value);
+	      }
+	    }
+	  }, {
+	    key: "top",
+	    get: function get() {
+	      return babelHelpers.classPrivateFieldGet(this, _top);
+	    },
+	    set: function set(value) {
+	      if (main_core.Type.isNumber(value)) {
+	        babelHelpers.classPrivateFieldSet(this, _top, value);
+	      }
+	    }
+	  }]);
+	  return PositionEvent;
+	}(main_core_events.BaseEvent);
 
-	  return data;
-	}
-
-	function _templateObject4() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div \n\t\t\t\tclass=\"", "\" \n\t\t\t\tid=\"", "\"\n\t\t\t\tstyle=\"display: none; position: absolute; left: 0; top: 0; z-index: ", "\"\n\t\t\t>", "</div>"]);
-
-	  _templateObject4 = function _templateObject4() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject3() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div id=\"popup-window-content-", "\" class=\"popup-window-content\"></div>"]);
-
-	  _templateObject3 = function _templateObject3() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject2() {
-	  var data = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t<span class=\"", "\" onclick=\"", "\"></span>\n\t\t\t"]);
-
-	  _templateObject2 = function _templateObject2() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject() {
-	  var data = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t<div class=\"popup-window-titlebar\" id=\"popup-window-titlebar-", "\"></div>\n\t\t\t"]);
-
-	  _templateObject = function _templateObject() {
-	    return data;
-	  };
-
-	  return data;
-	}
+	var _templateObject, _templateObject2, _templateObject3, _templateObject4, _templateObject5, _templateObject6, _templateObject7, _templateObject8, _templateObject9;
 	var aliases = {
 	  onPopupWindowInit: {
 	    namespace: 'BX.Main.Popup',
@@ -332,6 +308,7 @@ this.BX = this.BX || {};
 	    _this.closeIcon = null;
 	    _this.resizeIcon = null;
 	    _this.angle = null;
+	    _this.angleArrowElement = null;
 	    _this.overlay = null;
 	    _this.titleBar = null;
 	    _this.bindOptions = babelHelpers.typeof(params.bindOptions) === 'object' ? params.bindOptions : {};
@@ -342,6 +319,7 @@ this.BX = this.BX || {};
 	    _this.isAutoHideBinded = false;
 	    _this.closeByEsc = params.closeByEsc === true;
 	    _this.isCloseByEscBinded = false;
+	    _this.toFrontOnShow = true;
 	    _this.cacheable = true;
 	    _this.destroyed = false;
 	    _this.width = null;
@@ -354,7 +332,7 @@ this.BX = this.BX || {};
 	    _this.contentPadding = null;
 	    _this.background = null;
 	    _this.contentBackground = null;
-	    _this.appendContainer = document.body;
+	    _this.targetContainer = main_core.Type.isElementNode(params.targetContainer) ? params.targetContainer : document.body;
 	    _this.dragOptions = {
 	      cursor: '',
 	      callback: function callback() {},
@@ -379,10 +357,6 @@ this.BX = this.BX || {};
 
 	    var popupClassName = 'popup-window';
 
-	    if (params.contentColor && main_core.Type.isStringFilled(params.contentColor)) {
-	      popupClassName += ' popup-window-content-' + params.contentColor;
-	    }
-
 	    if (params.titleBar) {
 	      popupClassName += ' popup-window-with-titlebar';
 	    }
@@ -396,12 +370,12 @@ this.BX = this.BX || {};
 	    }
 
 	    if (params.titleBar) {
-	      _this.titleBar = main_core.Tag.render(_templateObject(), popupId);
+	      _this.titleBar = main_core.Tag.render(_templateObject || (_templateObject = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t<div class=\"popup-window-titlebar\" id=\"popup-window-titlebar-", "\"></div>\n\t\t\t"])), popupId);
 	    }
 
 	    if (params.closeIcon) {
 	      var className = 'popup-window-close-icon' + (params.titleBar ? ' popup-window-titlebar-close-icon' : '');
-	      _this.closeIcon = main_core.Tag.render(_templateObject2(), className, _this.handleCloseIconClick.bind(babelHelpers.assertThisInitialized(_this)));
+	      _this.closeIcon = main_core.Tag.render(_templateObject2 || (_templateObject2 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t<span class=\"", "\" onclick=\"", "\"></span>\n\t\t\t"])), className, _this.handleCloseIconClick.bind(babelHelpers.assertThisInitialized(_this)));
 
 	      if (main_core.Type.isPlainObject(params.closeIcon)) {
 	        main_core.Dom.style(_this.closeIcon, params.closeIcon);
@@ -412,16 +386,25 @@ this.BX = this.BX || {};
 	     */
 
 
-	    _this.contentContainer = main_core.Tag.render(_templateObject3(), popupId);
+	    _this.contentContainer = main_core.Tag.render(_templateObject3 || (_templateObject3 = babelHelpers.taggedTemplateLiteral(["<div id=\"popup-window-content-", "\" class=\"popup-window-content\"></div>"])), popupId);
 	    /**
 	     * @private
 	     */
 
-	    _this.popupContainer = main_core.Tag.render(_templateObject4(), popupClassName, popupId, _this.getZindex(), [_this.titleBar, _this.contentContainer, _this.closeIcon]);
+	    _this.popupContainer = main_core.Tag.render(_templateObject4 || (_templateObject4 = babelHelpers.taggedTemplateLiteral(["<div\n\t\t\t\tclass=\"", "\"\n\t\t\t\tid=\"", "\"\n\t\t\t\tstyle=\"display: none; position: absolute; left: 0; top: 0;\"\n\t\t\t>", "</div>"])), popupClassName, popupId, [_this.titleBar, _this.contentContainer, _this.closeIcon]);
 
-	    _this.appendContainer.appendChild(_this.popupContainer);
+	    _this.targetContainer.appendChild(_this.popupContainer);
 
+	    _this.zIndexComponent = main_core_zIndexManager.ZIndexManager.register(_this.popupContainer, params.zIndexOptions);
 	    _this.buttonsContainer = null;
+
+	    if (params.contentColor && main_core.Type.isStringFilled(params.contentColor)) {
+	      if (params.contentColor === 'white' || params.contentColor === 'gray') {
+	        popupClassName += ' popup-window-content-' + params.contentColor;
+	      }
+
+	      _this.setContentColor(params.contentColor);
+	    }
 
 	    if (params.angle) {
 	      _this.setAngle(params.angle);
@@ -465,7 +448,9 @@ this.BX = this.BX || {};
 
 	    _this.setAnimation(params.animation);
 
-	    _this.setCacheable(params.cacheable); // Compatibility
+	    _this.setCacheable(params.cacheable);
+
+	    _this.setToFrontOnShow(params.toFrontOnShow); // Compatibility
 
 
 	    if (params.contentNoPaddings) {
@@ -555,7 +540,7 @@ this.BX = this.BX || {};
 	          }
 	        }
 
-	        this.buttonsContainer = this.contentContainer.parentNode.appendChild(main_core.Tag.render(_templateObject5(), newButtons));
+	        this.buttonsContainer = this.contentContainer.parentNode.appendChild(main_core.Tag.render(_templateObject5 || (_templateObject5 = babelHelpers.taggedTemplateLiteral(["<div class=\"popup-window-buttons\">", "</div>"])), newButtons));
 	      }
 	    }
 	  }, {
@@ -601,7 +586,11 @@ this.BX = this.BX || {};
 	    key: "getBindElementPos",
 	    value: function getBindElementPos(bindElement) {
 	      if (main_core.Type.isDomNode(bindElement)) {
-	        return main_core.Dom.getPosition(bindElement);
+	        if (this.isTargetDocumentBody()) {
+	          return main_core.Dom.getPosition(bindElement);
+	        } else {
+	          return this.getPositionRelativeToTarget(bindElement);
+	        }
 	      } else if (bindElement && babelHelpers.typeof(bindElement) === 'object') {
 	        if (!main_core.Type.isNumber(bindElement.bottom)) {
 	          bindElement.bottom = bindElement.top;
@@ -609,14 +598,8 @@ this.BX = this.BX || {};
 
 	        return bindElement;
 	      } else {
-	        var windowSize = {
-	          innerWidth: window.innerWidth,
-	          innerHeight: window.innerHeight
-	        };
-	        var windowScroll = {
-	          scrollLeft: window.pageXOffset,
-	          scrollTop: window.pageYOffset
-	        };
+	        var windowSize = this.getWindowSize();
+	        var windowScroll = this.getWindowScroll();
 	        var popupWidth = this.getPopupContainer().offsetWidth;
 	        var popupHeight = this.getPopupContainer().offsetHeight;
 	        this.bindOptions.forceTop = true;
@@ -632,6 +615,58 @@ this.BX = this.BX || {};
 	        };
 	      }
 	    }
+	    /**
+	     * @internal
+	     */
+
+	  }, {
+	    key: "getPositionRelativeToTarget",
+	    value: function getPositionRelativeToTarget(element) {
+	      var offsetLeft = element.offsetLeft;
+	      var offsetTop = element.offsetTop;
+	      var offsetElement = element.offsetParent;
+
+	      while (offsetElement && offsetElement !== this.getTargetContainer()) {
+	        offsetLeft += offsetElement.offsetLeft;
+	        offsetTop += offsetElement.offsetTop;
+	        offsetElement = offsetElement.offsetParent;
+	      }
+
+	      var elementRect = element.getBoundingClientRect();
+	      return new DOMRect(offsetLeft, offsetTop, elementRect.width, elementRect.height);
+	    } // private
+
+	  }, {
+	    key: "getWindowSize",
+	    value: function getWindowSize() {
+	      if (this.isTargetDocumentBody()) {
+	        return {
+	          innerWidth: window.innerWidth,
+	          innerHeight: window.innerHeight
+	        };
+	      } else {
+	        return {
+	          innerWidth: this.getTargetContainer().offsetWidth,
+	          innerHeight: this.getTargetContainer().offsetHeight
+	        };
+	      }
+	    } // private
+
+	  }, {
+	    key: "getWindowScroll",
+	    value: function getWindowScroll() {
+	      if (this.isTargetDocumentBody()) {
+	        return {
+	          scrollLeft: window.pageXOffset,
+	          scrollTop: window.pageYOffset
+	        };
+	      } else {
+	        return {
+	          scrollLeft: this.getTargetContainer().scrollLeft,
+	          scrollTop: this.getTargetContainer().scrollTop
+	        };
+	      }
+	    }
 	  }, {
 	    key: "setAngle",
 	    value: function setAngle(params) {
@@ -641,6 +676,7 @@ this.BX = this.BX || {};
 	        }
 
 	        this.angle = null;
+	        this.angleArrowElement = null;
 	        return;
 	      }
 
@@ -656,8 +692,14 @@ this.BX = this.BX || {};
 	          defaultOffset += angleLeftOffset - Popup.defaultOptions.angleLeftOffset;
 	        }
 
+	        this.angleArrowElement = main_core.Tag.render(_templateObject6 || (_templateObject6 = babelHelpers.taggedTemplateLiteral(["<div class=\"popup-window-angly--arrow\"></div>"])));
+
+	        if (this.background) {
+	          this.angleArrowElement.style.background = this.background;
+	        }
+
 	        this.angle = {
-	          element: main_core.Tag.render(_templateObject6(), className, className, position),
+	          element: main_core.Tag.render(_templateObject7 || (_templateObject7 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t<div class=\"", " ", "-", "\">\n\t\t\t\t\t\t", "\n\t\t\t\t\t</div>\n\t\t\t\t"])), className, className, position, this.angleArrowElement),
 	          position: position,
 	          offset: 0,
 	          defaultOffset: Math.max(defaultOffset, angleMinLeft) //Math.max(Type.isNumber(params.offset) ? params.offset : 0, angleMinLeft)
@@ -874,14 +916,31 @@ this.BX = this.BX || {};
 	      return this.contentPadding;
 	    }
 	  }, {
+	    key: "setContentColor",
+	    value: function setContentColor(color) {
+	      if (main_core.Type.isString(color) && this.contentContainer) {
+	        this.contentContainer.style.backgroundColor = color;
+	      } else if (color === null) {
+	        this.contentContainer.style.style.removeProperty('background-color');
+	      }
+	    }
+	  }, {
 	    key: "setBackground",
 	    value: function setBackground(background) {
 	      if (main_core.Type.isStringFilled(background)) {
 	        this.background = background;
 	        this.getPopupContainer().style.background = background;
+
+	        if (this.angleArrowElement) {
+	          this.angleArrowElement.style.background = background;
+	        }
 	      } else if (background === null) {
 	        this.background = null;
 	        this.getPopupContainer().style.removeProperty('background');
+
+	        if (this.angleArrowElement) {
+	          this.angleArrowElement.style.removeProperty('background');
+	        }
 	      }
 	    }
 	  }, {
@@ -921,11 +980,21 @@ this.BX = this.BX || {};
 	      return this.cacheable;
 	    }
 	  }, {
+	    key: "setToFrontOnShow",
+	    value: function setToFrontOnShow(flag) {
+	      this.toFrontOnShow = flag !== false;
+	    }
+	  }, {
+	    key: "shouldFrontOnShow",
+	    value: function shouldFrontOnShow() {
+	      return this.toFrontOnShow;
+	    }
+	  }, {
 	    key: "setResizeMode",
 	    value: function setResizeMode(mode) {
 	      if (mode === true || main_core.Type.isPlainObject(mode)) {
 	        if (!this.resizeIcon) {
-	          this.resizeIcon = main_core.Tag.render(_templateObject7(), this.handleResizeMouseDown.bind(this));
+	          this.resizeIcon = main_core.Tag.render(_templateObject8 || (_templateObject8 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t<div class=\"popup-window-resize\" onmousedown=\"", "\"></div>\n\t\t\t\t"])), this.handleResizeMouseDown.bind(this));
 	          this.getPopupContainer().appendChild(this.resizeIcon);
 	        } //Compatibility
 
@@ -936,6 +1005,16 @@ this.BX = this.BX || {};
 	        main_core.Dom.remove(this.resizeIcon);
 	        this.resizeIcon = null;
 	      }
+	    }
+	  }, {
+	    key: "getTargetContainer",
+	    value: function getTargetContainer() {
+	      return this.targetContainer;
+	    }
+	  }, {
+	    key: "isTargetDocumentBody",
+	    value: function isTargetDocumentBody() {
+	      return this.getTargetContainer() === document.body;
 	    }
 	  }, {
 	    key: "getPopupContainer",
@@ -983,8 +1062,16 @@ this.BX = this.BX || {};
 	        callback: this.handleResize
 	      });
 
-	      this.resizeContentPos = main_core.Dom.getPosition(this.getResizableContainer());
-	      this.resizeContentOffset = this.resizeContentPos.left - main_core.Dom.getPosition(this.getPopupContainer()).left;
+	      if (this.isTargetDocumentBody()) {
+	        this.resizeContentPos = main_core.Dom.getPosition(this.getResizableContainer());
+	        this.resizeContentOffset = this.resizeContentPos.left - main_core.Dom.getPosition(this.getPopupContainer()).left;
+	      } else {
+	        this.resizeContentPos = this.getPositionRelativeToTarget(this.getResizableContainer());
+	        this.resizeContentOffset = this.resizeContentPos.left - this.getPositionRelativeToTarget(this.getPopupContainer()).left;
+	      }
+
+	      this.resizeContentPos.offsetX = 0;
+	      this.resizeContentPos.offsetY = 0;
 	    }
 	    /**
 	     * @private
@@ -993,9 +1080,11 @@ this.BX = this.BX || {};
 	  }, {
 	    key: "handleResize",
 	    value: function handleResize(offsetX, offsetY, pageX, pageY) {
-	      var width = pageX - this.resizeContentPos.left;
-	      var height = pageY - this.resizeContentPos.top;
-	      var scrollWidth = document.documentElement.scrollWidth;
+	      this.resizeContentPos.offsetX += offsetX;
+	      this.resizeContentPos.offsetY += offsetY;
+	      var width = this.resizeContentPos.width + this.resizeContentPos.offsetX;
+	      var height = this.resizeContentPos.height + this.resizeContentPos.offsetY;
+	      var scrollWidth = this.isTargetDocumentBody() ? document.documentElement.scrollWidth : this.getTargetContainer().scrollWidth;
 
 	      if (this.resizeContentPos.left + width + this.resizeContentOffset >= scrollWidth) {
 	        width = scrollWidth - this.resizeContentPos.left - this.resizeContentOffset;
@@ -1241,11 +1330,11 @@ this.BX = this.BX || {};
 	    value: function setOverlay(params) {
 	      if (this.overlay === null) {
 	        this.overlay = {
-	          element: main_core.Tag.render(_templateObject8(), this.getId())
+	          element: main_core.Tag.render(_templateObject9 || (_templateObject9 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t<div class=\"popup-window-overlay\" id=\"popup-window-overlay-", "\"></div>\n\t\t\t\t"])), this.getId())
 	        };
-	        this.adjustOverlayZindex();
 	        this.resizeOverlay();
-	        this.appendContainer.appendChild(this.overlay.element);
+	        this.targetContainer.appendChild(this.overlay.element);
+	        this.getZIndexComponent().setOverlay(this.overlay.element);
 	      }
 
 	      if (params && main_core.Type.isNumber(params.opacity) && params.opacity >= 0 && params.opacity <= 100) {
@@ -1261,6 +1350,7 @@ this.BX = this.BX || {};
 	    value: function removeOverlay() {
 	      if (this.overlay !== null && this.overlay.element !== null) {
 	        main_core.Dom.remove(this.overlay.element);
+	        this.getZIndexComponent().setOverlay(null);
 	      }
 
 	      if (this.overlayTimeout) {
@@ -1303,30 +1393,30 @@ this.BX = this.BX || {};
 	    key: "resizeOverlay",
 	    value: function resizeOverlay() {
 	      if (this.overlay !== null && this.overlay.element !== null) {
-	        var scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight);
-	        this.overlay.element.style.width = document.documentElement.scrollWidth + 'px';
+	        var scrollWidth;
+	        var scrollHeight;
+
+	        if (this.isTargetDocumentBody()) {
+	          scrollWidth = document.documentElement.scrollWidth;
+	          scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight);
+	        } else {
+	          scrollWidth = this.getTargetContainer().scrollWidth;
+	          scrollHeight = this.getTargetContainer().scrollHeight;
+	        }
+
+	        this.overlay.element.style.width = scrollWidth + 'px';
 	        this.overlay.element.style.height = scrollHeight + 'px';
 	      }
 	    }
 	  }, {
 	    key: "getZindex",
 	    value: function getZindex() {
-	      if (this.overlay !== null) {
-	        return this.params.zIndexAbsolute > 0 ? this.params.zIndexAbsolute : Popup.getOption('popupOverlayZindex') + this.params.zIndex;
-	      } else {
-	        return this.params.zIndexAbsolute > 0 ? this.params.zIndexAbsolute : Popup.getOption('popupZindex') + this.params.zIndex;
-	      }
+	      return this.getZIndexComponent().getZIndex();
 	    }
-	    /**
-	     * @private
-	     */
-
 	  }, {
-	    key: "adjustOverlayZindex",
-	    value: function adjustOverlayZindex() {
-	      if (this.overlay !== null && this.overlay.element !== null) {
-	        this.overlay.element.style.zIndex = parseInt(this.getPopupContainer().style.zIndex) - 1;
-	      }
+	    key: "getZIndexComponent",
+	    value: function getZIndexComponent() {
+	      return this.zIndexComponent;
 	    }
 	  }, {
 	    key: "show",
@@ -1335,6 +1425,14 @@ this.BX = this.BX || {};
 
 	      if (this.isShown() || this.isDestroyed()) {
 	        return;
+	      }
+
+	      this.emit('onBeforeShow');
+	      this.showOverlay();
+	      this.getPopupContainer().style.display = 'block';
+
+	      if (this.shouldFrontOnShow()) {
+	        this.bringToFront();
 	      }
 
 	      if (!this.firstShow) {
@@ -1347,8 +1445,6 @@ this.BX = this.BX || {};
 	      this.emit('onShow', new main_core_events.BaseEvent({
 	        compatData: [this]
 	      }));
-	      this.showOverlay();
-	      this.getPopupContainer().style.display = 'block';
 	      this.adjustPosition();
 	      this.animateOpening(function () {
 	        if (_this4.isDestroyed()) {
@@ -1416,6 +1512,13 @@ this.BX = this.BX || {};
 	          _this5.destroy();
 	        }
 	      });
+	    }
+	  }, {
+	    key: "bringToFront",
+	    value: function bringToFront() {
+	      if (this.isShown()) {
+	        main_core_zIndexManager.ZIndexManager.bringToFront(this.getPopupContainer());
+	      }
 	    }
 	  }, {
 	    key: "toggle",
@@ -1534,14 +1637,17 @@ this.BX = this.BX || {};
 	      main_core.Event.unbind(document, 'mousemove', this.handleDocumentMouseMove);
 	      main_core.Event.unbind(document, 'mouseup', this.handleDocumentMouseUp);
 	      main_core.Event.unbind(window, 'resize', this.handleResizeWindow);
-	      main_core.Dom.remove(this.popupContainer);
 	      this.removeOverlay();
+	      main_core_zIndexManager.ZIndexManager.unregister(this.popupContainer);
+	      this.zIndexComponent = null;
+	      main_core.Dom.remove(this.popupContainer);
 	      this.popupContainer = null;
 	      this.contentContainer = null;
 	      this.closeIcon = null;
 	      this.titleBar = null;
 	      this.buttonsContainer = null;
 	      this.angle = null;
+	      this.angleArrowElement = null;
 	      this.resizeIcon = null;
 	    }
 	  }, {
@@ -1558,14 +1664,8 @@ this.BX = this.BX || {};
 	      }
 
 	      this.bindElementPos = bindElementPos;
-	      var windowSize = bindElementPos.windowSize ? bindElementPos.windowSize : {
-	        innerWidth: window.innerWidth,
-	        innerHeight: window.innerHeight
-	      };
-	      var windowScroll = bindElementPos.windowScroll ? bindElementPos.windowScroll : {
-	        scrollLeft: window.pageXOffset,
-	        scrollTop: window.pageYOffset
-	      };
+	      var windowSize = bindElementPos.windowSize ? bindElementPos.windowSize : this.getWindowSize();
+	      var windowScroll = bindElementPos.windowScroll ? bindElementPos.windowScroll : this.getWindowScroll();
 	      var popupWidth = bindElementPos.popupWidth ? bindElementPos.popupWidth : this.popupContainer.offsetWidth;
 	      var popupHeight = bindElementPos.popupHeight ? bindElementPos.popupHeight : this.popupContainer.offsetHeight;
 	      var angleTopOffset = Popup.getOption('angleTopOffset');
@@ -1640,14 +1740,16 @@ this.BX = this.BX || {};
 	        top = 0;
 	      }
 
+	      var event = new PositionEvent();
+	      event.left = left;
+	      event.top = top;
+	      this.emit('onBeforeAdjustPosition', event);
 	      main_core.Dom.adjust(this.popupContainer, {
 	        style: {
-	          top: top + 'px',
-	          left: left + 'px',
-	          zIndex: this.getZindex()
+	          top: event.top + 'px',
+	          left: event.left + 'px'
 	        }
 	      });
-	      this.adjustOverlayZindex();
 	    }
 	  }, {
 	    key: "enterFullScreen",
@@ -1766,11 +1868,20 @@ this.BX = this.BX || {};
 	        //Left side
 	        if (left < 0) {
 	          left = 0;
+	        }
+
+	        var scrollWidth;
+	        var scrollHeight;
+
+	        if (this.isTargetDocumentBody()) {
+	          scrollWidth = document.documentElement.scrollWidth;
+	          scrollHeight = document.documentElement.scrollHeight;
+	        } else {
+	          scrollWidth = this.getTargetContainer().scrollWidth;
+	          scrollHeight = this.getTargetContainer().scrollHeight;
 	        } //Right side
 
 
-	        var scrollWidth = document.documentElement.scrollWidth;
-	        var scrollHeight = document.documentElement.scrollHeight;
 	        var floatWidth = this.popupContainer.offsetWidth;
 	        var floatHeight = this.popupContainer.offsetHeight;
 
@@ -1833,6 +1944,11 @@ this.BX = this.BX || {};
 	      document.body.style.cursor = this.dragOptions.cursor;
 	      document.body.style.MozUserSelect = 'none';
 	      this.popupContainer.style.MozUserSelect = 'none';
+
+	      if (this.shouldFrontOnShow()) {
+	        this.bringToFront();
+	      }
+
 	      event.preventDefault();
 	    }
 	    /**
@@ -2064,12 +2180,15 @@ this.BX = this.BX || {};
 	    key: "getMaxZIndex",
 	    value: function getMaxZIndex() {
 	      var zIndex = 0;
-
-	      for (var i = 0; i < this._popups.length; i++) {
-	        zIndex = Math.max(zIndex, this._popups[i].params.zIndex);
-	      }
-
+	      this.getPopups().forEach(function (popup) {
+	        zIndex = Math.max(zIndex, popup.getZindex());
+	      });
 	      return zIndex;
+	    }
+	  }, {
+	    key: "getPopups",
+	    value: function getPopups() {
+	      return this._popups;
 	    }
 	  }]);
 	  return PopupManager;
@@ -2083,15 +2202,7 @@ this.BX = this.BX || {};
 	PopupManager.handleOnAfterInit = PopupManager.handleOnAfterInit.bind(PopupManager);
 	main_core_events.EventEmitter.subscribe('BX.Main.Popup:onAfterInit', PopupManager.handleOnAfterInit);
 
-	function _templateObject$1() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<span class=\"popup-window-delimiter\">"]);
-
-	  _templateObject$1 = function _templateObject() {
-	    return data;
-	  };
-
-	  return data;
-	}
+	var _templateObject$1, _templateObject2$1, _templateObject3$1;
 	var aliases$1 = {
 	  onSubMenuShow: {
 	    namespace: 'BX.Main.Menu.Item',
@@ -2102,6 +2213,24 @@ this.BX = this.BX || {};
 	    eventName: 'SubMenu:onClose'
 	  }
 	};
+	var reEscape = /[<>'"]/g;
+	var escapeEntities = {
+	  '<': '&lt;',
+	  '>': '&gt;',
+	  "'": '&#39;',
+	  '"': '&quot;'
+	};
+
+	function encodeSafe(value) {
+	  if (main_core.Type.isString(value)) {
+	    return value.replace(reEscape, function (item) {
+	      return escapeEntities[item];
+	    });
+	  }
+
+	  return value;
+	}
+
 	main_core_events.EventEmitter.registerAliases(aliases$1);
 
 	var MenuItem = /*#__PURE__*/function (_EventEmitter) {
@@ -2118,7 +2247,20 @@ this.BX = this.BX || {};
 	    options = options || {};
 	    _this.options = options;
 	    _this.id = options.id || main_core.Text.getRandom();
-	    _this.text = main_core.Type.isStringFilled(options.text) ? options.text : '';
+	    _this.text = '';
+	    _this.allowHtml = false;
+
+	    if (main_core.Type.isStringFilled(options.html) || main_core.Type.isElementNode(options.html)) {
+	      _this.text = options.html;
+	      _this.allowHtml = true;
+	    } else if (main_core.Type.isStringFilled(options.text)) {
+	      _this.text = options.text;
+
+	      if (_this.text.match(/<[^>]+>/)) {
+	        console.warn('BX.Main.MenuItem: use "html" option for the html item content.', _this.getText());
+	      }
+	    }
+
 	    _this.title = main_core.Type.isStringFilled(options.title) ? options.title : '';
 	    _this.delimiter = options.delimiter === true;
 	    _this.href = main_core.Type.isStringFilled(options.href) ? options.href : null;
@@ -2153,7 +2295,7 @@ this.BX = this.BX || {};
 	    _this.subMenuWindow = null;
 	    /**
 	     *
-	     * @type {{item: Element, text: Element}}
+	     * @type {{item: HTMLElement, text: HTMLElement}}
 	     */
 
 	    _this.layout = {
@@ -2186,20 +2328,15 @@ this.BX = this.BX || {};
 	      }
 
 	      if (this.delimiter) {
-	        if (main_core.Type.isStringFilled(this.text)) {
+	        if (main_core.Type.isStringFilled(this.getText())) {
 	          this.layout.item = main_core.Dom.create('span', {
 	            props: {
-	              className: 'popup-window-delimiter-section'
+	              className: ['popup-window-delimiter-section', this.className ? this.className : ''].join(' ')
 	            },
-	            children: [this.layout.text = main_core.Dom.create('span', {
-	              props: {
-	                className: 'popup-window-delimiter-text'
-	              },
-	              html: this.text
-	            })]
+	            children: [this.layout.text = main_core.Tag.render(_templateObject$1 || (_templateObject$1 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t\t\t<span class=\"popup-window-delimiter-text\">", "</span>\n\t\t\t\t\t\t"])), this.allowHtml ? this.getText() : encodeSafe(this.getText()))]
 	          });
 	        } else {
-	          this.layout.item = main_core.Tag.render(_templateObject$1());
+	          this.layout.item = main_core.Tag.render(_templateObject2$1 || (_templateObject2$1 = babelHelpers.taggedTemplateLiteral(["<span class=\"popup-window-delimiter\">"])));
 	        }
 	      } else {
 	        this.layout.item = main_core.Dom.create(this.href ? 'a' : 'span', {
@@ -2220,12 +2357,7 @@ this.BX = this.BX || {};
 	            props: {
 	              className: 'menu-popup-item-icon'
 	            }
-	          }), this.layout.text = main_core.Dom.create('span', {
-	            props: {
-	              className: 'menu-popup-item-text'
-	            },
-	            html: this.text
-	          })]
+	          }), this.layout.text = main_core.Tag.render(_templateObject3$1 || (_templateObject3$1 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t\t\t\t<span class=\"menu-popup-item-text\">", "</span>\n\t\t\t\t\t"])), this.allowHtml ? this.getText() : encodeSafe(this.getText()))]
 	        });
 
 	        if (this.href) {
@@ -2260,9 +2392,23 @@ this.BX = this.BX || {};
 	  }, {
 	    key: "setText",
 	    value: function setText(text) {
-	      if (main_core.Type.isString(text)) {
+	      var allowHtml = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+	      if (main_core.Type.isString(text) || main_core.Type.isElementNode(text)) {
+	        this.allowHtml = allowHtml;
 	        this.text = text;
-	        this.getTextContainer().innerHTML = text;
+
+	        if (main_core.Type.isElementNode(text)) {
+	          main_core.Dom.clean(this.getTextContainer());
+
+	          if (this.allowHtml) {
+	            main_core.Dom.append(text, this.getTextContainer());
+	          } else {
+	            this.getTextContainer().innerHTML = encodeSafe(text.outerHTML);
+	          }
+	        } else {
+	          this.getTextContainer().innerHTML = this.allowHtml ? text : encodeSafe(text);
+	        }
 	      }
 	    }
 	  }, {
@@ -2273,6 +2419,10 @@ this.BX = this.BX || {};
 	  }, {
 	    key: "showSubMenu",
 	    value: function showSubMenu() {
+	      if (!this.getMenuWindow().getPopupWindow().isShown()) {
+	        return;
+	      }
+
 	      this.addSubMenu(this._items);
 
 	      if (this.subMenuWindow) {
@@ -2297,19 +2447,20 @@ this.BX = this.BX || {};
 	      }
 
 	      var rootMenuWindow = this.getMenuWindow().getRootMenuWindow() || this.getMenuWindow();
-	      var options = rootMenuWindow.params; //Override root menu options
+	      var rootOptions = Object.assign({}, rootMenuWindow.params);
+	      delete rootOptions.events;
+	      var subMenuOptions = main_core.Type.isPlainObject(rootMenuWindow.params.subMenuOptions) ? rootMenuWindow.params.subMenuOptions : {};
+	      var options = Object.assign({}, rootOptions, subMenuOptions); //Override root menu options
 
 	      options.autoHide = false;
 	      options.menuShowDelay = this.menuShowDelay;
 	      options.cacheable = this.isCacheable();
-	      options.zIndexAbsolute = this.getMenuWindow().getPopupWindow().getZindex() + 2;
+	      options.targetContainer = this.getMenuWindow().getPopupWindow().getTargetContainer();
 	      options.bindOptions = {
 	        forceTop: true,
 	        forceLeft: true,
 	        forceBindPosition: true
 	      };
-	      delete options.zIndex;
-	      delete options.events;
 	      delete options.angle;
 	      delete options.overlay;
 	      this.subMenuWindow = new Menu('popup-submenu-' + this.id, this.layout.item, items, options);
@@ -2388,7 +2539,7 @@ this.BX = this.BX || {};
 	      }
 
 	      var popupWindow = this.subMenuWindow.getPopupWindow();
-	      var itemRect = this.layout.item.getBoundingClientRect();
+	      var itemRect = this.getBoundingClientRect();
 	      var offsetLeft = itemRect.width + this.subMenuOffsetX;
 	      var offsetTop = itemRect.height + this.getPopupPadding();
 	      var angleOffset = itemRect.height / 2 - this.getPopupPadding();
@@ -2396,8 +2547,10 @@ this.BX = this.BX || {};
 	      var popupWidth = popupWindow.getPopupContainer().offsetWidth;
 	      var popupHeight = popupWindow.getPopupContainer().offsetHeight;
 	      var popupBottom = itemRect.top + popupHeight;
-	      var clientWidth = document.documentElement.clientWidth;
-	      var clientHeight = document.documentElement.clientHeight; // let's try to fit a submenu to the browser viewport
+	      var targetContainer = this.getMenuWindow().getPopupWindow().getTargetContainer();
+	      var isGlobalContext = this.getMenuWindow().getPopupWindow().isTargetDocumentBody();
+	      var clientWidth = isGlobalContext ? document.documentElement.clientWidth : targetContainer.offsetWidth;
+	      var clientHeight = isGlobalContext ? document.documentElement.clientHeight : targetContainer.offsetHeight; // let's try to fit a submenu to the browser viewport
 
 	      var exceeded = popupBottom - clientHeight;
 
@@ -2437,6 +2590,19 @@ this.BX = this.BX || {};
 	        offset: angleOffset
 	      });
 	      popupWindow.adjustPosition();
+	    }
+	  }, {
+	    key: "getBoundingClientRect",
+	    value: function getBoundingClientRect() {
+	      var popup = this.getMenuWindow().getPopupWindow();
+
+	      if (popup.isTargetDocumentBody()) {
+	        return this.layout.item.getBoundingClientRect();
+	      } else {
+	        var rect = popup.getPositionRelativeToTarget(this.layout.item);
+	        var targetContainer = this.getMenuWindow().getPopupWindow().getTargetContainer();
+	        return new DOMRect(rect.left - targetContainer.scrollLeft, rect.top - targetContainer.scrollTop, rect.width, rect.height);
+	      }
 	    }
 	  }, {
 	    key: "getPopupPadding",
@@ -2520,14 +2686,24 @@ this.BX = this.BX || {};
 
 	  }, {
 	    key: "onItemMouseEnter",
-	    value: function onItemMouseEnter(event) {
+	    value: function onItemMouseEnter(mouseEvent) {
 	      if (this.isDisabled()) {
 	        return;
 	      }
 
-	      main_core_events.EventEmitter.emit(this, 'onMouseEnter', undefined, {
+	      var event = new main_core_events.BaseEvent({
+	        data: {
+	          mouseEvent: mouseEvent
+	        }
+	      });
+	      main_core_events.EventEmitter.emit(this, 'onMouseEnter', event, {
 	        thisArg: this
 	      });
+
+	      if (event.isDefaultPrevented()) {
+	        return;
+	      }
+
 	      this.clearSubMenuTimeout();
 
 	      if (this.hasSubMenu()) {
@@ -2546,14 +2722,24 @@ this.BX = this.BX || {};
 
 	  }, {
 	    key: "onItemMouseLeave",
-	    value: function onItemMouseLeave(event) {
+	    value: function onItemMouseLeave(mouseEvent) {
 	      if (this.isDisabled()) {
 	        return;
 	      }
 
-	      main_core_events.EventEmitter.emit(this, 'onMouseLeave', undefined, {
+	      var event = new main_core_events.BaseEvent({
+	        data: {
+	          mouseEvent: mouseEvent
+	        }
+	      });
+	      main_core_events.EventEmitter.emit(this, 'onMouseLeave', event, {
 	        thisArg: this
 	      });
+
+	      if (event.isDefaultPrevented()) {
+	        return;
+	      }
+
 	      this.clearSubMenuTimeout();
 	    }
 	    /**
@@ -2582,25 +2768,7 @@ this.BX = this.BX || {};
 	  return MenuItem;
 	}(main_core_events.EventEmitter);
 
-	function _templateObject2$1() {
-	  var data = babelHelpers.taggedTemplateLiteral(["\n\t\t\t<div class=\"menu-popup\">", "</div>\n\t\t"]);
-
-	  _templateObject2$1 = function _templateObject2() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject$2() {
-	  var data = babelHelpers.taggedTemplateLiteral(["\n\t\t\t<div class=\"menu-popup-items\">", "</div>\n\t\t"]);
-
-	  _templateObject$2 = function _templateObject() {
-	    return data;
-	  };
-
-	  return data;
-	}
+	var _templateObject$2, _templateObject2$2;
 
 	/**
 	 * @memberof BX.Main
@@ -2681,8 +2849,8 @@ this.BX = this.BX || {};
 	      options.noAllPaddings = true;
 	      options.darkMode = false;
 	      options.autoHideHandler = this.handleAutoHide.bind(this);
-	      this.layout.itemsContainer = main_core.Tag.render(_templateObject$2(), domItems);
-	      this.layout.menuContainer = main_core.Tag.render(_templateObject2$1(), this.layout.itemsContainer);
+	      this.layout.itemsContainer = main_core.Tag.render(_templateObject$2 || (_templateObject$2 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t<div class=\"menu-popup-items\">", "</div>\n\t\t"])), domItems);
+	      this.layout.menuContainer = main_core.Tag.render(_templateObject2$2 || (_templateObject2$2 = babelHelpers.taggedTemplateLiteral(["\n\t\t\t<div class=\"menu-popup\">", "</div>\n\t\t"])), this.layout.itemsContainer);
 	      this.itemsContainer = this.layout.itemsContainer;
 	      options.content = this.layout.menuContainer; //Make internal event handlers first in the queue.
 
@@ -2848,7 +3016,7 @@ this.BX = this.BX || {};
 	  }, {
 	    key: "addMenuItemInternal",
 	    value: function addMenuItemInternal(menuItemJson, targetItemId) {
-	      if (!menuItemJson || !menuItemJson.delimiter && !main_core.Type.isStringFilled(menuItemJson.text) || menuItemJson.id && this.getMenuItem(menuItemJson.id) !== null) {
+	      if (!menuItemJson || !menuItemJson.delimiter && !main_core.Type.isStringFilled(menuItemJson.text) && !main_core.Type.isStringFilled(menuItemJson.html) && !main_core.Type.isElementNode(menuItemJson.html) || menuItemJson.id && this.getMenuItem(menuItemJson.id) !== null) {
 	        return null;
 	      }
 
@@ -3487,5 +3655,5 @@ this.BX = this.BX || {};
 	exports.PopupWindowButtonLink = PopupWindowButtonLink;
 	exports.PopupWindowCustomButton = PopupWindowCustomButton;
 
-}((this.BX.Main = this.BX.Main || {}),BX.Event,BX));
+}((this.BX.Main = this.BX.Main || {}),BX,BX.Event,BX));
 //# sourceMappingURL=main.popup.bundle.js.map

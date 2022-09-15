@@ -343,12 +343,21 @@
 
 			var kkmId = BX('KKM_ID');
 			kkmId = (kkmId) ? kkmId.value : '';
-			
+
+			var restCode = '';
+
+			var handlerSelect = BX("HANDLER");
+			if (handlerSelect && handlerSelect.options)
+			{
+				restCode = handlerSelect.options[handlerSelect.selectedIndex].getAttribute('data-rest-code');
+			}
+
 			BX.ajax({
 				data: {
 					'action': 'reload_settings',
 					'kkmId': kkmId,
-					'handler': BX('HANDLER').value || '',
+					'handler': handlerSelect.value || '',
+					'restCode': restCode || '',
 					'sessid': BX.bitrix_sessid()
 				},
 				method: 'POST',
@@ -357,18 +366,35 @@
 				onsuccess: BX.delegate(function(result)
 					{
 						BX.closeWait();
+						if (result && result.hasOwnProperty('HANDLER_CODE'))
+						{
+							var code = 'SALE_CASHBOX_'+result.HANDLER_CODE.toUpperCase()+'_HINT';
+							if (BX.message.hasOwnProperty(code) && BX('hint_HANDLER'))
+							{
+								BX.hint_replace(BX('hint_HANDLER'), BX.message(code));
+							}
+
+							if (BX('hint_handler_wrapper'))
+							{
+								BX('hint_handler_wrapper').innerHTML = '<span id="hint_HANDLER"></span>';
+							}
+
+						}
 						if (result && result.hasOwnProperty('HTML'))
 							BX('sale-cashbox-settings-container').innerHTML = result.HTML;
 
-						if (result && result.hasOwnProperty('MODEL_HTML'))
+						if (BX('sale-cashbox-models-container'))
 						{
-							BX('sale-cashbox-models-container').innerHTML = result.MODEL_HTML;
+							if (result && result.hasOwnProperty('MODEL_HTML'))
+							{
+								BX('sale-cashbox-models-container').innerHTML = result.MODEL_HTML;
+							}
+							else
+							{
+								BX('sale-cashbox-models-container').innerHTML = '';
+							}
 						}
-						else
-						{
-							BX('sale-cashbox-models-container').innerHTML = '';
-						}
-						
+
 						if (result.hasOwnProperty('OFD'))
 						{
 							BX('OFD').value = result.OFD;
@@ -389,7 +415,7 @@
 										if (className && className.indexOf('adm-required-field') > -1)
 											span.className = '';
 									}
-									
+
 									var id = tr[i].getAttribute('id');
 									if (id)
 										id = id.slice(3);
@@ -413,7 +439,7 @@
 				onfailure: function() {BX.debug('onfailure: reloadSettings');}
 			});
 		},
-		
+
 		reloadOfdSettings: function()
 		{
 			BX.ajax({
@@ -435,7 +461,7 @@
 				onfailure: function() {BX.debug('onfailure: reloadOfdSettings');}
 			});
 		},
-		
+
 		testConnection: function(cashboxId)
 		{
 			BX.ajax({
@@ -468,9 +494,9 @@
 										}
 									})
 								]
-						
+
 							});
-						
+
 							popup.show();
 						}
 					}, this
@@ -554,7 +580,7 @@
 										onfailure: function() {BX.debug('Select params error');}
 									}
 								);
-			
+
 							},
 							this
 						)
@@ -609,7 +635,7 @@
 								name : 'ENTITY_CODE',
 								onchange : BX.delegate(function() {
 									var form = BX('check_form_add');
-									
+
 									var sendData = {
 										sessid : BX.bitrix_sessid(),
 										formData: BX.ajax.prepareForm(form),
@@ -688,10 +714,10 @@
 							}
 							select.appendChild(group);
 						}
-						
+
 						var tr = BX('check_info_block');
 						tr.innerHTML = '';
-						
+
 						tr = BX('check_entities_body');
 						tr.innerHTML = '';
 
@@ -699,20 +725,20 @@
 						tr.appendChild(td);
 						td = BX.create('td', {children : [select]});
 						tr.appendChild(td);
-						
+
 						select.onchange();
 					}
 				},this),
 				onfailure: function() {BX.debug('Select params error');}
 			});
 		},
-		
+
 		constructCheckInfoBlock : function (data)
 		{
 			var i, element;
-			
+
 			var result = [];
-			
+
 			select = BX.create('select', {
 				attrs : {id : 'CHECK_TYPE'},
 				props : {
@@ -752,7 +778,7 @@
 										{
 											if (!result.PAYMENTS.hasOwnProperty(i))
 												continue;
-						
+
 											element = this.createSinglePayment(result.PAYMENTS[i]);
 											td.appendChild(element);
 										}
@@ -764,12 +790,12 @@
 										{
 											if (!result.SHIPMENTS.hasOwnProperty(i))
 												continue;
-						
+
 											element = this.createSingleShipment(result.SHIPMENTS[i], result.FFD_105_ENABLED);
 											td.appendChild(element);
 										}
 									}
-									
+
 									var tdTitle = td.parentNode;
 									if (!result.PAYMENTS && !result.SHIPMENTS)
 									{
@@ -790,7 +816,7 @@
 			{
 				if (!data.CHECK_TYPES.hasOwnProperty(i))
 					continue;
-				
+
 				option = BX.create('option', {
 					text : data.CHECK_TYPES[i].NAME,
 					attrs : {
@@ -800,7 +826,7 @@
 
 				select.appendChild(option);
 			}
-			
+
 			var tr = BX.create('tr', {
 				children : [
 					BX.create('td', {text : BX.message('CASHBOX_ADD_CHECK_TYPE_CHECKS')+': '}),
@@ -833,7 +859,7 @@
 					td.appendChild(element);
 				}
 			}
-			
+
 			tr = BX.create('tr', {
 				children : [
 					BX.create('td', {text : BX.message('CASHBOX_ADD_CHECK_ADDITIONAL_ENTITIES')+': '}),
@@ -842,7 +868,7 @@
 			});
 
 			result.push(tr);
-			
+
 			return result;
 		},
 
@@ -859,7 +885,7 @@
 							label.style.color = '';
 						else
 							label.style.color = '#D2D1D1';
-						
+
 						var select = label.nextElementSibling;
 						if (select)
 							select.disabled = !this.checked;
@@ -896,7 +922,7 @@
 				{
 					if (!payment.PAYMENT_TYPES.hasOwnProperty(j))
 						continue;
-					
+
 					var option = BX.create('option', {
 						text: payment.PAYMENT_TYPES[j].NAME,
 						attrs: {
@@ -908,10 +934,10 @@
 
 				div.appendChild(select);
 			}
-			
+
 			return div;
 		},
-		
+
 		createSingleShipment: function(shipment, isFfd105Enable)
 		{
 			var checkbox = BX.create('input', {
@@ -925,7 +951,7 @@
 							label.style.color = '';
 						else
 							label.style.color = '#D2D1D1';
-			
+
 						if (!isFfd105Enable)
 						{
 							var td = this.parentNode.parentNode;
@@ -936,7 +962,7 @@
 								{
 									if (inputs[i].id === this.id)
 										continue;
-									
+
 									inputs[i].disabled = this.checked;
 								}
 							}
@@ -959,7 +985,7 @@
 					}
 				})
 			]});
-			
+
 			return div;
 		}
 	}

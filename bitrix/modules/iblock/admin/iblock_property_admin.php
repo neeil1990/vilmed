@@ -131,7 +131,7 @@ if (isset($arFilter['=PROPERTY_TYPE']))
 
 if($lAdmin->EditAction())
 {
-	foreach($FIELDS as $ID => $arFields)
+	foreach($_REQUEST['FIELDS'] as $ID => $arFields)
 	{
 		$DB->StartTransaction();
 		$ID = (int)$ID;
@@ -178,7 +178,17 @@ if($arID = $lAdmin->GroupAction())
 		{
 		case "delete":
 			if(!CIBlockProperty::Delete($ID))
-				$lAdmin->AddGroupError(GetMessage("IBP_ADM_DELETE_ERROR"), $ID);
+			{
+				$exception = $APPLICATION->getException();
+				if ($exception)
+				{
+					$lAdmin->AddGroupError($exception->GetString(), $ID);
+				}
+				else
+				{
+					$lAdmin->AddGroupError(GetMessage("IBP_ADM_DELETE_ERROR"), $ID);
+				}
+			}
 			break;
 		case "activate":
 		case "deactivate":

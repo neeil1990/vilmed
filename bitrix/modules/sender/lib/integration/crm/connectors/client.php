@@ -12,14 +12,16 @@ use Bitrix\Crm\CompanyTable as CrmCompanyTable;
 use Bitrix\Crm\ContactTable as CrmContactTable;
 use Bitrix\Crm\PhaseSemantics;
 use Bitrix\Main\Application;
+use Bitrix\Main\DB\Result;
 use Bitrix\Main\DB\SqlExpression;
 use Bitrix\Main\Entity;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\ORM\Query\Query;
 use Bitrix\Main\Page\Asset;
 use Bitrix\Main\Type\DateTime;
 use Bitrix\Main\UI\Filter\AdditionalDateType;
-use Bitrix\Sender\Connector\BaseFilter as ConnectorBaseFilter;
+use Bitrix\Sender\Connector;
 use Bitrix\Sender\Connector\ResultView;
 use Bitrix\Sender\Integration\Sender\Holiday;
 use Bitrix\Sender\Recipient\Type;
@@ -30,7 +32,7 @@ Loc::loadMessages(__FILE__);
  * Class Client
  * @package Bitrix\Sender\Integration\Crm\Connectors
  */
-class Client extends ConnectorBaseFilter
+class Client extends Connector\BaseFilter implements Connector\IncrementallyConnector
 {
 	const PRODUCT_SOURCE_ORDERS_ALL = "ORDERS_ALL";
 	const PRODUCT_SOURCE_ORDERS_PAID = "ORDERS_PAID";
@@ -89,10 +91,99 @@ class Client extends ConnectorBaseFilter
 		return $queries;
 	}
 
-	protected function getContactQuery($selectList = [])
+	/**
+	 * Get queries.
+	 *
+	 * @param int $offset
+	 * @param int $limit
+	 * @param string|null $excludeType
+	 *
+	 * @return Entity\Query[]
+	 */
+	public function getLimitedQueries(int $offset = 0, int $limit, string $excludeType = null): array
+	{
+		$queries = array();
+		$clientType = $this->getFieldValue('CLIENT_TYPE');
+
+		if (!$clientType || $clientType === \CCrmOwnerType::ContactName)
+		{
+			if($excludeType !== \CCrmOwnerType::ContactName)
+			{
+				$this->prepareQueryForType($this->prepareQueryCollection($this->getContactQuery())[0], $offset, $limit,
+					$queries);
+			}
+		}
+		if (!$clientType || $clientType === \CCrmOwnerType::CompanyName)
+		{
+			if($excludeType !== \CCrmOwnerType::CompanyName)
+			{
+				$this->prepareQueryForType($this->prepareQueryCollection($this->getCompanyQuery())[0], $offset, $limit, $queries);
+			}
+		}
+
+		return $queries;
+	}
+
+	public function getEntityLimitInfo(): array
+	{
+		$lastContact = \CCrmContact::GetListEx(
+			['ID' => 'DESC'],
+			[
+				'CHECK_PERMISSIONS' => 'N',
+				'@CATEGORY_ID' => 0,
+			],
+			false,
+			['nTopCount' => '1'],
+			['ID'],
+			['limit' => 1]
+		)->Fetch();
+
+		$lastCompany = \CCrmCompany::GetListEx(
+			['ID' => 'DESC'],
+			[
+				'CHECK_PERMISSIONS' => 'N',
+				'@CATEGORY_ID' => 0,
+			],
+			false,
+			['nTopCount' => '1'],
+			['ID']
+		)->Fetch();
+
+		$lastContactId = $lastContact['ID'] ?? 0;
+		$lastCompanyId = $lastCompany['ID'] ?? 0;
+
+		return [
+			'lastContactId' => $lastContactId,
+			'lastCompanyId' => $lastCompanyId,
+			'lastId' => max($lastCompanyId, $lastContactId),
+		];
+	}
+
+	public function getLimitedData(int $offset, int $limit): ?Result
+	{
+		$entityInfo = $this->getEntityLimitInfo();
+		$excludedClass = $offset > $entityInfo['lastContactId'] ? \CCrmOwnerType::ContactName : null;
+		$excludedClass = $offset > $entityInfo['lastCompanyId'] ? \CCrmOwnerType::CompanyName : $excludedClass;
+
+		$query = QueryData::getUnionizedQuery($this->getLimitedQueries($offset, $limit, $excludedClass));
+		return !$query ? null : QueryData::getUnionizedData($query);
+	}
+
+	protected function prepareQueryForType(Query $query, int $from, int $to, array &$queries)
+	{
+		$query->whereBetween('ID', $from, $to);
+		$queryCollection = $this->prepareQueryCollection($query);
+		$queries = array_merge($queries, $queryCollection);
+	}
+
+	protected function getContactQuery()
 	{
 		$query = CrmContactTable::query();
 		$query->setFilter($this->getCrmEntityFilter(\CCrmOwnerType::ContactName));
+		if ($query->getEntity()->hasField('CATEGORY_ID'))
+		{
+			$query->where('CATEGORY_ID', 0);
+		}
 		$this->addCrmEntityReferences($query);
 		$query->registerRuntimeField(new Entity\ExpressionField('CRM_ENTITY_TYPE_ID', \CCrmOwnerType::Contact));
 		$query->registerRuntimeField(new Entity\ExpressionField('CRM_ENTITY_TYPE', '\''.\CCrmOwnerType::ContactName.'\''));
@@ -108,6 +199,9 @@ class Client extends ConnectorBaseFilter
 					'CRM_ENTITY_TYPE',
 					'CRM_CONTACT_ID' => 'CONTACT_ID',
 					'CRM_COMPANY_ID',
+					'HAS_EMAIL',
+					'HAS_PHONE',
+					'HAS_IMOL',
 				]
 		);
 
@@ -118,6 +212,10 @@ class Client extends ConnectorBaseFilter
 	{
 		$query = CrmCompanyTable::query();
 		$query->setFilter($this->getCrmEntityFilter(\CCrmOwnerType::CompanyName));
+		if ($query->getEntity()->hasField('CATEGORY_ID'))
+		{
+			$query->where('CATEGORY_ID', 0);
+		}
 		$this->addCrmEntityReferences($query);
 		$query->registerRuntimeField(new Entity\ExpressionField('CRM_ENTITY_TYPE_ID', \CCrmOwnerType::Company));
 		$query->registerRuntimeField(new Entity\ExpressionField('CRM_ENTITY_TYPE', '\''.\CCrmOwnerType::CompanyName.'\''));
@@ -133,6 +231,9 @@ class Client extends ConnectorBaseFilter
 				'CRM_ENTITY_TYPE',
 				'CRM_CONTACT_ID' => 'CONTACT_ID',
 				'CRM_COMPANY_ID' => 'COMPANY_ID',
+				'HAS_EMAIL',
+				'HAS_PHONE',
+				'HAS_IMOL',
 			]
 		);
 
@@ -473,6 +574,7 @@ class Client extends ConnectorBaseFilter
 			array('join_type' => 'LEFT')
 		));
 
+		$query->addSelect("SGT_DEAL.ID", "SGT_DEAL_ID");
 		$extraQuery->setFilter($query->getFilter()); // apply actual user filter
 
 		$extraQuery->registerRuntimeField(new Entity\ReferenceField(
@@ -481,6 +583,7 @@ class Client extends ConnectorBaseFilter
 			$orderRef,
 			array('join_type' => 'LEFT')
 		));
+		$extraQuery->addSelect("PROD_CRM_ORDER.ID", "PROD_CRM_ORDER_ID");
 
 		$extraQuery->registerRuntimeField(new Entity\ReferenceField(
 			'PROD_CRM_ORDER_PRODUCT',
@@ -1178,7 +1281,7 @@ class Client extends ConnectorBaseFilter
 					'DEAL_DATE_CREATE_datesel' => 'RANGE',
 					'DEAL_DATE_CREATE_from' => $holiday->getDateFrom()->toString(),
 					'DEAL_DATE_CREATE_to' => $holiday->getDateTo()->toString(),
-					'CONTACT_BIRTHDATE_allow_year' => '0',
+					'DEAL_DATE_CREATE_allow_year' => '0',
 				]
 			];
 		}
@@ -1208,7 +1311,10 @@ class Client extends ConnectorBaseFilter
 			)
 			->setCallback(
 				ResultView::Draw,
-				[__NAMESPACE__ . '\Helper', 'onResultViewDraw']
+				function (array &$row)
+				{
+					(new Helper())->onResultViewDraw($row);
+				}
 			);
 	}
 

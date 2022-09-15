@@ -7,13 +7,30 @@
  */
 namespace Bitrix\Sale\Internals;
 
-use Bitrix\Main;
 use	Bitrix\Main\Entity\DataManager,
 	Bitrix\Main\Entity\Validator,
 	Bitrix\Main\Localization\Loc;
+use Bitrix\Main\ORM\Fields\Validators\EnumValidator;
+use Bitrix\Sale\Registry;
 
 Loc::loadMessages(__FILE__);
 
+/**
+ * Class OrderPropsTable
+ *
+ * DO NOT WRITE ANYTHING BELOW THIS
+ *
+ * <<< ORMENTITYANNOTATION
+ * @method static EO_OrderProps_Query query()
+ * @method static EO_OrderProps_Result getByPrimary($primary, array $parameters = array())
+ * @method static EO_OrderProps_Result getById($id)
+ * @method static EO_OrderProps_Result getList(array $parameters = array())
+ * @method static EO_OrderProps_Entity getEntity()
+ * @method static \Bitrix\Sale\Internals\EO_OrderProps createObject($setDefaultValues = true)
+ * @method static \Bitrix\Sale\Internals\EO_OrderProps_Collection createCollection()
+ * @method static \Bitrix\Sale\Internals\EO_OrderProps wakeUpObject($row)
+ * @method static \Bitrix\Sale\Internals\EO_OrderProps_Collection wakeUpCollection($rows)
+ */
 class OrderPropsTable extends DataManager
 {
 	public static function getFilePath()
@@ -124,6 +141,14 @@ class OrderPropsTable extends DataManager
 				'data_type' => 'boolean',
 				'values' => array('N', 'Y'),
 			),
+			'IS_ADDRESS_FROM' => array(
+				'data_type' => 'boolean',
+				'values' => array('N', 'Y'),
+			),
+			'IS_ADDRESS_TO' => array(
+				'data_type' => 'boolean',
+				'values' => array('N', 'Y'),
+			),
 			'ACTIVE' => array(
 				'data_type' => 'boolean',
 				'values' => array('N', 'Y'),
@@ -163,7 +188,29 @@ class OrderPropsTable extends DataManager
 			'XML_ID' => array(
 				'data_type' => 'string',
 			),
+			'ENTITY_TYPE' => array(
+				'data_type' => 'enum',
+				'default_value' => Registry::ENTITY_ORDER,
+				'required' => true,
+				'validation' => array(__CLASS__, 'validateEntityType'),
+				'values' => static::getEntityTypes()
+			),
 		);
+	}
+
+	public static function getEntityTypes()
+	{
+		return [
+			Registry::ENTITY_ORDER,
+			Registry::ENTITY_SHIPMENT,
+		];
+	}
+
+	public static function validateEntityType()
+	{
+		return [
+			new EnumValidator(),
+		];
 	}
 
 	// value
@@ -199,7 +246,7 @@ class OrderPropsTable extends DataManager
 		if($value <> '')
 		{
 			if(CheckSerializedData($value)
-				&& ($v = @unserialize($value)) !== false)
+				&& ($v = @unserialize($value, ['allowed_classes' => false])) !== false)
 				//&& is_array($v)) TODO uncomment after a while)
 			{
 				$value = $v;
@@ -262,7 +309,7 @@ class OrderPropsTable extends DataManager
 	}
 	public static function modifySettingsForFetch($value)
 	{
-		$v = @unserialize($value);
+		$v = @unserialize($value, ['allowed_classes' => false]);
 		return is_array($v) ? $v : array();
 	}
 

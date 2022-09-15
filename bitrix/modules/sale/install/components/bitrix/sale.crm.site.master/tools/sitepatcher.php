@@ -1,6 +1,11 @@
 <?php
 namespace Bitrix\Sale\CrmSiteMaster\Tools;
 
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
+{
+	die();
+}
+
 use Bitrix\Main,
 	Bitrix\Catalog,
 	Bitrix\Main\UrlRewriter,
@@ -100,12 +105,6 @@ class SitePatcher
 				"CONDITION" => "#^".$this->getCrmSiteDir()."pub/pay/([\\w\\W]+)/([0-9a-zA-Z]+)/([^/]*)#",
 				"RULE" => "account_number=$1&hash=$2",
 				"PATH" => $this->getCrmSiteDir()."pub/payment.php",
-			];
-
-			$arNewUrlRewrite[] = [
-				"CONDITION" => "#^".$this->getCrmSiteDir()."crm/invoicing/#",
-				"RULE" => "",
-				"PATH" => $this->getCrmSiteDir()."crm/invoicing/index.php",
 			];
 
 			$arNewUrlRewrite[] = [
@@ -976,7 +975,7 @@ class SitePatcher
 			return;
 		}
 
-		$selectedGroups = @unserialize($selectedGroups);
+		$selectedGroups = @unserialize($selectedGroups, ['allowed_classes' => false]);
 		if (!is_array($selectedGroups))
 		{
 			return;
@@ -1353,7 +1352,7 @@ class SitePatcher
 	public static function retrieveConfig1C()
 	{
 		$config1C = Option::get("sale", self::CONFIG_1C);
-		$config1C = unserialize($config1C);
+		$config1C = unserialize($config1C, ['allowed_classes' => false]);
 
 		foreach ($config1C as $module => $options)
 		{

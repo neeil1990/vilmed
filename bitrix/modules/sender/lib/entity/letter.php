@@ -7,6 +7,7 @@
  */
 namespace Bitrix\Sender\Entity;
 
+use Bitrix\Main\ArgumentException;
 use Bitrix\Main\DB;
 use Bitrix\Main\Error;
 use Bitrix\Main\InvalidOperationException;
@@ -15,6 +16,7 @@ use Bitrix\Main\Result;
 use Bitrix\Main\Type\Date;
 use Bitrix\Main\Type\DateTime;
 use Bitrix\Sender\Dispatch;
+use Bitrix\Sender\FileTable;
 use Bitrix\Sender\Integration;
 use Bitrix\Sender\Internals\Model\LetterSegmentTable;
 use Bitrix\Sender\Internals\Model\LetterTable;
@@ -319,8 +321,15 @@ class Letter extends Base
 			return null;
 		}
 
-		$message = MainMessage\Adapter::create($code);
-		if ($message->isAds())
+		try
+		{
+			$message = MainMessage\Adapter::create($code);
+		} catch (ArgumentException $e)
+		{
+			return null;
+		}
+
+		if ($message->isAds() || $message->isMarketing())
 		{
 			$instance = new Ad();
 		}
@@ -533,7 +542,7 @@ class Letter extends Base
 
 		$oldSegments = $this->loadDataSegments($id);
 		$letter = LetterTable::getById($id)->fetch();
-		LetterSegmentTable::delete(array('LETTER_ID' => $id));
+		LetterSegmentTable::deleteList(array('LETTER_ID' => $id));
 
 		$isChanged = false;
 		$dataToInsert = [];
@@ -579,7 +588,7 @@ class Letter extends Base
 		if ($isChanged && $this->getId() && $this->get('POSTING_ID'))
 		{
 			Posting\Builder::create()
-				->run($this->get('POSTING_ID'), false, false);
+				->run($this->get('POSTING_ID'), false);
 		}
 	}
 
@@ -963,6 +972,15 @@ class Letter extends Base
 		$instance = static::create()->mergeData($data);
 		$instance->save();
 		$this->getErrorCollection()->add($instance->getErrors());
+
+		if (!is_null($this->getMessage()->getConfiguration()->get('MESSAGE')))
+		{
+			FileTable::syncFiles(
+				$instance->getId(),
+				0,
+				$this->getMessage()->getConfiguration()->get('MESSAGE')
+			);
+		}
 
 		return $instance->getId();
 	}

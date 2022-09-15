@@ -12,7 +12,9 @@
  * @global CMain $APPLICATION
  * @global CDatabase $DB
  */
+
 use Bitrix\Main\ModuleManager;
+use Bitrix\Main\Authentication\Policy;
 
 IncludeModuleLangFile(__FILE__);
 
@@ -23,7 +25,7 @@ $mid = $_REQUEST["mid"];
 
 $arGROUPS = array();
 $groups = array();
-$z = CGroup::GetList(($v1=""), ($v2=""), array("ACTIVE"=>"Y", "ADMIN"=>"N", "ANONYMOUS"=>"N"));
+$z = CGroup::GetList('', '', array("ACTIVE"=>"Y", "ADMIN"=>"N", "ANONYMOUS"=>"N"));
 while($zr = $z->Fetch())
 {
 	$ar = array();
@@ -42,7 +44,6 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $USER->IsAdmin() && $_REQUEST["Restore
 		array("NAME"=>"PARAM_MAX_USERS", "DEF"=>"0"),
 		array("NAME"=>"crc_code", "DEF"=>""),
 		array("NAME"=>"vendor", "DEF"=>"1c_bitrix"),
-		array("NAME"=>"distributive6", "DEF"=>"N"),
 	);
 	foreach($aSaveVal as $i=>$aParam)
 		$aSaveVal[$i]["VALUE"] = COption::GetOptionString("main", $aParam["NAME"], $aParam["DEF"]);
@@ -68,6 +69,27 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $USER->CanDoOperation('edit_other_sett
 	else
 	{
 		CAdminMessage::ShowMessage(GetMessage("MAIN_OPT_SECURE_KEY_ERROR"));
+	}
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_passwords']) && $USER->CanDoOperation('edit_php') && check_bitrix_sessid())
+{
+	$customWeakPasswords = (isset($_POST['custom_weak_passwords']) && $_POST['custom_weak_passwords'] === 'Y' ? 'Y' : 'N');
+	COption::SetOptionString('main', 'custom_weak_passwords', $customWeakPasswords);
+
+	if (isset($_FILES['passwords']['tmp_name']) && $_FILES['passwords']['tmp_name'] != '')
+	{
+		$uploadDir = COption::GetOptionString('main', 'upload_dir', 'upload');
+		$path = "{$_SERVER['DOCUMENT_ROOT']}/{$uploadDir}/main/weak_passwords";
+
+		if (Policy\WeakPassword::createIndex($_FILES['passwords']['tmp_name'], $path))
+		{
+			CAdminMessage::ShowNote(GetMessage("main_options_upload_success"));
+		}
+		else
+		{
+			CAdminMessage::ShowMessage(GetMessage("main_options_upload_error"));
+		}
 	}
 }
 
@@ -126,11 +148,15 @@ $arAllOptions = array(
 	"main" => Array(
 		Array("site_name", GetMessage("MAIN_OPTION_SITENAME"), $SERVER_NAME, Array("text", 30)),
 		Array("server_name", GetMessage("MAIN_OPTION_SERVERNAME"), $SERVER_NAME, Array("text", 30)),
-		Array("cookie_name", GetMessage("MAIN_PREFIX"), "BITRIX_SM", Array("text", 30)),
-		Array("ALLOW_SPREAD_COOKIE", GetMessage("MAIN_OPTION_ALLOW_SPREAD_COOKIE"), "Y", Array("checkbox", "Y")),
 		Array("error_reporting", GetMessage("MAIN_ERROR_REPORTING"), E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR|E_PARSE, Array("selectbox", Array(E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR|E_PARSE=>GetMessage("MAIN_OPTION_ERROR1"), E_ALL^E_NOTICE=>GetMessage("MAIN_OPTION_ERROR2"), 0=>GetMessage("MAIN_OPTION_ERROR3")))),
 		Array("use_hot_keys", GetMessage("main_options_use_hot_keys"), "Y", Array("checkbox", "Y")),
 		Array("smile_gallery_id", GetMessage("MAIN_OPTIONS_SMILE_GALLERY_ID"), 0, Array("selectbox", $arSmileGallery)),
+
+		GetMessage("MAIN_OPTIONS_COOKIES"),
+		Array("cookie_name", GetMessage("MAIN_PREFIX"), "BITRIX_SM", Array("text", 30)),
+		Array("ALLOW_SPREAD_COOKIE", GetMessage("MAIN_OPTION_ALLOW_SPREAD_COOKIE1"), "Y", Array("checkbox", "Y")),
+		Array("use_secure_password_cookies", GetMessage("MAIN_OPTION_USE_SECURE_PASSWORD_COOKIE1"), "N", Array("checkbox", "Y")),
+		Array("auth_multisite", GetMessage("MAIN_OPTION_AUTH_TO_ALL_DOM1"), "N", Array("checkbox", "Y")),
 
 		GetMessage("main_options_files"),
 		Array("disk_space", GetMessage("MAIN_DISK_SPACE"), "", Array("text", 30)),
@@ -160,7 +186,7 @@ $arAllOptions = array(
 
 		GetMessage("MAIN_OPTIMIZE_TRANSLATE_SETTINGS"),
 		Array("translate_key_yandex", GetMessage("MAIN_TRANSLATE_KEY_YANDEX"), "", Array("text", 30)),
-		Array("note" => GetMessage("MAIN_TRANSLATE_KEY_YANDEX_HINT")),
+		Array("note" => GetMessage("MAIN_TRANSLATE_KEY_YANDEX_HINT1")),
 
 		GetMessage("MAIN_OPT_TIME_ZONES"),
 		array("curr_time", GetMessage("MAIN_OPT_TIME_ZONES_LOCAL"), GetMessage("MAIN_OPT_TIME_ZONES_DIFF")." ".date('O')." (".date('Z').")<br>".GetMessage("MAIN_OPT_TIME_ZONES_DIFF_STD")." ".(date('I')? GetMessage("MAIN_OPT_TIME_ZONES_DIFF_STD_S") : GetMessage("MAIN_OPT_TIME_ZONES_DIFF_STD_ST"))."<br>".GetMessage("MAIN_OPT_TIME_ZONES_DIFF_DATE")." ".date('r'), array("statichtml")),
@@ -197,9 +223,8 @@ $arAllOptions = array(
 	"auth" => Array(
 		GetMessage("MAIN_OPTION_CTRL_LOC"),
 		Array("store_password", GetMessage("MAIN_REMEMBER"), "Y", Array("checkbox", "Y")),
-		Array("use_secure_password_cookies", GetMessage("MAIN_OPTION_USE_SECURE_PASSWORD_COOKIE"), "N", Array("checkbox", "Y")),
-		Array("auth_multisite", GetMessage("MAIN_OPTION_AUTH_TO_ALL_DOM"), "N", Array("checkbox", "Y")),
 		Array("allow_socserv_authorization", GetMessage("MAIN_OPTION_SOCSERV_AUTH"), "Y", Array("checkbox", "Y")),
+		Array("allow_qrcode_auth", GetMessage('main_option_qrcode_auth'), "N", Array("checkbox", "Y")),
 		Array("use_digest_auth", GetMessage("MAIN_OPT_HTTP_DIGEST"), "N", Array("checkbox", "Y")),
 		Array("note"=>GetMessage("MAIN_OPT_DIGEST_NOTE")),
 		Array("custom_register_page", GetMessage("MAIN_OPT_REGISTER_PAGE"), "", Array("text", 40)),
@@ -216,6 +241,7 @@ $arAllOptions = array(
 		Array("event_log_logout", GetMessage("MAIN_EVENT_LOG_LOGOUT"), "N", Array("checkbox", "Y")),
 		Array("event_log_login_success", GetMessage("MAIN_EVENT_LOG_LOGIN_SUCCESS"), "N", Array("checkbox", "Y")),
 		Array("event_log_login_fail", GetMessage("MAIN_EVENT_LOG_LOGIN_FAIL"), "N", Array("checkbox", "Y")),
+		Array("event_log_permissions_fail", GetMessage("MAIN_EVENT_LOG_PERM_FAIL"), "N", Array("checkbox", "Y")),
 		Array("event_log_block_user", GetMessage("MAIN_OPT_EVENT_LOG_BLOCK"), "N", Array("checkbox", "Y")),
 		Array("event_log_register", GetMessage("MAIN_EVENT_LOG_REGISTER"), "N", Array("checkbox", "Y")),
 		Array("event_log_register_fail", GetMessage("MAIN_EVENT_LOG_REGISTER_FAIL"), "N", Array("checkbox", "Y")),
@@ -255,7 +281,7 @@ $arAllOptions = array(
 	),
 );
 
-if (\Bitrix\Main\Analytics\SiteSpeed::isRussianSiteManager())
+if (\Bitrix\Main\Analytics\SiteSpeed::isOn())
 {
 	$arAllOptions["main"][] = GetMessage("MAIN_CATALOG_STAT_SETTINGS");
 	$arAllOptions["main"][] = array("gather_catalog_stat", GetMessage("MAIN_GATHER_CATALOG_STAT"), "Y", Array("checkbox", "Y"));
@@ -276,7 +302,7 @@ $imageEditorOptions["Y"] = GetMessage("MAIN_OPTION_IMAGE_EDITOR_PROXY_ENABLED_YE
 $imageEditorOptions["YWL"] = GetMessage("MAIN_OPTION_IMAGE_EDITOR_PROXY_ENABLED_YES_FROM_WHITE_LIST");
 $arAllOptions["main"][] = Array("imageeditor_proxy_enabled", GetMessage("MAIN_OPTION_IMAGE_EDITOR_PROXY_ENABLED"), "N", array("selectbox", $imageEditorOptions));
 
-$allowedHostsList = unserialize(COption::GetOptionString("main", "imageeditor_proxy_white_list"));
+$allowedHostsList = unserialize(COption::GetOptionString("main", "imageeditor_proxy_white_list"), ['allowed_classes' => false]);
 
 if (!is_array($allowedHostsList) || empty($allowedHostsList))
 {
@@ -296,24 +322,24 @@ $addAllowedHost = "
     <script>
         var whiteListValues = ".CUtil::phpToJsObject($allowedHostsList).";
         var firstWhiteListInputs = [].slice.call(document.querySelectorAll('input[name=\'imageeditor_proxy_white_list\']'));
-        
+
         if (firstWhiteListInputs.length)
         {
             firstWhiteListInputs.forEach(function(item, index) {
             	item.setAttribute('placeholder', '".htmlspecialcharsbx($allowedWhiteListPlaceholder)."');
             	item.name = 'imageeditor_proxy_white_list[]';
             	item.setAttribute('value', whiteListValues[index]);
-            	
+
             	var allowedHostRemoveButton = '<a href=\"javascript:void(0);\" onclick=\"removeAllowedHost(this)\" class=\"access-delete\"></a>';
                 item.parentElement.innerHTML += allowedHostRemoveButton;
             });
         }
-        
+
         function removeAllowedHost(button)
         {
         	var row = button.parentElement.parentElement;
         	var inputs = [].slice.call(document.querySelectorAll('input[name*=\'imageeditor_proxy_white_list\']'));
-        	
+
         	if (inputs.length > 1)
             {
             	if (row.firstElementChild.innerHTML)
@@ -324,22 +350,22 @@ $addAllowedHost = "
         	        button.parentElement.parentElement
         	    );
             }
-            else 
+            else
             {
                 var input = row.querySelector('input[type=\'text\']');
                 input.removeAttribute('value');
                 input.value = '';
             }
-        	
+
         }
-        
+
         function addProxyAllowedHost(button)
         {
         	var row = button
         	    .parentElement
         	    .parentElement
         	    .previousElementSibling;
-        	
+
         	if (row)
             {
                 var clonedRow = row.cloneNode(true);
@@ -348,7 +374,7 @@ $addAllowedHost = "
                 clonedInput.removeAttribute('value');
                 clonedInput.value = '';
                 row.parentElement.insertBefore(clonedRow, row.nextElementSibling);
-                
+
                 if (!clonedInput.parentElement.querySelector('.access-delete'))
                 {
                     var allowedHostRemoveButton = '<a href=\"javascript:void(0);\" onclick=\"removeAllowedHost(this)\" class=\"access-delete\"></a>';
@@ -356,37 +382,37 @@ $addAllowedHost = "
                 }
             }
         }
-        
+
         var proxyEnabled = document.querySelector('[name=\'imageeditor_proxy_enabled\']');
         if (proxyEnabled)
         {
             proxyEnabled.addEventListener('change', onProxyEnabledChange);
-            
+
             requestAnimationFrame(function() {
                onProxyEnabledChange({currentTarget: proxyEnabled});
             });
         }
-        
+
         function onProxyEnabledChange(event)
         {
             var inputs = [].slice.call(document.querySelectorAll('input[name*=\'imageeditor_proxy_white_list\']'));
-            
+
             inputs.forEach(function(item) {
                 item.disabled = event.currentTarget.value !== 'YWL';
             });
-            
+
             var button = document.querySelector('.adm-add-allowed-host');
-            
+
             if (event.currentTarget.value !== 'YWL')
             {
                 button.style.pointerEvents = 'none';
                 button.style.opacity = .4;
             }
-            else 
+            else
             {
             	button.removeAttribute('style');
             }
-        
+
         }
     </script>
 ";
@@ -398,12 +424,12 @@ $arAllOptions["main"][] = Array("", "", $addAllowedHost, Array("statichtml"));
 CJSCore::Init(array('access'));
 
 //show the public panel for users
-$arCodes = unserialize(COption::GetOptionString("main", "show_panel_for_users"));
+$arCodes = unserialize(COption::GetOptionString("main", "show_panel_for_users"), ['allowed_classes' => false]);
 if(!is_array($arCodes))
 	$arCodes = array();
 
 //hide the public panel for users
-$arHideCodes = unserialize(COption::GetOptionString("main", "hide_panel_for_users"));
+$arHideCodes = unserialize(COption::GetOptionString("main", "hide_panel_for_users"), ['allowed_classes' => false]);
 if(!is_array($arHideCodes))
 	$arHideCodes = array();
 
@@ -529,6 +555,7 @@ $arAllOptions["auth"][] = array("new_user_agreement", GetMessage("MAIN_REGISTER_
 
 $arAllOptions["auth"][] = GetMessage("main_options_restrictions");
 $arAllOptions["auth"][] = Array("inactive_users_block_days", GetMessage("main_options_block_inactive"), "0", Array("text", 5));
+$arAllOptions["auth"][] = Array("secure_logout", GetMessage("main_options_secure_logout"), "N", Array("checkbox", "Y"));
 
 $arAllOptions["auth"][] = GetMessage("MAIN_OPTION_SESS");
 $arAllOptions["auth"][] = Array("session_expand", GetMessage("MAIN_OPTION_SESS_EXPAND"), "Y", Array("checkbox", "Y"));
@@ -653,20 +680,19 @@ $tabControl->BeginNextTab();
 
 ShowParamsHTMLByArray($arAllOptions["auth"]);
 
-$tabControl->BeginNextTab();
-ShowParamsHTMLByArray($arAllOptions["event_log"]);
-?>
-
-<?if(COption::GetOptionString("main", "controller_member", "N")=="Y"):?>
+if(COption::GetOptionString("main", "controller_member", "N")=="Y")
+{
+	?>
 	<tr class="heading">
 		<td colspan="2"><b><?echo GetMessage("MAIN_OPTION_CTRL_REM")?></b></td>
 	</tr>
 	<?
 	ShowParamsHTMLByArray($arAllOptions["controller_auth"]);
-	?>
-<?endif?>
+}
 
-<?
+$tabControl->BeginNextTab();
+ShowParamsHTMLByArray($arAllOptions["event_log"]);
+
 $tabControl->BeginNextTab();
 ?>
 	<tr>
@@ -1006,7 +1032,6 @@ if($message)
 ?>
 <h2><?=GetMessage("MAIN_SUB2")?></h2>
 <?
-$aTabs = Array();
 $aTabs = array(
 	array("DIV" => "fedit2", "TAB" => GetMessage("MAIN_TAB_4"), "ICON" => "main_settings", "TITLE" => GetMessage("MAIN_OPTION_PUBL"))
 );
@@ -1019,6 +1044,8 @@ if ($diskSpace > 0)
 {
 	$aTabs[] = array("DIV" => "fedit3", "TAB" => GetMessage("MAIN_TAB_7"), "ICON" => "main_settings", "TITLE" => GetMessage("MAIN_OPTION_DISC_SPACE"));
 }
+
+$aTabs[] = array("DIV" => "fedit5", "TAB" => GetMessage("main_options_weak_pass"), "ICON" => "main_settings", "TITLE" => GetMessage("main_options_weak_pass_title"));
 
 $tabControl = new CAdminTabControl("tabControl2", $aTabs, true, true);
 
@@ -1170,10 +1197,7 @@ if(COption::GetOptionString("main", "controller_member", "N")!="Y"):
 </form>
 <?endif; //if(IsModuleInstalled("controller"))?>
 
-<?if ($diskSpace <= 0):?>
-<?$tabControl->End();?>
-<?else: ?>
-<?$tabControl->EndTab();?>
+<?if ($diskSpace > 0):?>
 <?$tabControl->BeginNextTab();?>
 <tr>
 <td align="left">
@@ -1186,7 +1210,7 @@ if(COption::GetOptionString("main", "controller_member", "N")!="Y"):
 	foreach (array("db", "files") as $name):
 		$res = array();
 		if (COption::GetOptionString("main_size", "~".$name."_params"))
-			$res = unserialize(COption::GetOptionString("main_size", "~".$name."_params"));
+			$res = unserialize(COption::GetOptionString("main_size", "~".$name."_params"), ['allowed_classes' => false]);
 		if ($res)
 		{
 			$res = array_merge(
@@ -1221,7 +1245,7 @@ if(COption::GetOptionString("main", "controller_member", "N")!="Y"):
 	<input type="button" id="butt_stop" value="<?=GetMessage("MAIN_OPTION_SIZE_STOP")?>" disabled="disabled" <?=((!$USER->CanDoOperation('edit_other_settings')) ? "disabled": "onclick=\"StopReCount()\"")?> />
 	</td>
 </tr>
-<?$tabControl->End();?>
+
 <?if ($USER->CanDoOperation('edit_other_settings')):?>
 <script language="JavaScript">
 var result = {'stop':false, 'done':true, 'error':false, 'db':{'size': <?=intval($arParam["db"]["size"])?>}, 'files':{'size':<?=intval($arParam["files"]["size"])?>}};
@@ -1356,4 +1380,47 @@ function DoNext(name, id, recount)
 CheckButtons();
 </script>
 <?endif;?>
+
+<?$tabControl->EndTab();?>
 <?endif;?>
+
+<form method="POST" action="<?echo $APPLICATION->GetCurPage()?>?mid=<?=htmlspecialcharsbx($mid)?>&amp;lang=<?echo LANG?>" enctype="multipart/form-data">
+<?=bitrix_sessid_post()?>
+<input type="hidden" name="tabControl2_active_tab" value="fedit5">
+
+<?$tabControl->BeginNextTab();?>
+<?
+$customWeakPasswords = COption::GetOptionString('main', 'custom_weak_passwords', 'N');
+?>
+<tr>
+	<td>
+		<label><input type="radio" name="custom_weak_passwords" value="N"<?= ($customWeakPasswords !== 'Y' ? ' checked' : '')?>><?echo GetMessage("main_options_weak_pass_use_default")?></label>
+	</td>
+</tr>
+<tr>
+	<td>
+		<label><input type="radio" name="custom_weak_passwords" value="Y"<?= ($customWeakPasswords === 'Y' ? ' checked' : '')?>><?echo GetMessage("main_options_weak_pass_use_custom")?></label>
+	</td>
+</tr>
+<tr>
+	<td>
+		<br>
+		<input type="file" name="passwords">
+	</td>
+</tr>
+<tr>
+	<td>
+		<?= BeginNote()?>
+		<?echo GetMessage("main_options_weak_pass_note")?>
+		<?= EndNote()?>
+	</td>
+</tr>
+<tr>
+	<td>
+		<input type="submit" <?if (!$USER->CanDoOperation('edit_php')) echo "disabled" ?> name="save_passwords" value="<?echo GetMessage("MAIN_SAVE")?>" class="adm-btn-save">
+	</td>
+</tr>
+<?$tabControl->EndTab();?>
+</form>
+
+<?$tabControl->End();?>

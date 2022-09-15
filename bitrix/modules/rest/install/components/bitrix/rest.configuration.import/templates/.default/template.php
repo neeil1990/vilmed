@@ -20,14 +20,23 @@ Loc::loadMessages(__FILE__);
 Extension::load(["ui.buttons", "ui.common", "ui.notification"]);
 $containerId = 'rest-configuration-import';
 
+$bodyClass = $APPLICATION->getPageProperty("BodyClass", false);
+$bodyClasses = 'rest-configuration-import-slider-modifier';
+
+$APPLICATION->setPageProperty("BodyClass", trim(sprintf("%s %s", $bodyClass, $bodyClasses)));
+
 $titleBlock = '';
-if ($arParams['MODE'] == 'ROLLBACK')
+if ($arParams['MODE'] === 'ROLLBACK')
 {
 	$titleBlock = Loc::getMessage('REST_CONFIGURATION_IMPORT_ROLLBACK_TITLE_BLOCK');
 }
+elseif ($arParams['MODE'] === 'ZIP' && !empty($arResult['INSTALL_APP']))
+{
+	$titleBlock = '';
+}
 else
 {
-	if(!empty($arResult['MANIFEST']['IMPORT_TITLE_BLOCK']))
+	if (!empty($arResult['MANIFEST']['IMPORT_TITLE_BLOCK']))
 	{
 		$titleBlock = $arResult['MANIFEST']['IMPORT_TITLE_BLOCK'];
 	}
@@ -40,7 +49,9 @@ else
 ?>
 <div id="<?=$containerId?>" class="rest-configuration">
 	<div class="rest-configuration-wrapper">
-		<div class="rest-configuration-title"><?=htmlspecialcharsbx($titleBlock)?></div>
+		<? if (!empty($titleBlock)):?>
+			<div class="rest-configuration-title"><?=htmlspecialcharsbx($titleBlock)?></div>
+		<? endif;?>
 		<? if($arResult['IMPORT_ACCESS'] === true):?>
 			<? if($arParams['MODE'] == 'ROLLBACK'):?>
 				<? if(!empty($arResult['IMPORT_FOLDER_FILES'])):?>
@@ -83,7 +94,7 @@ else
 						<div class="rest-configuration-start-icon"></div>
 						<div class="rest-configuration-start-icon-circle"></div>
 					</div>
-					<p  class="rest-configuration-info"><?=Loc::getMessage("REST_CONFIGURATION_IMPORT_ROLLBACK_MODE_DESCRIPTION");?></p>
+					<p class="rest-configuration-info"><?=Loc::getMessage("REST_CONFIGURATION_IMPORT_ROLLBACK_MODE_DESCRIPTION_2");?></p>
 					<form method="post">
 						<?=bitrix_sessid_post()?>
 						<? foreach($arResult['ROLLBACK_ITEMS'] as $item):?>
@@ -103,19 +114,37 @@ else
 					</div>
 					<p  class="rest-configuration-info"><?=Loc::getMessage("REST_CONFIGURATION_IMPORT_EASY_DELETE_APP")?></p>
 				<? endif;?>
+			<? elseif(!empty($arResult['IMPORT_PROCESS_ID'])):?>
+				<?php
+				$APPLICATION->includeComponent(
+					'bitrix:rest.configuration.install',
+					'',
+					array(
+						'PROCESS_ID' => $arResult['IMPORT_PROCESS_ID'],
+						'MANIFEST_CODE' => $arResult['MANIFEST_CODE'],
+						'APP' => $arResult['APP'],
+					),
+					$component,
+					array(
+						'HIDE_ICONS' => 'Y',
+					)
+				);
+				?>
 			<? elseif(!empty($arResult['IMPORT_CONTEXT'])):?>
 				<?php
-					$APPLICATION->includeComponent(
+				$APPLICATION->includeComponent(
 					'bitrix:rest.configuration.install',
 					'',
 					array(
 						'IMPORT_CONTEXT' => $arResult['IMPORT_CONTEXT'],
 						'IMPORT_MANIFEST' => $arResult['IMPORT_MANIFEST_FILE'],
 						'MANIFEST_CODE' => $arResult['MANIFEST_CODE'],
-						'APP' => $arResult['APP']
+						'APP' => $arResult['APP'],
 					),
 					$component,
-					array('HIDE_ICONS' => 'Y')
+					array(
+						'HIDE_ICONS' => 'Y',
+					)
 				);
 				?>
 			<? else:
@@ -144,6 +173,19 @@ else
 				</form>
 				<p class="rest-configuration-info"><?=htmlspecialcharsbx($importFileDescription)?></p>
 			<? endif;?>
+		<? elseif (!empty($arResult['INSTALL_APP'])):?>
+			<?php
+			$APPLICATION->includeComponent(
+				'bitrix:rest.marketplace.install',
+				'',
+				array(
+					'APP_CODE' => $arResult['INSTALL_APP'],
+					'IFRAME' => 'Y',
+				),
+				$component,
+				array('HIDE_ICONS' => 'Y')
+			);
+			?>
 		<? else:?>
 			<div class="rest-configuration-start-icon-main rest-configuration-start-icon-main-error">
 				<div class="rest-configuration-start-icon-refresh"></div>
@@ -161,6 +203,9 @@ else
 								[
 									'#SIZE#' => $arResult['MAX_FILE_SIZE']['MEGABYTE']
 								]
+							),
+							'REST_CONFIGURATION_IMPORT_SAVE_FILE_PROCESS' => Loc::getMessage(
+								'REST_CONFIGURATION_IMPORT_SAVE_FILE_PROCESS'
 							),
 						]
 					);

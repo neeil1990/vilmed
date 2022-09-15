@@ -70,6 +70,8 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["SECTION_TITLE_H1"] = $arSection["UF_SECTION_TITLE_H1"];
 
 			$arCurSection["RECOMMENDED_LIST"] = $arSection["UF_RECOMMENDED_LIST"];
+			
+			$arCurSection["DISABLE_ADDITIONAL_PRODUCT"] = ($arSection["UF_DISABLE_ADDITIONAL_P"]) ? false : true;
 
 			if(isset($arSection["UF_YOUTUBE_BG"]) && !empty($arSection["UF_YOUTUBE_BG"])) {
 				$arCurSection["BACKGROUND_YOUTUBE"] = $arSection["UF_YOUTUBE_BG"];
@@ -220,8 +222,7 @@ if(!empty($arCurSection)) {
 				"TOP_DEPTH" => "1",
 				"SECTION_FIELDS" => array(),
 				"SECTION_USER_FIELDS" => array(
-					0 => "UF_ICON",
-					1 => "UF_HIDDEN",
+					0 => "UF_*",
 				),
 				"SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
                 "ADD_SECTIONS_CHAIN" => (isset($arParams["ADD_SECTIONS_CHAIN"]) ? $arParams["ADD_SECTIONS_CHAIN"] : ""),
@@ -510,7 +511,7 @@ if($arCurSection["VIEW_COLLECTION"]) {
 <?
 $SectionElementsCount = $arSetting['PAGE_ELEMENT_COUNT_ADDITIONAL']['VALUE'];
 $current_element_cnt = CIBlockSection::GetSectionElementsCount($arCurSection['ID'], ['CNT_ACTIVE' => 'Y']);
-if($current_element_cnt < $SectionElementsCount){
+if($arCurSection["DISABLE_ADDITIONAL_PRODUCT"] && $current_element_cnt < $SectionElementsCount){
 
     $arPathSection = [];
     $pathIterator = CIBlockSection::GetNavChain(

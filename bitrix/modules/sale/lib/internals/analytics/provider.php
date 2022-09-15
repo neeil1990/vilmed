@@ -1,11 +1,13 @@
 <?php
 namespace Bitrix\Sale\Internals\Analytics;
 
+use Bitrix\Main\Loader;
 use Bitrix\Main\Type\DateTime;
 
 /**
  * Class Provider
  * @package Bitrix\Sale\Internals\Analytics
+ * @internal
  */
 abstract class Provider
 {
@@ -15,35 +17,31 @@ abstract class Provider
 	abstract public static function getCode(): string;
 
 	/**
-	 * @param DateTime $dateFrom
-	 * @param DateTime $dateTo
-	 * @return array
+	 * @return bool
 	 */
-	abstract protected function getProviderData(DateTime $dateFrom, DateTime $dateTo): array;
+	abstract protected function needProvideData(): bool;
 
 	/**
-	 * @param DateTime $dateFrom
-	 * @param DateTime $dateTo
 	 * @return array
 	 */
-	public function getData(DateTime $dateFrom, DateTime $dateTo): array
+	abstract protected function getProviderData(): array;
+
+	/**
+	 * @return array
+	 */
+	public function getData(): array
 	{
 		$result = [];
 
-		foreach ($this->getProviderData($dateFrom, $dateTo) as $data)
+		if ($this->needProvideData())
 		{
-			$result[] = [
-				'data' => $data,
-				'hash' => $this->getHash($data),
-			];
+			$data = $this->getProviderData();
+			if ($data)
+			{
+				$result = $data;
+			}
 		}
 
 		return $result;
 	}
-
-	/**
-	 * @param array $data
-	 * @return string
-	 */
-	abstract protected function getHash(array $data): string;
 }

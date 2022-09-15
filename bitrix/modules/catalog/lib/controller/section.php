@@ -7,6 +7,7 @@ namespace Bitrix\Catalog\Controller;
 use Bitrix\Main\Engine\Response\DataType\Page;
 use Bitrix\Main\Error;
 use Bitrix\Main\Result;
+use Bitrix\Main\UI\PageNavigation;
 
 final class Section extends Controller
 {
@@ -21,7 +22,7 @@ final class Section extends Controller
 		)];
 	}
 
-	public function listAction($select=[], $filter=[], $order=[], $start=0)
+	public function listAction($select=[], $filter=[], $order=[], PageNavigation $pageNavigation)
 	{
 		$r = $this->checkPermissionIBlockSectionList($filter['IBLOCK_ID']);
 		if($r->isSuccess())
@@ -31,18 +32,19 @@ final class Section extends Controller
 			$select = empty($select)? ['*']:$select;
 			$order = empty($order)? ['ID'=>'ASC']:$order;
 
-			$r = \CIBlockSection::GetList($order, $filter, false, $select, self::getNavData($start));
+			if (isset($filter['IBLOCK_SECTION_ID']))
+			{
+				$filter['SECTION_ID'] = $filter['IBLOCK_SECTION_ID'];
+				unset($filter['IBLOCK_SECTION_ID']);
+			}
+
+			$r = \CIBlockSection::GetList($order, $filter, false, $select, self::getNavData($pageNavigation->getOffset()));
 			while ($l = $r->fetch())
 				$result[] = $l;
 
 			return new Page('SECTIONS', $result, function() use ($filter)
 			{
-				$list = [];
-				$r = \CIBlockSection::GetList([], $filter);
-				while ($l = $r->fetch())
-					$list[] = $l;
-
-				return count($list);
+				return (int)\CIBlockSection::GetList([], $filter, []);
 			});
 		}
 		else

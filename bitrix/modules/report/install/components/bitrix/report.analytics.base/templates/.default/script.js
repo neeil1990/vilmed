@@ -38,19 +38,40 @@
 			this.loader = new BX.Loader({size: 80});
 			top.onpopstate = this.handlerOnPopState.bind(this);
 			this.openBoardWithKey(this.defaultBoardKey);
+
+			const activeButton = Array.from(this.changeBoardButtons).find(button => {
+				return button.dataset.reportBoardKey === this.defaultBoardKey;
+			});
+
+			this.tryOpenExternalUrl(activeButton);
 		},
+
+		tryOpenExternalUrl(button)
+		{
+			if (BX.Type.isElementNode(button) && button.dataset.isExternal === 'Y')
+			{
+				if (button.dataset.isSliderSupport === 'N')
+				{
+					this.openExternalUrlInNewTab(button.dataset.externalUrl);
+				}
+				else
+				{
+					this.openExternalUrl(button.dataset.externalUrl);
+				}
+
+				return true;
+			}
+
+			return false;
+		},
+
 		handleItemClick: function(event)
 		{
 			event.preventDefault();
 			var button = event.currentTarget;
 
 			this.activateButton(event);
-			var isExternal = button.dataset.isExternal == 'Y';
-			if (isExternal)
-			{
-				this.openExternalUrl(button.dataset.externalUrl);
-			}
-			else
+			if (!this.tryOpenExternalUrl(button))
 			{
 				this.openBoardWithKey(button.dataset.reportBoardKey, button.href);
 			}
@@ -58,8 +79,13 @@
 		openExternalUrl: function(url)
 		{
 			BX.SidePanel.Instance.open(url, {
-				cacheable: false
+				cacheable: false,
+				loader: 'report:analytics',
 			});
+		},
+		openExternalUrlInNewTab: function(url)
+		{
+			window.open(url, '_blank');
 		},
 		openBoardWithKey: function (boardKey, urlForHistory)
 		{

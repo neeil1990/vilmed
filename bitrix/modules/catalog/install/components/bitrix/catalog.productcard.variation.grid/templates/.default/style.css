@@ -19,11 +19,22 @@
 .catalog-product-variation-grid .main-grid-control-panel-input-text,
 .catalog-product-variation-grid .main-grid-editor-text, .main-grid-editor-textarea {
 	height: 40px;
+	font-size: 14px;
+	margin-left: 0;
 }
 
-.catalog-product-variation-grid .main-dropdown {
+.catalog-product-variation-grid .main-grid-editor.main-dropdown {
 	height: 40px;
 	line-height: 38px;
+	font-size: 14px;
+}
+
+.catalog-product-variation-grid .main-grid-editor-money-price {
+	height: 38px;
+}
+
+.catalog-product-variation-grid .main-grid-editor.main-grid-editor-money-currency {
+	height: 38px;
 }
 
 .brandblock-block-wrapper {
@@ -68,7 +79,7 @@
 }
 
 .catalog-productcard-select .catalog-productcard-select-text {
-	font-size: 13px;
+	font-size: 14px;
 	line-height: 38px;
 	overflow: hidden;
 	max-width: 100%;
@@ -137,7 +148,7 @@
 }
 
 .catalog-productcard-popup-select-label {
-	font-size: 15px;
+	font-size: 14px;
 	line-height: 55px;
 	display: block;
 	overflow: hidden;
@@ -225,6 +236,19 @@
 }
 
 .catalog-productcard-popup-select-item-new .catalog-productcard-popup-select-text {
+	font: 14px/24px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	color: #80868e;
+}
+
+.catalog-productcard-popup-multi-select-item-new {
+	background: #e8f9fe;
+}
+
+.catalog-productcard-popup-multi-select-item-new:hover {
+	background: #e1f9ff;
+}
+
+.catalog-productcard-popup-multi-select-item-new .catalog-productcard-popup-select-text {
 	font: 14px/24px "Helvetica Neue", Helvetica, Arial, sans-serif;
 	color: #80868e;
 }
@@ -350,6 +374,7 @@
 
 .catalog-productcard-popup-list .menu-popup {
 	padding-bottom: 0;
+	font-size: 14px;
 }
 
 .catalog-productcard-popup-list .menu-popup-items {
@@ -438,4 +463,86 @@
 
 .catalog-dropdown-currency-inner:hover {
 	border-color: #a7aaad;
+}
+
+.catalog-product-variation-grid .main-grid-cell-content,
+.catalog-product-variation-grid .main-grid-editor-container {
+	margin-top: 19px;
+	margin-bottom: 21px;
+	font-size: 14px;
+}
+
+.main-grid-cell-overlay {
+	z-index: -1;
+}
+
+.main-grid-delete-button {
+	position: relative;
+	top: -3px;
+	display: inline-block;
+	width: 26px;
+	height: 26px;
+	background: url(/bitrix/js/ui/buttons/icons/images/ui-remove-black.svg) no-repeat;
+	opacity: .3;
+	cursor: pointer;
+	transition: opacity 200ms ease;
+}
+
+.main-grid-delete-button::before {
+	position: absolute;
+	top: -10px;
+	right: -10px;
+	bottom: -10px;
+	left: -10px;
+	display: block;
+	content: '';
+}
+
+.main-grid-delete-button:hover { opacity: .7; }
+
+.main-ui-square-container {
+	margin-right: 25px;
+}
+
+.main-grid-cell-content-catalog-quantity-inventory-management,
+.main-grid-cell-content-catalog-reserved-quantity {
+	color: #2067b0;
+	border-bottom: 1px dashed #2067b0;
+	cursor: pointer;
+}
+
+.main-grid-cell-content-catalog-quantity-inventory-management:hover,
+.main-grid-cell-content-catalog-reserved-quantity:hover {
+	text-decoration: none !important;
+}
+
+.store-amount-popup-container {
+	padding: 20px;
+}
+
+.store-amount-popup-container table {
+	margin-bottom: 15px;
+}
+
+.store-amount-popup-not-found-message {
+	font-size: 20px;
+	text-align: center;
+	margin: 0;
+	color: #535c69;
+}
+
+.ui-link-open-store-amount-slider {
+	margin-left: 16px;
+}
+
+.main-grid-cell-head[data-name="SKU_GRID_BARCODE"] {
+	min-width: 300px !important;
+}
+
+div[data-role="barcode-selector"] {
+	min-width: 300px;
+}
+
+div[data-role="barcode-selector"] .ui-tag-selector-text-box{
+	min-width: 300px;
 }

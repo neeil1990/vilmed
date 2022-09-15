@@ -22,6 +22,7 @@ return array(
 			'name' => Loc::getMessage('LANDING_BLOCK_37.3.TWO_COLS_BLOCKS_CAROUSEL_NODES_LANDINGBLOCKNODECARDBGIMG'),
 			'type' => 'img',
 			'dimensions' => array('height' => 1080),
+			'create2xByDefault' => false,
 		),
 		'.landing-block-node-card-title' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_37.3.TWO_COLS_BLOCKS_CAROUSEL_NODES_LANDINGBLOCKNODECARD_TITLE'),
@@ -52,7 +53,7 @@ return array(
 		),
 		'.landing-block-node-card-title' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_37.3.TWO_COLS_BLOCKS_CAROUSEL_NODES_LANDINGBLOCKNODECARD_TITLE'),
-			'type' => array('typo', 'animation'),
+			'type' => ['typo', 'animation', 'heading'],
 		),
 		'.landing-block-node-card-text' => array(
 			'name' => Loc::getMessage('LANDING_BLOCK_37.3.TWO_COLS_BLOCKS_CAROUSEL_STYLE_LANDINGBLOCKNODECARDTEXT'),

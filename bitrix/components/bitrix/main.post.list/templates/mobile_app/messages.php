@@ -27,11 +27,13 @@ BX.message({
 	BPC_MES_DELETE : "<?=GetMessageJS("BPC_MES_DELETE")?>",
 	BPC_MES_CREATETASK : "<?=GetMessageJS("BPC_MES_CREATETASK")?>",
 	BPC_MES_COPYLINK : "<?=GetMessageJS("BPC_MES_COPYLINK")?>",
+	BPC_MES_RESULT : "<?=GetMessageJS("BPC_MES_RESULT")?>",
 	MPL_RECORD_TEMPLATE : '<?=CUtil::JSEscape($template)?>',
 	MPL_RECORD_THUMB : '<?=CUtil::JSEscape($thumb)?>',
 	FC_ERROR : '<?=GetMessageJS("B_B_PC_COM_ERROR")?>',
 	BLOG_C_REPLY : '<?=GetMessageJS("BLOG_C_REPLY")?>',
 	BLOG_C_HIDE : '<?=GetMessageJS("BLOG_C_HIDE")?>',
-	INCORRECT_SERVER_RESPONSE : '<?=GetMessageJS('INCORRECT_SERVER_RESPONSE')?>'
+	INCORRECT_SERVER_RESPONSE : '<?=GetMessageJS('INCORRECT_SERVER_RESPONSE')?>',
+	INCORRECT_SERVER_RESPONSE_2 : '<?=GetMessageJS('INCORRECT_SERVER_RESPONSE_2')?>'
 	});
 </script>

@@ -9,6 +9,7 @@ use \Bitrix\Main\Localization\Loc;
 return [
 	'block' => [
 		'name' => Loc::getMessage('LANDING_BLOCK_59_2-NAME'),
+		'dynamic' => false,
 		'section' => array('sidebar', 'other', 'recommended'),
 		'type' => ['knowledge', 'group'],
 		'subtype' => 'search',
@@ -25,7 +26,7 @@ return [
 		],
 		'.landing-block-node-input-container' => [
 			'name' => Loc::getMessage('LANDING_BLOCK_59_2-INPUT'),
-			'type' => ['color', 'background-color', 'border-color'],
+			'type' => ['color', 'background-color', 'border-colors'],
 		],
 	],
 	'attrs' => [

@@ -29,7 +29,7 @@ class CAdminFilter
 		if(empty($popup) || !is_array($popup))
 			$popup = false;
 
-		$this->id = $id;
+		$this->id = preg_replace('/[^a-z0-9_]/i', '', $id);
 		$this->popup = $popup;
 
 		if(is_array($arExtraParams))
@@ -67,10 +67,10 @@ class CAdminFilter
 				continue;
 
 			$arItem = $arFilter;
-			$arItem["FIELDS"] = unserialize($arFilter["FIELDS"]);
+			$arItem["FIELDS"] = unserialize($arFilter["FIELDS"], ['allowed_classes' => false]);
 
 			if(!is_null($arFilter["SORT_FIELD"]))
-				$arItem["SORT_FIELD"] = unserialize($arFilter["SORT_FIELD"]);
+				$arItem["SORT_FIELD"] = unserialize($arFilter["SORT_FIELD"], ['allowed_classes' => false]);
 
 			if($arFilter["PRESET"] == "Y" && is_null($arFilter["LANGUAGE_ID"]))
 			{
@@ -94,7 +94,7 @@ class CAdminFilter
 		}
 	}
 
-	private function err_mess()
+	private static function err_mess()
 	{
 		return "<br>Class: CAdminFilter<br>File: ".__FILE__;
 	}
@@ -146,7 +146,7 @@ class CAdminFilter
 		return true;
 	}
 
-	private function CheckFields($arFields)
+	private static function CheckFields($arFields)
 	{
 		/** @global CMain $APPLICATION */
 		global $APPLICATION;
@@ -185,7 +185,7 @@ class CAdminFilter
 		return true;
 	}
 
-	private function FieldsExcess($arFields)
+	private static function FieldsExcess($arFields)
 	{
 		$arResult = array();
 
@@ -198,7 +198,7 @@ class CAdminFilter
 		return $arResult;
 	}
 
-	private function FieldsDelHiddenEmpty($arFields)
+	private static function FieldsDelHiddenEmpty($arFields)
 	{
 		$arResult = array();
 
@@ -343,7 +343,7 @@ class CAdminFilter
 		return false;
 	}
 
-	public function AddPresetToBase($arFields)
+	public static function AddPresetToBase($arFields)
 	{
 		if(!isset($arFields["NAME"]) || empty($arFields["NAME"]))
 			return false;
@@ -432,13 +432,13 @@ class CAdminFilter
 	{
 		global $DB;
 
-		$err_mess = (CAdminFilter::err_mess())."<br>Function: GetList<br>Line: ";
+		$err_mess = (static::err_mess())."<br>Function: GetList<br>Line: ";
 		$arSqlSearch = Array();
 		if (is_array($arFilter))
 		{
 			foreach ($arFilter as $key => $val)
 			{
-				if ($val == '' || $val=="NOT_REF")
+				if ((string)$val == '' || $val=="NOT_REF")
 					continue;
 
 				switch(mb_strtoupper($key))
@@ -680,8 +680,8 @@ class CAdminFilter
 		}
 		else
 		{
-			$openedTabSes = $_SESSION[self::SESS_PARAMS_NAME][$this->id]["activeTabId"];
-			$filteredTab = $_SESSION[self::SESS_PARAMS_NAME][$this->id]["filteredId"];
+			$openedTabSes = \Bitrix\Main\Application::getInstance()->getSession()[self::SESS_PARAMS_NAME][$this->id]["activeTabId"];
+			$filteredTab = \Bitrix\Main\Application::getInstance()->getSession()[self::SESS_PARAMS_NAME][$this->id]["filteredId"];
 		}
 
 		echo '
@@ -782,7 +782,7 @@ class CAdminFilter
 			return false;
 
 		foreach ($aParams as $paramName => $value)
-			$_SESSION[self::SESS_PARAMS_NAME][$filterId][$paramName] = $value;
+			\Bitrix\Main\Application::getInstance()->getSession()[self::SESS_PARAMS_NAME][$filterId][$paramName] = $value;
 
 		return true;
 	}
@@ -790,7 +790,7 @@ class CAdminFilter
 	//experemental
 	private function IsFiltered()
 	{
-		$fltTable = $_SESSION["SESS_ADMIN"][$this->tableId];
+		$fltTable = \Bitrix\Main\Application::getInstance()->getSession()["SESS_ADMIN"][$this->tableId];
 
 		if(!isset($fltTable) || !is_array($fltTable))
 			return false;

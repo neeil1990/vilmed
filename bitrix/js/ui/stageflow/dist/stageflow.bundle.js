@@ -2,28 +2,8 @@ this.BX = this.BX || {};
 (function (exports,main_core,main_popup) {
 	'use strict';
 
-	function _templateObject2() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div \n\t\t\t\t\tclass=\"ui-stageflow-stage\" \n\t\t\t\t\tdata-stage-id=\"", "\" \n\t\t\t\t\tonmouseenter=\"", "\" \n\t\t\t\t\tonmouseleave=\"", "\"\n\t\t\t\t\tonclick=\"", "\"\n\t\t\t\t>\n\t\t\t\t<div class=\"ui-stageflow-stage-item\">\n\t\t\t\t\t", "\n\t\t\t\t</div>\n\t\t\t</div>"]);
-
-	  _templateObject2 = function _templateObject2() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div style=\"border-image: ", ";\" class=\"ui-stageflow-stage-item-text\">", "</div>"]);
-
-	  _templateObject = function _templateObject() {
-	    return data;
-	  };
-
-	  return data;
-	}
-	var Stage =
-	/*#__PURE__*/
-	function () {
+	var _templateObject, _templateObject2;
+	var Stage = /*#__PURE__*/function () {
 	  function Stage(_ref) {
 	    var id = _ref.id,
 	        name = _ref.name,
@@ -100,8 +80,8 @@ this.BX = this.BX || {};
 	      if (this.node) {
 	        this.textNode.style.backgroundImage = this.getBackgroundImage();
 	      } else {
-	        this.textNode = main_core.Tag.render(_templateObject(), this.getBackgroundImage(), main_core.Text.encode(this.getName()));
-	        this.node = main_core.Tag.render(_templateObject2(), this.getId(), this.onMouseEnter.bind(this), this.onMouseLeave.bind(this), this.onClick.bind(this), this.textNode);
+	        this.textNode = main_core.Tag.render(_templateObject || (_templateObject = babelHelpers.taggedTemplateLiteral(["<div style=\"border-image: ", ";\" class=\"ui-stageflow-stage-item-text\">", "</div>"])), this.getBackgroundImage(), main_core.Text.encode(this.getName()));
+	        this.node = main_core.Tag.render(_templateObject2 || (_templateObject2 = babelHelpers.taggedTemplateLiteral(["<div \n\t\t\t\t\tclass=\"ui-stageflow-stage\" \n\t\t\t\t\tdata-stage-id=\"", "\" \n\t\t\t\t\tonmouseenter=\"", "\" \n\t\t\t\t\tonmouseleave=\"", "\"\n\t\t\t\t\tonclick=\"", "\"\n\t\t\t\t>\n\t\t\t\t<div class=\"ui-stageflow-stage-item\">\n\t\t\t\t\t", "\n\t\t\t\t</div>\n\t\t\t</div>"])), this.getId(), this.onMouseEnter.bind(this), this.onMouseLeave.bind(this), this.onClick.bind(this), this.textNode);
 	      }
 
 	      this.textNode.style.color = Stage.calculateTextColor('#' + (this.isFilled ? this.color : this.backgroundColor));
@@ -169,7 +149,7 @@ this.BX = this.BX || {};
 	    value: function removeBackLight() {
 	      if (this.textNode) {
 	        this.textNode.style.borderImage = this.getBackgroundImage();
-	        this.textNode.style.color = Stage.calculateTextColor('#' + this.backgroundColor);
+	        this.textNode.style.color = Stage.calculateTextColor('#' + (this.isFilled ? this.fillingColor : this.backgroundColor));
 	      }
 	    }
 	  }], [{
@@ -229,65 +209,17 @@ this.BX = this.BX || {};
 	  return Stage;
 	}();
 
-	function _templateObject6() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-stage-selector-block\">\n\t\t\t<span>", " </span>\n\t\t\t", "\n\t\t</div>"]);
+	var _templateObject$1, _templateObject2$1, _templateObject3, _templateObject4, _templateObject5, _templateObject6;
 
-	  _templateObject6 = function _templateObject6() {
-	    return data;
-	  };
+	function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-	  return data;
-	}
+	function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-	function _templateObject5() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-final-fail-stage-list-section\">\n\t\t\t\t\t\t<input data-stage-id=\"", "\" id=\"ui-stageflow-final-fail-stage-", "\" name=\"ui-stageflow-final-fail-stage-input\" class=\"crm-list-fail-deal-button\" type=\"radio\" ", ">\n\t\t\t\t\t\t<label for=\"ui-stageflow-final-fail-stage-", "\">", "</label>\n\t\t\t\t\t</div>"]);
+	function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-	  _templateObject5 = function _templateObject5() {
-	    return data;
-	  };
+	function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-	  return data;
-	}
-
-	function _templateObject4() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-final-fail-stage-list-wrapper\"></div>"]);
-
-	  _templateObject4 = function _templateObject4() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject3() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-stage-selector-option ui-stageflow-stage-selector-option-fail\" onclick=\"", "\"></div>"]);
-
-	  _templateObject3 = function _templateObject3() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject2$1() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-popup-title\">", "</div>"]);
-
-	  _templateObject2$1 = function _templateObject2() {
-	    return data;
-	  };
-
-	  return data;
-	}
-
-	function _templateObject$1() {
-	  var data = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-container\"></div>"]);
-
-	  _templateObject$1 = function _templateObject() {
-	    return data;
-	  };
-
-	  return data;
-	}
+	function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { babelHelpers.defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 	var semanticSelectorPopupId = 'ui-stageflow-select-semantic-popup';
 	var finalStageSelectorPopupId = 'ui-stageflow-select-final-stage-popup';
 	var FinalStageDefaultData = {
@@ -301,9 +233,7 @@ this.BX = this.BX || {};
 	  finalStagePopupFail: main_core.Loc.getMessage('UI_STAGEFLOW_FINAL_STAGE_POPUP_FAIL'),
 	  finalStageSelectorTitle: main_core.Loc.getMessage('UI_STAGEFLOW_FINAL_STAGE_SELECTOR_TITLE')
 	};
-	var Chart =
-	/*#__PURE__*/
-	function () {
+	var Chart = /*#__PURE__*/function () {
 	  function Chart(params) {
 	    var _this = this;
 
@@ -331,7 +261,7 @@ this.BX = this.BX || {};
 	      }
 
 	      if (main_core.Type.isPlainObject(params.labels)) {
-	        this.labels = babelHelpers.objectSpread({}, this.labels, params.labels);
+	        this.labels = _objectSpread(_objectSpread({}, this.labels), params.labels);
 	      }
 	    }
 
@@ -433,14 +363,14 @@ this.BX = this.BX || {};
 	  }, {
 	    key: "addFinalStage",
 	    value: function addFinalStage(data) {
-	      this.stages.set(FinalStageDefaultData.id, new Stage(babelHelpers.objectSpread({}, {
+	      this.stages.set(FinalStageDefaultData.id, new Stage(_objectSpread(_objectSpread(_objectSpread({}, {
 	        backgroundColor: this.backgroundColor,
 	        events: {
 	          onMouseEnter: this.onStageMouseHover.bind(this),
 	          onMouseLeave: this.onStageMouseLeave.bind(this),
 	          onClick: this.onFinalStageClick.bind(this)
 	        }
-	      }, FinalStageDefaultData, data)));
+	      }), FinalStageDefaultData), data)));
 	    }
 	  }, {
 	    key: "getFinalStage",
@@ -512,7 +442,7 @@ this.BX = this.BX || {};
 	        return this.container;
 	      }
 
-	      this.container = main_core.Tag.render(_templateObject$1());
+	      this.container = main_core.Tag.render(_templateObject$1 || (_templateObject$1 = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-container\"></div>"])));
 	      return this.container;
 	    }
 	  }, {
@@ -522,12 +452,11 @@ this.BX = this.BX || {};
 	        return;
 	      }
 
-	      var _iteratorNormalCompletion = true;
-	      var _didIteratorError = false;
-	      var _iteratorError = undefined;
+	      var _iterator = _createForOfIteratorHelper(this.stages),
+	          _step;
 
 	      try {
-	        for (var _iterator = this.stages[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        for (_iterator.s(); !(_step = _iterator.n()).done;) {
 	          var _step$value = babelHelpers.slicedToArray(_step.value, 2),
 	              id = _step$value[0],
 	              currentStage = _step$value[1];
@@ -539,18 +468,9 @@ this.BX = this.BX || {};
 	          }
 	        }
 	      } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
+	        _iterator.e(err);
 	      } finally {
-	        try {
-	          if (!_iteratorNormalCompletion && _iterator.return != null) {
-	            _iterator.return();
-	          }
-	        } finally {
-	          if (_didIteratorError) {
-	            throw _iteratorError;
-	          }
-	        }
+	        _iterator.f();
 	      }
 	    }
 	  }, {
@@ -560,12 +480,11 @@ this.BX = this.BX || {};
 	        return;
 	      }
 
-	      var _iteratorNormalCompletion2 = true;
-	      var _didIteratorError2 = false;
-	      var _iteratorError2 = undefined;
+	      var _iterator2 = _createForOfIteratorHelper(this.stages),
+	          _step2;
 
 	      try {
-	        for (var _iterator2 = this.stages[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
 	          var _step2$value = babelHelpers.slicedToArray(_step2.value, 2),
 	              id = _step2$value[0],
 	              currentStage = _step2$value[1];
@@ -577,18 +496,9 @@ this.BX = this.BX || {};
 	          }
 	        }
 	      } catch (err) {
-	        _didIteratorError2 = true;
-	        _iteratorError2 = err;
+	        _iterator2.e(err);
 	      } finally {
-	        try {
-	          if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
-	            _iterator2.return();
-	          }
-	        } finally {
-	          if (_didIteratorError2) {
-	            throw _iteratorError2;
-	          }
-	        }
+	        _iterator2.f();
 	      }
 	    }
 	  }, {
@@ -678,7 +588,7 @@ this.BX = this.BX || {};
 	          closeByEsc: true,
 	          closeIcon: true,
 	          maxWidth: 420,
-	          content: main_core.Tag.render(_templateObject2$1(), this.labels.finalStagePopupTitle),
+	          content: main_core.Tag.render(_templateObject2$1 || (_templateObject2$1 = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-popup-title\">", "</div>"])), this.labels.finalStagePopupTitle),
 	          buttons: [new BX.UI.Button({
 	            color: BX.UI.Button.Color.SUCCESS,
 	            text: this.getSuccessStage().getName(),
@@ -717,7 +627,7 @@ this.BX = this.BX || {};
 	      var isSuccess = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
 	      if (!this.finalStageSemanticSelector) {
-	        this.finalStageSemanticSelector = main_core.Tag.render(_templateObject3(), this.onSemanticSelectorClick.bind(this));
+	        this.finalStageSemanticSelector = main_core.Tag.render(_templateObject3 || (_templateObject3 = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-stage-selector-option ui-stageflow-stage-selector-option-fail\" onclick=\"", "\"></div>"])), this.onSemanticSelectorClick.bind(this));
 	      }
 
 	      if (main_core.Type.isBoolean(isSuccess)) {
@@ -754,7 +664,7 @@ this.BX = this.BX || {};
 
 	      var isSuccess = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 	      var titleBar = {};
-	      var content = main_core.Tag.render(_templateObject4());
+	      var content = main_core.Tag.render(_templateObject4 || (_templateObject4 = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-final-fail-stage-list-wrapper\"></div>"])));
 
 	      if (!isSuccess) {
 	        var failStages = this.getFailStages();
@@ -762,13 +672,13 @@ this.BX = this.BX || {};
 	        if (failStages.length > 1) {
 	          var isChecked = true;
 	          failStages.forEach(function (stage) {
-	            content.appendChild(main_core.Tag.render(_templateObject5(), stage.getId(), stage.getId(), isChecked ? 'checked="checked"' : '', stage.getId(), stage.getName()));
+	            content.appendChild(main_core.Tag.render(_templateObject5 || (_templateObject5 = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-final-fail-stage-list-section\">\n\t\t\t\t\t\t<input data-stage-id=\"", "\" id=\"ui-stageflow-final-fail-stage-", "\" name=\"ui-stageflow-final-fail-stage-input\" class=\"crm-list-fail-deal-button\" type=\"radio\" ", ">\n\t\t\t\t\t\t<label for=\"ui-stageflow-final-fail-stage-", "\">", "</label>\n\t\t\t\t\t</div>"])), stage.getId(), stage.getId(), isChecked ? 'checked="checked"' : '', stage.getId(), stage.getName()));
 	            isChecked = false;
 	          });
 	        }
 	      }
 
-	      titleBar.content = main_core.Tag.render(_templateObject6(), this.labels.finalStageSelectorTitle, this.getFinalStageSemanticSelector(isSuccess));
+	      titleBar.content = main_core.Tag.render(_templateObject6 || (_templateObject6 = babelHelpers.taggedTemplateLiteral(["<div class=\"ui-stageflow-stage-selector-block\">\n\t\t\t<span>", " </span>\n\t\t\t", "\n\t\t</div>"])), this.labels.finalStageSelectorTitle, this.getFinalStageSemanticSelector(isSuccess));
 	      var popup = main_popup.PopupManager.getPopupById(finalStageSelectorPopupId);
 
 	      if (!popup) {

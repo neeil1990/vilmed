@@ -74,7 +74,7 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 	if ($request->get('action_target')=='selected')
 	{
 		$ids = array();
-		$dbRes = \Bitrix\Sale\Internals\PaySystemActionTable::getList(
+		$dbRes = \Bitrix\Sale\PaySystem\Manager::getList(
 			array(
 				'select' => array('ID'),
 				'filter' => $filter,
@@ -101,6 +101,8 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 					continue 2;
 				}
 
+				$paySystem = \Bitrix\Sale\PaySystem\Manager::getById($id);
+
 				$result = \Bitrix\Sale\PaySystem\Manager::delete($id);
 				if (!$result->isSuccess())
 				{
@@ -108,6 +110,15 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 						$lAdmin->AddGroupError(join(', ', $result->getErrorMessages()), $id);
 					else
 						$lAdmin->AddGroupError(GetMessage("SPSAN_ERROR_DELETE"), $id);
+				}
+				elseif (is_array($paySystem))
+				{
+					$paySysntemStatisticLabel = $paySystem['ACTION_FILE'];
+					if (!empty($paySystem['PS_MODE']))
+					{
+						$paySysntemStatisticLabel .= ':' . $paySystem['PS_MODE'];
+					}
+					AddEventToStatFile('sale', 'deletePaysystem', '', $paySysntemStatisticLabel);
 				}
 
 				break;
@@ -119,7 +130,7 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 					"ACTIVE" => (($_REQUEST['action'] == 'activate') ? 'Y' : 'N')
 				);
 
-				$result = \Bitrix\Sale\Internals\PaySystemActionTable::update($id, $arFields);
+				$result = \Bitrix\Sale\PaySystem\Manager::update($id, $arFields);
 				if (!$result->isSuccess())
 				{
 					if ($result->getErrorMessages())
@@ -152,7 +163,7 @@ global $by, $order;
 if (isset($by) && ToUpper($by) != 'LID' && ToUpper($by) != 'CURRENCY')
 	$params['order'] = array(ToUpper($by) => ToUpper($order));
 
-$dbRes = \Bitrix\Sale\Internals\PaySystemActionTable::getList($params);
+$dbRes = \Bitrix\Sale\PaySystem\Manager::getList($params);
 
 $result = array();
 
@@ -214,7 +225,7 @@ while ($arCCard = $dbRes->NavNext(false))
 	$row =& $lAdmin->AddRow($arCCard["ID"], $arCCard, $editUrl, GetMessage("SALE_EDIT_DESCR"));
 
 	$row->AddField("ID", "<a href=\"".$editUrl."\">".$arCCard["ID"]."</a>");
-	$row->AddField("NAME", $arCCard["NAME"], false, false);
+	$row->AddField("NAME", htmlspecialcharsbx($arCCard["NAME"]), false, false);
 	$row->AddField("ACTIVE", (($arCCard["ACTIVE"]=="Y") ? GetMessage("SPS_YES") : GetMessage("SPS_NO")));
 	$row->AddField("SORT", $arCCard["SORT"], false, false);
 
@@ -225,7 +236,11 @@ while ($arCCard = $dbRes->NavNext(false))
 	}
 
 	$row->AddField("LOGOTIP", $arCCard["LOGOTIP"]);
-	$row->AddField("DESCRIPTION", $arCCard["DESCRIPTION"], false, false);
+
+	$sanitizer = new CBXSanitizer();
+	$sanitizer->SetLevel(\CBXSanitizer::SECURE_LEVEL_LOW);
+	$description = $sanitizer->SanitizeHtml($arCCard["DESCRIPTION"]);
+	$row->AddField("DESCRIPTION", $description, false, true);
 
 	$pTypes = '';
 	$aFiles = '';
@@ -285,7 +300,7 @@ while ($arCCard = $dbRes->NavNext(false))
 			"ICON" => "delete",
 			"TEXT" => GetMessage("SALE_DELETE"),
 			"TITLE" => GetMessage("SALE_DELETE_DESCR"),
-			"ACTION" => "if(confirm('".GetMessage('SALE_CONFIRM_DEL_MESSAGE')."')) ".$lAdmin->ActionDoGroup($arCCard["ID"], "delete"),
+			"ACTION" => "if(confirm('" . CUtil::JSEscape(GetMessage('SALE_CONFIRM_DEL_MESSAGE')) . "')) ".$lAdmin->ActionDoGroup($arCCard["ID"], "delete"),
 		);
 	}
 

@@ -33,10 +33,10 @@ class CBitrixMenuComponent extends CBitrixComponent
 				""
 			;
 
-			if($this->arParams["MENU_CACHE_USE_GROUPS"] === "Y")
+			if(($this->arParams["MENU_CACHE_USE_GROUPS"] ?? '') === "Y")
 				$strCacheID .= ":".$USER->GetGroups();
 
-			if($this->arParams["MENU_CACHE_USE_USERS"] === "Y")
+			if(($this->arParams["MENU_CACHE_USE_USERS"] ?? '') === "Y")
 				$strCacheID .= ":".$USER->GetID();
 
 			if(is_array($this->arParams["MENU_CACHE_GET_VARS"]))
@@ -58,7 +58,7 @@ class CBitrixMenuComponent extends CBitrixComponent
 	public function getGenerationCachePath($id)
 	{
 		$hash = md5($id);
-		$path = $this->getRelativePath()."/".mb_substr($hash, -5, 2)."/".mb_substr($hash, -3);
+		$path = $this->getRelativePath()."/".substr($hash, -5, 2)."/".substr($hash, -3)."/".(int)$id;
 		return $path;
 	}
 
@@ -92,11 +92,26 @@ class CBitrixMenuComponent extends CBitrixComponent
 				if(!preg_match("'^(([a-z]+://)|mailto:|javascript:)'i", $arMenu[$menuIndex]["LINK"]))
 				{
 					if(mb_substr($arMenu[$menuIndex]["LINK"], -1) == "/")
-						$bDir = true;
+					{
+						if ($parentItem && $parentItem['LINK'] === $arMenu[$menuIndex]["LINK"])
+						{
+							$bDir = false;
+						}
+						else
+						{
+							$bDir = true;
+						}
+					}
 				}
 				if($bDir)
 				{
-					$menu = new CMenu($menuType);
+					$type = $menuType; // public method compatibility
+					if (is_array($type))
+					{
+						$type = $menuType[$currentLevel] ?? $menuType[count($menuType) - 1];
+					}
+
+					$menu = new CMenu($type);
 					$menu->disableDebug();
 					$success = $menu->Init($arMenu[$menuIndex]["LINK"], $use_ext, $menuTemplate, $onlyCurrentDir = true);
 					$subMenuExists = ($success && count($menu->arMenu) > 0);
@@ -109,7 +124,7 @@ class CBitrixMenuComponent extends CBitrixComponent
 
 						if($arMenu[$menuIndex]["SELECTED"])
 						{
-							$arResult["menuType"] = $menuType;
+							$arResult["menuType"] = $type;
 							$arResult["menuDir"] = $arMenu[$menuIndex]["LINK"];
 						}
 

@@ -2,25 +2,56 @@
 
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
+/** @var array $arResult */
+
+use Bitrix\Main\Page\Asset;
 use Bitrix\Main\UserField\Types\EnumType;
-use Bitrix\Main\Web\Json;
 
 if(
 	($arResult['userField']['ENTITY_VALUE_ID'] < 1)
-	&&
-	mb_strlen($arResult['userField']['SETTINGS']['DEFAULT_VALUE'])
 )
 {
-	$arResult['additionalParameters']['VALUE'] =
-		(int)$arResult['userField']['SETTINGS']['DEFAULT_VALUE'];
+	if ($arResult['userField']['MULTIPLE'] === 'Y')
+	{
+		if (!empty($arResult['userField']['SETTINGS']['DEFAULT_VALUE']))
+		{
+			if (is_array($arResult['userField']['SETTINGS']['DEFAULT_VALUE']))
+			{
+				$arResult['additionalParameters']['VALUE'] = [];
+				foreach ($arResult['userField']['SETTINGS']['DEFAULT_VALUE'] as $value)
+				{
+					$arResult['additionalParameters']['VALUE'][] = (int)$value;
+				}
+				$arResult['additionalParameters']['VALUE'] = array_unique($arResult['additionalParameters']['VALUE']);
+			}
+			else
+			{
+				$arResult['additionalParameters']['VALUE'] =
+					(int)$arResult['userField']['SETTINGS']['DEFAULT_VALUE'];
+			}
+		}
+	}
+	else
+	{
+		if(
+			isset($arResult['userField']['SETTINGS']['DEFAULT_VALUE'])
+			&& $arResult['userField']['SETTINGS']['DEFAULT_VALUE'] !== ''
+		)
+		{
+			$arResult['additionalParameters']['VALUE'] =
+				(int)$arResult['userField']['SETTINGS']['DEFAULT_VALUE'];
+		}
+	}
 }
 
 if($arResult['userField']['SETTINGS']['DISPLAY'] === EnumType::DISPLAY_UI)
 {
-	CJSCore::Init('ui');
+	$arResult['isEnabled'] = ($arResult['userField']['EDIT_IN_LIST'] === 'Y');
+	$value = $arResult['value'];
 
-	$arResult['additionalParameters']['VALIGN'] = 'middle';
+	\CJSCore::Init('ui');
 
+	$startValue = [];
 	$itemList = [];
 
 	$emptyValue = [
@@ -30,69 +61,88 @@ if($arResult['userField']['SETTINGS']['DISPLAY'] === EnumType::DISPLAY_UI)
 
 	$startValue = [];
 
-	if($arUserField['MANDATORY'] !== 'Y')
+	if(
+		$arResult['userField']['MANDATORY'] !== 'Y'
+		&& $arResult['userField']['MULTIPLE'] !== 'Y'
+	)
 	{
 		$itemList[] = $emptyValue;
 	}
 
-	foreach($arResult['additionalParameters']['items'] as $itemId => $item)
+	foreach($arResult['additionalParameters']['items'] as $key => $element)
 	{
-		$element = [
-			'NAME' => $item['~VALUE'],
-			'VALUE' => $item['ID'],
+		if($key === '' && $arResult['userField']['MULTIPLE'] === 'Y')
+		{
+			continue;
+		}
+
+		$item = [
+			'NAME' => $element['VALUE'],
+			'VALUE' => $key,
 		];
 
-		if(
-			($arResult['userField']['ENTITY_VALUE_ID'] <= 0 && $item['DEF'] === 'Y')
-			||
-			in_array($item['ID'], $arResult['value'])
-		)
+		if(in_array($key, $value))
 		{
-			$startValue[] = $element;
+			$startValue[] = $item;
 		}
-		$itemList[] = $element;
+
+		$itemList[] = $item;
 	}
 
-	if($arResult['userField']['MANDATORY'] !== 'Y' && !count($startValue))
-	{
-		$startValue[] = $emptyValue;
-	}
+	$postfix = $this->randString();
 
-	$params = Json::encode([
+	$arResult['params'] = [
 		'isMulti' => ($arResult['userField']['MULTIPLE'] === 'Y'),
-		'fieldName' => $arResult['userField']['FIELD_NAME']
-	]);
+		'fieldName' => $arResult['fieldName']
+	];
 
-	$items = Json::encode($itemList);
-	$currentValue = (
-	$arResult['userField']['MULTIPLE'] === 'Y' ?
-		Json::encode($startValue) : Json::encode($startValue[0])
-	);
+	$arResult['valueContainerId'] = $arResult['fieldName'] . '_value_' . $postfix;
 
-	$controlNodeId = $arResult['userField']['FIELD_NAME'] . '_control';
-	$valueContainerId = $arResult['userField']['FIELD_NAME'] . '_value';
+	$arResult['spanAttrList'] = [
+		'id' => $arResult['valueContainerId'],
+		'style' => 'display: none'
+	];
 
-	$fieldNameJS = CUtil::JSEscape($arResult['userField']['FIELD_NAME']);
-	$htmlFieldNameJS = CUtil::JSEscape($arResult['fieldName']);
-	$controlNodeIdJS = CUtil::JSEscape($controlNodeId);
-	$valueContainerIdJS = CUtil::JSEscape($valueContainerId);
+	$arResult['controlNodeId'] = $arResult['userField']['FIELD_NAME'] . '_control_' . $postfix;
 
-	$block = ($arResult['userField']['MULTIPLE'] === 'Y' ?
-		'main-ui-multi-select' : 'main-ui-select'
+	$arResult['attrList'] = [];
+
+	for($i = 0, $n = count($startValue); $i < $n; $i++)
+	{
+		$attrList = [
+			'type' => 'hidden',
+			'name' => $arResult['fieldName'],
+			'value' => $startValue[$i]['VALUE'],
+		];
+
+		$arResult['attrList'][] = $attrList;
+	}
+
+	if($arResult['userField']['MULTIPLE'] !== 'Y')
+	{
+		$startValue = $startValue[0];
+	}
+
+	$arResult['items'] = $itemList;
+	$arResult['currentValue'] = $startValue;
+
+	$block = (
+	$arResult['userField']['MULTIPLE'] === 'Y'
+		? 'main-ui-multi-select'
+		: 'main-ui-select'
 	);
 
 	$arResult['block'] = $block;
-	$arResult['startValue'] = $startValue;
-	$arResult['valueContainerId'] = $valueContainerId;
-	$arResult['valueContainerIdJs'] = $valueContainerIdJS;
-	$arResult['controlNodeIdJs'] = $controlNodeIdJS;
-	$arResult['fieldNameJs'] = $fieldNameJS;
-	$arResult['htmlFieldNameJs'] = $htmlFieldNameJS;
+	$arResult['fieldNameJs'] = \CUtil::JSEscape($arResult['fieldName']);
 
-	$arResult['items'] = $items;
-	$arResult['currentValue'] = $currentValue;
-	$arResult['params'] = $params;
+	\CJSCore::Init(['ui']);
+	\Bitrix\Main\UI\Extension::load([
+		'ui.entity-selector',
+	]);
 
+	Asset::getInstance()->addJs(
+		'/bitrix/components/bitrix/main.field.enum/templates/main.edit/dist/display.bundle.js'
+	);
 }
 elseif($arResult['userField']['SETTINGS']['DISPLAY'] === EnumType::DISPLAY_LIST)
 {

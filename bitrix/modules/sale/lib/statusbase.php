@@ -227,7 +227,7 @@ abstract class StatusBase
 			}
 		}
 
-		return $cacheAllowStatuses[$cacheKey];
+		return $cacheAllowStatuses[$cacheKey] ?? [];
 	}
 
 	/**
@@ -340,7 +340,7 @@ abstract class StatusBase
 		if (!is_array($groupId))
 			$groupId = array($groupId);
 
-		$cacheHash = md5(static::TYPE."|".join($groupId, '_')."|".join($operations, '_'));
+		$cacheHash = md5(static::TYPE."|".join('_', $groupId)."|".join('_', $operations));
 
 		if (!empty($cacheStatuses[$cacheHash]))
 		{

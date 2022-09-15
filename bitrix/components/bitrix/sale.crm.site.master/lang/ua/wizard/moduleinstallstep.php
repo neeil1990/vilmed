@@ -10,6 +10,5 @@ $MESS["SALE_CSM_WIZARD_MODULEINSTALLSTEP_INSTALL_WAIT2"] = "Операція м�
 $MESS["SALE_CSM_WIZARD_MODULEINSTALLSTEP_INSTALL_WAIT3"] = "Автоматичне перенаправлення через #COUNT_TIME# сек ...";
 $MESS["SALE_CSM_WIZARD_MODULEINSTALLSTEP_NEXT"] = "Продовжити";
 $MESS["SALE_CSM_WIZARD_MODULEINSTALLSTEP_RETRY_BUTTON"] = "Повторити крок";
-$MESS["SALE_CSM_WIZARD_MODULEINSTALLSTEP_SKIP_BUTTON"] = "Пропустити крок";
 $MESS["SALE_CSM_WIZARD_MODULEINSTALLSTEP_TITLE"] = "Установка модулів";
 ?>

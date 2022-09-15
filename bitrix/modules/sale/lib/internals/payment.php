@@ -12,6 +12,22 @@ use Bitrix\Main\Localization\Loc;
 
 Loc::loadMessages(__FILE__);
 
+/**
+ * Class PaymentTable
+ *
+ * DO NOT WRITE ANYTHING BELOW THIS
+ *
+ * <<< ORMENTITYANNOTATION
+ * @method static EO_Payment_Query query()
+ * @method static EO_Payment_Result getByPrimary($primary, array $parameters = array())
+ * @method static EO_Payment_Result getById($id)
+ * @method static EO_Payment_Result getList(array $parameters = array())
+ * @method static EO_Payment_Entity getEntity()
+ * @method static \Bitrix\Sale\Internals\EO_Payment createObject($setDefaultValues = true)
+ * @method static \Bitrix\Sale\Internals\EO_Payment_Collection createCollection()
+ * @method static \Bitrix\Sale\Internals\EO_Payment wakeUpObject($row)
+ * @method static \Bitrix\Sale\Internals\EO_Payment_Collection wakeUpCollection($rows)
+ */
 class PaymentTable extends Main\Entity\DataManager
 {
 	public static function getTableName()
@@ -125,6 +141,11 @@ class PaymentTable extends Main\Entity\DataManager
 				'data_type' => 'string',
 				'validation' => array(__CLASS__, 'validatePsRecurringToken'),
 				'title' => Loc::getMessage('ORDER_PAYMENT_ENTITY_PS_RECURRING_TOKEN_FIELD'),
+			),
+			'PS_CARD_NUMBER' => array(
+				'data_type' => 'string',
+				'validation' => array(__CLASS__, 'validatePsCardNumber'),
+				'title' => Loc::getMessage('ORDER_PAYMENT_ENTITY_PS_CARD_NUMBER_FIELD'),
 			),
 			'PAY_VOUCHER_NUM' => array(
 				'data_type' => 'string',
@@ -427,6 +448,18 @@ class PaymentTable extends Main\Entity\DataManager
 	{
 		return array(
 			new Main\Entity\Validator\Length(null, 255),
+		);
+	}
+	
+	/**
+	 * Returns validators for PS_CARD_NUMBER field.
+	 *
+	 * @return array
+	 */
+	public static function validatePsCardNumber()
+	{
+		return array(
+			new Main\Entity\Validator\Length(null, 64),
 		);
 	}
 }

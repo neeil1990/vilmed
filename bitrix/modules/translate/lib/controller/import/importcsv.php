@@ -255,20 +255,14 @@ class ImportCsv
 						continue;
 					}
 
-					$phrase = str_replace("\\\\", "\\", $csvRow[$langIndex]);
+					//$phrase = str_replace("\\\\", "\\", $csvRow[$langIndex]);
+					$phrase = $csvRow[$langIndex];
 
 					$encodingOut = self::$sourceEncoding[$languageId];
 
 					if (!empty($this->encodingIn) && $this->encodingIn !== $encodingOut)
 					{
-						$errorMessage = '';
-						$phrase = Main\Text\Encoding::convertEncoding($phrase, $this->encodingIn, $encodingOut, $errorMessage);
-
-						if (!$phrase && !empty($errorMessage))
-						{
-							$rowErrors[] = $errorMessage;
-							continue;
-						}
+						$phrase = Main\Text\Encoding::convertEncoding($phrase, $this->encodingIn, $encodingOut);
 					}
 
 					$checked = true;
@@ -355,9 +349,21 @@ class ImportCsv
 					$langFile->setLangId($languageId);
 					$langFile->setOperatingEncoding(self::$sourceEncoding[$languageId]);
 
-					if (!$langFile->load() && $langFile->hasErrors())
+					if (!$langFile->loadTokens())
 					{
-						$this->addErrors($langFile->getErrors());
+						if (!$langFile->load() && $langFile->hasErrors())
+						{
+							foreach ($langFile->getErrors() as $error)
+							{
+								if ($error->getCode() !== 'EMPTY_CONTENT')
+								{
+									$this->addError($error);
+								}
+							}
+						}
+					}
+					if (count($this->getErrors()) > 0)
+					{
 						continue;
 					}
 

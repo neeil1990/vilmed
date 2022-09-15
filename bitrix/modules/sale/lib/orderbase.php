@@ -252,7 +252,7 @@ abstract class OrderBase extends Internals\Entity
 	 */
 	public static function load($id)
 	{
-		if (intval($id) <= 0)
+		if ((int)$id <= 0)
 		{
 			throw new Main\ArgumentNullException("id");
 		}
@@ -438,7 +438,7 @@ abstract class OrderBase extends Internals\Entity
 	 */
 	protected function loadBasket()
 	{
-		if ((int)$this->getId() > 0)
+		if ($this->getId() > 0)
 		{
 			$registry = Registry::getInstance(static::getRegistryType());
 			/** @var BasketBase $basketClassName */
@@ -637,13 +637,13 @@ abstract class OrderBase extends Internals\Entity
 	 * @internal
 	 *
 	 * @param string $action Action.
-	 * @param PropertyValueBase $property Property.
+	 * @param EntityPropertyValue $property Property.
 	 * @param null|string $name Field name.
 	 * @param null|string|int|float $oldValue Old value.
 	 * @param null|string|int|float $value New value.
 	 * @return Result
 	 */
-	public function onPropertyValueCollectionModify($action, PropertyValueBase $property, $name = null, $oldValue = null, $value = null)
+	public function onPropertyValueCollectionModify($action, EntityPropertyValue $property, $name = null, $oldValue = null, $value = null)
 	{
 		return new Result();
 	}
@@ -743,6 +743,19 @@ abstract class OrderBase extends Internals\Entity
 	public function getPrice()
 	{
 		return floatval($this->getField('PRICE'));
+	}
+
+	/**
+	 * Returns order price without discounts.
+	 *
+	 * @return float
+	 */
+	public function getBasePrice(): float
+	{
+		$basket = $this->getBasket();
+		$taxPrice = !$this->isUsedVat() ? $this->getField('TAX_PRICE') : 0;
+
+		return $basket->getBasePrice() + $taxPrice;
 	}
 
 	/**
@@ -1186,14 +1199,13 @@ abstract class OrderBase extends Internals\Entity
 	 * @return Result
 	 * @throws Main\ArgumentOutOfRangeException
 	 * @throws Main\NotImplementedException
-	 * @throws Main\ObjectException
 	 */
 	protected function completeSaving($needUpdateDateInsert)
 	{
 		$result = new Result();
 
 		$currentDateTime = new Type\DateTime();
-		$updateFields = array('RUNNING' => 'N');
+		$updateFields = ['RUNNING' => 'N'];
 
 		$changedFields = $this->fields->getChangedValues();
 		if ($this->isNew
@@ -1227,7 +1239,6 @@ abstract class OrderBase extends Internals\Entity
 	 * @throws Main\ArgumentNullException
 	 * @throws Main\ArgumentOutOfRangeException
 	 * @throws Main\NotImplementedException
-	 * @throws Main\ObjectException
 	 * @throws Main\SystemException
 	 */
 	protected function add()
@@ -1424,37 +1435,23 @@ abstract class OrderBase extends Internals\Entity
 	{
 		$result = new Result();
 
-		/** @var BasketBase $basket */
-		$basket = $this->getBasket();
-
-		/** @var Result $r */
-		$r = $basket->save();
+		$r = $this->getBasket()->save();
 		if (!$r->isSuccess())
 		{
 			$result->addWarnings($r->getErrors());
 		}
 
-		/** @var Tax $tax */
-		$tax = $this->getTax();
-
-		/** @var Result $r */
-		$r = $tax->save();
+		$r = $this->getTax()->save();
 		if (!$r->isSuccess())
 		{
 			$result->addWarnings($r->getErrors());
 		}
 
-		/** @var PropertyValueCollectionBase $propertyCollection */
-		$propertyCollection = $this->getPropertyCollection();
-
-		/** @var Result $r */
-		$r = $propertyCollection->save();
+		$r = $this->getPropertyCollection()->save();
 		if (!$r->isSuccess())
 		{
 			$result->addWarnings($r->getErrors());
 		}
-
-
 
 		return $result;
 	}
@@ -2026,9 +2023,8 @@ abstract class OrderBase extends Internals\Entity
 	 */
 	public function getTaxLocation()
 	{
-		if (strval(($this->getField('TAX_LOCATION')) == ""))
+		if ((string)$this->getField('TAX_LOCATION') === "")
 		{
-			/** @var PropertyValueCollectionBase $propertyCollection */
 			$propertyCollection = $this->getPropertyCollection();
 
 			if ($property = $propertyCollection->getTaxLocation())
@@ -2652,12 +2648,12 @@ abstract class OrderBase extends Internals\Entity
 	{
 		if (in_array('PRICE', $select))
 		{
-			$this->setFieldNoDemand('PRICE', 0);
+			$this->setField('PRICE', 0);
 		}
 
 		if (in_array('PRICE_DELIVERY', $select))
 		{
-			$this->setFieldNoDemand('PRICE_DELIVERY', 0);
+			$this->setField('PRICE_DELIVERY', 0);
 		}
 	}
 
@@ -2818,5 +2814,15 @@ abstract class OrderBase extends Internals\Entity
 	public static function getEntityEventName()
 	{
 		return 'SaleOrder';
+	}
+
+	public function toArray() : array
+	{
+		$result = parent::toArray();
+
+		$result['BASKET_ITEMS'] = $this->getBasket()->toArray();
+		$result['PROPERTIES'] = $this->getPropertyCollection()->toArray();
+
+		return $result;
 	}
 }

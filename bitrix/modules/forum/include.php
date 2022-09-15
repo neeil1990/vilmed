@@ -7,7 +7,7 @@ if (file_exists(__DIR__."/deprecated.php"))
 	include("deprecated.php");
 }
 
-$arNameStatuses = @unserialize(COption::GetOptionString("forum", "statuses_name"));
+$arNameStatuses = @unserialize(COption::GetOptionString("forum", "statuses_name"), ["allowed_classes" => false]);
 $arNameStatuses = is_array($arNameStatuses) ? $arNameStatuses : array();
 $arNameStatuses[LANGUAGE_ID] = is_array($arNameStatuses[LANGUAGE_ID]) ? $arNameStatuses[LANGUAGE_ID] : array();
 $name = array("guest" => "Guest", "user" => "User", "moderator" => "Moderator", "editor" => "Editor", "administrator" => "Administrator");
@@ -420,7 +420,7 @@ function ForumAddMessage(
 				$arFieldsG["AUTHOR_NAME"] = $usr->getName();
 			}
 			$arFieldsG["APPROVED"] = $forum["MODERATION"] != "Y" || $usr->canModerate($forum) ? "Y" : "N";
-			$arFieldsG["POST_DATA"] = new \Bitrix\Main\Type\DateTime();
+			$arFieldsG["POST_DATE"] = new \Bitrix\Main\Type\DateTime();
 
 			if ($MESSAGE_TYPE == "NEW") // New Topic
 			{

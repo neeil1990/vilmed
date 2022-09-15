@@ -180,7 +180,7 @@ if ($boolRead || $boolDiscount)
 
 if ($boolRead || $boolStore)
 {
-	if (Catalog\Config\State::isUsedInventoryManagement())
+	if ($boolStore && Catalog\Config\State::isUsedInventoryManagement())
 	{
 		$arSubItems[] = array(
 			"text" => GetMessage("CM_STORE_DOCS"),
@@ -324,7 +324,7 @@ if ($boolRead)
 if (empty($arSubItems))
 	return false;
 
-$aMenu = array(
+return array(
 	"parent_menu" => "global_menu_store",
 	"section" => "catalog",
 	"sort" => 200,
@@ -335,4 +335,3 @@ $aMenu = array(
 	"items_id" => "mnu_catalog",
 	"items" => $arSubItems,
 );
-return $aMenu;

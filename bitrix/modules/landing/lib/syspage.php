@@ -16,7 +16,8 @@ class Syspage
 		'cart',
 		'order',
 		'payment',
-		'compare'
+		'compare',
+		'feedback',
 	);
 
 	/**
@@ -152,6 +153,20 @@ class Syspage
 		while ($row = $res->fetch())
 		{
 			$types[$id][$row['TYPE']] = $row;
+		}
+
+		// event for external changes
+		$event = new \Bitrix\Main\Event('landing', 'onLandingSyspageRetrieve', [
+			'types' => $types
+		]);
+		$event->send();
+		foreach ($event->getResults() as $result)
+		{
+			$params = $result->getParameters();
+			if (is_array($params))
+			{
+				$types = $params;
+			}
 		}
 
 		return $removeHidden($types[$id]);

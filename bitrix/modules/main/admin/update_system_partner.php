@@ -580,7 +580,7 @@ $tabControl->BeginNextTab();
 											<?if (is_array($arUpdateList) && array_key_exists("CLIENT", $arUpdateList)):?>
 												<tr>
 													<td><?echo GetMessage("SUP_REGISTERED")?>&nbsp;&nbsp;</td>
-													<td><?echo $arUpdateList["CLIENT"][0]["@"]["NAME"]?></td>
+													<td><?echo htmlspecialchars($arUpdateList["CLIENT"][0]["@"]["NAME"])?></td>
 												</tr>
 											<?endif;?>
 
@@ -665,7 +665,7 @@ $tabControl->BeginNextTab();
 							$arModuleTmp["@"]["ID"] = preg_replace("#[^A-Za-z0-9._-]#", "", $arModuleTmp["@"]["ID"]);
 							if($myaddmodule <> '')
 							{
-								if(toLower($myaddmodule) != toLower($arModuleTmp["@"]["ID"]) && mb_strpos(toLower($myaddmodule), toLower($arModuleTmp["@"]["ID"])) === false)
+								if(strtolower($myaddmodule) != strtolower($arModuleTmp["@"]["ID"]) && mb_strpos(strtolower($myaddmodule), strtolower($arModuleTmp["@"]["ID"])) === false)
 									$checked = "";
 							}
 							$strTitleTmp = $arModuleTmp["@"]["NAME"]." (".$arModuleTmp["@"]["ID"].")\n".$arModuleTmp["@"]["DESCRIPTION"]."\n";
@@ -696,7 +696,7 @@ $tabControl->BeginNextTab();
 									else
 									{
 										echo GetMessage("SUP_SULL_REF_N");
-										if(toLower($myaddmodule) == toLower($arModuleTmp["@"]["ID"]) || mb_strpos(toLower($myaddmodule), toLower($arModuleTmp["@"]["ID"])) !== false)
+										if(strtolower($myaddmodule) == strtolower($arModuleTmp["@"]["ID"]) || mb_strpos(strtolower($myaddmodule), strtolower($arModuleTmp["@"]["ID"])) !== false)
 										{
 											?>
 											<script>

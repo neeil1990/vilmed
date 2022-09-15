@@ -65,7 +65,7 @@ if(isset($_REQUEST["reorder"]) && intval($_REQUEST["reorder"]) > 0)
 	$addOrderUrl = $selfFolderUrl."sale_order_create.php?USER_ID=".CUtil::JSEscape($ID)."&SITE_ID=".CUtil::JSEscape($lid)."&lang=".LANGUAGE_ID.CUtil::JSEscape($urlProduct);
 	if ($adminSidePanelHelper->isPublicSidePanel())
 	{
-		$addOrderUrl = "/shop/orders/details/0/?USER_ID=".CUtil::JSEscape($ID)."&SITE_ID=".CUtil::JSEscape($lid)."&lang=".LANGUAGE_ID.CUtil::JSEscape($urlProduct);
+		$addOrderUrl = "/shop/orders/details/" . $ORDER_ID . "/?IFRAME=Y&IFRAME_TYPE=SIDE_SLIDER&init_mode=edit&copy=1";
 	}
 
 	LocalRedirect($addOrderUrl);
@@ -106,7 +106,7 @@ if(!empty($arUser))
 	}
 	else
 	{
-		$dbGroups = CGroup::GetList(($b = 'c_sort'), ($o = 'asc'), array('ANONYMOUS' => 'N'));
+		$dbGroups = CGroup::GetList('c_sort', 'asc', array('ANONYMOUS' => 'N'));
 		while ($arGroup = $dbGroups->Fetch())
 		{
 			$userGroupList[] = $arGroup;
@@ -126,7 +126,7 @@ if(!empty($arUser))
 			{
 				$strUserGroup .= htmlspecialcharsbx($userGroup['NAME']).'<br>';
 			}
-		}		
+		}
 	}
 
 	if (empty($strUserGroup))
@@ -152,7 +152,7 @@ if(!empty($arUser))
 
 	//ALL SITES
 	$arSites = array();
-	$rsSites = CSite::GetList($oby="id", $oorder="asc", array());
+	$rsSites = CSite::GetList("id", "asc");
 	while ($arSite = $rsSites->Fetch())
 		$arSites[$arSite["ID"]] = $arSite;
 }
@@ -994,11 +994,22 @@ if(!empty($arUser))
 		);
 		$reorderUrl = $selfFolderUrl."sale_buyers_profile.php?USER_ID=".$ID."&lang=".LANGUAGE_ID."&reorder=".$arOrder["ID"]."&lid=".$arOrder["LID"];
 		$reorderUrl = $adminSidePanelHelper->setDefaultQueryParams($reorderUrl);
-		$arActions[] = array(
-			"ICON" => "edit",
-			"TEXT" => GetMessage("BUYER_PD_REORDER"),
-			"LINK" => $reorderUrl
-		);
+		if ($adminSidePanelHelper->isPublicSidePanel())
+		{
+			$arActions[] = array(
+				"ICON" => "edit",
+				"TEXT" => GetMessage("BUYER_PD_REORDER"),
+				"ONCLICK" => "top.BX.SidePanel.Instance.open('$reorderUrl')"
+			);
+		}
+		else
+		{
+			$arActions[] = array(
+				"ICON" => "edit",
+				"TEXT" => GetMessage("BUYER_PD_REORDER"),
+				"LINK" => $reorderUrl,
+			);
+		}
 
 		$row->AddActions($arActions);
 	}
@@ -1931,7 +1942,7 @@ if(!empty($arUser))
 		{
 			$listUserId = array_keys($listUserData);
 			$listUsers = implode(' | ', $listUserId);
-			$userQuery = CUser::getList($byUser = 'ID', $orderUser = 'ASC',
+			$userQuery = CUser::getList('ID', 'ASC',
 				array('ID' => $listUsers) ,
 				array('FIELDS' => array('ID' ,'LOGIN', 'NAME', 'LAST_NAME')));
 			while($user = $userQuery->fetch())
@@ -1974,7 +1985,7 @@ if(!empty($arUser))
 	$arSiteMenu = array();
 	$arSitesShop = array();
 	$arSitesTmp = array();
-	$rsSites = CSite::GetList($b="id", $o="asc", Array("ACTIVE" => "Y"));
+	$rsSites = CSite::GetList("id", "asc", Array("ACTIVE" => "Y"));
 	while ($arSite = $rsSites->Fetch())
 	{
 		$site = COption::GetOptionString("sale", "SHOP_SITE_".$arSite["ID"], "");
@@ -2121,7 +2132,7 @@ if(!empty($arUser))
 	if($catalogSubscribeEnabled)
 	{
 		$aTabs[] = array(
-			"DIV" => "tab6",
+			"DIV" => "tab8",
 			"TAB" => GetMessage("CS_TAB_TITLE"),
 			"ICON" => "",
 			"TITLE" => GetMessage("CS_TAB_DESC"),
@@ -2937,7 +2948,7 @@ if(!empty($arUser))
 		<?$tabControl->BeginNextTab();?>
 		<tr>
 			<td colspan="2">
-				<form method="GET" name="find_subscribe_form" id="find_subscribe_form" 
+				<form method="GET" name="find_subscribe_form" id="find_subscribe_form"
 				      action="<?=$APPLICATION->getCurPage()?>">
 					<?
 						$findFields = array(

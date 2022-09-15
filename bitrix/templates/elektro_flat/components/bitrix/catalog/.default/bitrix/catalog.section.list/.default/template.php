@@ -19,7 +19,7 @@ if(count($arResult["SECTIONS"]) < 1)
 			<?}
 			if($bHasChildren) {?>
 				<div class="catalog-section-childs">
-					<?foreach($arSection["CHILDREN"] as $key => $arChild) {?>
+					<?foreach($arSection["CHILDREN"] as $key => $arChild) { ?>
 						<div class="catalog-section-child">
 							<a href="<?=$arChild['SECTION_PAGE_URL']?>" title="<?=$arChild['NAME']?>">
 								<span class="child">
@@ -33,7 +33,7 @@ if(count($arResult["SECTIONS"]) < 1)
 										<?}?>
 									</span>
 									<span class="text-cont">
-										<span class="text"><?=$arChild["NAME"]?></span>
+										<span class="text"><?=($arChild['UF_PAGE_TITLE']) ? $arChild['UF_PAGE_TITLE'] : $arChild["NAME"]?></span>
 									</span>
 								</span>
 							</a>

@@ -19,6 +19,8 @@ use \Bitrix\Main\Localization\Loc;
  * @var string $imgTitle
  * @var string $productTitle
  * @var string $buttonSizeClass
+ * @var string $discountPositionClass
+ * @var string $labelPositionClass
  * @var CatalogSectionComponent $component
  */
 ?>
@@ -370,9 +372,9 @@ use \Bitrix\Main\Localization\Loc;
 							{
 								?>
 								<div class="product-item-button-container">
-									<button class="btn btn-primary <?=$buttonSizeClass?>" href="<?=$item['DETAIL_PAGE_URL']?>">
+									<a class="btn btn-primary <?=$buttonSizeClass?>" href="<?=$item['DETAIL_PAGE_URL']?>">
 										<?=$arParams['MESS_BTN_DETAIL']?>
-									</button>
+									</a>
 								</div>
 								<?
 							}

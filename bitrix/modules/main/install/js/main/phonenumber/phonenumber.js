@@ -1566,13 +1566,14 @@
 				{
 					className: params.countryPopupClassName || '',
 					autoHide: true,
-					zIndex: (BX.WindowManager ? BX.WindowManager.GetZIndex() + 100 : 100),
 					closeByEsc: true,
 					bindOptions: {
 						position: 'top'
 					},
 					height: params.countryPopupHeight,
 					offsetRight: 35,
+					padding: 0,
+					contentPadding: 10,
 					angle: {
 						offset: 33
 					},

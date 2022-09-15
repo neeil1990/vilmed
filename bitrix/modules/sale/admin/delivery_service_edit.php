@@ -7,6 +7,7 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Sale\Delivery\Services;
 use Bitrix\Sale\Delivery\ExtraServices;
 use Bitrix\Currency;
+use Bitrix\Catalog\VatTable;
 
 use \Bitrix\Sale\Helpers\Admin\BusinessValueControl;
 
@@ -57,6 +58,12 @@ if (($isItReloadingProcess || $isItSavingProcess) && $saleModulePermissions == "
 	if(isset($_POST["PARENT_ID"]))      $fields["PARENT_ID"] = intval($_POST["PARENT_ID"]);
 	if(isset($_POST["CLASS_NAME"]))     $fields["CLASS_NAME"] = trim($_POST["CLASS_NAME"]);
 	if(isset($_POST["DESCRIPTION"]))    $fields["DESCRIPTION"] = htmlspecialcharsback(trim($_POST["DESCRIPTION"]));
+
+	if(!empty($fields["CLASS_NAME"]))
+	{
+		if(!is_subclass_of($fields["CLASS_NAME"], 'Bitrix\Sale\Delivery\Services\Base'))
+			throw new \Bitrix\Main\SystemException('Class "'.$fields["CLASS_NAME"].'" is not a subclass of the Bitrix\Sale\Delivery\Services\Base');
+	}
 
 	if(isset($_POST["TRACKING_PARAMS"]) && is_array($_POST["TRACKING_PARAMS"]))
 		$fields["TRACKING_PARAMS"] = $_POST["TRACKING_PARAMS"];
@@ -391,6 +398,7 @@ if(empty($fields["CLASS_NAME"]) && count($classNamesList) == 1)
 
 $isGroup = $fields["CLASS_NAME"] == '\Bitrix\Sale\Delivery\Services\Group';
 
+/** @var Services\Base|null $service */
 $service = null;
 
 if((isset($fields["CLASS_NAME"]) && $fields["CLASS_NAME"] <> '') || $parentService)
@@ -457,6 +465,16 @@ if((isset($fields["CLASS_NAME"]) && $fields["CLASS_NAME"] <> '') || $parentServi
 
 			if($fields["DESCRIPTION"] == '')
 				$fields["DESCRIPTION"] = $service->getClassDescription();
+
+			$serviceDefaultVatRate = $service->getDefaultVatRate();
+			if (
+				!is_null($serviceDefaultVatRate)
+				&& !isset($fields['VAT_ID'])
+				&& \Bitrix\Main\Loader::includeModule('catalog')
+			)
+			{
+				$fields['VAT_ID'] = VatTable::getActiveVatIdByRate($serviceDefaultVatRate, true);
+			}
 		}
 	}
 }
@@ -491,9 +509,13 @@ foreach($serviceConfig as $sectionKey => $serviceSection)
 {
 	$aTabs[] = array(
 		"DIV" => "edit_".$sectionKey,
-		"TAB" => $serviceSection["TITLE"],
+		"TAB" => (isset($serviceSection["TITLE"]) && !empty($serviceSection["TITLE"]))
+			? $serviceSection["TITLE"]
+			: Loc::getMessage('SALE_DSE_TAB_SETTINGS'),
 		"ICON" => "sale",
-		"TITLE" => $serviceSection["DESCRIPTION"]
+		"TITLE" => (isset($serviceSection["DESCRIPTION"]) && !empty($serviceSection["DESCRIPTION"]))
+			? $serviceSection["DESCRIPTION"]
+			: Loc::getMessage('SALE_DSE_TAB_SETTINGS'),
 	);
 }
 

@@ -119,6 +119,14 @@ function GetReportsList($strPath2Export)
 
 $arReportsList = GetReportsList(CATALOG_PATH2EXPORTS);
 
+if (!\Bitrix\Catalog\Config\Feature::isCanUseYandexExport())
+{
+	unset(
+		$arReportsList['yandex'],
+		$arReportsList['yandex_simple']
+	);
+}
+
 /////////////////////////////////////////////////////////////////////
 // In the step by step wizard
 //	$FINITE = true the last step
@@ -1177,11 +1185,9 @@ foreach ($arReportsList as $strReportFile => $arReportParams)
 		{
 			if (!isset($arUserList[$arProfile['MODIFIED_BY']]))
 			{
-				$byUser = 'ID';
-				$byOrder = 'ASC';
 				$rsUsers = CUser::GetList(
-					$byUser,
-					$byOrder,
+					'ID',
+					'ASC',
 					array('ID_EQUAL_EXACT' => $arProfile['MODIFIED_BY']),
 					array('FIELDS' => array('ID', 'LOGIN', 'NAME', 'LAST_NAME', 'SECOND_NAME', 'EMAIL'))
 				);
@@ -1415,11 +1421,9 @@ foreach ($arReportsList as $strReportFile => $arReportParams)
 		{
 			if (!isset($arUserList[$arProfile['CREATED_BY']]))
 			{
-				$byUser = 'ID';
-				$byOrder = 'ASC';
 				$rsUsers = CUser::GetList(
-					$byUser,
-					$byOrder,
+					'ID',
+					'ASC',
 					array('ID_EQUAL_EXACT' => $arProfile['CREATED_BY']),
 					array('FIELDS' => array('ID', 'LOGIN', 'NAME', 'LAST_NAME', 'SECOND_NAME', 'EMAIL'))
 				);
@@ -1444,11 +1448,9 @@ foreach ($arReportsList as $strReportFile => $arReportParams)
 		{
 			if (!isset($arUserList[$arProfile['MODIFIED_BY']]))
 			{
-				$byUser = 'ID';
-				$byOrder = 'ASC';
 				$rsUsers = CUser::GetList(
-					$byUser,
-					$byOrder,
+					'ID',
+					'ASC',
 					array('ID_EQUAL_EXACT' => $arProfile['MODIFIED_BY']),
 					array('FIELDS' => array('ID', 'LOGIN', 'NAME', 'LAST_NAME', 'SECOND_NAME', 'EMAIL'))
 				);

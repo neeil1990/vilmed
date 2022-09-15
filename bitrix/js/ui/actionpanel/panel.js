@@ -15,7 +15,7 @@ BX.UI.ActionPanel = function(options)
 		totalSelected: null,
 		totalSelectedItem: null
 	};
-	this.zIndex = options.zIndex;
+
 	this.itemContainer = null;
 	this.className = options.className;
 	this.renderTo = options.renderTo;
@@ -147,11 +147,13 @@ BX.UI.ActionPanel.prototype =
 
 	appendItem: function(options)
 	{
-		var item = this.buildItem(options);
+		if(options.hiddenInPanel !== true)
+		{
+			var item = this.buildItem(options);
 
-		this.items.push(item);
-		this.layout.itemContainer.appendChild(item.render());
-
+			this.items.push(item);
+			this.layout.itemContainer.appendChild(item.render());
+		}
 	},
 
 	addHiddenItem: function(item)
@@ -198,19 +200,27 @@ BX.UI.ActionPanel.prototype =
 		this.hiddenItems = [];
 	},
 
+	getMoreBlock: function()
+	{
+		if (!this.layout.more)
+		{
+			this.layout.more = BX.create("div", {
+				props: {
+					className: "ui-action-panel-more"
+				},
+				text: BX.message('JS_UI_ACTIONPANEL_MORE_BLOCK'),
+				events: {
+					click: this.handleClickMoreBlock.bind(this)
+				}
+			});
+		}
+
+		return this.layout.more;
+	},
+
 	appendMoreBlock: function()
 	{
-		this.layout.more = BX.create("div", {
-			props: {
-				className: "ui-action-panel-more"
-			},
-			text: BX.message('JS_UI_ACTIONPANEL_MORE_BLOCK'),
-			events: {
-				click: this.handleClickMoreBlock.bind(this)
-			}
-		});
-
-		this.layout.container.appendChild(this.layout.more);
+		this.layout.container.appendChild(this.getMoreBlock());
 
 		this.fillHiddenItems();
 	},
@@ -305,28 +315,24 @@ BX.UI.ActionPanel.prototype =
 		}
 	},
 
-	getMaxZindex: function()
+	handleClickMoreBlock: function (event)
 	{
-		var highestIndex = 0;
-		var elements = document.getElementsByTagName('*');
-		for (var i = 0; i < elements.length - 1; i++) {
-			if (parseInt(elements[i].style.zIndex) > highestIndex) {
-				highestIndex = parseInt(elements[i].style.zIndex);
+		for (var i = 0; i < this.hiddenItems.length; i++)
+		{
+			if (this.hiddenItems[i].buttonIconClass && this.hiddenItems[i].text.length === 0)
+			{
+				this.hiddenItems[i].className = "menu-popup-no-icon ui-btn ui-btn-link " + this.hiddenItems[i].buttonIconClass;
+				this.hiddenItems[i].html = '<span></span>'
 			}
 		}
 
-		return highestIndex;
-	},
-
-	handleClickMoreBlock: function (event)
-	{
-		var bindElement = this.layout.more;
-		var popupMenu = BX.PopupMenu.create("ui-action-panel-item-popup-menu", bindElement, this.hiddenItems, {
+		var popupMenu = new BX.PopupMenuWindow({
+			bindElement: this.getMoreBlock(),
 			className: "ui-action-panel-item-popup-menu",
 			angle: true,
-			offsetLeft: bindElement.offsetWidth / 2,
+			offsetLeft: this.getMoreBlock().offsetWidth / 2,
 			closeByEsc: true,
-			zIndex: this.getMaxZindex() + 1,
+			items: this.hiddenItems,
 			events: {
 				onPopupShow: function() {
 					BX.bind(popupMenu.popupWindow.popupContainer, 'click', function(event) {
@@ -343,8 +349,8 @@ BX.UI.ActionPanel.prototype =
 				},
 				onPopupClose: function() {
 					popupMenu.destroy();
-					BX.removeClass(bindElement, "ui-action-panel-item-active");
-				}
+					BX.removeClass(this.getMoreBlock(), "ui-action-panel-item-active");
+				}.bind(this)
 			}
 		});
 
@@ -628,6 +634,10 @@ BX.UI.ActionPanel.prototype =
 					buttons.push({
 						id: item.ID || item.VALUE,
 						text: item.TEXT || item.NAME,
+						title: item.TITLE,
+						iconOnly: item.ICON_ONLY,
+						additionalClassForPanel: item.ADDITIONAL_CLASS_FOR_PANEL,
+						hiddenInPanel: item.HIDDEN_IN_PANEL,
 						icon: item.ICON,
 						disabled: item.DISABLED,
 						onclick: firstHandler.JS
@@ -639,6 +649,10 @@ BX.UI.ActionPanel.prototype =
 				buttons.push({
 					id: item.ID || item.VALUE,
 					text: item.TEXT || item.NAME,
+					title: item.TITLE,
+					iconOnly: item.ICON_ONLY,
+					additionalClassForPanel: item.ADDITIONAL_CLASS_FOR_PANEL,
+					hiddenInPanel: item.HIDDEN_IN_PANEL,
 					icon: item.ICON,
 					submenuOptions: item.SUBMENU_OPTIONS || {},
 					disabled: item.DISABLED,

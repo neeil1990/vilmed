@@ -5,6 +5,7 @@ import typeof Sensor from './sensor/sensor';
 import MouseSensor from './sensor/mousesensor/mousesensor';
 import TouchSensor from './sensor/touchsensor/touchsensor';
 
+import {DragBeforeStartEvent} from './events/drag.before.start.event';
 import {DragStartEvent} from './events/drag.start.event';
 import {DragMoveEvent} from './events/drag.move.event';
 import {DragOverEvent} from './events/drag.over.event';
@@ -34,6 +35,11 @@ type DraggableOptions = {
 	delay?: number,
 	sensors?: Array<Sensor>,
 	transitionDuration: number,
+	context?: Window,
+	offset?: {
+		x?: number,
+		y?: number,
+	},
 };
 
 const defaultSensors = [
@@ -63,6 +69,11 @@ export class Draggable extends EventEmitter
 		type: 'move',
 		transitionDuration: 150,
 		dropzone: [],
+		context: window,
+		offset: {
+			x: 0,
+			y: 0,
+		},
 	};
 
 	[containersKey] = [];
@@ -133,6 +144,11 @@ export class Draggable extends EventEmitter
 		]);
 	}
 
+	getDocument(): HTMLDocument
+	{
+		return this.getOptions().context.document;
+	}
+
 	getOptions(): DraggableOptions
 	{
 		return this[optionsKey];
@@ -145,6 +161,24 @@ export class Draggable extends EventEmitter
 		if (!Type.isString(this[optionsKey].dragElement))
 		{
 			this[optionsKey].dragElement = this[optionsKey].draggable;
+		}
+
+		if (!Type.isPlainObject(this[optionsKey].offset))
+		{
+			this[optionsKey].offset = {
+				x: 0,
+				y: 0,
+			};
+		}
+
+		if (!Type.isNumber(this[optionsKey].offset.x))
+		{
+			this[optionsKey].offset.x = 0;
+		}
+
+		if (!Type.isNumber(this[optionsKey].offset.y))
+		{
+			this[optionsKey].offset.y = 0;
 		}
 
 		this.invalidateCache();
@@ -326,6 +360,10 @@ export class Draggable extends EventEmitter
 		return this.cache.remember('dropPreview', () => {
 			const {type} = this.getOptions();
 			const source = this.getSource();
+			if (source === null)
+			{
+				return Tag.render`<div></div>`;
+			}
 			const sourceRect = this.getSourceClientRect();
 			let dropPreview;
 
@@ -752,7 +790,26 @@ export class Draggable extends EventEmitter
 	onDragStart(event: DragStartSensorEvent)
 	{
 		const {originalSource, sourceContainer, clientX, clientY} = event.data;
+
 		const source = this.getDraggableElementByChild(originalSource);
+
+		const dragBeforeStartEvent = new DragBeforeStartEvent({
+			clientX,
+			clientY,
+			source,
+			sourceContainer,
+			originalSource
+		});
+
+		this.emit('beforeStart', dragBeforeStartEvent);
+
+		if (dragBeforeStartEvent.isDefaultPrevented())
+		{
+			event.preventDefault();
+
+			return;
+		}
+
 		this.setSource(source);
 
 		const sourceDepth = this.getElementDepth(source);
@@ -773,8 +830,8 @@ export class Draggable extends EventEmitter
 			Dom.style(draggable, {
 				width: `${sourceRect.width}px`,
 				height: `${sourceRect.height}px`,
-				top: `${clientY - pointerOffsetY}px`,
-				left: `${clientX - pointerOffsetX}px`,
+				top: `${(clientY - pointerOffsetY) + this.getOptions().offset.y}px`,
+				left: `${(clientX - pointerOffsetX) + this.getOptions().offset.x}px`,
 			});
 
 			Dom.addClass(draggable, 'ui-draggable--draggable');
@@ -806,8 +863,8 @@ export class Draggable extends EventEmitter
 		}
 
 		Dom.addClass(source, 'ui-draggable--source');
-		Dom.addClass(document.body, 'ui-draggable--disable-user-select');
-		Dom.addClass(document.body, `ui-draggable--type-${this.getOptions().type}`);
+		Dom.addClass(this.getDocument().body, 'ui-draggable--disable-user-select');
+		Dom.addClass(this.getDocument().body, `ui-draggable--type-${this.getOptions().type}`);
 
 		const sourceIndex = this.getElementIndex(source);
 		this.dragStartEvent = new DragStartEvent({
@@ -888,8 +945,8 @@ export class Draggable extends EventEmitter
 		if (type !== Draggable.HEADLESS)
 		{
 			Dom.style(draggable, {
-				top: `${clientY - pointerOffsetY}px`,
-				left: `${clientX - pointerOffsetX}px`,
+				top: `${(clientY - pointerOffsetY) + this.getOptions().offset.y}px`,
+				left: `${(clientX - pointerOffsetX) + this.getOptions().offset.x}px`,
 			});
 
 			if (overContainer && overContainer.contains(source) && !this.stopMove)
@@ -1030,7 +1087,7 @@ export class Draggable extends EventEmitter
 			this.lastOver = over;
 		}
 
-		const sourceOver = document.elementFromPoint(clientX, clientY);
+		const sourceOver = this.getDocument().elementFromPoint(clientX, clientY);
 		const dropzoneOver = this.getDropzoneByChild(sourceOver);
 
 		if (dropzoneOver)
@@ -1175,8 +1232,6 @@ export class Draggable extends EventEmitter
 			endContainer: this.lastOverContainer,
 		});
 
-		this.emit('end', dragEndEvent);
-
 		const {source, draggable} = this.dragStartEvent.data;
 
 		if (this.getOptions().type !== Draggable.HEADLESS)
@@ -1244,8 +1299,10 @@ export class Draggable extends EventEmitter
 		this.childrenElements = [];
 		this.currentDepth = null;
 		this.invalidateCache();
-		Dom.removeClass(document.body, 'ui-draggable--disable-user-select');
-		Dom.removeClass(document.body, `ui-draggable--type-${this.getOptions().type}`);
+		Dom.removeClass(this.getDocument().body, 'ui-draggable--disable-user-select');
+		Dom.removeClass(this.getDocument().body, `ui-draggable--type-${this.getOptions().type}`);
+
+		this.emit('end', dragEndEvent); // todo test in default
 	}
 
 	onDragDrop(event: DragDropSensorEvent)

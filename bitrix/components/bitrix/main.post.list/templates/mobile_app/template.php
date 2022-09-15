@@ -1,4 +1,10 @@
-<?if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
+<?php
+
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
+{
+	die();
+}
+
 /**
  * @var array $arResult
  * @var array $arParams
@@ -9,12 +15,19 @@
  */
 use Bitrix\Main\Localization\Loc;
 
+global $USER;
+
 \Bitrix\Main\Page\Asset::getInstance()->addJs("/bitrix/components/bitrix/main.post.list/templates/.default/script.js");
 \Bitrix\Main\Page\Asset::getInstance()->addJs($templateFolder."/script.js");
 \Bitrix\Main\Page\Asset::getInstance()->addString('<link href="'.CUtil::GetAdditionalFileURL('/bitrix/js/ui/icons/base/ui.icons.base.css').'" type="text/css" rel="stylesheet" />');
 \Bitrix\Main\Page\Asset::getInstance()->addString('<link href="'.CUtil::GetAdditionalFileURL('/bitrix/js/ui/icons/b24/ui.icons.b24.css').'" type="text/css" rel="stylesheet" />');
 
-CUtil::InitJSCore(array("uploader", "date", "fx", "ls")); // does not work
+$extensionsList = [ 'uploader', 'date', 'fx', 'ls' ];
+if (CModule::IncludeModule('socialnetwork'))
+{
+	$extensionsList[] = 'comment_aux';
+}
+CUtil::InitJSCore($extensionsList); // does not work
 
 $prefixNode = $arParams["ENTITY_XML_ID"].'-'.$arParams["EXEMPLAR_ID"];
 $eventNodeId = $prefixNode."_main";
@@ -61,7 +74,13 @@ ob_start();
 			#AFTER_HEADER#
 			#BEFORE#
 			<div class="post-comment-wrap-outer">
-				<div class="post-comment-wrap" bx-content-view-xml-id="#CONTENT_ID#" id="post-comment-wrap-#CONTENT_ID#" bx-content-view-save="N" bx-mpl-block="body">
+				<div
+				 class="post-comment-wrap"
+				 bx-content-view-xml-id="#CONTENT_ID#"
+				 bx-content-view-save="N" bx-mpl-block="body"
+				 bx-content-view-key="#CONTENT_VIEW_KEY#"
+				 bx-content-view-key-signed="#CONTENT_VIEW_KEY_SIGNED#"
+				 id="post-comment-wrap-#CONTENT_ID#">
 					<div class="post-comment-text" id="record-#FULL_ID#-text" bx-mpl-block="text">#TEXT#</div>
 				</div>
 				<div class="post-comment-more" onclick="mobileExpand(this, event)" bx-mpl-block="more-button"><div class="post-comment-more-but"></div></div>
@@ -94,7 +113,9 @@ ob_start();
 	</div>
 	#AFTER_RECORD#<?
 	?><script>BX.ready(function() { BX.onCustomEvent(BX('<?=$eventNodeIdTemplate?>'), 'OnUCCommentIsInDOM', ['#ID#', BX('<?=$eventNodeIdTemplate?>')]);});</script><?
-?></div><? // post-comment-block
+?></div>
+<!--RCRD_END_#FULL_ID#-->
+<? // post-comment-block
 $template = preg_replace("/[\t\n]/", "", ob_get_clean());
 
 ob_start();
@@ -131,7 +152,7 @@ ob_start();
 </div><?
 
 $avatar = \CFile::ResizeImageGet(
-	$_SESSION["SESS_AUTH"]["PERSONAL_PHOTO"],
+	$USER->GetParam("PERSONAL_PHOTO"),
 	array(
 		"width" => $arParams["AVATAR_SIZE"],
 		"height" => $arParams["AVATAR_SIZE"]
@@ -186,13 +207,13 @@ else
 				?><div id="record-<?=$prefixNode?>-hidden" class="feed-hidden-post" style="display:none; overflow:hidden;"></div> <?
 			}
 
-			?><a href="<?=$arParams["NAV_STRING"]?>" id="<?=$prefixNode?>_page_nav" class="post-comments-link" bx-mpl-comments-count="<?=$arResult["NAV_STRING_COUNT_MORE"]?>"><?=Loc::getMessage("BLOG_C_VIEW")?> <span class="post-comments-link-count"><?=$arResult["NAV_STRING_COUNT_MORE"]?></span><?
-				?><span class="post-comments-button-waiter"><svg class="post-comments-button-waiter-circular" viewBox="25 25 50 50">
-					<circle class="post-comments-button-waiter-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"/>
-					<circle class="post-comments-button-waiter-inner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"/>
-				</svg></span><?
-			?></a><?
-
+			?><div class="post-comments-link-cont">
+				<a href="<?=$arParams["NAV_STRING"]?>" id="<?=$prefixNode?>_page_nav" class="post-comments-link" bx-mpl-comments-count="<?=$arResult["NAV_STRING_COUNT_MORE"]?>"><?
+					?><?=Loc::getMessage("BLOG_C_VIEW")?><?
+					?><span class="post-comments-link-count"><?=$arResult["NAV_STRING_COUNT_MORE"]?></span><?
+				?></a>
+				<span class="post-comments-link-loader-informer" id="<?=$prefixNode?>_page_nav_loader" style='display: none;'><?=Loc::getMessage("BLOG_C_LOADING")?></span>
+			</div><?
 			if ($arParams["PREORDER"] != "Y")
 			{
 				?><div id="record-<?=$prefixNode?>-hidden" class="feed-hidden-post" style="display:none; overflow:hidden;"></div> <?
@@ -209,6 +230,10 @@ else
 	if ($arParams["PREORDER"] != "Y"): ?><?=$arParams["NAV_STRING"]?><? endif;
 	$iCount = 0;
 	?><!--RCRDLIST_<?=$arParams["ENTITY_XML_ID"]?>--><?
+	$collapsedMessages = 0;
+	$collapsedMessagesBlockIsCollapsed = true;
+	$collapsedMessagesBlock = null;
+
 	foreach ($arParams["RECORDS"] as $key => $res)
 	{
 		if (intval($res["ID"]) <= 0)
@@ -216,17 +241,82 @@ else
 			continue;
 		}
 
+		if ($res["COLLAPSED"] === "Y")
+		{
+			$collapsedMessages++;
+			if ($collapsedMessagesBlock === null)
+			{
+				ob_start();
+				?>
+				<div class="feed-com-collapsed" data-bx-role="collapsed-block">
+				<input type="checkbox" id="collapsed_switcher_<?=$arParams["ENTITY_XML_ID"]?>_<?=$res["ID"]?>" #COLLAPSED_MESSAGES_BLOCK_IS_COLLAPSED#>
+				<label for="collapsed_switcher_<?=$arParams["ENTITY_XML_ID"]?>_<?=$res["ID"]?>" data-bx-collapse-role="show">
+					<div class="post-comment-control-item">
+						<?=GetMessage("MPL_SHOW_COLLAPSED_COMMENTS")?> (#COLLAPSED_MESSAGES_COUNT#)
+					</div>
+				</label>
+				<label for="collapsed_switcher_<?=$arParams["ENTITY_XML_ID"]?>_<?=$res["ID"]?>" data-bx-collapse-role="hide">
+					<div class="post-comment-control-item">
+						<?=GetMessage("MPL_HIDE_COLLAPSED_COMMENTS")?> (#COLLAPSED_MESSAGES_COUNT#)
+					</div>
+				</label>
+				<div class="feed-com-collapsed-block">
+					#COLLAPSED_MESSAGES_BLOCK#
+				</div>
+				</div><?
+				$collapsedMessagesBlock = ob_get_clean();
+				ob_start();
+			}
+		}
+		else if ($collapsedMessagesBlock !== null)
+		{
+			?><?=str_replace([
+			"#COLLAPSED_MESSAGES_BLOCK_IS_COLLAPSED#",
+			"#COLLAPSED_MESSAGES_COUNT#",
+			"#COLLAPSED_MESSAGES_BLOCK#"
+		], [
+			$collapsedMessagesBlockIsCollapsed ? "" : "checked",
+			$collapsedMessages,
+			ob_get_clean()
+		],
+			$collapsedMessagesBlock
+		);
+			$collapsedMessagesBlock = null;
+			$collapsedMessages = 0;
+			$collapsedMessagesBlockIsCollapsed = true;
+		}
+
 		$res["AUTHOR"] = (is_array($res["AUTHOR"]) ? $res["AUTHOR"] : array());
+		$isMessageBlank = !(array_key_exists("POST_MESSAGE_TEXT", $res) && $res["POST_MESSAGE_TEXT"] !== null);
+		$collapsedMessagesBlockIsCollapsed = ($res["NEW"] == "Y" ? false : $collapsedMessagesBlockIsCollapsed);
 		$iCount++;
 		?><div id="record-<?=$arParams["ENTITY_XML_ID"]?>-<?=$res["ID"]?>-cover" <?
 			?>bx-mpl-xml-id="<?=$arParams["ENTITY_XML_ID"]?>" <?
 			?>bx-mpl-entity-id="<?=$res["ID"]?>" <?
 			?>bx-mpl-read-status="<?=(($res["NEW"] == "Y" ? "new" : "old"))?>" <?
+			?>bx-mpl-blank-status="<?=($isMessageBlank ? "blank" : "full")?>" <?
 			?>bx-mpl-block="main" <?
 		?>class="feed-com-block-cover"><?
 		?><?=$this->__component->parseTemplate($res, $arParams, $template)?>
 		</div>
 	<?
+	}
+	if ($collapsedMessagesBlock !== null)
+	{
+		?><?=str_replace([
+		"#COLLAPSED_MESSAGES_BLOCK_IS_COLLAPSED#",
+		"#COLLAPSED_MESSAGES_COUNT#",
+		"#COLLAPSED_MESSAGES_BLOCK#"
+	], [
+		$collapsedMessagesBlockIsCollapsed ? "" : "checked",
+		$collapsedMessages,
+		ob_get_clean()
+	],
+		$collapsedMessagesBlock
+	);
+		$collapsedMessagesBlock = null;
+		$collapsedMessages = 0;
+		$collapsedMessagesBlockIsCollapsed = true;
 	}
 	?><!--RCRDLIST_END_<?=$arParams["ENTITY_XML_ID"]?>--><?
 	if ($arParams["PREORDER"] == "Y"): ?><?=$arParams["NAV_STRING"]?><? endif;
@@ -251,6 +341,41 @@ if ($this->__component->__parent instanceof \Bitrix\Main\Engine\Contract\Control
 ?>
 <script>
 	BX.ready(function(){
+
+		var collapsedblocks = document.querySelectorAll('.feed-com-collapsed-block');
+		for (const block of collapsedblocks) {
+			block.addEventListener('transitionend', function(event){
+				var position = BX.pos(event.target);
+				var input = block.parentNode.querySelector('input');
+				var duration;
+
+				if (block.offsetHeight < 200 )
+				{
+					duration =  1500;
+				}
+				else
+				{
+					duration =  800;
+				}
+
+				var easing = new BX.easing({
+					duration : duration,
+					start : { scroll : window.pageYOffset || document.documentElement.scrollTop },
+					finish : { scroll : position.top },
+					transition : BX.easing.makeEaseOut(BX.easing.transitions.quart),
+					step : function(state) {
+						window.scrollTo(0, state.scroll);
+					}
+				});
+
+				if (input.checked)
+				{
+					easing.animate();
+				}
+
+			});
+		}
+
 		var f = function() {
 			BX.MPL.createInstance({
 					EXEMPLAR_ID : '<?=CUtil::JSEscape(htmlspecialcharsbx($arParams["EXEMPLAR_ID"]))?>',
@@ -260,6 +385,7 @@ if ($this->__component->__parent instanceof \Bitrix\Main\Engine\Contract\Control
 
 					mainNode : BX('<?=$eventNodeId?>'),
 					navigationNode : BX('<?=$prefixNode?>_page_nav'),
+					navigationNodeLoader : BX('<?=$prefixNode?>_page_nav_loader'),
 					nodeForOldMessages : BX('record-<?=$prefixNode?>-hidden'),
 					nodeForNewMessages : BX('record-<?=$prefixNode?>-new'),
 					nodeFormHolder : BX('record-<?=$prefixNode?>-form-holder'),
@@ -295,7 +421,10 @@ if ($this->__component->__parent instanceof \Bitrix\Main\Engine\Contract\Control
 
 				SHOW_POST_FORM : '<?=CUtil::JSEscape($arParams["SHOW_POST_FORM"])?>',
 				BIND_VIEWER : '<?=$arParams["BIND_VIEWER"]?>',
-				USE_LIVE : <?=(isset($arParams["USE_LIVE"]) && !$arParams["USE_LIVE"] ? 'false' : 'true')?>
+				USE_LIVE : <?=(isset($arParams["USE_LIVE"]) && !$arParams["USE_LIVE"] ? 'false' : 'true')?>,
+
+				CONTENT_VIEW_KEY : '<?= CUtil::JSEscape($arParams['CONTENT_VIEW_KEY'] ?? '') ?>',
+				CONTENT_VIEW_KEY_SIGNED : '<?= CUtil::JSEscape($arParams['CONTENT_VIEW_KEY_SIGNED'] ?? '') ?>',
 			},
 			{
 				id : '<?=CUtil::JSEscape($arParams["FORM"]["ID"])?>',

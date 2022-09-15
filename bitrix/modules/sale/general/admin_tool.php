@@ -911,7 +911,7 @@ function fGetBuyerType($PERSON_TYPE_ID, $LID, $USER_ID = '', $ORDER_ID = 0, $for
 					"ALLOW_EMPTY_CITY" => "Y",
 					"LOCATION_VALUE" => $curVal,
 					"COUNTRY" => "",
-					"ONCITYCHANGE" => "fChangeLocationCity();",
+					"ONCITYCHANGE" => "fChangeLocationCity",
 					"PUBLIC" => "N",
 				),
 				array(
@@ -1421,6 +1421,10 @@ function fGetDeliverySystemsHTML($location, $locationZip, $weight, $price, $curr
 	$setDeliveryPrice = false;
 
 	$arDelivery = CSaleDelivery::DoLoadDelivery($location, $locationZip, $weight, $price, $currency, $siteId, $arShoppingCart);
+	if (empty($arDelivery) || !is_array($arDelivery))
+	{
+		$arDelivery = [];
+	}
 
 	$deliveryHTML = "<select name=\"DELIVERY_ID\" id=\"DELIVERY_ID\" onchange=\"fChangeDelivery();\">";
 	$deliveryHTML .= "<option value=\"\">".GetMessage('NEWO_DELIVERY_NO')."</option>";

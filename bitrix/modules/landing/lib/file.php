@@ -19,7 +19,7 @@ class File
 	 * Entity type block.
 	 */
 	const ENTITY_TYPE_BLOCK = 'B';
-	
+
 	/**
 	 * Entity type asset.
 	 */
@@ -43,10 +43,11 @@ class File
 	 * Add new record.
 	 * @param int $fileId File id.
 	 * @param int $entityId Entity id.
-	 * @param int $entityType Entity type.
+	 * @param string $entityType Entity type.
+	 * @param bool $temp This is temporary file.
 	 * @return void
 	 */
-	protected static function add($fileId, $entityId, $entityType)
+	protected static function add(int $fileId, int $entityId, string $entityType, bool $temp = false): void
 	{
 		$res = FileTable::getList(array(
 			'select' => array(
@@ -63,7 +64,8 @@ class File
 			$res = FileTable::add(array(
 				'FILE_ID' => $fileId,
 				'ENTITY_ID' => $entityId,
-				'ENTITY_TYPE' => $entityType
+				'ENTITY_TYPE' => $entityType,
+				'TEMP' => $temp ? 'Y' : 'N'
 			));
 			$res->isSuccess();
 		}
@@ -103,6 +105,13 @@ class File
 	 */
 	protected static function delete($fileId, $entityId, $entityType)
 	{
+		//@tmp log
+		Debug::log(
+			$entityId . '@' . $entityType,
+			'fileId: ' . print_r($fileId, true) . '@' . print_r(\Bitrix\Main\Diag\Helper::getBackTrace(15), true),
+			'LANDING_FILE_MARK_DELETE'
+		);
+
 		$filter = array(
 			'ENTITY_ID' => $entityId,
 			'=ENTITY_TYPE' => $entityType
@@ -192,13 +201,14 @@ class File
 	 * Add new record for Site.
 	 * @param int $id Site id.
 	 * @param int $fileId File id.
+	 * @param bool $temp This is temporary file.
 	 * @return void
 	 */
-	public static function addToSite($id, $fileId)
+	public static function addToSite(int $id, int $fileId, bool $temp = false): void
 	{
 		if ($fileId > 0 && $id > 0)
 		{
-			self::add($fileId, $id, self::ENTITY_TYPE_SITE);
+			self::add($fileId, $id, self::ENTITY_TYPE_SITE, $temp);
 		}
 	}
 
@@ -268,9 +278,10 @@ class File
 	 * Add new record(s) for Block.
 	 * @param int $blockId Block id.
 	 * @param int|array $fileId File id (or file ids).
+	 * @param bool $temp This is temporary file.
 	 * @return void
 	 */
-	public static function addToBlock($blockId, $fileId)
+	public static function addToBlock(int $blockId, $fileId, bool $temp = false): void
 	{
 		if ($blockId > 0)
 		{
@@ -282,7 +293,7 @@ class File
 			{
 				if ($fid > 0)
 				{
-					self::add($fid, $blockId, self::ENTITY_TYPE_BLOCK);
+					self::add($fid, $blockId, self::ENTITY_TYPE_BLOCK, $temp);
 				}
 			}
 		}
@@ -384,7 +395,7 @@ class File
 			self::ENTITY_TYPE_BLOCK
 		);
 	}
-	
+
 	/**
 	 * Add new record for Asset.
 	 * @param int $assetId Id of landing to which attached asset.
@@ -400,20 +411,20 @@ class File
 			// todo: res from add and check error
 		}
 	}
-	
+
 	/**
 	 * Gets asset files for current landing.
 	 * @param int $assetId Id of landing to which attached asset.
 	 * @return array
 	 */
-	public static function getFilesFromAsset($assetId)
+	public static function getFilesFromAsset($assetId): array
 	{
 		return self::getFiles(
 			$assetId,
 			self::ENTITY_TYPE_ASSET
 		);
 	}
-	
+
 	/**
 	 * Delete asset files for current landing.
 	 * Not remove from disk immediately, just marked for agent
@@ -421,17 +432,17 @@ class File
 	 * @param int|int[] $fileId File id (by default delete all files from Asset).
 	 * @return void
 	 */
-	public static function deleteFromAsset($assetId, $fileId = [])
+	public static function deleteFromAsset(int $assetId, $fileId = []): void
 	{
 		self::delete($fileId, $assetId, self::ENTITY_TYPE_ASSET);
 	}
-	
+
 	/**
 	 * Mark file as "need rebuild", but not delete them. File will be exist until not created new file.
 	 * @param int|int[] $assetId Id of landing to which attached asset. If not set - will marked all.
-	 * @return void
+	 * @return bool
 	 */
-	public static function markAssetToRebuild($assetId = [])
+	public static function markAssetToRebuild($assetId = []): bool
 	{
 		$filter = [
 			'=ENTITY_TYPE' => self::ENTITY_TYPE_ASSET
@@ -440,34 +451,39 @@ class File
 		{
 			$filter['ENTITY_ID'] = $assetId;
 		}
+
 		$res = FileTable::getList([
 			'select' => ['ID', 'ENTITY_ID'],
 			'filter' => $filter
 		]);
-		while ($row = $res->fetch())
+		$files = $res->fetchAll();
+		$result = true;
+		foreach ($files as $file)
 		{
 			$resUpdate = FileTable::update(
-				$row['ID'],
+				$file['ID'],
 				[
-					'ENTITY_ID' => -1 * abs($row['ENTITY_ID'])
+					'ENTITY_ID' => -1 * abs($file['ENTITY_ID'])
 				]
 			);
-			$resUpdate->isSuccess();
+			$result = $result && $resUpdate->isSuccess();
 		}
+
+		return count($files) > 0 ? $result : false;
 	}
-	
+
 	/**
 	 * When file rebuilded - delete old files (marked as "need rebuild") for current asset ID (current landing)
 	 * @param int|int[] $assetId Id of landing to which attached asset.
 	 * @return void
 	 */
-	public static function markAssetRebuilded($assetId)
+	public static function markAssetRebuilded($assetId): void
 	{
 		if(!is_array($assetId))
 		{
 			$assetId = [$assetId];
 		}
-		
+
 		foreach ($assetId as $key => $id)
 		{
 			self::deleteFromAsset(-1 * abs($id));
@@ -558,9 +574,9 @@ class File
 	/**
 	 * Gets core file path.
 	 * @param int $fileId File id.
-	 * @return string
+	 * @return string|null
 	 */
-	public static function getFilePath($fileId)
+	public static function getFilePath($fileId): ?string
 	{
 		$file = self::getFileArray($fileId);
 		if (isset($file['SRC']))

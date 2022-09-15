@@ -1,4 +1,4 @@
-<?
+<?php
 $MESS["IBLIST_A_ACCESS_DENIED_STATUS"] = "You do not have enough permissions to edit this record in its current state";
 $MESS["IBLIST_A_ACTIVATE"] = "Activate";
 $MESS["IBLIST_A_ACTIVE"] = "Active";
@@ -15,6 +15,7 @@ $MESS["IBLIST_A_CATALOG_BAR_CODE_MULTI"] = "multiple";
 $MESS["IBLIST_A_CATALOG_BUNDLE"] = "Bundle";
 $MESS["IBLIST_A_CATALOG_CAN_BUY_ZERO"] = "Make out-of-stock items available for purchase";
 $MESS["IBLIST_A_CATALOG_CAN_BUY_ZERO_TITLE"] = "Make out-of-stock items available for purchase including those with negative quantity";
+$MESS["IBLIST_A_CATALOG_DEFAULT"] = "(default)";
 $MESS["IBLIST_A_CATALOG_EMPTY_VALUE"] = "not selected";
 $MESS["IBLIST_A_CATALOG_EXTRA_DESCRIPTION"] = "Surcharge of #VALUE# to the base price";
 $MESS["IBLIST_A_CATALOG_HEIGHT"] = "Height";
@@ -23,9 +24,13 @@ $MESS["IBLIST_A_CATALOG_MEASURE"] = "Unit of measurement";
 $MESS["IBLIST_A_CATALOG_MEASURE_RATIO"] = "Factor";
 $MESS["IBLIST_A_CATALOG_MEASURE_RATIO_TITLE"] = "Unit ratio";
 $MESS["IBLIST_A_CATALOG_MEASURE_TITLE"] = "Unit of measurement";
+$MESS["IBLIST_A_CATALOG_PRODUCT"] = "Product";
+$MESS["IBLIST_A_CATALOG_PRODUCT_TITLE"] = "Product";
 $MESS["IBLIST_A_CATALOG_PURCHASING_PRICE"] = "Purchasing price";
 $MESS["IBLIST_A_CATALOG_QUANTITY_EXT"] = "Quantity in stock";
+$MESS["IBLIST_A_CATALOG_QUANTITY_NEW_CARD"] = "Available stock";
 $MESS["IBLIST_A_CATALOG_QUANTITY_RESERVED"] = "Reserved";
+$MESS["IBLIST_A_CATALOG_QUANTITY_RESERVED_NEW_CARD"] = "Reserved";
 $MESS["IBLIST_A_CATALOG_QUANTITY_TRACE"] = "Reduce quantity upon order";
 $MESS["IBLIST_A_CATALOG_QUANTITY_TRACE_EXT"] = "Enable stock control";
 $MESS["IBLIST_A_CATALOG_SKU_PRICE"] = "from #PRICE#";
@@ -62,7 +67,6 @@ $MESS["IBLIST_A_ELEMENT_DELETE_ERROR"] = "Error deleting element ##ID#.";
 $MESS["IBLIST_A_ELS"] = "Elements";
 $MESS["IBLIST_A_EL_EDIT"] = "Open element editing page";
 $MESS["IBLIST_A_ERR_BUILDER_ADSENT"] = "Link builder was not found.";
-$MESS["IBLIST_A_ERR_PRODUCT_LIMIT"] = "Maximum number of products allowed exceeded. Products found in the catalog - #COUNT# (limit allowed - #LIMIT#).";
 $MESS["IBLIST_A_EXTCODE"] = "External code";
 $MESS["IBLIST_A_F_CREATED_BY"] = "Created by";
 $MESS["IBLIST_A_F_CREATED_WHEN"] = "Creation date";
@@ -158,4 +162,3 @@ $MESS["MAIN_ADMIN_LIST_DEACTIVATE"] = "deactivate";
 $MESS["MAIN_ADMIN_LIST_DELETE"] = "delete";
 $MESS["MAIN_ADMIN_LIST_SELECTED"] = "Selected:";
 $MESS["MAIN_DELETE"] = "Delete";
-?>

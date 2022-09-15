@@ -287,6 +287,29 @@ class Result extends BaseResult
 								// create new collection and set as value for current object
 								/** @var Collection $collection */
 								$collection = $remoteEntity->createCollection();
+
+								// collection should be filled if there are no LIMIT and relation filter in query
+								if ($this->query->getLimit() === null)
+								{
+									// noting in filter should start with $currentDefinition
+									$noRelationInFilter = true;
+
+									foreach ($this->query->getFilterChains() as $chain)
+									{
+										if (strpos($chain->getDefinition(), $currentDefinition) === 0)
+										{
+											$noRelationInFilter = false;
+											break;
+										}
+									}
+
+									if ($noRelationInFilter)
+									{
+										// now we are sure the set is complete
+										$collection->sysSetFilled();
+									}
+								}
+
 								$currentObject->sysSetActual($field->getName(), $collection);
 							}
 							else
@@ -588,9 +611,11 @@ class Result extends BaseResult
 
 	public function fetch(\Bitrix\Main\Text\Converter $converter = null)
 	{
+		$row = $this->result->fetch($converter);
+
 		return empty($this->hiddenObjectFields)
-			? $this->result->fetch($converter)
-			: $this->hideObjectFields($this->result->fetch($converter));
+			? $row
+			: $this->hideObjectFields($row);
 	}
 
 	public function fetchAll(\Bitrix\Main\Text\Converter $converter = null)
@@ -603,7 +628,7 @@ class Result extends BaseResult
 		{
 			$data = $this->result->fetchAll($converter);
 
-			foreach ($data as $row)
+			foreach ($data as &$row)
 			{
 				$this->hideObjectFields($row);
 			}

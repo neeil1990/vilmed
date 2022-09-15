@@ -285,4 +285,19 @@ BX.ready(function()
 			BX.PreventDefault();
 		});
 	}
+
+	//Show all 20 colors in setting 'corporate color'
+	var linkAllColors = document.getElementById("link-all-colors");
+	if (linkAllColors)
+	{
+		linkAllColors.addEventListener("click", showAllColors);
+	}
+	function showAllColors() {
+		var colors = document.getElementById("set-colors");
+		for (var i = 0; i < colors.childNodes.length; i++)
+		{
+			colors.childNodes[i].hidden = false;
+		}
+		linkAllColors.hidden = true;
+	}
 });

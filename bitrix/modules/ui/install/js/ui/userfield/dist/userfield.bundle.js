@@ -3,9 +3,7 @@ this.BX.UI = this.BX.UI || {};
 (function (exports,main_core) {
 	'use strict';
 
-	var UserField =
-	/*#__PURE__*/
-	function () {
+	var UserField = /*#__PURE__*/function () {
 	  function UserField(data, params) {
 	    babelHelpers.classCallCheck(this, UserField);
 	    this.progress = false;
@@ -24,7 +22,7 @@ this.BX.UI = this.BX.UI || {};
 	      get: 'main.userFieldConfig.get',
 	      add: 'main.userFieldConfig.add',
 	      update: 'main.userFieldConfig.update',
-	      delete: 'main.userFieldConfig.delete'
+	      "delete": 'main.userFieldConfig.delete'
 	    };
 	  }
 
@@ -68,7 +66,7 @@ this.BX.UI = this.BX.UI || {};
 	          _this.setData(response.data.field);
 
 	          resolve(response);
-	        }).catch(function (response) {
+	        })["catch"](function (response) {
 	          _this.progress = false;
 	          response.errors.forEach(function (_ref) {
 	            var message = _ref.message;
@@ -125,7 +123,7 @@ this.BX.UI = this.BX.UI || {};
 	          _this2.setData(response.data.field);
 
 	          resolve(response);
-	        }).catch(function (response) {
+	        })["catch"](function (response) {
 	          _this2.progress = false;
 	          response.errors.forEach(function (_ref2) {
 	            var message = _ref2.message;
@@ -160,7 +158,7 @@ this.BX.UI = this.BX.UI || {};
 	          return;
 	        }
 
-	        var action = _this3.actions.delete;
+	        var action = _this3.actions["delete"];
 
 	        if (!main_core.Type.isString(action) || action.length <= 0) {
 	          errors.push('UserField action is not specified');
@@ -178,7 +176,7 @@ this.BX.UI = this.BX.UI || {};
 	          _this3.deleted = true;
 	          _this3.progress = false;
 	          resolve();
-	        }).catch(function (response) {
+	        })["catch"](function (response) {
 	          _this3.progress = false;
 	          response.errors.forEach(function (_ref3) {
 	            var message = _ref3.message;
@@ -270,16 +268,16 @@ this.BX.UI = this.BX.UI || {};
 	  }, {
 	    key: "getEnumeration",
 	    value: function getEnumeration() {
-	      if (!main_core.Type.isArray(this.data.enum)) {
-	        this.data.enum = [];
+	      if (!main_core.Type.isArray(this.data["enum"])) {
+	        this.data["enum"] = [];
 	      }
 
-	      return this.data.enum;
+	      return this.data["enum"];
 	    }
 	  }, {
 	    key: "setEnumeration",
 	    value: function setEnumeration(items) {
-	      this.data.enum = items;
+	      this.data["enum"] = items;
 	      return this;
 	    }
 	  }, {

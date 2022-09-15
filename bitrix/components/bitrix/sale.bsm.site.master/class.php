@@ -17,8 +17,8 @@ require_once("tools/modulechecker.php");
 require_once("tools/bitrixvmchecker.php");
 require_once("tools/agentchecker.php");
 require_once("tools/pushchecker.php");
-require_once("tools/persontypepreparer.php");
 require_once("tools/sitepatcher.php");
+require_once("tools/defaultsitechecker.php");
 
 /**
  * Class SaleBsmSiteMaster
@@ -340,6 +340,7 @@ class SaleBsmSiteMaster extends \CBitrixComponent
 			}
 		}
 
+		$this->checkDefaultSite();
 		$this->checkBitrixVm();
 		$this->checkAgents();
 		$this->checkPushServer();
@@ -369,6 +370,18 @@ class SaleBsmSiteMaster extends \CBitrixComponent
 		if (!$bitrixVmChecker->isVm())
 		{
 			$this->addWizardStep("Bitrix\Sale\BsmSiteMaster\Steps\BitrixVmStep", 300);
+		}
+	}
+
+	private function checkDefaultSite()
+	{
+		$defaultSiteChecker = new Tools\DefaultSiteChecker();
+
+		$checkSiteResult = $defaultSiteChecker->checkSite();
+		if (!$checkSiteResult->isSuccess())
+		{
+			$this->addWizardVar("default_site_error", $checkSiteResult->getErrorCollection()->current()->getMessage());
+			$this->addWizardStep("Bitrix\Sale\BsmSiteMaster\Steps\DefaultSiteStep", 305);
 		}
 	}
 

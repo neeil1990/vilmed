@@ -1,5 +1,6 @@
-<?
+<?php
 
+use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Sender\Access\ActionDictionary;
 use Bitrix\Sender\Security;
@@ -32,12 +33,6 @@ class SenderConfigLimitsComponent extends Bitrix\Sender\Internals\CommonSenderCo
 
 	protected function prepareResult()
 	{
-		/* Set title */
-		if ($this->arParams['SET_TITLE'])
-		{
-			/**@var CAllMain*/
-			$GLOBALS['APPLICATION']->SetTitle(Loc::getMessage('SENDER_CONFIG_LIMITS_TITLE'));
-		}
 
 		if (!$this->arParams['CAN_EDIT'])
 		{
@@ -45,6 +40,11 @@ class SenderConfigLimitsComponent extends Bitrix\Sender\Internals\CommonSenderCo
 			return false;
 		}
 
+		$this->arResult['CAN_TRACK_MAIL'] = Option::get('sender', 'track_mails') === 'Y';
+		$this->arResult['USE_MAIL_CONSENT'] = Option::get('sender', 'mail_consent') === 'Y';
+		$this->arResult['SENDING_TIME'] = Option::get('sender', 'sending_time') === 'Y';
+		$this->arResult['SENDING_START'] = Option::get('sender', 'sending_start', '09:00');
+		$this->arResult['SENDING_END'] = Option::get('sender', 'sending_end', '18:00');
 		$this->arResult['ACTION_URI'] = $this->getPath() . '/ajax.php';
 
 		$list = array();
@@ -61,6 +61,11 @@ class SenderConfigLimitsComponent extends Bitrix\Sender\Internals\CommonSenderCo
 			$limits = array();
 			foreach ($transport->getLimiters() as $limiter)
 			{
+				if ($limiter->isHidden())
+				{
+					continue;
+				}
+
 				/** @var Transport\CountLimiter $limiter */
 				$isCountLimiter = $limiter instanceof Transport\CountLimiter;
 
@@ -74,7 +79,7 @@ class SenderConfigLimitsComponent extends Bitrix\Sender\Internals\CommonSenderCo
 				$initialLimit = $initialLimit ?: 1;
 
 				$percentage = $isCountLimiter ? ceil(($current / $initialLimit) * 100) : 0;
-				$percentage = $percentage > 100 ? 100 : 0;
+				$percentage = $percentage > 100 ? 100 : $percentage;
 
 				$limits[] = array(
 					'NAME' => $isCountLimiter ? $limiter->getName() : null,
@@ -94,6 +99,11 @@ class SenderConfigLimitsComponent extends Bitrix\Sender\Internals\CommonSenderCo
 				{
 					$helpUri = $limiter->getParameter('globalHelpUri');
 				}
+			}
+
+			if (empty($limits))
+			{
+				continue;
 			}
 
 			$list[] = array(

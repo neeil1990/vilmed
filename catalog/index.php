@@ -17,8 +17,8 @@ if ($USER->IsAdmin()){
 
 <?
 $APPLICATION->IncludeComponent(
-	"bitrix:catalog",
-	".default",
+	"bitrix:catalog", 
+	".default", 
 	array(
 		"BY_LINK" => "N",
 		"1CB_FILE_FIELD_MAX_COUNT" => "5",

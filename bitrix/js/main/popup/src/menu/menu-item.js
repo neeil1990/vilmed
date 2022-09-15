@@ -1,12 +1,30 @@
 import Menu from './menu';
 import { Type, Text, Dom, Event, Tag } from 'main.core';
-import { EventEmitter } from 'main.core.events';
+import { BaseEvent, EventEmitter } from 'main.core.events';
 import { MenuItemOptions } from './menu-types';
 
 const aliases = {
 	onSubMenuShow: { namespace: 'BX.Main.Menu.Item', eventName: 'SubMenu:onShow' },
 	onSubMenuClose: { namespace: 'BX.Main.Menu.Item', eventName: 'SubMenu:onClose' }
 };
+
+const reEscape = /[<>'"]/g;
+const escapeEntities = {
+	'<': '&lt;',
+	'>': '&gt;',
+	"'": '&#39;',
+	'"': '&quot;',
+};
+
+function encodeSafe(value: string): string
+{
+	if (Type.isString(value))
+	{
+		return value.replace(reEscape, item => escapeEntities[item]);
+	}
+
+	return value;
+}
 
 EventEmitter.registerAliases(aliases);
 
@@ -21,7 +39,23 @@ export default class MenuItem extends EventEmitter
 		this.options = options;
 
 		this.id = options.id || Text.getRandom();
-		this.text = Type.isStringFilled(options.text) ? options.text : '';
+
+		this.text = '';
+		this.allowHtml = false;
+		if (Type.isStringFilled(options.html) || Type.isElementNode(options.html))
+		{
+			this.text = options.html;
+			this.allowHtml = true;
+		}
+		else if (Type.isStringFilled(options.text))
+		{
+			this.text = options.text;
+			if (this.text.match(/<[^>]+>/))
+			{
+				console.warn('BX.Main.MenuItem: use "html" option for the html item content.', this.getText());
+			}
+		}
+
 		this.title = Type.isStringFilled(options.title) ? options.title : '';
 		this.delimiter = options.delimiter === true;
 		this.href = Type.isStringFilled(options.href) ? options.href : null;
@@ -60,7 +94,7 @@ export default class MenuItem extends EventEmitter
 
 		/**
 		 *
-		 * @type {{item: Element, text: Element}}
+		 * @type {{item: HTMLElement, text: HTMLElement}}
 		 */
 		this.layout = {
 			item: null,
@@ -91,22 +125,23 @@ export default class MenuItem extends EventEmitter
 
 		if (this.delimiter)
 		{
-			if (Type.isStringFilled(this.text))
+			if (Type.isStringFilled(this.getText()))
 			{
 				this.layout.item = Dom.create('span', {
 					props: {
-						className: 'popup-window-delimiter-section'
+						className: [
+							'popup-window-delimiter-section',
+							this.className ? this.className : '',
+						].join(' ')
 					},
 					children: [
-						(this.layout.text = Dom.create('span', {
-							props: {
-								className: 'popup-window-delimiter-text'
-							},
-							html: this.text
-						}))
+						(this.layout.text = Tag.render`
+							<span class="popup-window-delimiter-text">${
+								this.allowHtml ? this.getText() : encodeSafe(this.getText())
+							}</span>
+						`)
 					]
 				});
-
 			}
 			else
 			{
@@ -140,12 +175,11 @@ export default class MenuItem extends EventEmitter
 
 				children: [
 					Dom.create('span', { props: { className: 'menu-popup-item-icon' } }),
-					(this.layout.text = Dom.create('span', {
-						props: {
-							className: 'menu-popup-item-text'
-						},
-						html: this.text
-					}))
+					(this.layout.text = Tag.render`
+						<span class="menu-popup-item-text">${
+							this.allowHtml ? this.getText() : encodeSafe(this.getText())
+						}</span>
+					`)
 				]
 			});
 
@@ -176,17 +210,34 @@ export default class MenuItem extends EventEmitter
 		return this.getLayout().text;
 	}
 
-	getText(): string
+	getText(): string | HTMLElement
 	{
 		return this.text;
 	}
 
-	setText(text: string)
+	setText(text: string | HTMLElement, allowHtml = false)
 	{
-		if (Type.isString(text))
+		if (Type.isString(text) || Type.isElementNode(text))
 		{
+			this.allowHtml = allowHtml;
 			this.text = text;
-			this.getTextContainer().innerHTML = text;
+
+			if (Type.isElementNode(text))
+			{
+				Dom.clean(this.getTextContainer());
+				if (this.allowHtml)
+				{
+					Dom.append(text, this.getTextContainer());
+				}
+				else
+				{
+					this.getTextContainer().innerHTML = encodeSafe(text.outerHTML);
+				}
+			}
+			else
+			{
+				this.getTextContainer().innerHTML = this.allowHtml ? text : encodeSafe(text);
+			}
 		}
 	}
 
@@ -197,6 +248,11 @@ export default class MenuItem extends EventEmitter
 
 	showSubMenu(): void
 	{
+		if (!this.getMenuWindow().getPopupWindow().isShown())
+		{
+			return;
+		}
+
 		this.addSubMenu(this._items);
 
 		if (this.subMenuWindow)
@@ -225,21 +281,26 @@ export default class MenuItem extends EventEmitter
 		}
 
 		const rootMenuWindow = this.getMenuWindow().getRootMenuWindow() || this.getMenuWindow();
-		const options = rootMenuWindow.params;
+		const rootOptions = Object.assign({}, rootMenuWindow.params);
+		delete rootOptions.events;
+
+		const subMenuOptions =
+			Type.isPlainObject(rootMenuWindow.params.subMenuOptions) ? rootMenuWindow.params.subMenuOptions : {}
+		;
+
+		const options = Object.assign({}, rootOptions, subMenuOptions);
 
 		//Override root menu options
 		options.autoHide = false;
 		options.menuShowDelay = this.menuShowDelay;
 		options.cacheable = this.isCacheable();
-		options.zIndexAbsolute = this.getMenuWindow().getPopupWindow().getZindex() + 2;
+		options.targetContainer = this.getMenuWindow().getPopupWindow().getTargetContainer();
 		options.bindOptions = {
 			forceTop: true,
 			forceLeft: true,
 			forceBindPosition: true
 		};
 
-		delete options.zIndex;
-		delete options.events;
 		delete options.angle;
 		delete options.overlay;
 
@@ -330,7 +391,7 @@ export default class MenuItem extends EventEmitter
 		}
 
 		const popupWindow = this.subMenuWindow.getPopupWindow();
-		const itemRect = this.layout.item.getBoundingClientRect();
+		const itemRect = this.getBoundingClientRect();
 
 		let offsetLeft = itemRect.width + this.subMenuOffsetX;
 		let offsetTop = itemRect.height + this.getPopupPadding();
@@ -341,8 +402,10 @@ export default class MenuItem extends EventEmitter
 		const popupHeight = popupWindow.getPopupContainer().offsetHeight;
 		const popupBottom = itemRect.top + popupHeight;
 
-		const clientWidth = document.documentElement.clientWidth;
-		const clientHeight = document.documentElement.clientHeight;
+		const targetContainer = this.getMenuWindow().getPopupWindow().getTargetContainer();
+		const isGlobalContext = this.getMenuWindow().getPopupWindow().isTargetDocumentBody();
+		const clientWidth = isGlobalContext ? document.documentElement.clientWidth : targetContainer.offsetWidth;
+		const clientHeight = isGlobalContext ? document.documentElement.clientHeight : targetContainer.offsetHeight;
 
 		// let's try to fit a submenu to the browser viewport
 		const exceeded = popupBottom - clientHeight;
@@ -379,6 +442,27 @@ export default class MenuItem extends EventEmitter
 		popupWindow.setOffset({ offsetLeft: offsetLeft, offsetTop: -offsetTop });
 		popupWindow.setAngle({ position: anglePosition, offset: angleOffset });
 		popupWindow.adjustPosition();
+	}
+
+	getBoundingClientRect(): DOMRect
+	{
+		const popup = this.getMenuWindow().getPopupWindow();
+		if (popup.isTargetDocumentBody())
+		{
+			return this.layout.item.getBoundingClientRect();
+		}
+		else
+		{
+			const rect = popup.getPositionRelativeToTarget(this.layout.item);
+			const targetContainer = this.getMenuWindow().getPopupWindow().getTargetContainer();
+
+			return new DOMRect(
+				rect.left - targetContainer.scrollLeft,
+				rect.top - targetContainer.scrollTop,
+				rect.width,
+				rect.height
+			);
+		}
 	}
 
 	getPopupPadding(): number
@@ -463,14 +547,19 @@ export default class MenuItem extends EventEmitter
 	/**
 	 * @private
 	 */
-	onItemMouseEnter(event): void
+	onItemMouseEnter(mouseEvent: MouseEvent): void
 	{
 		if (this.isDisabled())
 		{
 			return;
 		}
 
-		EventEmitter.emit(this, 'onMouseEnter', undefined, { thisArg: this });
+		const event = new BaseEvent({ data: { mouseEvent } });
+		EventEmitter.emit(this, 'onMouseEnter', event, { thisArg: this });
+		if (event.isDefaultPrevented())
+		{
+			return;
+		}
 
 		this.clearSubMenuTimeout();
 
@@ -491,14 +580,19 @@ export default class MenuItem extends EventEmitter
 	/**
 	 * @private
 	 */
-	onItemMouseLeave(event): void
+	onItemMouseLeave(mouseEvent: MouseEvent): void
 	{
 		if (this.isDisabled())
 		{
 			return;
 		}
 
-		EventEmitter.emit(this, 'onMouseLeave', undefined, { thisArg: this });
+		const event = new BaseEvent({ data: { mouseEvent } });
+		EventEmitter.emit(this, 'onMouseLeave', event, { thisArg: this });
+		if (event.isDefaultPrevented())
+		{
+			return;
+		}
 
 		this.clearSubMenuTimeout();
 	}

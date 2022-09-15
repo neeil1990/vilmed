@@ -1,4 +1,7 @@
 <?
+
+use Bitrix\Main\Loader;
+
 IncludeModuleLangFile(__FILE__);
 
 $GLOBALS['YANDEX_MAP_PROPERTY'] = array();
@@ -64,7 +67,7 @@ abstract class CIBlockPropertyMapInterface
 
 		if ($strMapKeys)
 		{
-			$arMapKeys = unserialize($strMapKeys);
+			$arMapKeys = unserialize($strMapKeys, ['allowed_classes' => false]);
 
 			if (array_key_exists($strDomain, $arMapKeys))
 				$MAP_KEY = $arMapKeys[$strDomain];
@@ -417,6 +420,10 @@ function updatePointPosition_<?echo $MAP_ID?>__n<?=$googleMapLastNumber?>_(obPoi
 	obInput.value = null == obP ? '' : obP[0] + ',' + obP[1];
 	BX('point_<?echo $MAP_ID?>__n<?=$googleMapLastNumber?>_lat').value = obP ? obP[0] : '';
 	BX('point_<?echo $MAP_ID?>__n<?=$googleMapLastNumber?>_lon').value = obP ? obP[1] : '';
+	if (obPoint.pixel)
+	{
+		BX.onCustomEvent(window, 'onAddGoogleMapPoint');
+	}
 }
 
 BX.ready(function() {
@@ -679,6 +686,8 @@ var jsGoogleCESearch_<?echo $MAP_ID;?> = {
 								),
 							),
 						)),
+						'MAP_WIDTH' => $arParams['WIDTH'] ?? null,
+						'MAP_HEIGHT' => $arParams['HEIGHT'] ?? null,
 						'MAP_ID' => 'MAP_GOOGLE_VIEW_'.$arProperty['IBLOCK_ID'].'_'.$arProperty['ID'].'__n'.$googleMapLastNumber.'_',
 						'DEV_MODE' => 'Y',
 						'API_KEY' => $apiKey
@@ -735,6 +744,15 @@ var jsGoogleCESearch_<?echo $MAP_ID;?> = {
 			'VALUE' => $params['FIELD_NAME'] ?? '',
 		];
 
+		if (isset($params['WIDTH']))
+		{
+			$paramsHTMLControl['WIDTH'] = $params['WIDTH'];
+		}
+		if (isset($params['HEIGHT']))
+		{
+			$paramsHTMLControl['HEIGHT'] = $params['HEIGHT'];
+		}
+
 		if ($settings['MULTIPLE'] === 'Y')
 		{
 			$multipleResult = '';
@@ -763,7 +781,51 @@ class CIBlockPropertyMapYandex extends CIBlockPropertyMapInterface
 {
 	public static function GetUserTypeDescription()
 	{
-		return array(
+		// This property should be disabled in Ukraine
+		if (Loader::includeModule('bitrix24'))
+		{
+			$licensePrefix = \CBitrix24::getLicensePrefix();
+			if ($licensePrefix === 'ua' || $licensePrefix === 'ur')
+			{
+				return [];
+			}
+		}
+		elseif (Loader::includeModule('intranet'))
+		{
+			$portalZone = \CIntranetUtils::getPortalZone();
+			if ($portalZone === 'ua')
+			{
+				return [];
+			}
+		}
+		else
+		{
+			$languageIterator = \Bitrix\Main\Localization\LanguageTable::getList([
+				'select' => ['ID'],
+				'filter' => ['=ID' => 'ru', '=ACTIVE' => 'Y']
+			]);
+			$row = $languageIterator->fetch();
+			unset($languageIterator);
+			if (!empty($row))
+			{
+				$languageIterator = \Bitrix\Main\Localization\LanguageTable::getList([
+					'select' => ['ID'],
+					'filter' => [
+						'=ID' => 'ua',
+						'=ACTIVE' => 'Y',
+					],
+					'limit' => 1
+				]);
+				$row = $languageIterator->fetch();
+				unset($languageIterator);
+				if (!empty($row))
+				{
+					return [];
+				}
+			}
+		}
+
+		return [
 			"PROPERTY_TYPE" => "S",
 			"USER_TYPE" => "map_yandex",
 			"DESCRIPTION" => GetMessage("IBLOCK_PROP_MAP_YANDEX"),
@@ -777,7 +839,7 @@ class CIBlockPropertyMapYandex extends CIBlockPropertyMapInterface
 			'GetUIEntityEditorProperty' => array(__CLASS__, 'GetUIEntityEditorProperty'),
 			'GetUIEntityEditorPropertyEditHtml' => array(__CLASS__, 'GetUIEntityEditorPropertyEditHtml'),
 			'GetUIEntityEditorPropertyViewHtml' => array(__CLASS__, 'GetUIEntityEditorPropertyViewHtml'),
-		);
+		];
 	}
 
 	public static function _DrawKeyInputControl($MAP_ID, $strDomain)
@@ -2599,7 +2661,9 @@ function ChangeOrLeaveFile<?= $id?>(bChange)
 	public static function BaseConvertFromDB($val = "")
 	{
 		if (!is_array($val) && $val <> '')
-			$val = unserialize($val);
+		{
+			$val = unserialize($val, ['allowed_classes' => false]);
+		}
 		return $val ? $val : array();
 	}
 
@@ -2718,7 +2782,7 @@ function ChangeOrLeaveFile<?= $id?>(bChange)
 	{
 		if(!is_array($val) && is_string($val))
 		{
-			$val = unserialize($val);
+			$val = unserialize($val, ['allowed_classes' => false]);
 		}
 
 		if(!is_array($val))
@@ -2836,6 +2900,11 @@ class CIBlockPropertyVideo extends CVideoProperty
 {
 	public static function GetUserTypeDescription()
 	{
+		if (Loader::includeModule("bitrix24"))
+		{
+			return [];
+		}
+
 		return array(
 			"PROPERTY_TYPE" => "S",
 			"USER_TYPE" => "video",
@@ -2967,26 +3036,34 @@ class CIBlockPropertyVideo extends CVideoProperty
 	public static function GetUIEntityEditorPropertyEditHtml(array $params = []) : string
 	{
 		$settings = $params['SETTINGS'] ?? [];
+
+		if ($settings['MULTIPLE'] === 'Y')
+		{
+			if (is_array($params['VALUE']))
+			{
+				$editor = '';
+
+				for($index = 0; $index < $params['SETTINGS']['MULTIPLE_CNT']; $index++)
+				{
+					$value = [
+						'VALUE' => $params['VALUE'][$index] ?? []
+					];
+					$paramsHTMLControl = [
+						'VALUE' => $params['FIELD_NAME'] . '[' . $index . ']' ?? '[' . $index . ']',
+					];
+					$editor .= static::GetPropertyFieldHtml($settings, $value, $paramsHTMLControl);
+				}
+
+				return $editor;
+			}
+		}
+
+		$value = [
+			'VALUE' => $params['VALUE'] ?? []
+		];
 		$paramsHTMLControl = [
 			'VALUE' => $params['FIELD_NAME'] ?? '',
 		];
-		if ($settings['MULTIPLE'] === 'Y')
-		{
-			$value = [];
-			if (is_array($params['VALUE']))
-			{
-				foreach ($params['VALUE'] as $element)
-				{
-					$value[] = ['VALUE' => $element];
-				}
-			}
-		}
-		else
-		{
-			$value = [
-				'VALUE' => $params['VALUE'] ?? ''
-			];
-		}
 
 		return static::GetPropertyFieldHtml($settings, $value, $paramsHTMLControl);
 	}
@@ -3005,7 +3082,9 @@ class CIBlockPropertyVideo extends CVideoProperty
 			{
 				foreach ($params['VALUE'] as $element)
 				{
-					$value = ['VALUE' => $element];
+					$value = [
+						'VALUE' => empty($element) ? [] : $element
+					];
 					$multipleResult .=  static::GetPublicViewHTML($settings, $value, $paramsHTMLControl) . '<br>';
 				}
 			}
@@ -3014,7 +3093,7 @@ class CIBlockPropertyVideo extends CVideoProperty
 		else
 		{
 			$value = [
-				'VALUE' => $params['VALUE'] ?? ''
+				'VALUE' => empty($params['VALUE']) ? [] : $params['VALUE']
 			];
 		}
 

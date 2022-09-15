@@ -75,6 +75,8 @@ export class Content extends BasePanel
 		return getDeltaFromEvent(event);
 	}
 
+	adjustActionsPanels: boolean = true;
+
 	constructor(id: string, data = {})
 	{
 		super(id, data);
@@ -135,20 +137,22 @@ export class Content extends BasePanel
 			Dom.addClass(this.layout, 'landing-ui-panel-content-with-subtitle');
 		}
 
+		if (this.data.showFromRight === true)
+		{
+			this.setLayoutClass('landing-ui-panel-show-from-right');
+		}
+
 		this.init();
 
 		Event.bind(window.top, 'keydown', this.onKeyDown.bind(this));
-
-		BX.Landing.PageObject.getInstance()
-			.view()
-			.then((frame) => {
-				void (!!frame && Event.bind(frame.contentWindow, 'keydown', this.onKeyDown.bind(this)));
-			}, console.warn);
+		BX.Landing.PageObject.getEditorWindow();
 
 		if (this.data.scrollAnimation)
 		{
 			this.scrollObserver = new IntersectionObserver(this.onIntersecting.bind(this));
 		}
+
+		this.checkReadyToSave = this.checkReadyToSave.bind(this);
 	}
 
 	init()
@@ -270,11 +274,21 @@ export class Content extends BasePanel
 		return this.state === 'shown';
 	}
 
+	shouldAdjustActionsPanels(): boolean
+	{
+		return this.adjustActionsPanels;
+	}
+
 	// eslint-disable-next-line no-unused-vars
 	show(options?: any): Promise<any>
 	{
 		if (!this.isShown())
 		{
+			if (this.shouldAdjustActionsPanels())
+			{
+				Dom.addClass(document.body, 'landing-ui-hide-action-panels');
+			}
+
 			void BX.Landing.Utils.Show(this.overlay);
 			return BX.Landing.Utils.Show(this.layout).then(() => {
 				this.state = 'shown';
@@ -288,6 +302,11 @@ export class Content extends BasePanel
 	{
 		if (this.isShown())
 		{
+			if (this.shouldAdjustActionsPanels())
+			{
+				Dom.removeClass(document.body, 'landing-ui-hide-action-panels');
+			}
+
 			void BX.Landing.Utils.Hide(this.overlay);
 			return BX.Landing.Utils.Hide(this.layout).then(() => {
 				this.state = 'hidden';
@@ -346,5 +365,53 @@ export class Content extends BasePanel
 	{
 		this.sidebarButtons.add(button);
 		Dom.append(button.layout, this.sidebar);
+	}
+
+	setOverlayClass(className: string)
+	{
+		Dom.addClass(this.overlay, className);
+	}
+
+	renderTo(target: HTMLElement)
+	{
+		super.renderTo(target);
+		Dom.append(this.overlay, target);
+	}
+
+	checkReadyToSave()
+	{
+		let canSave = true;
+		this.forms.forEach(form => {
+			form.fields.forEach(field => {
+				if (field.readyToSave === false)
+				{
+					canSave = false
+				}
+				if (!field.getListeners('onChangeReadyToSave').has(this.checkReadyToSave))
+				{
+					field.subscribe('onChangeReadyToSave', this.checkReadyToSave);
+				}
+			})
+		});
+
+		canSave ? this.enableSave() : this.disableSave()
+	}
+
+	disableSave()
+	{
+		const saveButton = this.buttons.get('save_block_content');
+		if (saveButton)
+		{
+			saveButton.disable();
+		}
+	}
+
+	enableSave()
+	{
+		const saveButton = this.buttons.get('save_block_content');
+		if (saveButton)
+		{
+			saveButton.enable();
+		}
 	}
 }

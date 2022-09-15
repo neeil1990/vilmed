@@ -15,13 +15,13 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/wiz
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/install/wizard/utils.php"); //Wizard utils
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/update_client.php");
 require_once("tools/modulechecker.php");
-require_once("tools/persontypepreparer.php");
 require_once("tools/crmpackage.php");
 require_once("tools/sitepatcher.php");
 require_once("tools/agentchecker.php");
 require_once("tools/b24connectoruninstaller.php");
 require_once("tools/pushchecker.php");
 require_once("tools/bitrixvmchecker.php");
+require_once("tools/defaultsitechecker.php");
 
 /**
  * Class SaleCrmSiteMaster
@@ -111,7 +111,7 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 
 		if (Bitrix\Main\ModuleManager::isModuleInstalled("intranet"))
 		{
-			if ($this->isIntranetWizard())
+			if ($this->isIntranetWizardExists())
 			{
 				$defaultStep["Bitrix\Sale\CrmSiteMaster\Steps\DataInstallStep"]["SORT"] = 600;
 			}
@@ -130,12 +130,9 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 	/**
 	 * @return bool
 	 */
-	private function isIntranetWizard(): bool
+	private function isIntranetWizardExists(): bool
 	{
-		return (
-			Main\IO\File::isFileExists($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/intranet/install/wizards/bitrix/portal/wizard.php")
-			|| Main\IO\File::isFileExists($_SERVER["DOCUMENT_ROOT"]."/bitrix/wizards/bitrix/portal/wizard.php")
-		);
+		return Main\IO\File::isFileExists($_SERVER["DOCUMENT_ROOT"]."/bitrix/wizards/bitrix/portal/wizard.php");
 	}
 
 	/**
@@ -146,9 +143,6 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 		return [
 			"Bitrix\Sale\CrmSiteMaster\Steps\B24ConnectorStep" => [
 				"SORT" => 320
-			],
-			"Bitrix\Sale\CrmSiteMaster\Steps\PersonTypeStep" => [
-				"SORT" => 330
 			],
 			"Bitrix\Sale\CrmSiteMaster\Steps\ActivationKeyStep" => [
 				"SORT" => 340
@@ -171,7 +165,7 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 	/**
 	 * @return array
 	 */
-	private function getRequiredModules()
+	private function getRequiredModules(): array
 	{
 		return [
 			"main" => [
@@ -180,7 +174,6 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			],
 			"iblock" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_IBLOCK_NAME"),
-				"version" => ""
 			],
 			"pull" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_PULL_NAME"),
@@ -188,47 +181,37 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			],
 			"socialnetwork" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_SOCIALNETWORK_NAME"),
-				"version" => ""
 			],
 			"report" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_REPORT_NAME"),
-				"version" => ""
 			],
 			"lists" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_LISTS_NAME"),
-				"version" => ""
 			],
 			"webservice" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_WEBSERVICES_NAME"),
-				"version" => ""
 			],
 			"mail" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_MAIL_NAME"),
-				"version" => ""
 			],
 			"support" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_SUPPORT_NAME"),
-				"version" => ""
 			],
 			"workflow" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_WORKFLOW_NAME"),
-				"version" => ""
 			],
 			"wiki" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_WIKI_NAME"),
-				"version" => ""
 			],
 			"advertising" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_ADVERTISING_NAME"),
-				"version" => ""
 			],
 			"intranet" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_INTRANET_NAME"),
-				"version" => "20.0.650"
+				"version" => "20.5.262"
 			],
 			"calendar" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_CALENDAR_NAME"),
-				"version" => ""
 			],
 			"crm" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_CRM_NAME"),
@@ -236,19 +219,15 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			],
 			"currency" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_CURRENCY_NAME"),
-				"version" => ""
 			],
 			"catalog" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_CATALOG_NAME"),
-				"version" => ""
 			],
 			"tasks" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_TASKS_NAME"),
-				"version" => ""
 			],
 			"disk" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_DISK_NAME"),
-				"version" => ""
 			],
 			"im" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_IM_NAME"),
@@ -256,7 +235,6 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			],
 			"dav" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_DAV_NAME"),
-				"version" => ""
 			],
 			"timeman" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_TIMEMAN_NAME"),
@@ -264,27 +242,21 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			],
 			"meeting" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_MEETING_NAME"),
-				"version" => ""
 			],
 			"imconnector" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_IMCONNECTOR_NAME"),
-				"version" => ""
 			],
 			"mobile" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_MOBILE_NAME"),
-				"version" => ""
 			],
 			"mobileapp" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_MOBILEAPP_NAME"),
-				"version" => ""
 			],
 			"voximplant" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_VOXIMPLANT_NAME"),
-				"version" => ""
 			],
 			"imopenlines" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_IMOPENLINES_NAME"),
-				"version" => ""
 			],
 			"landing" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_LANDING_NAME"),
@@ -296,15 +268,16 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			],
 			"bizprocdesigner" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_BIZPROCDESIGNER_NAME"),
-				"version" => ""
 			],
 			"blog" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_BLOG_NAME"),
-				"version" => ""
 			],
 			"rest" => [
 				"name" => Loc::getMessage("SALE_CSM_MODULE_REST_NAME"),
-				"version" => ""
+			],
+			"forum" => [
+				"name" => Loc::getMessage("SALE_CSM_MODULE_FORUM_NAME"),
+				"version" => "20.0.500"
 			],
 		];
 	}
@@ -549,9 +522,9 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 			}
 		}
 
+		$this->checkDefaultSite();
 		$this->checkBitrixVm();
 		$this->checkAgents();
-		$this->checkPersonType();
 		$this->checkB24Connection();
 		$this->checkPushServer();
 
@@ -741,20 +714,15 @@ class SaleCrmSiteMaster extends \CBitrixComponent
 		return $siteUrl.$pathToOderList;
 	}
 
-	/**
-	 * @throws Main\ArgumentException
-	 * @throws Main\ObjectPropertyException
-	 * @throws Main\SystemException
-	 */
-	private function checkPersonType()
+	private function checkDefaultSite()
 	{
-		$personTypePreparer = new Tools\PersonTypePreparer();
+		$defaultSiteChecker = new Tools\DefaultSiteChecker();
 
-		$personTypeList = $personTypePreparer->getPersonTypeList();
-
-		if ($personTypeList["NOT_MATCH"])
+		$checkSiteResult = $defaultSiteChecker->checkSite();
+		if (!$checkSiteResult->isSuccess())
 		{
-			$this->addWizardStep("Bitrix\Sale\CrmSiteMaster\Steps\PersonTypeStep", 330);
+			$this->addWizardVar("default_site_error", $checkSiteResult->getErrorCollection()->current()->getMessage());
+			$this->addWizardStep("Bitrix\Sale\CrmSiteMaster\Steps\DefaultSiteStep", 305);
 		}
 	}
 

@@ -7,6 +7,7 @@ use Bitrix\Main;
 use Bitrix\Main\Entity;
 use Bitrix\Sale;
 use Bitrix\Sale\Internals;
+use Bitrix\Sale\PaySystem\ServiceResult;
 
 Loc::loadMessages(__FILE__);
 
@@ -20,8 +21,11 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 	const RETURN_INNER = 'Y';
 	const RETURN_PS = 'P';
 
-	/** @var  Sale\PaySystem\Service */
+	/** @var Sale\PaySystem\Service */
 	protected $service;
+
+	/** @var PayableItemCollection */
+	protected $payableItemCollection;
 
 	/**
 	 * Payment constructor.
@@ -49,6 +53,26 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 	public static function getRegistryEntity()
 	{
 		return Registry::ENTITY_PAYMENT;
+	}
+
+	/**
+	 * @return PayableItemCollection
+	 * @throws Main\ArgumentException
+	 * @throws Main\ArgumentTypeException
+	 * @throws Main\SystemException
+	 */
+	public function getPayableItemCollection() : PayableItemCollection
+	{
+		if ($this->payableItemCollection === null)
+		{
+			$registry = Registry::getInstance(static::getRegistryType());
+
+			/** @var PayableItemCollection $itemCollectionClassName */
+			$itemCollectionClassName = $registry->getPayableItemCollectionClassName();
+			$this->payableItemCollection = $itemCollectionClassName::load($this);
+		}
+
+		return $this->payableItemCollection;
 	}
 
 	/**
@@ -98,6 +122,7 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 			'PS_CURRENCY',
 			'PS_RESPONSE_DATE',
 			'PS_RECURRING_TOKEN',
+			'PS_CARD_NUMBER',
 			'PAY_VOUCHER_NUM',
 			'PAY_VOUCHER_DATE',
 			'DATE_PAY_BEFORE',
@@ -143,7 +168,7 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 	 * @return Payment
 	 * @throws Main\ArgumentException
 	 */
-	private static function createPaymentObject(array $fields = [])
+	protected static function createPaymentObject(array $fields = [])
 	{
 		$registry = Registry::getInstance(static::getRegistryType());
 		$paymentClassName = $registry->getPaymentClassName();
@@ -172,6 +197,7 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 	{
 		$fields = [
 			'DATE_BILL' => new Main\Type\DateTime(),
+			'SUM' => 0,
 			'PAID' => 'N',
 			'XML_ID' => static::generateXmlId(),
 			'IS_RETURN' => static::RETURN_NONE,
@@ -241,20 +267,19 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 
 	/**
 	 * @internal
-	 *
-	 * @param $idOrder
+	 * @param $orderId
 	 * @return Result
 	 * @throws Main\ArgumentException
 	 * @throws Main\ObjectPropertyException
 	 * @throws Main\SystemException
 	 */
-	public static function deleteNoDemand($idOrder)
+	public static function deleteNoDemand($orderId)
 	{
 		$result = new Result();
 
 		$dbRes = static::getList([
 				"select" => ["ID"],
-				"filter" => ["=ORDER_ID" => $idOrder]
+				"filter" => ["=ORDER_ID" => $orderId]
 		]);
 
 		while ($payment = $dbRes->fetch())
@@ -410,7 +435,11 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 		{
 			if ($value === "Y")
 			{
-				$this->setField('DATE_PAID', new Main\Type\DateTime());
+				if (!$this->getFields()->isChanged('DATE_PAID'))
+				{
+					$this->setField('DATE_PAID', new Main\Type\DateTime());
+				}
+
 				$this->setField('EMP_PAID_ID', $USER->GetID());
 
 				if ($this->getField('IS_RETURN') === self::RETURN_INNER)
@@ -511,6 +540,16 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 					{
 						return $result->addErrors($refResult->getErrors());
 					}
+
+					$refResultOperation = $refResult->getOperationType();
+					if ($refResultOperation === ServiceResult::MONEY_LEAVING)
+					{
+						$setUnpaidResult = $this->setField('PAID', 'N');
+						if (!$setUnpaidResult->isSuccess())
+						{
+							return $result->addErrors($setUnpaidResult->getErrors());
+						}
+					}
 				}
 			}
 			else
@@ -521,12 +560,6 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 						'SALE_ORDER_PAYMENT_RETURN_NO_SUPPORTED'
 					)
 				);
-			}
-
-			$r = $this->setField('PAID', 'N');
-			if (!$r->isSuccess())
-			{
-				return $result->addErrors($r->getErrors());
 			}
 		}
 		elseif($name === "SUM")
@@ -548,7 +581,11 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 			if ($oldValue !== "Y")
 			{
 				$this->setField('DATE_MARKED', new Main\Type\DateTime());
-				$this->setField('EMP_MARKED_ID', $USER->GetID());
+
+				if (is_object($USER))
+				{
+					$this->setField('EMP_MARKED_ID', $USER->GetID());
+				}
 			}
 			elseif ($value === "N")
 			{
@@ -565,6 +602,19 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 		}
 
 		return parent::onFieldModify($name, $oldValue, $value);
+	}
+
+	public function onBeforeBasketItemDelete(BasketItem $basketItem)
+	{
+		$result = new Result();
+
+		$r = $this->getPayableItemCollection()->onBeforeBasketItemDelete($basketItem);
+		if (!$r->isSuccess())
+		{
+			$result->addErrors($r->getErrors());
+		}
+
+		return $result;
 	}
 
 	/**
@@ -625,9 +675,27 @@ class Payment extends Internals\CollectableEntity implements IBusinessValueProvi
 
 		$this->callDelayedEvents();
 
+		$payableItemCollection = $this->getPayableItemCollection();
+		$r = $payableItemCollection->save();
+		if (!$r->isSuccess())
+		{
+			return $result->addErrors($r->getErrors());
+		}
+
 		$this->onAfterSave($isNew);
 
 		return $result;
+	}
+
+	public function isChanged()
+	{
+		$isChanged = parent::isChanged();
+		if ($isChanged)
+		{
+			return true;
+		}
+
+		return $this->getPayableItemCollection()->isChanged();
 	}
 
 	/**

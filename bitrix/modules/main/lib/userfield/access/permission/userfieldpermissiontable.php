@@ -9,6 +9,22 @@ use Bitrix\Main\ORM\Fields\Relations\Reference;
 use Bitrix\Main\UserAccessTable;
 use Bitrix\Main\UserFieldTable;
 
+/**
+ * Class UserFieldPermissionTable
+ *
+ * DO NOT WRITE ANYTHING BELOW THIS
+ *
+ * <<< ORMENTITYANNOTATION
+ * @method static EO_UserFieldPermission_Query query()
+ * @method static EO_UserFieldPermission_Result getByPrimary($primary, array $parameters = [])
+ * @method static EO_UserFieldPermission_Result getById($id)
+ * @method static EO_UserFieldPermission_Result getList(array $parameters = [])
+ * @method static EO_UserFieldPermission_Entity getEntity()
+ * @method static \Bitrix\Main\UserField\Access\Permission\UserFieldPermission createObject($setDefaultValues = true)
+ * @method static \Bitrix\Main\UserField\Access\Permission\EO_UserFieldPermission_Collection createCollection()
+ * @method static \Bitrix\Main\UserField\Access\Permission\UserFieldPermission wakeUpObject($row)
+ * @method static \Bitrix\Main\UserField\Access\Permission\EO_UserFieldPermission_Collection wakeUpCollection($rows)
+ */
 class UserFieldPermissionTable extends AccessPermissionTable
 {
 	private const PERMISSION_ALLOWED = 1;
@@ -122,6 +138,7 @@ class UserFieldPermissionTable extends AccessPermissionTable
 		$query->addSelect('USER_FIELD_ID');
 		$query->addFilter('=ENTITY_TYPE_ID', $entityTypeID);
 		$query->addFilter('=VALUE', self::PERMISSION_ALLOWED);
+		$query->whereNotNull('FIELD_NAME');
 
 		$dbResult = $query->exec();
 
@@ -133,10 +150,17 @@ class UserFieldPermissionTable extends AccessPermissionTable
 	 * @param string $fieldName
 	 * @param int $entityTypeId
 	 * @param string $permissionId
+	 * @param string|null $entityTypeName
 	 */
-	public static function saveEntityConfiguration($accessCodes, string $fieldName, int $entityTypeId, string $permissionId): void
+	public static function saveEntityConfiguration(
+		$accessCodes,
+		string $fieldName,
+		int $entityTypeId,
+		string $permissionId,
+		?string $entityTypeName = null
+	): void
 	{
-		if ($userField = self::getUserFieldIdByName($fieldName))
+		if ($userField = self::getUserFieldId($fieldName, $entityTypeName))
 		{
 			self::removeEntityConfiguration($userField['ID'], $entityTypeId);
 			if (is_array($accessCodes))
@@ -173,15 +197,20 @@ class UserFieldPermissionTable extends AccessPermissionTable
 
 	/**
 	 * @param string $fieldName
+	 * @param string $entityId
 	 * @return array|null
 	 */
-	private static function getUserFieldIdByName(string $fieldName): ?array
+	private static function getUserFieldId(string $fieldName, ?string $entityId = null): ?array
 	{
+		$filter = ['=FIELD_NAME' => $fieldName];
+		if ($entityId)
+		{
+			$filter['=ENTITY_ID'] = $entityId;
+		}
+
 		return UserFieldTable::getRow([
 			'select' => ['ID'],
-			'filter' => [
-				'=FIELD_NAME' => $fieldName
-			]
+			'filter' => $filter
 		]);
 	}
 }

@@ -1,4 +1,4 @@
-<?
+<?php
 $MESS["VOTE_ACTIVE"] = "Aktiv:";
 $MESS["VOTE_ACTIVE_LABEL"] = "aktiv";
 $MESS["VOTE_ANSWERS"] = "Antworten";
@@ -35,6 +35,7 @@ $MESS["VOTE_GRID_ACTIONS_RESTORE"] = "Änderungen rückgängig machen";
 $MESS["VOTE_GRID_ACTIONS_UNDELETE"] = "Löschen rückgängig machen";
 $MESS["VOTE_GRID_BUTTON_ADD_TEXT"] = "Sonstiges...";
 $MESS["VOTE_IMAGE"] = "Bild:";
+$MESS["VOTE_IMAGE_ID"] = "Bild";
 $MESS["VOTE_NEW_RECORD"] = "Neue Frage";
 $MESS["VOTE_PROPERTIES"] = "Eigenschaften";
 $MESS["VOTE_PROPERTIES_TITLE"] = "Zusätzliche Eigenschaften der Frage";
@@ -47,4 +48,3 @@ $MESS["VOTE_SORT"] = "Sort.";
 $MESS["VOTE_TIMESTAMP"] = "Geändert:";
 $MESS["VOTE_TYPE_NOTIFY"] = "(in einigen öffentlichen Vorlagen kann diese Option nicht vollständig unterstützt werden)";
 $MESS["VOTE_VOTE"] = "Umfrage:";
-?>

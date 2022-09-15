@@ -74,7 +74,7 @@ if ($arParams["HTML_SIZE"] !== null)
 		if ($arParams["HTML_SIZE"]["height"] > 0)
 			$style[] = 'max-height:'.$arParams["HTML_SIZE"]["height"].'px;';
 		if (!empty($style))
-			$props = 'style="'.implode($style, "").'"';
+			$props = 'style="'.implode("", $style).'"';
 	}
 
 }
@@ -111,7 +111,7 @@ else
 	} while(ForumGetEntity($id) !== false);
 
 $arParams["RETURN_DATA"] = <<<HTML
-<img src="{$img["~src"]}" id="{$id}" border="0" {$props} data-bx-viewer="image" data-bx-src="{$img["~src"]}" />
+<img src="{$img["~src"]}" id="{$id}" border="0" {$props} data-bx-viewer="image" data-bx-src="{$img["~src"]}" data-bx-image="{$img["~src"]}" />
 HTML;
 }
 $arParams["RETURN_DATA"] = str_replace(array("\n", "\t", "  "), " ", $arParams["RETURN_DATA"]);

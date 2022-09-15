@@ -9,6 +9,8 @@ return [
 	'js' => 'dist/basefield.bundle.js',
 	'rel' => [
 		'main.core',
+		'main.core.events',
+		'landing.ui.component.internal',
 	],
 	'skip_core' => false,
 ];

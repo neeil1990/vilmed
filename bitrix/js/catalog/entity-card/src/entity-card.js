@@ -1,38 +1,48 @@
-import {Dom, Loc, Reflection, Tag, Text, Type} from 'main.core';
+import {Dom, Event, Loc, Reflection, Tag, Text, Type} from 'main.core';
 import {type BaseEvent, EventEmitter} from 'main.core.events'
 import './entity-card.css';
 import TabManager from './tab/manager';
 import 'ui.entity-editor';
 import 'ui.notification';
+import 'ui.hint';
 import FieldsFactory from './fields-factory'
 import ControllersFactory from './controllers-factory'
 import IblockFieldConfigurationManager from './field-configurator/iblock-field-configuration-manager'
 import GridFieldConfigurationManager from './field-configurator/grid-field-configuration-manager';
+import {Popup} from "main.popup";
+import {BaseCard} from "./base-card/base-card";
+import {DialogDisable, Slider, EventType} from 'catalog.store-use'
 
-export class EntityCard
+class EntityCard extends BaseCard
 {
 	stackWithOffset = null;
 
 	constructor(id, settings = {})
 	{
-		this.id = Type.isStringFilled(id) ? id : Text.getRandom();
-		this.settings = settings;
-		this.cardSettings = settings.cardSettings || [];
-		this.feedbackUrl = settings.feedbackUrl || ''
+		super(id, settings);
 
-		this.entityId = Text.toInteger(settings.entityId) || 0;
-		this.container = document.getElementById(settings.containerId);
+		this.cardSettings = settings.cardSettings || [];
+		this.feedbackUrl = settings.feedbackUrl || '';
+		this.variationGridId = settings.variationGridId;
+		this.productStoreGridId = settings.productStoreGridId || null;
+		this.settingsButtonId = settings.settingsButtonId;
+		this.createDocumentButtonId = settings.createDocumentButtonId;
+		this.createDocumentButtonMenuPopupItems = settings.createDocumentButtonMenuPopupItems;
 
 		this.componentName = settings.componentName || null;
 		this.componentSignedParams = settings.componentSignedParams || null;
 
 		this.isSimpleProduct = settings.isSimpleProduct || false;
 
-		this.initializeTabManager();
-		this.checkFadeOverlay();
 		this.registerFieldsFactory();
 		this.registerControllersFactory();
 		this.registerEvents();
+		this.bindCardSettingsButton();
+		this.bindCreateDocumentButtonMenu();
+
+		EventEmitter.subscribe('SidePanel.Slider:onMessage', this.onSliderMessage.bind(this));
+		EventEmitter.subscribe('BX.UI.EntityEditorSection:onLayout', this.onSectionLayout.bind(this));
+		EventEmitter.subscribe('Grid::updated', this.onGridUpdatedHandler.bind(this));
 	}
 
 	getEntityType()
@@ -54,33 +64,92 @@ export class EntityCard
 		return settingItem && settingItem.checked;
 	}
 
-	initializeTabManager()
+	bindCardSettingsButton()
 	{
-		return new TabManager(this.id, {
-			container: document.getElementById(this.settings.tabContainerId),
-			menuContainer: document.getElementById(this.settings.tabMenuContainerId),
-			data: this.settings.tabs || []
-		});
+		const settingsButton = this.getSettingsButton();
+		if (settingsButton)
+		{
+			Event.bind(settingsButton.getContainer(), 'click', this.showCardSettingsPopup.bind(this));
+		}
 	}
 
-	checkFadeOverlay()
+	getSettingsButton()
 	{
-		if (this.entityId <= 0)
-		{
-			this.overlay = Tag.render`<div class="catalog-entity-overlay"></div>`;
-			Dom.append(this.overlay, this.container);
-
-			if (window === window.top)
-			{
-				this.overlay.style.position = 'absolute';
-				this.overlay.style.top = this.overlay.style.left = this.overlay.style.right = '-15px';
-			}
-		}
+		return BX.UI.ButtonManager.getByUniqid(this.settingsButtonId);
 	}
 
 	registerFieldsFactory()
 	{
 		return new FieldsFactory();
+	}
+
+	onGridUpdatedHandler(event: BaseEvent)
+	{
+		const [grid] = event.getCompatData();
+
+		if (grid && grid.getId() === this.getVariationGridId())
+		{
+			this.updateSettingsCheckboxState();
+		}
+	}
+
+	onSectionLayout()
+	{
+
+	}
+
+	getProductStoreGridId()
+	{
+		return this.productStoreGridId;
+	}
+
+	getProductStoreGridComponent()
+	{
+		return Reflection.getClass('BX.Catalog.ProductStoreGridManager.Instance');
+	}
+
+	reloadProductStoreGrid()
+	{
+		const gridComponent = this.getProductStoreGridComponent();
+		if (gridComponent)
+		{
+			if (this.getProductStoreGridId() && this.getProductStoreGridId() === gridComponent.getGridId())
+			{
+				gridComponent.reloadGrid();
+			}
+		}
+	}
+
+	/**
+	 * @returns {BX.Catalog.VariationGrid|null}
+	 */
+	getVariationGridComponent()
+	{
+		return Reflection.getClass('BX.Catalog.VariationGrid.Instance');
+	}
+
+	reloadVariationGrid()
+	{
+		const gridComponent = this.getVariationGridComponent();
+		if (gridComponent)
+		{
+			gridComponent.reloadGrid();
+		}
+	}
+
+	getVariationGridId()
+	{
+		return this.variationGridId;
+	}
+
+	getVariationGrid()
+	{
+		if (!Reflection.getClass('BX.Main.gridManager.getInstanceById'))
+		{
+			return null;
+		}
+
+		return BX.Main.gridManager.getInstanceById(this.getVariationGridId());
 	}
 
 	registerControllersFactory()
@@ -100,6 +169,18 @@ export class EntityCard
 
 		EventEmitter.subscribe('onAttachFiles', this.onAttachFilesHandler.bind(this));
 		EventEmitter.subscribe('BX.Main.Popup:onClose', this.onFileEditorCloseHandler.bind(this));
+
+		EventEmitter.subscribe('onAfterVariationGridSave', this.onAfterVariationGridSave.bind(this));
+	}
+
+	onAfterVariationGridSave(event: BaseEvent)
+	{
+		const data = event.getData();
+
+		if (data.gridId === this.getVariationGridId())
+		{
+			this.reloadProductStoreGrid();
+		}
 	}
 
 	onAttachFilesHandler(event: BaseEvent)
@@ -173,7 +254,7 @@ export class EntityCard
 	{
 		const [fields, response] = event.getCompatData();
 
-		const title = fields.NAME || '';
+		const title = fields['NAME-CODE'].NAME || '';
 		this.changePageTitle(title);
 
 		if (response.data)
@@ -324,4 +405,320 @@ export class EntityCard
 			width: 580
 		});
 	}
+
+	bindCreateDocumentButtonMenu()
+	{
+		const createDocumentButtonMenu = this.getCreateDocumentButtonMenu();
+		if (createDocumentButtonMenu)
+		{
+			Event.bind(createDocumentButtonMenu.getContainer(), 'click', this.showCreateDocumentPopup.bind(this));
+		}
+	}
+
+	getCreateDocumentButtonMenu()
+	{
+		const createDocumentButton = BX.UI.ButtonManager.getByUniqid(this.createDocumentButtonId);
+		if (createDocumentButton)
+		{
+			return BX.UI.ButtonManager.getByUniqid(this.createDocumentButtonId).getMenuButton();
+		}
+
+		return null;
+	}
+
+	getCreateDocumentPopup()
+	{
+		if (!this.createDocumentPopup)
+		{
+			this.createDocumentPopup = new Popup(
+				this.id + '-create-document',
+				this.getCreateDocumentButtonMenu().getContainer(),
+				{
+					autoHide: true,
+					draggable: false,
+					offsetLeft: 0,
+					offsetTop: 0,
+					angle: {position: 'top', offset: 43},
+					noAllPaddings: true,
+					bindOptions: {forceBindPosition: true},
+					closeByEsc: true,
+					content: this.getCreateDocumentMenuContent()
+				}
+			);
+		}
+
+		return this.createDocumentPopup;
+	}
+
+	showCreateDocumentPopup()
+	{
+		this.getCreateDocumentPopup().show();
+	}
+
+	getCreateDocumentMenuContent()
+	{
+		const popupWrapper = Tag.render`<div class="menu-popup"></div>`;
+		const popupItemsContainer = Tag.render`<div class="menu-popup-items"></div>`;
+		popupWrapper.appendChild(popupItemsContainer);
+
+		this.createDocumentButtonMenuPopupItems.forEach((item) => {
+			popupItemsContainer.appendChild(Tag.render`
+				<a class="menu-popup-item menu-popup-item-no-icon" href="${item.link}">
+					<span class="menu-popup-item-text">${item.text}</span>
+				</a>
+			`);
+		});
+
+		return popupWrapper;
+	}
+
+	getCardSettingsPopup()
+	{
+		if (!this.settingsPopup)
+		{
+			this.settingsPopup = new Popup(
+				this.id,
+				this.getSettingsButton().getContainer(),
+				{
+					autoHide: true,
+					draggable: false,
+					offsetLeft: 0,
+					offsetTop: 0,
+					angle: {position: 'top', offset: 43},
+					noAllPaddings: true,
+					bindOptions: {forceBindPosition: true},
+					closeByEsc: true,
+					content: this.prepareCardSettingsContent()
+				}
+			);
+		}
+
+		return this.settingsPopup;
+	}
+
+	showCardSettingsPopup()
+	{
+		const okCallback = () => this.getCardSettingsPopup().show();
+		const variationGridInstance = Reflection.getClass('BX.Catalog.VariationGrid.Instance');
+
+		if (variationGridInstance)
+		{
+			variationGridInstance.askToLossGridData(okCallback);
+		}
+		else
+		{
+			okCallback();
+		}
+	}
+
+	prepareCardSettingsContent()
+	{
+		const content = Tag.render`
+			<div class='ui-entity-editor-popup-create-field-list'></div>
+		`;
+
+		this.cardSettings.map(item => {
+			content.append(this.getSettingItem(item));
+		});
+
+		return content;
+	}
+
+	getSettingItem(item)
+	{
+		const input = Tag.render`
+			<input type="checkbox">
+		`;
+		input.checked = item.checked;
+		input.disabled = item.disabled ?? false;
+		input.dataset.settingId = item.id;
+
+		const hintNode = (
+			Type.isStringFilled(item.hint)
+				? Tag.render`<span class="catalog-entity-setting-hint" data-hint="${item.hint}"></span>`
+				: ''
+		);
+
+		const setting = Tag.render`
+				<label class="ui-ctl-block ui-entity-editor-popup-create-field-item ui-ctl-w100">
+					<div class="ui-ctl-w10" style="text-align: center">${input}</div>
+					<div class="ui-ctl-w75">
+						<span class="ui-entity-editor-popup-create-field-item-title ${item.disabled ? 'catalog-entity-disabled-setting' : ''}">${item.title}${hintNode}</span>
+						<span class="ui-entity-editor-popup-create-field-item-desc">${item.desc}</span>
+					</div>
+				</label>
+			`;
+
+		BX.UI.Hint.init(setting);
+
+		if(item.id === 'SLIDER')
+		{
+			Event.bind(setting, 'change', (event) =>
+			{
+				new Slider().open(item.url, {})
+				.then(() => {
+					this.reloadGrid();
+					this.getCardSettingsPopup().close();
+				});
+			})
+		}
+		else
+		{
+			Event.bind(setting, 'change', this.setProductCardSetting.bind(this));
+		}
+
+
+		return setting;
+	}
+
+	setProductCardSetting(event: BaseEvent)
+	{
+		const settingItem = this.getCardSetting(event.target.dataset.settingId);
+		if (!settingItem)
+		{
+			return;
+		}
+
+		const settingEnabled = event.target.checked;
+
+		if (settingItem.action === 'grid')
+		{
+			this.requestGridSettings(settingItem, settingEnabled);
+		}
+		else
+		{
+			this.requestCardSettings(settingItem, settingEnabled);
+		}
+	}
+
+	onSliderMessage(event: BaseEvent)
+	{
+		const [sliderEvent] = event.getCompatData();
+
+		if (
+			sliderEvent.getEventId() === 'Catalog.VariationCard::onCreate'
+			|| sliderEvent.getEventId() === 'Catalog.VariationCard::onUpdate'
+		)
+		{
+			this.reloadVariationGrid();
+		}
+	}
+
+	reloadGrid()
+	{
+		document.location.reload();
+	}
+
+	requestGridSettings(setting, enabled)
+	{
+		if (!this.getVariationGrid())
+		{
+			new Error('Cant find variation grid.');
+		}
+
+		const headers = [];
+		const cells = this.getVariationGrid().getRows().getHeadFirstChild().getCells();
+
+		Array.from(cells).forEach((header) => {
+			if ('name' in header.dataset)
+			{
+				headers.push(header.dataset.name);
+			}
+		});
+
+		BX.ajax.runComponentAction(
+			this.componentName,
+			'setGridSetting',
+			{
+				mode: 'class',
+				data: {
+					signedParameters: this.componentSignedParams,
+					settingId: setting.id,
+					selected: enabled,
+					currentHeaders: headers
+				}
+			}
+		).then(() => {
+			let message = null;
+			setting.checked = enabled;
+			this.reloadVariationGrid();
+			this.postSliderMessage('onUpdate', {});
+			this.getCardSettingsPopup().close();
+
+			if(setting.id === 'WAREHOUSE')
+			{
+				this.reloadGrid()
+				message = enabled ? Loc.getMessage('CATALOG_ENTITY_CARD_WAREHOUSE_ENABLED') : Loc.getMessage('CATALOG_ENTITY_CARD_WAREHOUSE_DISABLED');
+			}
+			else
+			{
+				message = enabled ? Loc.getMessage('CATALOG_ENTITY_CARD_SETTING_ENABLED') : Loc.getMessage('CATALOG_ENTITY_CARD_SETTING_DISABLED');
+				message = message.replace('#NAME#', setting.title)
+			}
+
+			this.showNotification(message, {
+				category: 'popup-settings'
+			});
+		});
+	}
+
+	requestCardSettings(setting, enabled)
+	{
+		BX.ajax.runComponentAction(
+			this.componentName,
+			'setCardSetting',
+			{
+				mode: 'class',
+				data: {
+					signedParameters: this.componentSignedParams,
+					settingId: setting.id,
+					selected: enabled
+				}
+			}
+		).then(() => {
+			setting.checked = enabled;
+
+			if (setting.id === 'CATALOG_PARAMETERS')
+			{
+				const section = this.getEditorInstance().getControlByIdRecursive('catalog_parameters');
+				if (section)
+				{
+					section.refreshLayout();
+				}
+			}
+
+			this.getCardSettingsPopup().close();
+
+			let message = enabled ? Loc.getMessage('CATALOG_ENTITY_CARD_SETTING_ENABLED') : Loc.getMessage('CATALOG_ENTITY_CARD_SETTING_DISABLED');
+			this.showNotification(message.replace('#NAME#', setting.title), {
+				category: 'popup-settings'
+			});
+		});
+	}
+
+	updateSettingsCheckboxState()
+	{
+		const popupContainer = this.getCardSettingsPopup().getContentContainer();
+
+		this.cardSettings
+			.filter(item => item.action === 'grid' && Type.isArray(item.columns))
+			.forEach(item => {
+				let allColumnsExist = true;
+
+				item.columns.forEach(columnName => {
+					if (!this.getVariationGrid().getColumnHeaderCellByName(columnName))
+					{
+						allColumnsExist = false;
+					}
+				})
+
+				let checkbox = popupContainer.querySelector('input[data-setting-id="' + item.id + '"]');
+				if (Type.isDomNode(checkbox))
+				{
+					checkbox.checked = allColumnsExist;
+				}
+			});
+	}
 }
+
+export {EntityCard, BaseCard};

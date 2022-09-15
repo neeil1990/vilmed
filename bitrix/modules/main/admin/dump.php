@@ -13,6 +13,8 @@
  * @global CDatabase $DB
  */
 
+use Bitrix\Main\Security\Random;
+
 define('NO_AGENT_CHECK', true);
 define("STATISTIC_SKIP_ACTIVITY_CHECK", true);
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_before.php");
@@ -29,9 +31,9 @@ IncludeModuleLangFile(__FILE__);
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/classes/general/backup.php");
 $strBXError = '';
 $bGzip = function_exists('gzcompress');
-$bMcrypt = function_exists('mcrypt_encrypt') || function_exists('openssl_encrypt');
+$encrypt = function_exists('openssl_encrypt');
 $bHash = function_exists('hash');
-$bBitrixCloud = $bMcrypt && $bHash;
+$bBitrixCloud = $encrypt && $bHash;
 if (!CModule::IncludeModule('bitrixcloud'))
 {
 	$bBitrixCloud = false;
@@ -50,9 +52,6 @@ if($bBitrixCloud)
 	$arFiles = $backup->listFiles();
 	$backup->saveToOptions();
 }
-
-if (function_exists('mb_internal_encoding'))
-	mb_internal_encoding('ISO-8859-1');
 
 define('DOCUMENT_ROOT', rtrim(str_replace('\\','/',$_SERVER['DOCUMENT_ROOT']),'/'));
 
@@ -83,7 +82,7 @@ elseif($_REQUEST['process'] == "Y")
 		RaiseErrorAndDie(GetMessage("DUMP_MAIN_SESISON_ERROR"));
 
 	require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_js.php");
-	$NS =& $_SESSION['BX_DUMP_STATE'];
+	$NS =& \Bitrix\Main\Application::getInstance()->getSession()['BX_DUMP_STATE'];
 	if($_REQUEST['action'] == 'start')
 	{
 		define('NO_TIME', true);
@@ -111,7 +110,7 @@ elseif($_REQUEST['process'] == "Y")
 		$NS['BUCKET_ID'] = intval($_REQUEST['dump_bucket_id']);
 		COption::SetOptionInt("main", "dump_bucket_id", $NS['BUCKET_ID']);
 
-		if ($bMcrypt && $_REQUEST['dump_encrypt_key'])
+		if ($encrypt && $_REQUEST['dump_encrypt_key'])
 		{
 			$NS['dump_encrypt_key'] =  $_REQUEST['dump_encrypt_key'];
 //			if (!defined('BX_UTF') || !BX_UTF)
@@ -229,7 +228,7 @@ elseif($_REQUEST['process'] == "Y")
 
 		if ($NS['BUCKET_ID'] == -1) // Bitrixcloud
 		{
-			$name = DOCUMENT_ROOT.BX_ROOT."/backup/".date('Ymd_His_').rand(11111111,99999999);
+			$name = DOCUMENT_ROOT . BX_ROOT . "/backup/" . date('Ymd_His_') . Random::getStringByAlphabet(16, Random::ALPHABET_NUM);
 			$NS['arc_name'] = $name.'.enc'.($bUseCompression ? ".gz" : '');
 			$NS['dump_name'] = $name.'.sql';
 		}
@@ -238,14 +237,14 @@ elseif($_REQUEST['process'] == "Y")
 			$prefix = '';
 			if (count($NS['dump_site_id']) == 1)
 			{
-				$rs = CSite::GetList($by='sort', $order='asc', array('ID' => $NS['dump_site_id'][0], 'ACTIVE' => 'Y'));
+				$rs = CSite::GetList('sort', 'asc', array('ID' => $NS['dump_site_id'][0], 'ACTIVE' => 'Y'));
 				if ($f = $rs->Fetch())
 					$prefix = str_replace('/', '', $f['SERVER_NAME']);
 			}
 			else
 				$prefix = str_replace('/', '', COption::GetOptionString("main", "server_name", ""));
 
-			$arc_name = CBackup::GetArcName(preg_match('#^[a-z0-9\.\-]+$#i', $prefix) ? mb_substr($prefix, 0, 20).'_' : '');
+			$arc_name = CBackup::GetArcName(preg_match('#^[a-z0-9\.\-]+$#i', $prefix) ? substr($prefix, 0, 20).'_' : '');
 			$NS['dump_name'] = $arc_name.".sql";
 			$NS['arc_name'] = $arc_name.($NS['dump_encrypt_key'] ? ".enc" : ".tar").($bUseCompression ? ".gz" : '');
 		}
@@ -261,7 +260,8 @@ elseif($_REQUEST['process'] == "Y")
 		$NS['arc_name'] = $name = DOCUMENT_ROOT.BX_ROOT.'/backup/'.str_replace(array('..','/','\\'),'',$_REQUEST['f_id']);
 		$NS['arc_size'] = filesize($NS['arc_name']);
 		$NS['BUCKET_ID'] = intval($_REQUEST['dump_bucket_id']);
-		while(file_exists($name = CTar::getNextName($name)))
+		$tar = new CTar;
+		while(file_exists($name = $tar->getNextName($name)))
 			$NS['arc_size'] += filesize($name);
 		$NS['step'] = 6;
 	}
@@ -280,7 +280,7 @@ elseif($_REQUEST['process'] == "Y")
 	}
 	else
 	{
-		$ar = unserialize(COption::GetOptionString("main","skip_mask_array"));
+		$ar = unserialize(COption::GetOptionString("main","skip_mask_array"), ['allowed_classes' => false]);
 		$skip_mask_array = is_array($ar) ? $ar : array();
 	}
 
@@ -294,7 +294,9 @@ elseif($_REQUEST['process'] == "Y")
 		if (IntOption('dump_base'))
 		{
 			if (!CBackup::MakeDump($NS['dump_name'], $NS['dump_state']))
+			{
 				RaiseErrorAndDie(GetMessage('DUMP_NO_PERMS'));
+			}
 
 			$TotalTables = $NS['dump_state']['TableCount'];
 			$FinishedTables = $TotalTables - count($NS['dump_state']['TABLES']);
@@ -339,7 +341,9 @@ elseif($_REQUEST['process'] == "Y")
 				$tar->ReadBlockCurrent = intval($NS['ReadBlockCurrent']);
 
 				if (!$tar->openWrite($NS["arc_name"]))
+				{
 					RaiseErrorAndDie(GetMessage('DUMP_NO_PERMS'));
+				}
 
 				if (!$tar->ReadBlockCurrent && file_exists($f = DOCUMENT_ROOT.BX_ROOT.'/.config.php'))
 					$tar->addFile($f);
@@ -390,7 +394,7 @@ elseif($_REQUEST['process'] == "Y")
 							$NS['arc_size'] += $size;
 							if (IntOption("disk_space") > 0)
 								CDiskQuota::updateDiskQuota("file", $size, "add");
-							$name = CTar::getNextName($name);
+							$name = $tar->getNextName($name);
 						}
 
 						$NS["step"]++;
@@ -467,7 +471,7 @@ elseif($_REQUEST['process'] == "Y")
 				if (is_array($NS['dump_site_id']))
 				{
 					$SITE_ID = reset($NS['dump_site_id']);
-					$rs = CSite::GetList($by='sort', $order='asc', array('ID' => $SITE_ID, 'ACTIVE' => 'Y'));
+					$rs = CSite::GetList('sort', 'asc', array('ID' => $SITE_ID, 'ACTIVE' => 'Y'));
 					if ($f = $rs->Fetch())
 					{
 						$DOCUMENT_ROOT_SITE = rtrim(str_replace('\\','/',$f['ABS_DOC_ROOT']),'/');
@@ -491,7 +495,9 @@ elseif($_REQUEST['process'] == "Y")
 				$tar->ReadFileSize = intval($NS['ReadFileSize']);
 
 				if (!$tar->openWrite($NS["arc_name"]))
+				{
 					RaiseErrorAndDie(GetMessage('DUMP_NO_PERMS'));
+				}
 
 				$Block = $tar->Block;
 
@@ -542,7 +548,7 @@ elseif($_REQUEST['process'] == "Y")
 							$NS['arc_size'] += $size;
 							if (IntOption("disk_space") > 0)
 								CDiskQuota::updateDiskQuota("file", $size, "add");
-							$name = CTar::getNextName($name);
+							$name = $tar->getNextName($name);
 						}
 						DeleteDirFilesEx(BX_ROOT.'/backup/clouds');
 						$NS["step"]++;
@@ -606,7 +612,7 @@ elseif($_REQUEST['process'] == "Y")
 					RaiseErrorAndDie(GetMessage("MAIN_DUMP_NO_CLOUDS_MODULE"));
 
 				$file_size = filesize($NS["arc_name"]);
-				$file_name = $NS['BUCKET_ID'] == -1? basename($NS['arc_name']) : mb_substr($NS['arc_name'], mb_strlen(DOCUMENT_ROOT));
+				$file_name = $NS['BUCKET_ID'] == -1? basename($NS['arc_name']) : substr($NS['arc_name'], strlen(DOCUMENT_ROOT));
 				$obUpload = new CCloudStorageUpload($file_name);
 
 				if (!$NS['upload_start_time'])
@@ -644,7 +650,12 @@ elseif($_REQUEST['process'] == "Y")
 						}
 					}
 					else
-						$obBucket = unserialize($NS['obBucket']);
+					{
+						$obBucket = unserialize(
+							$NS['obBucket'],
+							['allowed_classes' => ['CBitrixCloudBackupBucket']]
+						);
+					}
 
 					$obBucket->Init();
 					$obBucket->GetService()->setPublic(false);
@@ -707,7 +718,9 @@ elseif($_REQUEST['process'] == "Y")
 									$oBucket->IncFileCounter($file_size);
 								}
 
-								if (file_exists($arc_name = CTar::getNextName($NS['arc_name'])))
+								$tar = new CTar;
+
+								if (file_exists($arc_name = $tar->getNextName($NS['arc_name'])))
 								{
 									unset($NS['obBucket']);
 									$NS['arc_name'] = $arc_name;
@@ -722,7 +735,7 @@ elseif($_REQUEST['process'] == "Y")
 										$size = filesize($name);
 										if (unlink($name) && IntOption("disk_space") > 0)
 											CDiskQuota::updateDiskQuota("file",$size , "del");
-										$name = CTar::getNextName($name);
+										$name = $tar->getNextName($name);
 									}
 
 									$NS["step"]++;
@@ -849,10 +862,10 @@ $editTab = new CAdminTabControl("editTab", $aTabs, true, true);
 
 if ($DB->type != 'MYSQL')
 	echo BeginNote().GetMessage('MAIN_DUMP_MYSQL_ONLY').EndNote();
-if (!$bMcrypt || !$bHash)
+if (!$encrypt || !$bHash)
 {
 	CAdminMessage::ShowMessage(array(
-		"MESSAGE" => ($bMcrypt ? '' : GetMessage("MAIN_DUMP_NOT_INSTALLED")).($bHash ? '' : ' '.GetMessage('MAIN_DUMP_NOT_INSTALLED_HASH')),
+		"MESSAGE" => ($encrypt ? '' : GetMessage("MAIN_DUMP_NOT_INSTALLED1")).($bHash ? '' : ' '.GetMessage('MAIN_DUMP_NOT_INSTALLED_HASH')),
 		"DETAILS" => GetMessage("MAIN_DUMP_NO_ENC_FUNCTIONS"),
 		"TYPE" => "ERROR",
 		"HTML" => true));
@@ -1315,7 +1328,7 @@ function getTableSize()
 	</tr>
 <?
 	$arSitePath = array();
-	$res = CSite::GetList($by='sort', $order='asc', array('ACTIVE'=>'Y'));
+	$res = CSite::GetList('sort', 'asc', array('ACTIVE'=>'Y'));
 	while($f = $res->Fetch())
 	{
 		$root = rtrim($f['ABS_DOC_ROOT'],'/');
@@ -1331,7 +1344,7 @@ function getTableSize()
 		<td>
 			<?
 				if ($s = COption::GetOptionString("main", "dump_site_id", $NS['dump_site_id']))
-					$dump_site_id = unserialize($s);
+					$dump_site_id = unserialize($s, ['allowed_classes' => false]);
 				else
 					$dump_site_id = array();
 				$i = 0;
@@ -1419,7 +1432,7 @@ if ($arAllBucket)
 			<?
 			$i=-1;
 
-			$res = unserialize(COption::GetOptionString("main","skip_mask_array"));
+			$res = unserialize(COption::GetOptionString("main","skip_mask_array"), ['allowed_classes' => false]);
 			$skip_mask_array = is_array($res)?$res:array();
 
 			foreach($skip_mask_array as $mask)
@@ -1452,7 +1465,7 @@ if ($arAllBucket)
 	</tr>
 	<tr>
 		<td><?=GetMessage("MAIN_DUMP_ENABLE_ENC")?><span class="required"><sup>4</sup></td>
-		<td><input type="checkbox" name="dump_encrypt" value="Y" <?=(IntOption("dump_encrypt", 0) ? "checked" : "")?> <?=$bMcrypt && !$bBitrixCloud  ? '' : 'disabled'?>></td>
+		<td><input type="checkbox" name="dump_encrypt" value="Y" <?=(IntOption("dump_encrypt", 0) ? "checked" : "")?> <?=$encrypt && !$bBitrixCloud  ? '' : 'disabled'?>></td>
 	</tr>
 	<tr>
 		<td width=40%><?=GetMessage('INTEGRITY_CHECK_OPTION')?></td>

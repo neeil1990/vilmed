@@ -17,7 +17,7 @@ Localization\Loc::loadMessages(__FILE__);
  */
 class CashboxOrangeData
 	extends Cashbox
-	implements IPrintImmediately, ICheckable, ITestConnection
+	implements IPrintImmediately, ICheckable, ITestConnection, ICorrection
 {
 	private const PARTNER_CODE_BITRIX = '3010144';
 
@@ -40,6 +40,7 @@ class CashboxOrangeData
 	const CODE_CALC_VAT_20 = 3;
 
 	private const MAX_TEXT_LENGTH = 128;
+
 	/**
 	 * @return string
 	 */
@@ -69,6 +70,8 @@ class CashboxOrangeData
 			CreditCheck::getType() => 6,
 			CreditReturnCheck::getType() => 6,
 			CreditPaymentCheck::getType() => 7,
+			CreditPaymentReturnCheck::getType() => 7,
+			CreditPaymentReturnCashCheck::getType() => 7,
 		];
 	}
 
@@ -79,67 +82,64 @@ class CashboxOrangeData
 	{
 		return [
 			Check::CALCULATED_SIGN_INCOME => 1,
-			Check::CALCULATED_SIGN_CONSUMPTION => 2
+			Check::CALCULATED_SIGN_CONSUMPTION => 3
 		];
 	}
 
 	/**
 	 * @param Check $check
 	 * @return array
-	 * @throws Main\NotImplementedException
 	 */
 	public function buildCheckQuery(Check $check)
 	{
-		$checkInfo = $check->getDataForCheck();
+		return $this->buildCheckQueryByCheckData(
+			$this->getCheckData($check),
+			($check->getType() === 'sellreturn')
+		);
+	}
 
+	/**
+	 * @param AbstractCheck $check
+	 * @return array
+	 */
+	protected function getCheckData(AbstractCheck $check): array
+	{
+		return $check->getDataForCheck();
+	}
+
+	/**
+	 * @param array $checkData
+	 * @param bool $isSellReturn
+	 * @return array
+	 */
+	protected function buildCheckQueryByCheckData(array $checkData, bool $isSellReturn): array
+	{
 		$calculatedSignMap = $this->getCalculatedSignMap();
 
 		$result = [
-			'id' => static::buildUuid(static::UUID_TYPE_CHECK, $checkInfo['unique_id']),
+			'id' => static::buildUuid(static::UUID_TYPE_CHECK, $checkData['unique_id']),
 			'inn' => $this->getValueFromSettings('SERVICE', 'INN'),
 			'group' => $this->getField('NUMBER_KKM') ?: null,
 			'key' => $this->getValueFromSettings('SECURITY', 'KEY_SIGN') ?: null,
 			'content' => [
-				'type' => $calculatedSignMap[$check::getCalculatedSign()],
+				'type' => $calculatedSignMap[$checkData['calculated_sign']],
 				'positions' => [],
 				'checkClose' => [
 					'payments' => [],
 					'taxationSystem' => $this->getValueFromSettings('TAX', 'SNO'),
 				],
-				'customerContact' => $this->getCustomerContact($checkInfo),
+				'customerContact' => $this->getCustomerContact($checkData),
 			],
 			'meta' => self::PARTNER_CODE_BITRIX
 		];
 
-		$checkType = $this->getCheckTypeMap();
-		$paymentObjectMap = $this->getPaymentObjectMap();
-		foreach ($checkInfo['items'] as $item)
+		foreach ($checkData['items'] as $item)
 		{
-			$vat = $this->getValueFromSettings('VAT', $item['vat']);
-			if ($vat === null)
-			{
-				$vat = $this->getValueFromSettings('VAT', 'NOT_VAT');
-			}
-
-			$position = [
-				'text' => mb_substr($item['name'], 0, self::MAX_TEXT_LENGTH),
-				'quantity' => $item['quantity'],
-				'price' => $item['price'],
-				'tax' => $this->mapVatValue($check::getType(), $vat),
-				'paymentMethodType' => $checkType[$check::getType()],
-				'paymentSubjectType' => $paymentObjectMap[$item['payment_object']]
-			];
-
-			if (isset($item['nomenclature_code']))
-			{
-				$position['nomenclatureCode'] = base64_encode($item['nomenclature_code']);
-			}
-
-			$result['content']['positions'][] = $position;
+			$result['content']['positions'][] = $this->buildPosition($checkData, $item, $isSellReturn);
 		}
 
 		$paymentTypeMap = $this->getPaymentTypeMap();
-		foreach ($checkInfo['payments'] as $payment)
+		foreach ($checkData['payments'] as $payment)
 		{
 			$result['content']['checkClose']['payments'][] = [
 				'type' => $paymentTypeMap[$payment['type']],
@@ -148,6 +148,105 @@ class CashboxOrangeData
 		}
 
 		return $result;
+	}
+
+	/**
+	 * @param array $checkData
+	 * @param array $item
+	 * @param bool $isSellReturn
+	 * @return array
+	 */
+	protected function buildPosition(array $checkData, array $item, bool $isSellReturn): array
+	{
+		$result = [
+			'text' => $this->buildPositionText($item),
+			'quantity' => $this->buildPositionQuantity($item),
+			'price' => $this->buildPositionPrice($item),
+			'tax' => $this->buildPositionTax($checkData, $item),
+			'paymentMethodType' => $this->buildPositionPaymentMethodType($checkData),
+			'paymentSubjectType' => $this->buildPositionPaymentSubjectType($item),
+		];
+
+		if (isset($item['nomenclature_code']))
+		{
+			$result['nomenclatureCode'] = $this->buildPositionNomenclatureCode($item);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param array $item
+	 * @return string
+	 */
+	protected function buildPositionText(array $item)
+	{
+		return mb_substr($item['name'], 0, self::MAX_TEXT_LENGTH);
+	}
+
+	/**
+	 * @param array $item
+	 * @return mixed
+	 */
+	protected function buildPositionQuantity(array $item)
+	{
+		return $item['quantity'];
+	}
+
+	/**
+	 * @param array $item
+	 * @return mixed
+	 */
+	protected function buildPositionPrice(array $item)
+	{
+		return $item['price'];
+	}
+
+	/**
+	 * @param array $checkData
+	 * @return int|mixed
+	 */
+	protected function buildPositionPaymentMethodType(array $checkData)
+	{
+		$checkType = $this->getCheckTypeMap();
+
+		return $checkType[$checkData['type']];
+	}
+
+	/**
+	 * @param array $item
+	 * @return int|mixed
+	 */
+	protected function buildPositionPaymentSubjectType(array $item)
+	{
+		$paymentObjectMap = $this->getPaymentObjectMap();
+
+		return $paymentObjectMap[$item['payment_object']];
+	}
+
+	/**
+	 * @param array $checkData
+	 * @param $item
+	 * @return int|mixed
+	 */
+	protected function buildPositionTax(array $checkData, $item)
+	{
+		$vat = $this->getValueFromSettings('VAT', $item['vat']);
+		if ($vat === null)
+		{
+			$vat = $this->getValueFromSettings('VAT', 'NOT_VAT');
+		}
+
+		return $this->mapVatValue($checkData['type'], $vat);
+	}
+
+	/**
+	 * @param array $item
+	 * @return string
+	 */
+	private function buildPositionNomenclatureCode(array $item)
+	{
+		return base64_encode($item['nomenclature_code']);
 	}
 
 	/**
@@ -219,7 +318,7 @@ class CashboxOrangeData
 	/**
 	 * @return array
 	 */
-	private function getPaymentObjectMap()
+	protected function getPaymentObjectMap()
 	{
 		return [
 			Check::PAYMENT_OBJECT_COMMODITY => 1,
@@ -227,6 +326,30 @@ class CashboxOrangeData
 			Check::PAYMENT_OBJECT_JOB => 3,
 			Check::PAYMENT_OBJECT_SERVICE => 4,
 			Check::PAYMENT_OBJECT_PAYMENT => 10,
+			Check::PAYMENT_OBJECT_GAMBLING_BET => 5,
+			Check::PAYMENT_OBJECT_GAMBLING_PRIZE => 6,
+			Check::PAYMENT_OBJECT_LOTTERY => 7,
+			Check::PAYMENT_OBJECT_LOTTERY_PRIZE => 8,
+			Check::PAYMENT_OBJECT_INTELLECTUAL_ACTIVITY => 9,
+			Check::PAYMENT_OBJECT_AGENT_COMMISSION => 11,
+			Check::PAYMENT_OBJECT_COMPOSITE => 12,
+			Check::PAYMENT_OBJECT_ANOTHER => 13,
+			Check::PAYMENT_OBJECT_PROPERTY_RIGHT => 14,
+			Check::PAYMENT_OBJECT_NON_OPERATING_GAIN => 15,
+			Check::PAYMENT_OBJECT_SALES_TAX => 17,
+			Check::PAYMENT_OBJECT_RESORT_FEE => 18,
+			Check::PAYMENT_OBJECT_DEPOSIT => 19,
+			Check::PAYMENT_OBJECT_EXPENSE => 20,
+			Check::PAYMENT_OBJECT_PENSION_INSURANCE_IP => 21,
+			Check::PAYMENT_OBJECT_PENSION_INSURANCE => 22,
+			Check::PAYMENT_OBJECT_MEDICAL_INSURANCE_IP => 23,
+			Check::PAYMENT_OBJECT_MEDICAL_INSURANCE => 24,
+			Check::PAYMENT_OBJECT_SOCIAL_INSURANCE => 25,
+			Check::PAYMENT_OBJECT_CASINO_PAYMENT => 26,
+			Check::PAYMENT_OBJECT_COMMODITY_MARKING_NO_MARKING_EXCISE => 2,
+			Check::PAYMENT_OBJECT_COMMODITY_MARKING_EXCISE => 2,
+			Check::PAYMENT_OBJECT_COMMODITY_MARKING_NO_MARKING => 1,
+			Check::PAYMENT_OBJECT_COMMODITY_MARKING => 1,
 		];
 	}
 
@@ -282,16 +405,27 @@ class CashboxOrangeData
 	 * @param Check $check
 	 * @return Result
 	 * @throws Main\ArgumentException
-	 * @throws Main\NotImplementedException
+	 * @throws Main\ObjectException
 	 */
 	public function printImmediately(Check $check)
 	{
+		return $this->registerCheck(
+			$this->getUrl().'/documents/',
+			$this->buildCheckQuery($check)
+		);
+	}
+
+	/**
+	 * @param $url
+	 * @param $data
+	 * @return Result
+	 * @throws Main\ArgumentException
+	 * @throws Main\ObjectException
+	 */
+	protected function registerCheck($url, $data)
+	{
 		$result = new Result();
 
-		$url = $this->getUrl();
-		$url .= '/documents/';
-
-		$data = $this->buildCheckQuery($check);
 		$encodedData = $this->encode($data);
 
 		$headers = $this->getPostQueryHeaders($url, $encodedData);
@@ -452,13 +586,24 @@ class CashboxOrangeData
 	/**
 	 * @param Check $check
 	 * @return Result
+	 * @throws Main\ObjectException
 	 */
 	public function check(Check $check)
 	{
-		$result = new Result();
-
 		$url = $this->getUrl();
 		$url .= '/documents/'.$this->getValueFromSettings('SERVICE', 'INN').'/status/'.$check->getField('EXTERNAL_UUID');
+
+		return $this->checkInternal($url);
+	}
+
+	/**
+	 * @param $url
+	 * @return Result
+	 * @throws Main\ObjectException
+	 */
+	protected function checkInternal($url)
+	{
+		$result = new Result();
 
 		$header = $this->getCheckQueryHeaders($url);
 		$queryResult = $this->send($url, $header);
@@ -771,6 +916,11 @@ class CashboxOrangeData
 			]
 		];
 
+		if (static::hasMeasureSettings())
+		{
+			$settings['MEASURE'] = static::getMeasureSettings();
+		}
+
 		$settings['INTERACTION'] = [
 			'LABEL' => Localization\Loc::getMessage('SALE_CASHBOX_ORANGE_DATA_SETTINGS_INTERACTION'),
 			'ITEMS' => [
@@ -786,6 +936,45 @@ class CashboxOrangeData
 		];
 
 		return $settings;
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected static function hasMeasureSettings(): bool
+	{
+		return false;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected static function getMeasureSettings(): array
+	{
+		$measureItems = [
+			'DEFAULT' => [
+				'TYPE' => 'STRING',
+				'LABEL' => Localization\Loc::getMessage('SALE_CASHBOX_MEASURE_SUPPORT_SETTINGS_DEFAULT_VALUE'),
+				'VALUE' => 0,
+			]
+		];
+		if (Main\Loader::includeModule('catalog'))
+		{
+			$measuresList = \CCatalogMeasure::getList();
+			while ($measure = $measuresList->fetch())
+			{
+				$measureItems[$measure['CODE']] = [
+					'TYPE' => 'STRING',
+					'LABEL' => $measure['MEASURE_TITLE'],
+					'VALUE' => MeasureCodeToTag2108Mapper::getTag2108Value($measure['CODE']),
+				];
+			}
+		}
+
+		return [
+			'LABEL' => Localization\Loc::getMessage('SALE_CASHBOX_MEASURE_SUPPORT_SETTINGS'),
+			'ITEMS' => $measureItems,
+		];
 	}
 
 	/**
@@ -815,11 +1004,194 @@ class CashboxOrangeData
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public static function isSupportedFFD105()
+	public static function getFfdVersion(): ?float
 	{
-		return true;
+		return 1.05;
 	}
 
+	/**
+	 * @param CorrectionCheck $check
+	 * @return Result
+	 * @throws Main\ArgumentException
+	 * @throws Main\ObjectException
+	 */
+	public function printCorrectionImmediately(CorrectionCheck $check)
+	{
+		return $this->registerCheck(
+			$this->getUrl() . $this->getCorrectionUrlPath(),
+			$this->buildCorrectionCheckQuery($check)
+		);
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function getCorrectionUrlPath(): string
+	{
+		return '/corrections/';
+	}
+
+	/**
+	 * @param CorrectionCheck $check
+	 * @return array
+	 * @throws Main\ObjectException
+	 */
+	public function buildCorrectionCheckQuery(CorrectionCheck $check)
+	{
+		$data = $this->getCheckData($check);
+
+		$calculatedSignMap = $this->getCalculatedSignMap();
+
+		$result = [
+			'id' => static::buildUuid(static::UUID_TYPE_CHECK, $data['unique_id']),
+			'inn' => $this->getValueFromSettings('SERVICE', 'INN'),
+			'group' => $this->getField('NUMBER_KKM') ?: null,
+			'key' => $this->getValueFromSettings('SECURITY', 'KEY_SIGN') ?: null,
+			'content' => [
+				'type' => $calculatedSignMap[$data['calculated_sign']],
+				'correctionType' => $this->getCorrectionTypeMap($data['correction_info']['type']),
+				'causeDocumentDate' => $this->getCorrectionCauseDocumentDate($data['correction_info']),
+				'causeDocumentNumber' => $this->getCorrectionCauseDocumentNumber($data['correction_info']),
+				'totalSum' => $this->getCorrectionTotalSum($data['correction_info']),
+				'taxationSystem' => $this->getValueFromSettings('TAX', 'SNO')
+			],
+		];
+
+		foreach ($data['payments'] as $payment)
+		{
+			if ($payment['type'] === Check::PAYMENT_TYPE_CASH)
+			{
+				$result['content']['cashSum'] = (float)$payment['sum'];
+			}
+			else
+			{
+				$result['content']['eCashSum'] = (float)$payment['sum'];
+			}
+		}
+
+		$vats = $this->getVatsByCheckData($data);
+		if (is_array($vats))
+		{
+			foreach ($vats as $vat)
+			{
+				$result['content'][$vat['code']] = $vat['value'];
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param $correctionInfo
+	 * @return string
+	 */
+	protected function getCorrectionCauseDocumentDate($correctionInfo)
+	{
+		$documentDate = new Main\Type\DateTime($correctionInfo['document_date']);
+
+		return $documentDate->format('Y-m-d\TH:i:s');
+	}
+
+	/**
+	 * @param $correctionInfo
+	 * @return mixed
+	 */
+	protected function getCorrectionCauseDocumentNumber($correctionInfo)
+	{
+		return $correctionInfo['document_number'];
+	}
+
+	/**
+	 * @param $correctionInfo
+	 * @return mixed
+	 */
+	protected function getCorrectionTotalSum($correctionInfo)
+	{
+		return $correctionInfo['total_sum'];
+	}
+
+	/**
+	 * @param array $data
+	 * @return array|null
+	 */
+	protected function getVatsByCheckData(array $data): ?array
+	{
+		if (!isset($data['vats']) || !is_array($data['vats']) || empty($data['vats']))
+		{
+			return null;
+		}
+
+		$result = [];
+		foreach ($data['vats'] as $item)
+		{
+			$vat = $this->getValueFromSettings('VAT', $item['type']);
+			if (is_null($vat) || $vat === '')
+			{
+				$vat = $this->getValueFromSettings('VAT', 'NOT_VAT');
+			}
+
+			switch ($vat)
+			{
+				case self::CODE_VAT_0:
+					$vatKey = '3Sum';
+					break;
+				case self::CODE_VAT_10:
+					$vatKey = '2Sum';
+					break;
+				case self::CODE_VAT_20:
+					$vatKey = '1Sum';
+					break;
+				default:
+					$vatKey = '4Sum';
+					break;
+			}
+
+			$result[] = [
+				'code' => $this->getVatKeyPrefix() . $vatKey,
+				'value' => $item['sum']
+			];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function getVatKeyPrefix(): string
+	{
+		return 'tax';
+	}
+
+	/**
+	 * @param $type
+	 * @return int
+	 */
+	protected function getCorrectionTypeMap($type)
+	{
+		$map = [
+			CorrectionCheck::CORRECTION_TYPE_INSTRUCTION => 1,
+			CorrectionCheck::CORRECTION_TYPE_SELF => 0
+		];
+
+		return $map[$type] ?? 0;
+	}
+
+	/**
+	 * @param CorrectionCheck $check
+	 * @return Result
+	 * @throws Main\ObjectException
+	 */
+	public function checkCorrection(CorrectionCheck $check)
+	{
+		return $this->checkInternal(
+			$this->getUrl()
+			. $this->getCorrectionUrlPath()
+			. $this->getValueFromSettings('SERVICE', 'INN')
+			. '/status/'
+			. $check->getField('EXTERNAL_UUID')
+		);
+	}
 }

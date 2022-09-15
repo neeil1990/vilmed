@@ -23,7 +23,7 @@ class SaleBasketLineComponent extends CBitrixComponent
 		if ($arParams['PATH_TO_BASKET'] == '')
 			$arParams['PATH_TO_BASKET'] = SITE_DIR.'personal/cart/';
 
-		$arParams['PATH_TO_ORDER'] = trim($arParams['PATH_TO_ORDER']);
+		$arParams['PATH_TO_ORDER'] = trim(($arParams['PATH_TO_ORDER'] ?? ''));
 		if ($arParams['PATH_TO_ORDER'] == '')
 			$arParams['PATH_TO_ORDER'] = SITE_DIR.'personal/order/make/';
 
@@ -35,7 +35,7 @@ class SaleBasketLineComponent extends CBitrixComponent
 		if ($arParams['SHOW_TOTAL_PRICE'] != 'N')
 			$arParams['SHOW_TOTAL_PRICE'] = 'Y';
 
-		if ($arParams['SHOW_EMPTY_VALUES'] != 'N')
+		if (($arParams['SHOW_EMPTY_VALUES'] ?? '') != 'N')
 			$arParams['SHOW_EMPTY_VALUES'] = 'Y';
 
 		// personal
@@ -80,19 +80,19 @@ class SaleBasketLineComponent extends CBitrixComponent
 		if ($arParams['SHOW_PRODUCTS'] != 'Y')
 			$arParams['SHOW_PRODUCTS'] = 'N';
 
-		if ($arParams['SHOW_DELAY'] != 'N')
+		if (!isset($arParams['SHOW_DELAY']) || $arParams['SHOW_DELAY'] != 'N')
 			$arParams['SHOW_DELAY'] = 'Y';
 
-		if ($arParams['SHOW_NOTAVAIL'] != 'N')
+		if (!isset($arParams['SHOW_NOTAVAIL']) || $arParams['SHOW_NOTAVAIL'] != 'N')
 			$arParams['SHOW_NOTAVAIL'] = 'Y';
 
-		if ($arParams['SHOW_IMAGE'] != 'N')
+		if (!isset($arParams['SHOW_IMAGE']) || $arParams['SHOW_IMAGE'] != 'N')
 			$arParams['SHOW_IMAGE'] = 'Y';
 
-		if ($arParams['SHOW_PRICE'] != 'N')
+		if (($arParams['SHOW_PRICE'] ?? '') != 'N')
 			$arParams['SHOW_PRICE'] = 'Y';
 
-		if ($arParams['SHOW_SUMMARY'] != 'N')
+		if (($arParams['SHOW_SUMMARY'] ?? '') != 'N')
 			$arParams['SHOW_SUMMARY'] = 'Y';
 
 		// Visual
@@ -100,10 +100,10 @@ class SaleBasketLineComponent extends CBitrixComponent
 		if ($arParams['POSITION_FIXED'] != 'Y')
 			$arParams['POSITION_FIXED'] = 'N';
 
-		if ($arParams['POSITION_VERTICAL'] != 'bottom' && $arParams['POSITION_VERTICAL'] != 'vcenter')
+		if (!isset($arParams['POSITION_VERTICAL']) || ($arParams['POSITION_VERTICAL'] != 'bottom' && $arParams['POSITION_VERTICAL'] != 'vcenter'))
 			$arParams['POSITION_VERTICAL'] = 'top';
 
-		if ($arParams['POSITION_HORIZONTAL'] != 'left' && $arParams['POSITION_HORIZONTAL'] != 'hcenter')
+		if (!isset($arParams['POSITION_HORIZONTAL']) || ($arParams['POSITION_HORIZONTAL'] != 'left' && $arParams['POSITION_HORIZONTAL'] != 'hcenter'))
 			$arParams['POSITION_HORIZONTAL'] = 'right';
 
 		$arParams['MAX_IMAGE_SIZE'] = (isset($arParams['MAX_IMAGE_SIZE']) ? (int)$arParams['MAX_IMAGE_SIZE'] : 70);
@@ -112,7 +112,7 @@ class SaleBasketLineComponent extends CBitrixComponent
 
 		// ajax
 
-		if ($arParams['AJAX'] != 'Y')
+		if (($arParams['AJAX'] ?? '') != 'Y')
 			$arParams['AJAX'] = 'N';
 
 		return $arParams;
@@ -259,6 +259,7 @@ class SaleBasketLineComponent extends CBitrixComponent
 		$this->arResult["PRODUCTS"] = Loc::getMessage(
 			'BX_CP_SBBL_MESS_TOTAL_POSITITON',
 			['#VALUE#' => $this->arResult['BASKET_COUNT_DESCRIPTION']]
+
 		);
 		// compatibility end!
 		unset($messages);

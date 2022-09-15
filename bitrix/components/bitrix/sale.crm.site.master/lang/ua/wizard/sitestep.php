@@ -17,7 +17,7 @@ $MESS["SALE_CSM_WIZARD_SITESTEP_REWRITE_ERROR"] = "Папка для устан�
 $MESS["SALE_CSM_WIZARD_SITESTEP_SITE_CREATE_ERROR"] = "Щось пішло не так...";
 $MESS["SALE_CSM_WIZARD_SITESTEP_SITE_DIR_ERROR"] = "Установка \"Бітрікс24\" доступна тільки в корінь сайту, у налаштуваннях сайту вказана \"Папка сайту\"";
 $MESS["SALE_CSM_WIZARD_SITESTEP_SITE_SELECT_NEW"] = "Додати новий сайт";
-$MESS["SALE_CSM_WIZARD_SITESTEP_SITE_SELECT_TITLE"] = "Оберіть сайт, на якому буде встановлено ??Бітрікс24 або додайте новий:";
+$MESS["SALE_CSM_WIZARD_SITESTEP_SITE_SELECT_TITLE"] = "Оберіть сайт, на якому буде встановлено Бітрікс24 або додайте новий:";
 $MESS["SALE_CSM_WIZARD_SITESTEP_TEMPLATE_COPY_ERROR"] = "Не вдається скопіювати шаблон сайту \"#SITE_TEMPLATE_NAME#\"";
 $MESS["SALE_CSM_WIZARD_SITESTEP_TITLE"] = "Будь ласка, уточніть наступні дані";
 ?>

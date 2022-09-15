@@ -1,9 +1,10 @@
-<?
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/general/tax.php");
+<?php
+
+require_once __DIR__."/../general/tax.php";
 
 class CSaleTax extends CAllSaleTax
 {
-	function Add($arFields)
+	public static function Add($arFields)
 	{
 		global $DB;
 
@@ -21,4 +22,3 @@ class CSaleTax extends CAllSaleTax
 		return $ID;
 	}
 }
-?>

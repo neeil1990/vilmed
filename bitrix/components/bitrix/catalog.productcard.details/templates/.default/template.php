@@ -2,6 +2,7 @@
 /**
  * @var $component \CatalogProductDetailsComponent
  * @var $this \CBitrixComponentTemplate
+ * @var $arResult
  */
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 {
@@ -25,6 +26,14 @@ $APPLICATION->SetPageProperty('BodyClass', ($bodyClass ? $bodyClass.' ' : '').'n
 
 Loader::includeModule('ui');
 
+$createDocumentButtonId = null;
+if (\Bitrix\Catalog\Config\State::isUsedInventoryManagement())
+{
+	$createDocumentButton = new \Bitrix\UI\Buttons\Split\Button($arResult['CREATE_DOCUMENT_BUTTON_PARAMS']);
+	Toolbar::addButton($createDocumentButton);
+	$createDocumentButtonId = $createDocumentButton->getUniqId();
+}
+
 $settingsButton = new SettingsButton([
 	'className' => $arResult['IS_NEW_PRODUCT'] ? 'ui-btn-highlighted' : '',
 ]);
@@ -47,6 +56,7 @@ Extension::load([
 	'catalog.entity-card',
 	'admin_interface',
 	'sidepanel',
+	'ui.hint',
 ]);
 
 $tabs = [
@@ -56,6 +66,12 @@ $tabs = [
 		'enabled' => true,
 		'active' => true,
 	],
+	[
+		'id' => 'balance',
+		'name' => Loc::getMessage('CPD_TAB_BALANCE_TITLE'),
+		'enabled' => true,
+		'active' => false,
+	]
 	// [
 	// 	'id' => 'seo',
 	// 	'name' => 'SEO',
@@ -90,6 +106,8 @@ $tabContainerId = "{$guid}_tabs";
 				tabs: <?=CUtil::PhpToJSObject($tabs)?>,
 				settingsButtonId: '<?=$settingsButton->getUniqId()?>',
 				cardSettings: <?=CUtil::PhpToJSObject($arResult['CARD_SETTINGS'])?>,
+				createDocumentButtonId: '<?=CUtil::JSEscape($createDocumentButtonId)?>',
+				createDocumentButtonMenuPopupItems: <?=CUtil::PhpToJSObject($arResult['CREATE_DOCUMENT_BUTTON_POPUP_ITEMS'])?>,
 				feedbackUrl: '<?=CUtil::JSEscape($arParams['PATH_TO']['FEEDBACK'] ?? '')?>',
 				containerId: '<?=CUtil::JSEscape($containerId)?>',
 				tabContainerId: '<?=CUtil::JSEscape($tabContainerId)?>',
@@ -97,7 +115,8 @@ $tabContainerId = "{$guid}_tabs";
 				serviceUrl: '<?=CUtil::JSEscape($arResult['SERVICE_URL'])?>',
 				creationPropertyUrl: '<?=CUtil::JSEscape($arResult['UI_CREATION_PROPERTY_URL'])?>',
 				creationVariationPropertyUrl: '<?=CUtil::JSEscape($arResult['UI_CREATION_SKU_PROPERTY_URL'])?>',
-				variationGridId: '<?=CUtil::JSEscape($arResult['VARIATION_GRID_ID'])?>'
+				variationGridId: '<?=CUtil::JSEscape($arResult['VARIATION_GRID_ID'])?>',
+				productStoreGridId: '<?=CUtil::JSEscape($arResult['STORE_AMOUNT_GRID_ID'])?>',
 			}
 		);
 	});

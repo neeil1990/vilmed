@@ -1,15 +1,17 @@
-<?
+<?php
+
 ##############################################
 # Bitrix Site Manager Forum                  #
 # Copyright (c) 2002-2009 Bitrix             #
 # http://www.bitrixsoft.com                  #
 # mailto:admin@bitrixsoft.com                #
 ##############################################
+
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/vote/classes/general/event.php");
 
 class CVoteEvent extends CAllVoteEvent
 {
-	function err_mess()
+	public static function err_mess()
 	{
 		$module_id = "vote";
 		return "<br>Module: ".$module_id."<br>Class: CVoteEvent<br>File: ".__FILE__;
@@ -36,7 +38,7 @@ class CVoteEvent extends CAllVoteEvent
 			$key_res = VoteGetFilterOperation($key);
 			$strNegative = $key_res["NEGATIVE"];
 			$strOperation = $key_res["OPERATION"];
-			$key = strtoupper($key_res["FIELD"]);
+			$key = mb_strtoupper($key_res["FIELD"]);
 			switch($key)
 			{
 				case "ID":

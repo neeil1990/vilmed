@@ -1,4 +1,6 @@
 <?
+
+use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Application;
 use Bitrix\Main\Page;
@@ -30,10 +32,18 @@ $server = $context->getServer();
 $lang = $context->getLanguage();
 $documentRoot = Application::getDocumentRoot();
 
+$isCloud = Loader::includeModule("bitrix24");
+$zone = '';
+if (!$isCloud && Loader::includeModule('intranet'))
+{
+	$zone = \CIntranetUtils::getPortalZone();
+}
+
 \Bitrix\Sale\Cashbox\Cashbox::init();
 
 $id = (int)$request->get('ID');
 
+$cashboxObject = null;
 $cashbox = array();
 $errorMessage = '';
 
@@ -50,7 +60,7 @@ if ($server->getRequestMethod() == "POST"
 		'HANDLER' => $request->getPost('HANDLER'),
 		'OFD' => $request->getPost('OFD'),
 		'EMAIL' => $request->getPost('EMAIL'),
-		'NUMBER_KKM' => $request->getPost('NUMBER_KKM'),
+		'NUMBER_KKM' => $request->getPost('NUMBER_KKM') ?: '',
 		'KKM_ID' => $request->get('KKM_ID') ?: '',
 		'ACTIVE' => ($request->get('ACTIVE') == 'Y') ? 'Y' : 'N',
 		'USE_OFFLINE' => ($request->get('USE_OFFLINE') == 'Y') ? 'Y' : 'N',
@@ -77,7 +87,7 @@ if ($server->getRequestMethod() == "POST"
 	{
 		$adminSidePanelHelper->sendJsonErrorResponse($errorMessage);
 	}
-	
+
 	if (class_exists($handler))
 	{
 		$cashbox['SETTINGS'] = $handler::extractSettingsFromRequest($request);
@@ -179,7 +189,9 @@ if (class_exists($cashbox['HANDLER']))
 	$requireFields = $cashbox['HANDLER']::getGeneralRequiredFields();
 }
 
-if ($id > 0)
+$isCashboxPaySystem = ($cashboxObject && Cashbox\Manager::isPaySystemCashbox($cashboxObject->getField('HANDLER')));
+
+if ($id > 0 && $cashboxObject && !$isCashboxPaySystem)
 {
 	$aTabs[] = array(
 		"DIV" => "edit2",
@@ -206,7 +218,7 @@ $tabControl = new CAdminForm("tabControl", $aTabs);
 
 $restrictionsHtml = '';
 
-if ($id > 0)
+if ($id > 0 && !$isCashboxPaySystem)
 {
 	ob_start();
 	require_once($documentRoot."/bitrix/modules/sale/admin/cashbox_restrictions_list.php");
@@ -222,7 +234,7 @@ $aMenu = array(
 	)
 );
 
-if ($id > 0 && $saleModulePermissions >= "W")
+if ($id > 0 && $saleModulePermissions >= "W" && !$isCashboxPaySystem)
 {
 	$aMenu[] = array("SEPARATOR" => "Y");
 
@@ -272,17 +284,29 @@ $tabControl->BeginNextFormTab();
 if ($id > 0)
 	$tabControl->AddViewField("ID", "ID:", $id);
 
-$active = isset($cashbox['ACTIVE']) ? $cashbox['ACTIVE'] : 'Y';
-$tabControl->AddCheckBoxField("ACTIVE", GetMessage("SALE_CASHBOX_ACTIVE").':', false, 'Y', $active === 'Y');
+$isCashbox1C = (Cashbox\Cashbox1C::getId() > 0 && (int)$id === (int)Cashbox\Cashbox1C::getId());
+
+if ($isCashboxPaySystem)
+{
+	$tabControl->BeginCustomField('ACTIVE', '');
+	echo '<input type="hidden" name="ACTIVE" id="ACTIVE" value="Y">';
+	$tabControl->EndCustomField('ACTIVE', '');
+}
+else
+{
+	$active = isset($cashbox['ACTIVE']) ? $cashbox['ACTIVE'] : 'Y';
+	$tabControl->AddCheckBoxField("ACTIVE", GetMessage("SALE_CASHBOX_ACTIVE").':', false, 'Y', $active === 'Y');
+}
 
 $tabControl->BeginCustomField('HANDLER', GetMessage("SALE_CASHBOX_HANDLER"));
 ?>
 	<tr class="adm-detail-required-field">
 		<td width="40%"><?=Loc::getMessage("SALE_CASHBOX_HANDLER");?>:</td>
 		<td width="60%" valign="top">
-			<?
+			<?php
 				$disabled = '';
-				if (Cashbox\Cashbox1C::getId() > 0 && $id == Cashbox\Cashbox1C::getId())
+
+				if ($isCashbox1C || $isCashboxPaySystem)
 				{
 					$disabled = 'disabled';
 					echo '<input type="hidden" name="HANDLER" id="HANDLER" value="'.htmlspecialcharsbx($cashbox['HANDLER']).'">';
@@ -293,16 +317,63 @@ $tabControl->BeginCustomField('HANDLER', GetMessage("SALE_CASHBOX_HANDLER"));
 					$handlerList = Bitrix\Sale\Cashbox\Cashbox::getHandlerList();
 				?>
 				<option value=""><?=Loc::getMessage("SALE_CASHBOX_NO_HANDLER") ?></option>
-				<?
+				<?php
 				foreach ($handlerList as $handler => $path)
 				{
 					if ($handler === '\Bitrix\Sale\Cashbox\Cashbox1C' && $cashbox['ID'] != Cashbox\Cashbox1C::getId())
+					{
 						continue;
+					}
 
-					if (class_exists($handler))
+					if (Cashbox\Manager::isPaySystemCashbox($handler))
+					{
+						$skip = true;
+
+						if (isset($cashbox['HANDLER']) && Cashbox\Manager::isPaySystemCashbox($cashbox['HANDLER']))
+						{
+							$paySystemCashboxList = Cashbox\Manager::getList([
+								'select' => ['ID'],
+								'filter' => [
+									'=ACTIVE' => 'Y',
+									'=HANDLER' => $cashbox['HANDLER'],
+									'=KKM_ID' => $cashbox['KKM_ID'],
+								],
+							])->fetchAll();
+							foreach ($paySystemCashboxList as $paySystemCashbox)
+							{
+								if ($cashbox['ID'] === $paySystemCashbox['ID'])
+								{
+									$skip = false;
+								}
+							}
+						}
+
+						if ($skip)
+						{
+							continue;
+						}
+					}
+
+					$restHandlers = [];
+					$isRestHandler = $handler === '\Bitrix\Sale\Cashbox\CashboxRest';
+					if ($isRestHandler)
+					{
+						$restHandlers = Cashbox\Manager::getRestHandlersList();
+						foreach ($restHandlers as $restHandlerCode => $restHandlerConfig)
+						{
+							$selected = ($restHandlerCode === $cashbox['SETTINGS']['REST']['REST_CODE']) ? 'selected' : '';
+							echo '<option data-rest-code="'.htmlspecialcharsbx($restHandlerCode).'" value="'.htmlspecialcharsbx($handler).'" '.$selected.'>'.htmlspecialcharsbx($restHandlerConfig['NAME']).'</option>';
+						}
+					}
+					elseif (class_exists($handler))
 					{
 						$selected = ($handler === $cashbox['HANDLER']) ? 'selected' : '';
-						echo '<option value="'.$handler.'" '.$selected.'>'.$handler::getName().'</option>';
+						$handlerName = $handler::getName();
+						if ($handler === '\Bitrix\Sale\Cashbox\CashboxCheckbox' && (!$isCloud && $zone !== 'ua'))
+						{
+							$handlerName .= ' ' . Loc::getMessage('SALE_CASHBOX_FOR_UA');
+						}
+						echo '<option value="'.$handler.'" '.$selected.'>'.htmlspecialcharsbx($handlerName).'</option>';
 					}
 				}
 				?>
@@ -310,13 +381,46 @@ $tabControl->BeginCustomField('HANDLER', GetMessage("SALE_CASHBOX_HANDLER"));
 			<?if ($cashboxObject instanceof Cashbox\ITestConnection):?>
 				<input type="button" id="TEST_BUTTON" value="<?=Loc::getMessage('SALE_CASHBOX_CONNECTION')?>" onclick="BX.Sale.Cashbox.testConnection(<?=$id?>)">
 			<?endif;?>
+			<span id="hint_handler_wrapper">
+
+				<span id="hint_HANDLER">
+					<?php
+					if ($cashboxObject)
+					{
+						$handlerHint = Loc::getMessage('SALE_CASHBOX_'.ToUpper($cashboxObject::getCode()).'_HINT');
+						if ($handlerHint)
+						{
+						?>
+							<script>
+								BX.hint_replace(BX('hint_HANDLER'), "<?=$handlerHint;?>");
+							</script>
+						<?
+						}
+					}
+					?>
+				</span>
+			</span>
 		</td>
 	</tr>
 <?
 $tabControl->EndCustomField('HANDLER', '');
 
-$tabControl->BeginCustomField('OFD', GetMessage("SALE_CASHBOX_OFD"));
-?>
+$zone = 'ru';
+if (Loader::includeModule("bitrix24"))
+{
+	$zone = \CBitrix24::getLicensePrefix();
+}
+elseif (Loader::includeModule('intranet'))
+{
+	$zone = \CIntranetUtils::getPortalZone();
+}
+
+$needOfdSettings = !$isCashboxPaySystem && $zone === 'ru';
+
+if ($needOfdSettings)
+{
+	$tabControl->BeginCustomField('OFD', GetMessage("SALE_CASHBOX_OFD"));
+	?>
 	<tr id="tr_OFD">
 		<td width="40%">
 			<span <?=(isset($requireFields['OFD']) ? 'class="adm-required-field"' : '')?>><?=Loc::getMessage("SALE_CASHBOX_OFD");?>:</span>
@@ -328,7 +432,7 @@ $tabControl->BeginCustomField('OFD', GetMessage("SALE_CASHBOX_OFD"));
 				foreach ($ofdList as $handler => $name)
 				{
 					$selected = ($handler === $cashbox['OFD']) ? 'selected' : '';
-					echo '<option value="'.$handler.'" '.$selected.'>'.$name.'</option>';
+					echo '<option value="'.$handler.'" '.$selected.'>'.htmlspecialcharsbx($name).'</option>';
 				}
 
 				$selected = ($cashbox['OFD'] == '') ? 'selected' : '';
@@ -337,13 +441,12 @@ $tabControl->BeginCustomField('OFD', GetMessage("SALE_CASHBOX_OFD"));
 			</select>
 		</td>
 	</tr>
-
-<?
-$tabControl->EndCustomField('OFD', '');
+	<?php
+	$tabControl->EndCustomField('OFD', '');
+}
 
 $name = $request->get('NAME') ? $request->get('NAME') : $cashbox['NAME'];
 $tabControl->AddEditField('NAME', Loc::getMessage("SALE_CASHBOX_NAME").':', true, array('SIZE' => 40), $name);
-
 
 $tabControl->BeginCustomField('KKM_ID', GetMessage("SALE_CASHBOX_KKM_ID"));
 ?>
@@ -358,7 +461,16 @@ $tabControl->BeginCustomField('KKM_ID', GetMessage("SALE_CASHBOX_KKM_ID"));
 					<span <?=(isset($requireFields['KKM_ID']) ? 'class="adm-required-field"' : '')?>><?=Loc::getMessage("SALE_CASHBOX_KKM_ID");?>:</span>
 				</td>
 				<td width="60%">
-					<select name="KKM_ID" id="KKM_ID" onchange="BX.Sale.Cashbox.reloadSettings()">
+					<?php
+					$disabled = '';
+
+					if ($isCashboxPaySystem)
+					{
+						$disabled = 'disabled';
+						echo '<input type="hidden" name="KKM_ID" id="KKM_ID" value="'.$cashbox['KKM_ID'].'">';
+					}
+					?>
+					<select name="KKM_ID" id="KKM_ID" onchange="BX.Sale.Cashbox.reloadSettings()" <?=$disabled?>>
 						<option value=""><?=Loc::getMessage('SALE_CASHBOX_KKM_NO_CHOOSE')?></option>
 						<?
 							foreach ($kkmList as $code => $kkm)
@@ -376,9 +488,11 @@ $tabControl->BeginCustomField('KKM_ID', GetMessage("SALE_CASHBOX_KKM_ID"));
 <?
 $tabControl->EndCustomField('KKM_ID', '');
 
-$numberKkm = $request->get('NUMBER_KKM') ? $request->get('NUMBER_KKM') : $cashbox['NUMBER_KKM'];
-$tabControl->BeginCustomField('NUMBER_KKM', GetMessage("SALE_CASHBOX_EXTERNAL_UUID"));
-?>
+if (!$isCashboxPaySystem)
+{
+	$numberKkm = $request->get('NUMBER_KKM') ? $request->get('NUMBER_KKM') : $cashbox['NUMBER_KKM'];
+	$tabControl->BeginCustomField('NUMBER_KKM', GetMessage("SALE_CASHBOX_EXTERNAL_UUID"));
+	?>
 	<tr id="tr_NUMBER_KKM">
 		<td width="40%"><span <?=(isset($requireFields['NUMBER_KKM']) ? 'class="adm-required-field"' : '')?>><?=Loc::getMessage("SALE_CASHBOX_EXTERNAL_UUID");?>:</span></td>
 		<td width="60%">
@@ -387,14 +501,17 @@ $tabControl->BeginCustomField('NUMBER_KKM', GetMessage("SALE_CASHBOX_EXTERNAL_UU
 
 		</td>
 	</tr>
+	<?php if ($zone !== 'ua'): ?>
 	<script>
 		BX.hint_replace(BX('hint_NUMBER_KKM'), '<?=Loc::getMessage('SALE_CASHBOX_EXTERNAL_UUID_HINT_V2');?>');
 	</script>
-<?
-$tabControl->EndCustomField('NUMBER_KKM', '');
+<?php endif; ?>
+	<?
+	$tabControl->EndCustomField('NUMBER_KKM', '');
 
-$isOffline = isset($cashbox['USE_OFFLINE']) ? $cashbox['USE_OFFLINE'] : 'N';
-$tabControl->AddCheckBoxField("USE_OFFLINE", GetMessage("SALE_CASHBOX_USE_OFFLINE").':', false, 'Y', $isOffline === 'Y');
+	$isOffline = isset($cashbox['USE_OFFLINE']) ? $cashbox['USE_OFFLINE'] : 'N';
+	$tabControl->AddCheckBoxField("USE_OFFLINE", GetMessage("SALE_CASHBOX_USE_OFFLINE").':', false, 'Y', $isOffline === 'Y');
+}
 
 $tabControl->BeginCustomField('EMAIL', GetMessage("SALE_CASHBOX_EMAIL"));
 $email = $request->get('EMAIL') ? $request->get('EMAIL') : $cashbox['EMAIL'];
@@ -437,16 +554,21 @@ $tabControl->BeginCustomField('CASHBOX_SETTINGS', GetMessage("CASHBOX_SETTINGS")
 	<tbody id="sale-cashbox-settings-container"><?=$cashboxSettings?></tbody>
 <?$tabControl->EndCustomField('CASHBOX_SETTINGS');
 
-$tabControl->BeginNextFormTab();
+if ($needOfdSettings)
+{
+	$tabControl->BeginNextFormTab();
 
-ob_start();
-require_once($documentRoot."/bitrix/modules/sale/admin/cashbox_ofd_settings.php");
-$cashboxOfdSettings = ob_get_contents();
-ob_end_clean();
+	ob_start();
+	require_once($documentRoot."/bitrix/modules/sale/admin/cashbox_ofd_settings.php");
+	$cashboxOfdSettings = ob_get_contents();
+	ob_end_clean();
 
-$tabControl->BeginCustomField('OFD_SETTINGS', GetMessage("CASHBOX_OFD_SETTINGS"));?>
+	$tabControl->BeginCustomField('OFD_SETTINGS', GetMessage("CASHBOX_OFD_SETTINGS"));
+	?>
 	<tbody id="sale-cashbox-ofd-settings-container"><?=$cashboxOfdSettings?></tbody>
-<?$tabControl->EndCustomField('OFD_SETTINGS');
+	<?php
+	$tabControl->EndCustomField('OFD_SETTINGS');
+}
 
 $tabControl->Buttons(array("disabled" => ($saleModulePermissions < "W"), "back_url" => $listUrl));
 
@@ -458,7 +580,9 @@ $tabControl->Show();
 		CASHBOX_CHECK_CONNECTION_TITLE: '<?=Loc::getMessage("CASHBOX_CHECK_CONNECTION_TITLE")?>',
 		CASHBOX_CHECK_CONNECTION_TITLE_POPUP_CLOSE: '<?=Loc::getMessage("CASHBOX_CHECK_CONNECTION_TITLE_POPUP_CLOSE")?>',
 		SALE_RDL_RESTRICTION: '<?=Loc::getMessage("SALE_CASHBOX_RDL_RESTRICTION")?>',
-		SALE_RDL_SAVE: '<?=Loc::getMessage("SALE_CASHBOX_RDL_SAVE")?>'
+		SALE_RDL_SAVE: '<?=Loc::getMessage("SALE_CASHBOX_RDL_SAVE")?>',
+		SALE_CASHBOX_CASHBOXCHECKBOX_HINT: '<?=Loc::getMessage("SALE_CASHBOX_CASHBOXCHECKBOX_HINT")?>',
+		SALE_CASHBOX_CASHBOXBUSINESSRU_HINT: '<?=GetMessageJS("SALE_CASHBOX_CASHBOXBUSINESSRU_HINT")?>'
 	});
 </script>
 <?

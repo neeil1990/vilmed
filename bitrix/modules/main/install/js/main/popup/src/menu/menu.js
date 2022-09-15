@@ -274,7 +274,12 @@ export default class Menu
 	{
 		if (
 			!menuItemJson ||
-			(!menuItemJson.delimiter && !Type.isStringFilled(menuItemJson.text)) ||
+			(
+				!menuItemJson.delimiter &&
+				!Type.isStringFilled(menuItemJson.text) &&
+				!Type.isStringFilled(menuItemJson.html) &&
+				!Type.isElementNode(menuItemJson.html)
+			) ||
 			(menuItemJson.id && this.getMenuItem(menuItemJson.id) !== null)
 		)
 		{

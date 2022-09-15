@@ -22,7 +22,9 @@ $arAllOptions = array(
 	array("sub_link", GetMessage("opt_sub_link"), array("text", 35)),
 	array("address_from", GetMessage("opt_address_from"), array("text-list", 3, 20)),
 	array("address_send_to_me", GetMessage("opt_address_send_to_me"), array("text-list", 3, 20)),
-	array("mail_headers", GetMessage("opt_mail_headers"), array("srlz-list", 3, 20))
+	array("mail_headers", GetMessage("opt_mail_headers"), array("srlz-list", 3, 20)),
+	array("mail_consent",GetMessage("mail_need_consent"),array("checkbox")),
+	array("~mail_max_consent_requests",GetMessage("mail_max_consent_requests"),array("text", 10)),
 );
 $aTabs = array(
 	array("DIV" => "edit1", "TAB" => GetMessage("MAIN_TAB_SET"), "ICON" => "sender_settings", "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
@@ -35,7 +37,7 @@ if($REQUEST_METHOD=="POST" && $Update.$Apply.$RestoreDefaults <> '' && $POST_RIG
 	if($RestoreDefaults <> '')
 	{
 		COption::RemoveOption("sender");
-		$z = CGroup::GetList($v1="id",$v2="asc", array("ACTIVE" => "Y", "ADMIN" => "N"));
+		$z = CGroup::GetList("id", "asc", array("ACTIVE" => "Y", "ADMIN" => "N"));
 		while($zr = $z->Fetch())
 			$APPLICATION->DelGroupRight($module_id, array($zr["ID"]));
 	}
@@ -70,7 +72,6 @@ if($REQUEST_METHOD=="POST" && $Update.$Apply.$RestoreDefaults <> '' && $POST_RIG
 		}
 	}
 
-	CModule::IncludeModule('sender');
 	\Bitrix\Sender\Runtime\Job::actualizeAll();
 
 	$Update = $Update.$Apply;
@@ -115,7 +116,7 @@ $tabControl->BeginNextTab();
 			elseif($type[0]=="text-list" || $type[0]=="srlz-list"):
 				if ($type[0]=="srlz-list")
 				{
-					$aVal = !empty($val) ? unserialize($val) : '';
+					$aVal = !empty($val) ? unserialize($val, ['allowed_classes' => false]) : '';
 				}
 				else
 				{

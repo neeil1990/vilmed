@@ -1,4 +1,8 @@
-<?
+<?php
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_BTN_CLOSE"] = "Jetzt abbrechen";
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_BTN_CONTINUE"] = "Import fortsetzen";
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_DESCRIPTION"] = "Wenn Sie jetzt abbrechen, wird das Importverfahren nächstes Mal erneut gestartet.";
+$MESS["REST_CONFIGURATION_IMPORT_HOLD_CLOSE_POPUP_TITLE"] = "Möchten Sie den Import wirklich abbrechen?";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_ACCEPT_CLEAR"] = "Ich will die aktuellen Bitrix24 Einstellungen durch die vom heruntergeladenen CRM Lösungspreset ersetzen.";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_ACCEPT_CLEAR_ROLLBACK"] = "Ich will die aktuellen Bitrix24 Einstellungen durch die vom ausgewählten CRM Lösungspreset ersetzen.";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_APP_DESCRIPTION"] = "Per Klick auf \"Fortfahren\" akzeptieren Sie, dass einige oder alle von aktuellen Bitrix24 Einstellungen durch zu importierendes CRM Lösungspreset geändert werden können. Sie können nachträglich nicht wiederhergestellt werden.";
@@ -18,8 +22,8 @@ $MESS["REST_CONFIGURATION_IMPORT_INSTALL_START_BTN"] = "Fortfahren";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP"] = "Einstellungen werden importiert";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_CLEAR"] = "Ihr Bitrix24 wird für einen Import vorbereitet";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_FINISH"] = "Wird abgeschlossen";
+$MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_INIT_BACKGROUND"] = "Inhalte werden geladen";
 $MESS["REST_CONFIGURATION_IMPORT_INSTALL_STEP_START"] = "Informationen werden gesammelt";
 $MESS["REST_CONFIGURATION_IMPORT_PRE_INSTALL_APP_DESCRIPTION"] = "Klicken Sie auf \"Fortfahren\", um den Lösungspreset \"#APP_NAME#\" zu installieren.";
 $MESS["REST_CONFIGURATION_IMPORT_PRE_INSTALL_LATER_APP_POPUP_DESCRIPTION"] = "Sie können den Lösungspreset \"#APP_NAME#\" jederzeit installieren, Sie sollten ihn lediglich in der Liste der Lösungen finden. Mehr dazu: #HELP_DESK_LINK#.";
 $MESS["REST_CONFIGURATION_IMPORT_PRE_INSTALL_LATER_APP_POPUP_HELP_DESK_LINK_LABEL"] = "hier";
-?>

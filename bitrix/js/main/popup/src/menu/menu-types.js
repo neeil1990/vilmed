@@ -1,12 +1,14 @@
 import { PopupOptions } from '../popup/popup-types';
 
 export type MenuOptions = PopupOptions & {
-	items: MenuItemOptions[]
+	items: MenuItemOptions[],
+	subMenuOptions?: PopupOptions,
 };
 
 export type MenuItemOptions = {
 	id?: string,
 	text?: string,
+	html?: string,
 	title?: string,
 	disabled?: boolean,
 	href?: string,

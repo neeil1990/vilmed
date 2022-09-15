@@ -13,9 +13,11 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
 {
 	die();
 }
-use \Bitrix\Main\Loader;
-use \Bitrix\Main\Localization\Loc;
-use \Bitrix\Rest\Marketplace\Url;
+use Bitrix\Main\Loader;
+use Bitrix\Main\Localization\Loc;
+use Bitrix\Rest\Marketplace\Url;
+use Bitrix\Rest\Url\DevOps;
+
 $portalZoneId = (Loader::includeModule("bitrix24")) ? (CBitrix24::getPortalZone()) : "ru";
 \Bitrix\Main\Loader::includeModule("ui");
 \Bitrix\Main\UI\Extension::load(array("ui.tilegrid", "ui.buttons"));
@@ -298,7 +300,7 @@ if ($arResult["AJAX_MODE"])
 if (\CRestUtil::isAdmin())
 {
 	\Bitrix\UI\Toolbar\Facade\Toolbar::addButton([
-		"link" => Url::getApplicationAddUrl(),
+		"link" => DevOps::getInstance()->getIndexUrl(),
 		"color" => \Bitrix\UI\Buttons\Color::PRIMARY,
 		"icon" => "",
 		"text" => Loc::getMessage("MENU_MARKETPLACE_ADD"),
@@ -311,7 +313,8 @@ if (\CRestUtil::isAdmin())
 			"icon" => "",
 			"text" => Loc::getMessage("MENU_MARKETPLACE_ADD_WIDGET")
 		]);
-	}}
+	}
+}
 
 //endregion
 //region TopMenu
@@ -364,9 +367,21 @@ if (!empty($arResult["CATEGORIES"]))
 	foreach ($arResult["CATEGORIES"] as $category)
 	{
 		$sum += $category["CNT"];
+
+		$name = '';
+		if (!empty($category['ICON_PATH']))
+		{
+			$name = '<img class="ui-sidepanel-menu-link-text-icon" src="' . $category['ICON_PATH'] . '" />';
+		}
+		$name .= '<span class="ui-sidepanel-menu-link-text-item">' . $category['NAME'] . '</span>';
+		if ($category['CNT'] > 0)
+		{
+			$name .= '<span class="ui-sidepanel-menu-link-text-counter">' . $category['CNT'] . '</span>';
+		}
+
 		$item = [
 			"ATTRIBUTES" => ["bx-role" => "mp-left-menu-item", "bx-mp-left-menu-item" => $category["CODE"], "onclick" => "BX.onCustomEvent('BX.Main.Filter:clickMPMenu', [this])"],
-			"NAME_HTML" => "<span class=\"ui-sidepanel-menu-link-text-item\">".$category["NAME"]."</span>".($category["CNT"] > 0 ? " <span class=\"ui-sidepanel-menu-link-text-counter\">{$category["CNT"]}</span>" : ""),
+			"NAME_HTML" => $name,
 			"ACTIVE" => in_array($category["CODE"], $activeItems),
 			"OPERATIVE" => true,
 			"CHILDREN" => []
@@ -385,29 +400,32 @@ if (!empty($arResult["CATEGORIES"]))
 		$items[] = $item;
 	}
 }
-$titleMessage = Loc::getMessage("MENU_MARKETPLACE_TITLE");
-if ($sum <= 890)
+
+if ($arResult["CATEGORIES_COUNT"] > 0)
 {
-	$title = <<<HTML
-	<div class="mp-head-status-box">
-		<span class="mp-head-status-value">{$sum}</span>
-		<span class="mp-head-status-text">{$titleMessage}</span>
-		<button class="mp-head-status-btn">&rarr;</button>
-	</div>
-HTML;
+	$sum = round($arResult["CATEGORIES_COUNT"], -1);
+}
+elseif ($sum > 890)
+{
+	$sum = 890;
 }
 else
 {
-	$title = <<<HTML
+	$sum = round($sum, -1);
+}
+
+$titleMessage = Loc::getMessage("MENU_MARKETPLACE_TITLE");
+$title = <<<HTML
 	<div class="mp-head-status-box">
 		<span class="mp-head-status-value">
-			890<span class="mp-head-status-plus">&#43;</span>
+			{$sum}<span class="mp-head-status-plus">&#43;</span>
 		</span>
 		<span class="mp-head-status-text">{$titleMessage}</span>
 		<button class="mp-head-status-btn">&rarr;</button>
 	</div>
 HTML;
-}
+
+$APPLICATION->AddViewContent("left-panel-before", $title);
 
 if(!empty($arResult["CATEGORIES"])):
 	?><? $APPLICATION->IncludeComponent(
@@ -415,7 +433,6 @@ if(!empty($arResult["CATEGORIES"])):
 		'',
 		[
 			"ID" => "mp-left-menu",
-			"TITLE_HTML" => $title,
 			"ITEMS" => $items
 		]
 	);?>

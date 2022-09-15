@@ -9,7 +9,9 @@ use Bitrix\Sender\Connector;
 use Bitrix\Sender\Internals\CommonAjax;
 use Bitrix\Sender\Internals\QueryController as Controller;
 use Bitrix\Sender\ListTable;
+use Bitrix\Sender\Posting\SegmentDataBuilder;
 use Bitrix\Sender\UI;
+use Bitrix\Sender\Entity;
 
 if (!Bitrix\Main\Loader::includeModule('sender'))
 {
@@ -65,6 +67,7 @@ $actions[] = Controller\Action::create('getFilterData')->setHandler(
 		));
 
 		$filterId = $request->get('filterId');
+		$groupId = $request->get('groupId');
 		if(!$filterId)
 		{
 			return;
@@ -79,6 +82,7 @@ $actions[] = Controller\Action::create('getFilterData')->setHandler(
 			'MODULE_ID' => $moduleId,
 			'CODE' => $code
 		));
+
 		if (!$connector || !($connector instanceof Connector\BaseFilter))
 		{
 			$content->addError('Filter not found.');
@@ -88,11 +92,57 @@ $actions[] = Controller\Action::create('getFilterData')->setHandler(
 		$content->add('num', $num);
 
 		$fields = $connector->getUiFilterData($filterId);
+
+		$endpoint = [
+			'CODE' => $code,
+			'FIELDS' => $fields,
+			'MODULE_ID' => $moduleId,
+		];
 		$content->add('data', $fields);
 
 		$connector->setDataTypeId(null);
 		$connector->setFieldValues($fields);
-		$content->add('count', $connector->getDataCounter()->getArray());
+
+		$entitySegment = new Entity\Segment($groupId);
+		$endpoints = $entitySegment->getData()['ENDPOINTS'];
+
+		for ($i = 0; $i < count($endpoints); $i++)
+		{
+			if ($endpoints[$i]['FILTER_ID'] === $filterId)
+			{
+				unset($endpoints[$i]);
+			}
+		}
+
+		$endpoint['FILTER_ID'] = $filterId;
+		$endpoints[] = $endpoint;
+		$data = [
+			'NAME' => trim($request->get('name')),
+			'HIDDEN' => $request->get('hidden') == 'Y' ? 'Y' : 'N',
+			'ENDPOINTS' => $endpoints,
+		];
+		$entitySegment->mergeData($data);
+		$entitySegment->save();
+
+		if ($entitySegment->getErrors())
+		{
+			$content->addError($entitySegment->getErrors()[0]);
+			return;
+		}
+
+		$dataBuilder = new SegmentDataBuilder($groupId, $filterId, $endpoint);
+		if (!$dataBuilder->prepareForAgent(false, true))
+		{
+			$content->add('count', (
+			$connector instanceof Connector\IncrementallyConnector
+				? $dataBuilder->calculateCurrentFilterCount()->getArray()
+				: $connector->getDataCounter()->getArray()
+			));
+
+			return;
+		}
+
+		$content->add('waiting', true);
 	}
 );
 $actions[] = Controller\Action::create('getContactSets')->setHandler(
@@ -113,6 +163,19 @@ $actions[] = Controller\Action::create('getContactSets')->setHandler(
 		$response->initContentJson()->set(array(
 			'list' => $view->get(),
 		));
+	}
+);
+$actions[] = Controller\Action::create('actualizeSegment')->setHandler(
+	function (HttpRequest $request, Controller\Response $response)
+	{
+		$groupId = (int)$request->get('GROUP_ID');
+
+		if ($groupId)
+		{
+			SegmentDataBuilder::actualize($groupId);
+		}
+
+		$content = $response->initContentJson();
 	}
 );
 

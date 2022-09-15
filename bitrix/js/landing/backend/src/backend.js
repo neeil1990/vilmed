@@ -9,7 +9,8 @@ let additionalRequestCompleted = true;
  */
 export class Backend
 {
-	static getInstance()
+	static +instance: Backend = null;
+	static getInstance(): Backend
 	{
 		if (!Backend.instance)
 		{
@@ -75,7 +76,11 @@ export class Backend
 				onsuccess: (sourceResponse) => {
 					const response = Backend.makeResponse(xhr, sourceResponse);
 
-					if (Type.isStringFilled(response.sessid) && additionalRequestCompleted)
+					if (
+						Type.isStringFilled(response.sessid) &&
+						Loc.getMessage('bitrix_sessid') !== response.sessid &&
+						additionalRequestCompleted
+					)
 					{
 						Loc.setMessage('bitrix_sessid', response.sessid);
 						additionalRequestCompleted = false;
@@ -198,7 +203,10 @@ export class Backend
 		uploadParams = {},
 	): Promise<{[key: string]: any}, any>
 	{
-		queryParams.site_id = this.getSiteId();
+		if (!queryParams.site_id)
+		{
+			queryParams.site_id = this.getSiteId();
+		}
 
 		const requestBody = {
 			sessid: Loc.getMessage('bitrix_sessid'),
@@ -230,19 +238,46 @@ export class Backend
 					BX.Landing.UI.Panel.StatusPanel.getInstance().update();
 				}
 
+				BX.onCustomEvent(
+					BX.Landing.PageObject.getRootWindow(),
+					'BX.Landing.Backend:action',
+					[action, data]
+				);
+
+				/*if (!response.result) {
+					BX.Landing.ErrorManager.getInstance().add({
+						type: 'error'
+					});
+				}*/
+
 				return response.result;
 			})
 			.catch((err) => {
-				if (requestBody.action !== 'Block::getById')
+				if (
+					requestBody.action !== 'Landing::downBlock'
+					&& requestBody.action !== 'Landing::upBlock'
+				)
 				{
-					const error = Type.isString(err) ? {type: 'error'} : err;
-					err.action = requestBody.action;
+					if (
+						requestBody.action !== 'Block::getById'
+						&& requestBody.action !== 'Block::publication'
+						&& requestBody.action !== 'Landing::move'
+						&& requestBody.action !== 'Landing::copy'
+						&& requestBody.action !== 'Landing::publication'
+						&& requestBody.action !== 'Site::publication'
+						&& requestBody.action !== 'Site::moveFolder'
+						&& requestBody.action !== 'Site::markDelete'
+					)
+					{
+						const error = Type.isString(err) ? {type: 'error'} : err;
+						err.action = requestBody.action;
 
-					// eslint-disable-next-line
-					BX.Landing.ErrorManager.getInstance().add(error);
+						// eslint-disable-next-line
+						BX.Landing.ErrorManager.getInstance().add(error);
+					}
+
+					return Promise.reject(err);
 				}
-
-				return Promise.reject(err);
 			});
 	}
 
@@ -269,20 +304,40 @@ export class Backend
 				data: requestBody,
 			})
 			.then((response) => {
+
 				// eslint-disable-next-line
 				BX.Landing.UI.Panel.StatusPanel.getInstance().update();
+
+				BX.onCustomEvent(
+					BX.Landing.PageObject.getRootWindow(),
+					'BX.Landing.Backend:batch',
+					[action, data]
+				);
+
+				/*if (!response.result) {
+					BX.Landing.ErrorManager.getInstance().add({
+						type: 'error'
+					});
+				}*/
+
 				return response;
 			})
 			.catch((err) => {
-				if (requestBody.action !== 'Block::getById')
+				if (
+					requestBody.action !== 'Landing::downBlock'
+					&& requestBody.action !== 'Landing::upBlock'
+				)
 				{
-					const error = Type.isString(err) ? {type: 'error'} : err;
-					error.action = requestBody.action;
-					// eslint-disable-next-line
-					BX.Landing.ErrorManager.getInstance().add(error);
-				}
+					if (requestBody.action !== 'Block::getById')
+					{
+						const error = Type.isString(err) ? {type: 'error'} : err;
+						error.action = requestBody.action;
+						// eslint-disable-next-line
+						BX.Landing.ErrorManager.getInstance().add(error);
+					}
 
-				return Promise.reject(err);
+					return Promise.reject(err);
+				}
 			});
 	}
 
@@ -309,6 +364,11 @@ export class Backend
 		{
 			formData.set('action', 'Site::uploadFile');
 			formData.append('data[id]', uploadParams.id);
+		}
+
+		if ('temp' in uploadParams)
+		{
+			formData.append('data[temp]', true);
 		}
 
 		const uri = new Uri(this.getControllerUrl());
@@ -343,28 +403,49 @@ export class Backend
 			return this
 				.action('Site::getList', {
 					params: {
-						order: {ID: 'DESC'},
-						filter: {TYPE: this.getSitesType(), ...filter},
+						filter,
+						order: {ID: 'DESC'}
 					},
 				})
 				.then((response) => response);
 		});
 	}
 
-	getLandings({siteId = []}: {siteId?: number | Array<number>} = {}): Promise<Array<Landing>>
+	getLandings({siteId = []}: {siteId?: number | Array<number>} = {}, filter: {}): Promise<Array<Landing>>
 	{
+		let skipFilter = false;
+		if (!BX.Type.isPlainObject(filter))
+		{
+			filter = {};
+			skipFilter = true;
+		}
+
 		const ids = Type.isArray(siteId) ? siteId : [siteId];
+		filter.SITE_ID = ids;
+
 		const getBathItem = (id) => ({
 			action: 'Landing::getList',
 			data: {
 				params: {
-					filter: {SITE_ID: id},
+					filter: (() => {
+						if (skipFilter)
+						{
+							return {
+								SITE_ID: id,
+								DELETED: 'N',
+								FOLDER: 'N',
+							};
+						}
+
+						return filter;
+					})(),
 					order: {ID: 'DESC'},
 					get_preview: true,
 					check_area: 1,
 				},
 			},
 		});
+
 		const prepareResponse = (response) => {
 			return response.reduce((acc, item) => {
 				return [...acc, ...item.result];

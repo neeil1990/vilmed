@@ -1,8 +1,11 @@
-<?
+<?php
+/** @global CAdminMenu $adminMenu */
+use Bitrix\Main\Loader;
+
 if(!is_object($GLOBALS["USER_FIELD_MANAGER"]))
 	return false;
 
-if (!CModule::IncludeModule("iblock"))
+if (!Loader::includeModule("iblock"))
 	return false;
 
 foreach (GetModuleEvents("iblock", "OnBeforeIBlockAdminMenu", true) as $arEvent)
@@ -83,6 +86,14 @@ function _get_other_elements_menu($arType, $arIBlock, $arSection, &$more_url)
 
 function _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL, $SECTION_ID, $arSectionsChain = false)
 {
+	global $adminMenu;
+
+	static $adminMenuExists = null;
+	if ($adminMenuExists === null)
+	{
+		$adminMenuExists = isset($adminMenu) && $adminMenu instanceof CAdminMenu;
+	}
+
 	//Determine opened sections
 	if($arSectionsChain === false)
 	{
@@ -179,10 +190,12 @@ function _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL, $SECTION_ID, $arSe
 		{
 			$arSectionTmp["items"] = _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL+1, $arSection["ID"], $arSectionsChain);
 		}
-		elseif(method_exists($GLOBALS["adminMenu"], "IsSectionActive"))
+		elseif($adminMenuExists)
 		{
-			if($GLOBALS["adminMenu"]->IsSectionActive("menu_iblock_/".$arType["ID"]."/".$arIBlock["ID"]."/".$arSection["ID"]))
-				$arSectionTmp["items"] = _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL+1, $arSection["ID"], $arSectionsChain);
+			if ($adminMenu->IsSectionActive("menu_iblock_/".$arType["ID"]."/".$arIBlock["ID"]."/".$arSection["ID"]))
+			{
+				$arSectionTmp["items"] = _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL + 1, $arSection["ID"], $arSectionsChain);
+			}
 		}
 
 		$arSections[] = $arSectionTmp;
@@ -192,7 +205,7 @@ function _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL, $SECTION_ID, $arSe
 	while($arSection = $rsSections->Fetch())
 	{
 		$urlElementAdminPage = CIBlock::GetAdminElementListLink($arIBlock["ID"], array("menu" => null, "skip_public" => true));
-		$arSections[0]["more_url"][] = $urlElementAdminPage;
+		$arSections[0]["more_url"][] = $urlElementAdminPage."&find_section_section=".$arSection["ID"]."&SECTION_ID=".$arSection["ID"]."&apply_filter=Y";
 	}
 
 	return $arSections;
@@ -201,6 +214,12 @@ function _get_sections_menu($arType, $arIBlock, $DEPTH_LEVEL, $SECTION_ID, $arSe
 function _get_iblocks_menu($arType)
 {
 	global $adminMenu;
+
+	static $adminMenuExists = null;
+	if ($adminMenuExists === null)
+	{
+		$adminMenuExists = isset($adminMenu) && $adminMenu instanceof CAdminMenu;
+	}
 
 	$arIBlocks = array();
 	foreach($arType["IBLOCKS"]["S"] as $arIBlock)
@@ -217,7 +236,7 @@ function _get_iblocks_menu($arType)
 			{
 				$arItems = _get_sections_menu($arType, $arIBlock, 1, 0);
 			}
-			elseif(method_exists($adminMenu, "IsSectionActive"))
+			elseif($adminMenuExists)
 			{
 				if(
 					$adminMenu->IsSectionActive("menu_iblock_/".$arType["ID"])
@@ -597,8 +616,8 @@ if($bUserIsAdmin || $bHasWRight || $bHasXRight || $bHasSRight || $bHasERight)
 	if ($bHasSRight)
 	{
 		$adminToolsMenu[] = array(
-			"text" => GetMessage('IBLOCK_MENU_ADMIN_TOOLS_REDIRECT_IBLOCK'),
-			"title" => GetMessage('IBLOCK_MENU_ADMIN_TOOLS_REDIRECT_IBLOCK_TITLE'),
+			"text" => GetMessage('IBLOCK_MENU_ADMIN_TOOLS_REDIRECT_IBLOCK_EXT'),
+			"title" => GetMessage('IBLOCK_MENU_ADMIN_TOOLS_REDIRECT_IBLOCK_TITLE_EXT'),
 			"url" => "iblock_redirect_entity.php?lang=".LANGUAGE_ID,
 			"module_id" => "iblock"
 		);

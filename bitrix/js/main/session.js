@@ -6,11 +6,12 @@ function CBXSession()
 	this.dateHit = new Date();
 	this.notifier = null;
 	this.checkInterval = 60;
+	this.checkImmediately = false;
 
 	this.Expand = function(key)
 	{
 		this.key = key;
-		
+
 		BX.ready(function(){
 			BX.bind(document, "keypress", _this.OnUserInput);
 			BX.bind(document.body, "mousemove", _this.OnUserInput);
@@ -20,18 +21,25 @@ function CBXSession()
 			setInterval(_this.CheckSession, _this.checkInterval*1000);
 		})
 	};
-		
+
 	this.OnUserInput = function()
 	{
-		var curr = new Date();
-		_this.dateInput.setTime(curr.valueOf());
+		var currentDate = new Date();
+		_this.dateInput.setTime(currentDate.valueOf());
+
+		if ((currentDate - _this.dateHit)/1000 > (_this.checkInterval + 5) && _this.checkImmediately === false)
+		{
+			// last hit was long time ago, need to recheck immediately
+			_this.checkImmediately = true;
+			_this.CheckSession();
+		}
 	};
-	
+
 	this.CheckSession = function()
 	{
 		var currentDate = new Date();
 
-		if((currentDate - _this.dateCheck) < (_this.checkInterval - 1))
+		if((currentDate - _this.dateCheck)/1000 < (_this.checkInterval - 1) && _this.checkImmediately === false)
 		{
 			//storm protection, e.g. after PC wake-up
 			return;
@@ -57,11 +65,12 @@ function CBXSession()
 			BX.ajax(config);
 		}
 	};
-	
+
 	this.CheckResult = function(data)
 	{
 		var currentDate = new Date();
 		_this.dateHit.setTime(currentDate.valueOf());
+		_this.checkImmediately = false;
 
 		if(data == 'SESSION_EXPIRED')
 		{
@@ -91,6 +100,9 @@ function CBXSession()
 							BX.message("SessExpired")
 					}));
 
+					BX.ZIndexManager.register(_this.notifier);
+					BX.ZIndexManager.bringToFront(_this.notifier);
+
 					var windowScroll = BX.GetWindowScrollPos();
 					var windowSize = BX.GetWindowInnerSize();
 
@@ -116,7 +128,7 @@ function CBXSession()
 			}
 		}
 	};
-	
+
 	this.Close = function()
 	{
 		this.notifier.style.display = 'none';

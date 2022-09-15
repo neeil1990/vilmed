@@ -10,6 +10,8 @@ if (!\Bitrix\Main\Loader::includeModule('landing'))
 	return;
 }
 
+/** @var \CMain $APPLICATION */
+
 // vars
 $context = \Bitrix\Main\Application::getInstance()->getContext();
 $request = $context->getRequest();
@@ -172,6 +174,16 @@ if ($postRight >= 'R'):
 		);
 	}
 	$allOptions[] = array(
+		'public_hook_on_save',
+		Loc::getMessage('LANDING_OPT_PUBLIC_HOOK_ON_SAVE') . ':',
+		array('checkbox')
+	);
+	/*$allOptions[] = array(
+		'strict_verification_update',
+		Loc::getMessage('LANDING_OPT_STRICT_VERIFICATION_UPDATE') . ':',
+		array('checkbox')
+	);*/
+	$allOptions[] = array(
 		'source_iblocks',
 		Loc::getMessage('LANDING_OPT_SOURCE_IBLOCKS') . ':',
 		array(
@@ -186,6 +198,9 @@ if ($postRight >= 'R'):
 		array('DIV' => 'edit1', 'TAB' => Loc::getMessage('MAIN_TAB_SET'), 'ICON' => ''),
 		array('DIV' => 'edit2', 'TAB' => Loc::getMessage('MAIN_TAB_RIGHTS'), 'ICON' => '')
 	));
+
+	$Update = $Update ?? '';
+	$Apply = $Apply ?? '';
 
 	// post save
 	if (

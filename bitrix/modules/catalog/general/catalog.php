@@ -1,9 +1,9 @@
-<?
-use Bitrix\Main,
-	Bitrix\Main\Localization\Loc,
-	Bitrix\Catalog;
-
-Loc::loadMessages(__FILE__);
+<?php
+use Bitrix\Main;
+use Bitrix\Main\Loader;
+use Bitrix\Main\Localization\Loc;
+use Bitrix\Catalog;
+use Bitrix\Iblock;
 
 class CAllCatalog
 {
@@ -441,9 +441,11 @@ class CAllCatalog
 				$arSelectFields = $arClearFields;
 			}
 
-			if (!isset($arSelectFields)
-				|| empty($arSelectFields)
-				|| in_array("*", $arSelectFields))
+			if (
+				empty($arSelectFields)
+				|| !is_array($arSelectFields)
+				|| in_array("*", $arSelectFields)
+			)
 			{
 				foreach ($arFields as $fieldKey => $fieldDescr)
 				{
@@ -615,7 +617,7 @@ class CAllCatalog
 								$valueFormat = ($arFields[$key]['TYPE'] == 'datetime' ?  'FULL' : 'SHORT');
 								$clearVals = array();
 								foreach ($vals as $item)
-									$clearVals[] = "'".$DB->CharToDateFunction($DB->ForSql($item), $valueFormat)."'";
+									$clearVals[] = $DB->CharToDateFunction($item, $valueFormat);
 								unset($item);
 								if (empty($clearVals))
 								{
@@ -682,14 +684,14 @@ class CAllCatalog
 									if ($val == '')
 										$arSqlSearch_tmp[] = ($strNegative=="Y"?"NOT":"")."(".$arFields[$key]["FIELD"]." IS NULL)";
 									else
-										$arSqlSearch_tmp[] = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($DB->ForSql($val), "FULL").")";
+										$arSqlSearch_tmp[] = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($val, "FULL").")";
 								}
 								elseif ($arFields[$key]["TYPE"] == "date")
 								{
 									if ($val == '')
 										$arSqlSearch_tmp[] = ($strNegative=="Y"?"NOT":"")."(".$arFields[$key]["FIELD"]." IS NULL)";
 									else
-										$arSqlSearch_tmp[] = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($DB->ForSql($val), "SHORT").")";
+										$arSqlSearch_tmp[] = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($val, "SHORT").")";
 								}
 							}
 						}
@@ -865,8 +867,7 @@ class CAllCatalog
 				$arSelectFields = array($arSelectFields);
 			}
 
-			if (!isset($arSelectFields)
-				|| empty($arSelectFields)
+			if (empty($arSelectFields)
 				|| !is_array($arSelectFields)
 				|| in_array("*", $arSelectFields))
 			{
@@ -1051,14 +1052,14 @@ class CAllCatalog
 							if ($val == '')
 								$arSqlSearch_tmp1 = ($strNegative=="Y"?"NOT":"")."(".$arFields[$key]["FIELD"]." IS NULL)";
 							else
-								$arSqlSearch_tmp1 = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($DB->ForSql($val), "FULL").")";
+								$arSqlSearch_tmp1 = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($val, "FULL").")";
 						}
 						elseif ($arFields[$key]["TYPE"] == "date")
 						{
 							if ($val == '')
 								$arSqlSearch_tmp1 = ($strNegative=="Y"?"NOT":"")."(".$arFields[$key]["FIELD"]." IS NULL)";
 							else
-								$arSqlSearch_tmp1 = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($DB->ForSql($val), "SHORT").")";
+								$arSqlSearch_tmp1 = ($strNegative=="Y"?" ".$arFields[$key]["FIELD"]." IS NULL OR NOT ":"")."(".$arFields[$key]["FIELD"]." ".$strOperation." ".$DB->CharToDateFunction($val, "SHORT").")";
 						}
 
 						if (isset($arFields[$key]["GROUPED"]) && $arFields[$key]["GROUPED"] == "Y")
@@ -1199,6 +1200,7 @@ class CAllCatalog
 		$DB->Query($strSql, false, "File: ".__FILE__."<br>Line: ".__LINE__);
 
 		CCatalogSku::ClearCache();
+		Catalog\CatalogIblockTable::getEntity()->cleanCache();
 
 		return true;
 	}
@@ -1230,6 +1232,8 @@ class CAllCatalog
 				unset(self::$catalogVatCache[$ID]);
 		}
 		CCatalogSku::ClearCache();
+		Catalog\CatalogIblockTable::getEntity()->cleanCache();
+
 		return true;
 	}
 
@@ -1260,7 +1264,9 @@ class CAllCatalog
 			unset(self::$catalogVatCache[$ID]);
 
 		CCatalogSku::ClearCache();
+		Catalog\CatalogIblockTable::getEntity()->cleanCache();
 		CCatalogProduct::ClearCache();
+
 		return $DB->Query("DELETE FROM b_catalog_iblock WHERE IBLOCK_ID = ".$ID, true);
 	}
 
@@ -1269,7 +1275,7 @@ class CAllCatalog
 		return CCatalog::Delete($ID);
 	}
 
-	public static function PreGenerateXML($xml_type = 'yandex')
+	public static function PreGenerateXML($xml_type = 'yandex'): string
 	{
 		if ($xml_type == 'yandex')
 		{
@@ -1321,7 +1327,7 @@ class CAllCatalog
 		return CCatalogSku::GetInfoByLinkProperty($ID);
 	}
 
-	public static function OnBeforeIBlockElementDelete($ID)
+	public static function OnBeforeIBlockElementDelete($ID): bool
 	{
 		global $APPLICATION;
 
@@ -1342,11 +1348,11 @@ class CAllCatalog
 						{
 							if (ExecuteModuleEventEx($arEvent, array($arOffer['ID']))===false)
 							{
-								$err = Loc::getMessage("BT_MOD_CATALOG_ERR_BEFORE_DEL_TITLE").' '.$arEvent['TO_NAME'];
+								$err = "";
 								$err_id = false;
 								if ($ex = $APPLICATION->GetException())
 								{
-									$err .= ': '.$ex->GetString();
+									$err = $ex->GetString();
 									$err_id = $ex->GetID();
 								}
 								$APPLICATION->ThrowException($err, $err_id);
@@ -1365,7 +1371,7 @@ class CAllCatalog
 		return true;
 	}
 
-	public static function OnBeforeCatalogDelete($ID)
+	public static function OnBeforeCatalogDelete($ID): bool
 	{
 		global $APPLICATION;
 
@@ -1415,51 +1421,111 @@ class CAllCatalog
 	 * @param array &$fields
 	 * @return bool
 	 */
-	public static function OnBeforeIBlockPropertyUpdate(array &$fields)
+	public static function OnBeforeIBlockPropertyUpdate(array &$fields): bool
 	{
 		global $APPLICATION;
 
-		$result = true;
-		if (
-			isset($fields['ID'])
-			&& isset($fields['ACTIVE'])
-			&& $fields['ACTIVE'] != 'Y'
-		)
+		$messages = [];
+		$id = (int)$fields['ID'];
+		if ($id > 0)
 		{
-			$id = (int)$fields['ID'];
-			if ($id > 0)
+			$changeActive = isset($fields['ACTIVE']) && $fields['ACTIVE'] !== 'Y';
+			$changeMultiple = isset($fields['MULTIPLE']) && $fields['MULTIPLE'] !== 'N';
+			$changeType = isset($fields['TYPE']) || array_key_exists('USER_TYPE', $fields);
+			if (
+				$changeActive
+				|| $changeMultiple
+				|| $changeType
+			)
 			{
-				$iterator = Catalog\CatalogIblockTable::getList(array(
-					'select' => array('IBLOCK_ID', 'PRODUCT_IBLOCK_ID', 'SKU_PROPERTY_ID'),
-					'filter' => array('=SKU_PROPERTY_ID' => $id)
-				));
+				$iterator = Catalog\CatalogIblockTable::getList([
+					'select' => [
+						'IBLOCK_ID',
+						'PRODUCT_IBLOCK_ID',
+						'SKU_PROPERTY_ID',
+					],
+					'filter' => ['=SKU_PROPERTY_ID' => $id],
+				]);
 				$row = $iterator->fetch();
 				unset($iterator);
 				if (!empty($row))
 				{
-					$APPLICATION->ThrowException(Loc::getMessage(
-						'BT_MOD_CATALOG_ERR_CANNOT_DEACTIVE_SKU_PROPERTY',
-						array(
-							'#SKU_PROPERTY_ID#' => $row['SKU_PROPERTY_ID'],
-							'#PRODUCT_IBLOCK_ID#' => $row['PRODUCT_IBLOCK_ID'],
-							'#IBLOCK_ID#' => $row['IBLOCK_ID'],
+					if ($changeActive)
+					{
+						$messages[] = Loc::getMessage(
+							'BT_MOD_CATALOG_ERR_CANNOT_DEACTIVE_SKU_PROPERTY',
+							[
+								'#SKU_PROPERTY_ID#' => $row['SKU_PROPERTY_ID'],
+								'#PRODUCT_IBLOCK_ID#' => $row['PRODUCT_IBLOCK_ID'],
+								'#IBLOCK_ID#' => $row['IBLOCK_ID'],
+							]
+						);
+					}
+					if ($changeMultiple)
+					{
+						$messages[] = Loc::getMessage(
+							'BT_MOD_CATALOG_ERR_CANNOT_SET_MULTIPLE_SKU_PROPERTY',
+							[
+								'#SKU_PROPERTY_ID#' => $row['SKU_PROPERTY_ID'],
+								'#PRODUCT_IBLOCK_ID#' => $row['PRODUCT_IBLOCK_ID'],
+								'#IBLOCK_ID#' => $row['IBLOCK_ID'],
+							]
+						);
+					}
+					if ($changeType)
+					{
+						if (
+							(isset($fields['TYPE']) && $fields['TYPE'] !== Iblock\PropertyTable::TYPE_ELEMENT)
+							|| (array_key_exists('USER_TYPE', $fields) && $fields['USER_TYPE'] !== \CIBlockPropertySKU::USER_TYPE)
 						)
-					));
-					$result = false;
+						{
+							$messages[] = Loc::getMessage(
+								'BT_MOD_CATALOG_ERR_CANNOT_CHANGE_TYPE_SKU_PROPERTY',
+								[
+									'#SKU_PROPERTY_ID#' => $row['SKU_PROPERTY_ID'],
+									'#PRODUCT_IBLOCK_ID#' => $row['PRODUCT_IBLOCK_ID'],
+									'#IBLOCK_ID#' => $row['IBLOCK_ID'],
+								]
+							);
+						}
+					}
 				}
 				unset($row);
+			}
+			if (self::isCrmCatalogBrandProperty($id))
+			{
+				$property = \CIBlockProperty::GetByID($id)->Fetch();
+
+				if (isset($fields['NAME']) && $fields['NAME'] !== $property['NAME'])
+				{
+					$messages[] = Loc::getMessage('BT_MOD_CATALOG_ERR_CANNOT_CHANGE_BRAND_PROPERTY_NAME');
+				}
+				elseif (isset($fields['CODE']) && $fields['CODE'] !== 'BRAND')
+				{
+					$messages[] = Loc::getMessage('BT_MOD_CATALOG_ERR_CANNOT_CHANGE_BRAND_PROPERTY_CODE');
+				}
+				elseif (isset($fields['MULTIPLE']) && $fields['MULTIPLE'] !== 'Y')
+				{
+					$messages[] = Loc::getMessage('BT_MOD_CATALOG_ERR_CANNOT_CHANGE_BRAND_PROPERTY_MULTIPLE');
+				}
 			}
 			unset($id);
 		}
 
-		return $result;
+		if (!empty($messages))
+		{
+			$APPLICATION->ThrowException(implode('. ', $messages));
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
 	 * @param int $intPropertyID
 	 * @return bool
 	 */
-	public static function OnBeforeIBlockPropertyDelete($intPropertyID)
+	public static function OnBeforeIBlockPropertyDelete($intPropertyID): bool
 	{
 		global $APPLICATION;
 
@@ -1485,11 +1551,33 @@ class CAllCatalog
 			));
 			$result = false;
 		}
+		elseif (self::isCrmCatalogBrandProperty($intPropertyID))
+		{
+			$APPLICATION->throwException(GetMessage("BT_MOD_CATALOG_ERR_CANNOT_DELETE_BRAND_PROPERTY"));
+			$result = false;
+		}
 		unset($property);
+
 		return $result;
 	}
 
-	public static function OnIBlockModuleUnInstall()
+	private static function isCrmCatalogBrandProperty($propertyId): bool
+	{
+		if (
+			!Loader::includeModule('crm')
+			|| !Loader::includeModule('bitrix24')
+		)
+		{
+			return false;
+		}
+
+		$crmCatalogId = \CCrmCatalog::GetDefaultID();
+		$property = \CIBlockProperty::GetByID($propertyId)->Fetch();
+
+		return $property['CODE'] === 'BRAND' && (int)$property['IBLOCK_ID'] === $crmCatalogId;
+	}
+
+	public static function OnIBlockModuleUnInstall(): bool
 	{
 		global $APPLICATION;
 
@@ -1497,7 +1585,7 @@ class CAllCatalog
 		return false;
 	}
 
-	public static function OnBeforeIBlockUpdate(array &$fields)
+	public static function OnBeforeIBlockUpdate(array &$fields): bool
 	{
 		if (!self::isEnabledHandler())
 			return true;
@@ -1517,10 +1605,10 @@ class CAllCatalog
 		return true;
 	}
 
-	public static function OnAfterIBlockUpdate(array &$fields)
+	public static function OnAfterIBlockUpdate(array &$fields): void
 	{
 		if (!self::isEnabledHandler())
-			return true;
+			return;
 		if (!$fields['RESULT'])
 			return;
 		if (!isset($fields['ID']) || !isset($fields['ACTIVE']))
@@ -1577,7 +1665,7 @@ class CAllCatalog
 		return $arResult;
 	}
 
-	public static function UnLinkSKUIBlock($ID)
+	public static function UnLinkSKUIBlock($ID): bool
 	{
 		global $APPLICATION;
 
@@ -1677,7 +1765,7 @@ class CAllCatalog
 			$obError = new CAdminException($arMsg);
 			$APPLICATION->ResetException();
 			$APPLICATION->ThrowException($obError);
-			return $boolResult;
+			return false;
 		}
 		else
 		{
@@ -1691,7 +1779,7 @@ class CAllCatalog
 	 *
 	 * @return array
 	 */
-	public static function GetCatalogFieldsList()
+	public static function GetCatalogFieldsList(): array
 	{
 		global $DB;
 		$arFieldsList = $DB->GetTableFieldsList('b_catalog_iblock');
@@ -1699,34 +1787,36 @@ class CAllCatalog
 		$arFieldsList[] = 'CATALOG_TYPE';
 		$arFieldsList[] = 'OFFERS_IBLOCK_ID';
 		$arFieldsList[] = 'OFFERS_PROPERTY_ID';
-		$arFieldsList = array_unique($arFieldsList);
-		return $arFieldsList;
+		return array_unique($arFieldsList);
 	}
 
-	public static function IsUserExists()
+	public static function IsUserExists(): bool
 	{
 		global $USER;
 
 		return (isset($USER) && $USER instanceof CUser);
 	}
 
-	public static function clearCache()
+	public static function clearCache(): void
 	{
-		self::$arCatalogCache = array();
-		self::$catalogVatCache = array();
+		self::$arCatalogCache = [];
+		self::$catalogVatCache = [];
 	}
 
-	private static function disableHandler()
+	private static function disableHandler(): void
 	{
 		self::$disableCheckIblock--;
 	}
 
-	private static function enableHandler()
+	private static function enableHandler(): void
 	{
 		self::$disableCheckIblock++;
 	}
 
-	private static function isEnabledHandler()
+	/**
+	 * @return bool
+	 */
+	private static function isEnabledHandler(): bool
 	{
 		return (self::$disableCheckIblock >= 0);
 	}

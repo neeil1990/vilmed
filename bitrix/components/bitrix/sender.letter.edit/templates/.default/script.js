@@ -24,7 +24,6 @@
 		this.actionUri = params.actionUri;
 		this.isFrame = params.isFrame || false;
 		this.prettyDateFormat = params.prettyDateFormat;
-		this.isFrame = params.isFrame || false;
 		this.isSaved = params.isSaved || false;
 		this.isOutside = params.isOutside || false;
 		this.mess = params.mess;
@@ -39,6 +38,7 @@
 		this.templateNameNode = Helper.getNode('template-name', this.editorNode);
 		this.templateTypeNode = Helper.getNode('template-type', this.editorNode);
 		this.templateIdNode = Helper.getNode('template-id', this.editorNode);
+		this.consentPreviewNodes = Helper.getNodes('consent-preview', this.editorNode);
 
 		if (BX.Sender.Template && BX.Sender.Template.Selector)
 		{
@@ -52,6 +52,13 @@
 			BX.bind(this.templateChangeButton, 'click', this.showTemplateSelector.bind(this));
 		}
 
+		if(this.consentPreviewNodes)
+		{
+			this.consentPreviewNodes.forEach((function(element) {
+				BX.bind(element, 'click', this.showConsentPreview.bind(this));
+			}).bind(this));
+		}
+
 		if (this.isFrame)
 		{
 			Helper.titleEditor.init({
@@ -59,8 +66,6 @@
 				disabled: params.isTemplateShowed,
 				defaultTitle: this.getPatternTitle(this.mess.name)
 			});
-
-			var self = this;
 
 			BX.addCustomEvent("SidePanel.Slider:onClose", this.onPopupClose.bind(this));
 		}
@@ -88,6 +93,7 @@
 	};
 	Letter.prototype.onPopupClose = function(event) {
 		var slider = event.getSlider();
+		var _this = this;
 
 		if(!this.isSaved)
 		{
@@ -109,8 +115,12 @@
 							className: "popup-window-button-accept",
 							events: {
 								click: function() {
-									slider.data = {close: true}
+									BX.removeCustomEvent("SidePanel.Slider::onClose", _this.onPopupClose);
+									event.allowAction();
 									slider.close();
+									setTimeout(function() {
+										slider.destroy();
+									}, 500);
 								}
 							}
 						}),
@@ -188,6 +198,15 @@
 	Letter.prototype.showTemplateSelector = function ()
 	{
 		this.changeDisplayingTemplateSelector(true);
+	};
+	Letter.prototype.showConsentPreview = function (event)
+	{
+		event.preventDefault();
+		var element = event.target;
+
+		var consent = document.getElementsByName(element.dataset.bxInputName)[0];
+		var consentId = consent.value;
+		BX.Sender.ConsentPreview.open(consentId);
 	};
 	Letter.prototype.changeDisplayingTemplateSelector = function (isShow)
 	{

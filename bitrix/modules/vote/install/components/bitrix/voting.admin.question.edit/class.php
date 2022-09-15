@@ -4,14 +4,13 @@ namespace
 	if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
 	use \Bitrix\Main\Localization\Loc;
 	use \Bitrix\Main\Application;
-	use \Bitrix\Main\Web\Json;
 	use \Bitrix\Main\Error;
 	use \Bitrix\Main\ErrorCollection;
 	use \Bitrix\Main\Config;
-	use \Bitrix\Vote\Base\Diag;
-	use \Bitrix\Main\ArgumentException;
+	use \Bitrix\Main;
 
 	class CVoteAdminQuestionEdit extends \CBitrixComponent
+		implements Main\Engine\Contract\Controllerable, Main\Errorable
 	{
 		/** @var int */
 		static protected $questionNumber = 0;
@@ -38,13 +37,12 @@ namespace
 
 		public function executeComponent()
 		{
+			if (!\Bitrix\Main\Loader::includeModule("vote"))
+			{
+				return;
+			}
 			try
 			{
-				if (!\Bitrix\Main\Loader::includeModule("vote"))
-				{
-					return;
-				}
-				$this->prepareParams();
 				$gridInstanceId = $this->request->getQuery("gridInstanceId");
 				if ($gridInstanceId === null)
 				{
@@ -136,10 +134,13 @@ namespace
 			return $USER;
 		}
 
-		protected function prepareParams()
+		public function onPrepareComponentParams($arParams)
 		{
-			$this->voteId = intval($this->arParams["VOTE_ID"]);
-			$this->questionId = intval($this->arParams["QUESTION_ID"]);
+			Main\Loader::includeModule("vote");
+			try
+			{
+				$this->voteId = intval($arParams["VOTE_ID"]);
+				$this->questionId = intval($arParams["QUESTION_ID"]);
 
 			$this->vote = \Bitrix\Vote\Vote::loadFromId($this->voteId);
 			if (!$this->vote->canEdit($this->getUser()->GetID()))
@@ -147,39 +148,45 @@ namespace
 			/** @var $questions array */
 			$questions = $this->vote->getQuestions();
 
-			if ($this->questionId > 0 && isset($questions[$this->questionId]))
-			{
-				$this->question = $questions[$this->questionId];
-				$this->answers = $questions[$this->questionId]["ANSWERS"];
-				unset($this->question["ANSWERS"]);
-			}
-			else if (($copyId = intval($this->request->get("COPY_ID"))) && $copyId > 0 && isset($questions[$copyId]))
-			{
-				$this->question = $questions[$copyId];
-				foreach ($questions[$copyId]["ANSWERS"] as $answer)
+				if ($this->questionId > 0 && isset($questions[$this->questionId]))
 				{
-					$this->answers[] = (["ID" => "c".$answer["ID"], "NEW" => "Y", "SAVED" => "N"] + $answer);
+					$this->question = $questions[$this->questionId];
+					$this->answers = $questions[$this->questionId]["ANSWERS"];
+					unset($this->question["ANSWERS"]);
 				}
-				unset($this->question["ID"]);
-				unset($this->question["ANSWERS"]);
+				else if (($copyId = intval($this->request->get("COPY_ID"))) && $copyId > 0 && isset($questions[$copyId]))
+				{
+					$this->question = $questions[$copyId];
+					foreach ($questions[$copyId]["ANSWERS"] as $answer)
+					{
+						$this->answers[] = (["ID" => "c".$answer["ID"], "NEW" => "Y", "SAVED" => "N"] + $answer);
+					}
+					unset($this->question["ID"]);
+					unset($this->question["ANSWERS"]);
+				}
+				else
+				{
+					$this->question = array(
+						"ACTIVE" => "Y",
+						"VOTE_ID" => $this->voteId,
+						"C_SORT" => \CVoteQuestion::GetNextSort($this->voteId),
+						"QUESTION" => "",
+						"QUESTION_TYPE" => "html",
+						"IMAGE_ID" => "",
+						"DIAGRAM" => "Y",
+						"REQUIRED" => "N",
+						"DIAGRAM_TYPE" => VOTE_DEFAULT_DIAGRAM_TYPE,
+						"TEMPLATE" => "default.php",
+						"TEMPLATE_NEW" => "default.php"
+					);
+				}
 			}
-			else
+			catch (Exception $e)
 			{
-				$this->question = array(
-					"ACTIVE" => "Y",
-					"VOTE_ID" => $this->voteId,
-					"C_SORT" => \CVoteQuestion::GetNextSort($this->voteId),
-					"QUESTION" => "",
-					"QUESTION_TYPE" => "html",
-					"IMAGE_ID" => "",
-					"DIAGRAM" => "Y",
-					"REQUIRED" => "N",
-					"DIAGRAM_TYPE" => VOTE_DEFAULT_DIAGRAM_TYPE,
-					"TEMPLATE" => "default.php",
-					"TEMPLATE_NEW" => "default.php"
-				);
+				$this->errorCollection->setError(new Error($e->getMessage(), $e->getCode()));
 			}
-			return $this;
+
+			return parent::onPrepareComponentParams($arParams);
 		}
 
 		protected function processAction()
@@ -282,7 +289,7 @@ namespace
 				else
 				{
 					$this->arParams["QUESTION_ID"] = $this->questionId;
-					$this->prepareParams();
+					$this->onPrepareComponentParams($this->arParams);
 				}
 				/** @var array */
 
@@ -307,6 +314,34 @@ namespace
 
 			$this->arResult["ANSWERS"] = $z;
 			$this->arParams["ANSWER_PARAMS"]["MAX_SORT"] = $maxSort;
+		}
+
+		public function configureActions()
+		{
+			return [];
+		}
+
+		protected function listKeysSignedParameters()
+		{
+			return ['VOTE_ID', 'QUESTION_ID'];
+		}
+
+		public function deleteAction()
+		{
+			if ($this->errorCollection->isEmpty() && !\CVoteQuestion::Delete($this->questionId))
+			{
+				$this->errorCollection->add([new Bitrix\Main\Error(Loc::getMessage('VOTE_DELETE_ERROR'), $this->questionId)]);
+			}
+		}
+
+		public function getErrors()
+		{
+			return $this->errorCollection->toArray();
+		}
+
+		public function getErrorByCode($code)
+		{
+			return $this->errorCollection->getErrorByCode($code);
 		}
 	}
 }
@@ -340,7 +375,7 @@ namespace Bitrix\Vote\Component
 
 			if ($this->file->IsExists())
 			{
-				$data = unserialize($this->file->GetContents());
+				$data = unserialize($this->file->GetContents(), ["allowed_classes" => false]);
 				foreach($data as $key => $val)
 				{
 					if (array_key_exists($key , $this->data) && is_array($this->data[$key]) && is_array($val))
@@ -400,7 +435,7 @@ namespace Bitrix\Vote\Component
 					$access = \CBXVirtualIo::GetInstance()->GetFile($directory->GetPath()."/.access.php");
 					$content = '<?$PERM["'.$directory->GetName().'"]["*"]="X";?>';
 
-					if (!$access->IsExists() || strpos($access->GetContents(), $content) === false)
+					if (!$access->IsExists() || mb_strpos($access->GetContents(), $content) === false)
 					{
 						if (($fd = $access->Open('ab')) && $fd)
 							fwrite($fd, $content);
@@ -527,7 +562,7 @@ namespace Bitrix\Vote\Component
 				{
 					if (is_array($a) && $a["ID"])
 					{
-						$id = substr($a["ID"], 1);
+						$id = mb_substr($a["ID"], 1);
 						$maxId = max($maxId, intval($id));
 					}
 				}
@@ -627,7 +662,8 @@ namespace Bitrix\Vote\Component
 				}
 				else if ($request->getPost("action_button_" . $this->getGridId()) === 'edit')
 				{
-					\CAllFile::ConvertFilesToPost(($request->getFile("FIELDS") ?: []), $rawFiles);
+					$rawFiles = [];
+					\CFile::ConvertFilesToPost(($request->getFile("FIELDS") ?: []), $rawFiles);
 
 					foreach ($request->getPost("FIELDS") as $id => $fields)
 						$this->update($id, $fields, $rawFiles[$id]);
@@ -776,7 +812,7 @@ namespace Bitrix\Vote\Component
 						$data["IMAGE_ID"] = array_merge($imageFile, [ "tmp_name" => $newFile->GetPathWithName()]);
 						if(!defined("BX_TEMPORARY_FILES_DIRECTORY"))
 						{
-							$data["IMAGE_ID"] += ["relative_tmp_name" => "/".ltrim(substr($newFile->GetPathWithName(), strlen($_SERVER["DOCUMENT_ROOT"])), "/\\")];
+							$data["IMAGE_ID"] += ["relative_tmp_name" => "/".ltrim(mb_substr($newFile->GetPathWithName(), mb_strlen($_SERVER["DOCUMENT_ROOT"])), "/\\")];
 						}
 					}
 				}

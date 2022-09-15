@@ -67,14 +67,15 @@ class Router
 	 */
 	public function match($request)
 	{
-		$path = $this->getUriPath($request);
+		$path = urldecode($this->getUriPath($request));
 
 		foreach ($this->routes as $route)
 		{
 			if ($matchResult = $route->match($path))
 			{
 				// check method
-				if (!in_array($request->getRequestMethod(), $route->getOptions()->getMethods(), true))
+				if (!empty($route->getOptions()->getMethods())
+					&& !in_array($request->getRequestMethod(), $route->getOptions()->getMethods(), true))
 				{
 					continue;
 				}

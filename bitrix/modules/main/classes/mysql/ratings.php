@@ -1,5 +1,7 @@
-<?
+<?php
+
 require($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/ratings.php");
+
 IncludeModuleLangFile(__FILE__);
 
 class CRatings extends CAllRatings
@@ -448,9 +450,19 @@ class CRatings extends CAllRatings
 	{
 		global $USER;
 
-		$userId = $USER->GetId();
-		$bUserAuth = $USER->IsAuthorized();
-		$bAllGroups = false;
+		if (
+			isset($arVoteParam['CURRENT_USER_ID'])
+			&& (int)$arVoteParam['CURRENT_USER_ID'] > 0
+		)
+		{
+			$userId = (int)$arVoteParam['CURRENT_USER_ID'];
+			$bUserAuth = ($userId > 0);
+		}
+		else
+		{
+			$userId = (int)$USER->GetId();
+			$bUserAuth = $USER->IsAuthorized();
+		}
 
 		$arInfo = array(
 			'RESULT' => true,
@@ -530,9 +542,9 @@ class CRatings extends CAllRatings
 						AND RV.CREATED > DATE_SUB(NOW(), INTERVAL 1 DAY)';
 					$res = $DB->Query($strSql, false, $err_mess.__LINE__);
 					$countVote = $res->Fetch();
-					$cacheVoteSize = $_SESSION['RATING_VOTE_COUNT'] = $countVote['VOTE'];
+					$cacheVoteSize = \Bitrix\Main\Application::getInstance()->getSession()['RATING_VOTE_COUNT'] = $countVote['VOTE'];
 
-					$cacheUserVote[$userId] = $_SESSION['RATING_USER_VOTE_COUNT'] = $arAuthorityUserProp['VOTE_COUNT'];
+					$cacheUserVote[$userId] = \Bitrix\Main\Application::getInstance()->getSession()['RATING_USER_VOTE_COUNT'] = $arAuthorityUserProp['VOTE_COUNT'];
 					if ($cacheVoteSize >= $cacheUserVote[$userId])
 					{
 						$arInfo = $cacheAllowVote[$userId] = array(

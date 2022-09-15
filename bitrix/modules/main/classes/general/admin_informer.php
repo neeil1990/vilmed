@@ -188,8 +188,6 @@ class CAdminInformer
 			{
 				//last update date time
 				$updateDate = COption::GetOptionString("main", "update_system_update", false);
-				// remove seconds
-				$updateDate = $updateDate ? CDatabase::FormatDate($updateDate, "DD.MM.YYYY HH:MI:SS", "DD.MM.YYYY HH:MI") : false;
 
 				$updAIParams["HTML"] = '<span class="adm-informer-strong-text">'.GetMessage("top_panel_ai_sys_ver").' '.SM_VERSION."</span><br>";
 				$updAIParams["HTML"] .= $updateDate ? GetMessage("top_panel_ai_upd_last").'<br>'.$updateDate : GetMessage("top_panel_ai_upd_never");
@@ -234,7 +232,7 @@ class CAdminInformer
 			$cModules = COption::GetOptionString("main", "mp_modules_date", "");
 			$arModules = array();
 			if($cModules <> '')
-				$arModules = unserialize($cModules);
+				$arModules = unserialize($cModules, ['allowed_classes' => false]);
 
 			$mCnt = count($arModules);
 			if($mCnt > 0)

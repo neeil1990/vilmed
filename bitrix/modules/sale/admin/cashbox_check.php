@@ -59,6 +59,28 @@ if (($ids = $lAdmin->GroupAction()) && $saleModulePermissions >= "W")
 					$lAdmin->AddGroupError(implode("\n", $r->getErrorMessages()), $id);
 			}
 		}
+		elseif ($_REQUEST['action'] === 'check_correction_status')
+		{
+			$check = Cashbox\CheckManager::getObjectById($id);
+
+			if ($check)
+			{
+				$cashbox = Cashbox\Manager::getObjectById($check->getField('CASHBOX_ID'));
+				if (
+					$cashbox
+					&& $cashbox->isCorrection()
+					&& $check instanceof Cashbox\CorrectionCheck
+				)
+				{
+					/** @var Cashbox\ICorrection $cashbox $r */
+					$r = $cashbox->checkCorrection($check);
+					if (!$r->isSuccess())
+					{
+						$lAdmin->AddGroupError(implode("\n", $r->getErrorMessages()), $id);
+					}
+				}
+			}
+		}
 	}
 	if ($lAdmin->hasGroupErrors())
 	{
@@ -89,19 +111,20 @@ $filterFields = array(
 		"name" => GetMessage("SALE_F_CASHBOX"),
 		"type" => "list",
 		"items" => $cashBox,
-		"filterable" => "",
-		"default" => true
+		"filterable" => ""
 	),
 	array(
 		"id" => "ID",
 		"name" => GetMessage("SALE_CHECK_ID"),
 		"type" => "number",
-		"filterable" => ""
+		"filterable" => "",
+		"default" => true
 	),
 	array(
 		"id" => "DATE_CREATE",
 		"name" => GetMessage("SALE_F_CHECK_CREATE"),
 		"type" => "date",
+		"default" => true
 	),
 	array(
 		"id" => "ORDER_ID",
@@ -121,6 +144,18 @@ $filterFields = array(
 );
 
 $filter = array();
+
+$filterPresets = [
+	'base' => [
+		'name' => GetMessage('SALE_CASHBOX_CHECK_TITLE'),
+		'default' => true,
+		'current' => true,
+		'fields' => [
+			'DATE_CREATE_datesel' => \Bitrix\Main\UI\Filter\DateType::CURRENT_DAY,
+		]
+	],
+];
+$lAdmin->setFilterPresets($filterPresets);
 
 $lAdmin->AddFilter($filterFields, $filter);
 
@@ -271,12 +306,19 @@ while ($check = $dbResultList->Fetch())
 	$checkName = class_exists($checkClass) ? $checkClass::getName() : '';
 	$row->AddField("CHECK_TYPE", $checkName);
 
-	$orderIdUrl = "sale_order_view.php?ID=".(int)$check['ORDER_ID']."&lang=".LANGUAGE_ID;
-	if ($publicMode)
+	$orderField = '';
+	if ($check['ORDER_ID'] > 0)
 	{
-		$orderIdUrl = "/shop/orders/details/".(int)$check['ORDER_ID']."/";
+		$orderIdUrl = "sale_order_view.php?ID=".(int)$check['ORDER_ID']."&lang=".LANGUAGE_ID;
+		if ($publicMode)
+		{
+			$orderIdUrl = "/shop/orders/details/".(int)$check['ORDER_ID']."/";
+		}
+
+		$orderField = "<a href=\"".$orderIdUrl."\">".(int)$check['ORDER_ID']."</a>";
 	}
-	$row->AddField("ORDER_ID",  "<a href=\"".$orderIdUrl."\">".(int)$check['ORDER_ID']."</a>");
+
+	$row->AddField("ORDER_ID",  $orderField);
 
 	$paymentIdField = '';
 	if ($check['PAYMENT_ID'] > 0)
@@ -376,7 +418,14 @@ while ($check = $dbResultList->Fetch())
 		}
 	}
 	$row->AddField("LINK_PARAMS", $checkLink);
-	$row->AddField("STATUS", Loc::getMessage('SALE_CASHBOX_STATUS_'.$check['STATUS']));
+
+	$errorMessage = null;
+	if (isset($check['ERROR_MESSAGE']))
+	{
+		$errorMessage = ' (' . $check['ERROR_MESSAGE'] . ')';
+	}
+
+	$row->AddField("STATUS", Loc::getMessage('SALE_CASHBOX_STATUS_'.$check['STATUS']) . $errorMessage);
 
 	$arActions = array();
 	if ($check['STATUS'] === 'E' || $check['STATUS'] == 'N')
@@ -388,13 +437,33 @@ while ($check = $dbResultList->Fetch())
 		);
 	}
 
-	if ($check['STATUS'] === 'P' && $cashbox && $cashbox->isCheckable() )
+	if (
+		$check['STATUS'] === 'P'
+		&& $cashbox
+	)
 	{
-		$arActions[] = array(
-			"ICON" => "check_status",
-			"TEXT" => GetMessage("SALE_CHECK_CHECK_STATUS"),
-			"ACTION" => $lAdmin->ActionDoGroup($check["ID"], "check_status", GetFilterParams())
-		);
+		if (
+			is_subclass_of($checkClass, Cashbox\CorrectionCheck::class)
+			&& $cashbox->isCorrection()
+		)
+		{
+			$arActions[] = [
+				"ICON" => "check_correction_status",
+				"TEXT" => GetMessage("SALE_CHECK_CHECK_STATUS"),
+				"ACTION" => $lAdmin->ActionDoGroup($check["ID"], "check_correction_status", GetFilterParams())
+			];
+		}
+		elseif (
+			is_subclass_of($checkClass, Cashbox\Check::class)
+			&& $cashbox->isCheckable()
+		)
+		{
+			$arActions[] = [
+				"ICON" => "check_status",
+				"TEXT" => GetMessage("SALE_CHECK_CHECK_STATUS"),
+				"ACTION" => $lAdmin->ActionDoGroup($check["ID"], "check_status", GetFilterParams())
+			];
+		}
 	}
 
 	if ($arActions)

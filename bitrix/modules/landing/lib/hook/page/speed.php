@@ -14,6 +14,8 @@ class Speed extends \Bitrix\Landing\Hook\Page
 {
 	const LAZYLOAD_EXTENSION_NAME = 'landing_lazyload';
 
+	protected $isNeedPublication = true;
+
 	/**
 	 * Map of the field.
 	 * @return array
@@ -74,7 +76,7 @@ class Speed extends \Bitrix\Landing\Hook\Page
 			&& ($hookData = $this->fields[$field]->getValue())
 		)
 		{
-			$mergedData = array_unique(array_merge(unserialize($hookData), $data));
+			$mergedData = array_unique(array_merge(unserialize($hookData, ['allowed_classes' => false]), $data));
 		}
 		else
 		{

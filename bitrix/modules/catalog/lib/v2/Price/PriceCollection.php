@@ -3,8 +3,6 @@
 namespace Bitrix\Catalog\v2\Price;
 
 use Bitrix\Catalog\v2\BaseCollection;
-use Bitrix\Catalog\v2\BaseEntity;
-use Bitrix\Main\InvalidOperationException;
 
 /**
  * Class PriceCollection
@@ -24,28 +22,18 @@ class PriceCollection extends BaseCollection
 		$this->factory = $factory;
 	}
 
-	/**
-	 * @param \Bitrix\Catalog\v2\BaseEntity|\Bitrix\Catalog\v2\Price\HasPriceCollection|null $parent
-	 * @return \Bitrix\Catalog\v2\BaseCollection
-	 */
-	public function setParent(?BaseEntity $parent): BaseCollection
+	public function findBasePrice(): ?BasePrice
 	{
-		parent::setParent($parent);
-
-		if ($parent)
+		/** @var \Bitrix\Catalog\v2\Price\BasePrice $price */
+		foreach ($this->getIterator() as $price)
 		{
-			if (!($parent instanceof HasPriceCollection))
+			if ($price->isPriceBase())
 			{
-				throw new InvalidOperationException(sprintf(
-					'Parent entity must implement {%s} interface',
-					HasPriceCollection::class
-				));
+				return $price;
 			}
-
-			$parent->setPriceCollection($this);
 		}
 
-		return $this;
+		return null;
 	}
 
 	public function findByGroupId(int $groupId): ?BasePrice
@@ -91,10 +79,7 @@ class PriceCollection extends BaseCollection
 
 			if ($price)
 			{
-				if (isset($fields['PRICE']))
-				{
-					$price->setPrice($fields['PRICE']);
-				}
+				$price->setPrice($fields['PRICE'] ?? null);
 
 				if (isset($fields['CURRENCY']))
 				{
@@ -113,10 +98,13 @@ class PriceCollection extends BaseCollection
 		/** @var \Bitrix\Catalog\v2\Price\BasePrice $item */
 		foreach ($this->getIterator() as $item)
 		{
-			$values[$item->getGroupId()] = [
-				'PRICE' => $item->getPrice(),
-				'CURRENCY' => $item->getCurrency(),
-			];
+			if ($item->hasField('PRICE') && $item->hasField('CURRENCY'))
+			{
+				$values[$item->getGroupId()] = [
+					'PRICE' => $item->getPrice(),
+					'CURRENCY' => $item->getCurrency(),
+				];
+			}
 		}
 
 		return $values;
@@ -131,7 +119,7 @@ class PriceCollection extends BaseCollection
 		{
 			if (!is_array($fields))
 			{
-				if (is_numeric($fields))
+				if (is_numeric($fields) && is_finite($fields))
 				{
 					$fields = ['PRICE' => $fields];
 				}
@@ -146,17 +134,13 @@ class PriceCollection extends BaseCollection
 			{
 				if (isset($fields['PRICE']))
 				{
-					if (empty($fields['PRICE']))
-					{
-						$fields['PRICE'] = 0;
-					}
-					elseif (is_numeric($fields['PRICE']))
+					if (is_numeric($fields['PRICE']) && is_finite($fields['PRICE']))
 					{
 						$fields['PRICE'] = (float)$fields['PRICE'];
 					}
 					else
 					{
-						unset($fields['PRICE']);
+						$fields['PRICE'] = null;
 					}
 				}
 
@@ -164,7 +148,6 @@ class PriceCollection extends BaseCollection
 				{
 					unset($fields['CURRENCY']);
 				}
-
 			}
 
 			if (!empty($fields))

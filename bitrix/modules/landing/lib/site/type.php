@@ -17,6 +17,11 @@ class Type
 	const SCOPE_CODE_KNOWLEDGE = 'KNOWLEDGE';
 
 	/**
+	 * Pseudo scope for crm forms.
+	 */
+	const PSEUDO_SCOPE_CODE_FORMS = 'crm_forms';
+
+	/**
 	 * Current scope class name.
 	 * @var Scope
 	 */
@@ -80,6 +85,17 @@ class Type
 	{
 		self::$scopeInit = false;
 		self::$currentScopeClass = null;
+	}
+
+	/**
+	 * Returns true if scope is public.
+	 * @param string|null $scope Scope code.
+	 * @return bool
+	 */
+	public static function isPublicScope(?string $scope = null): bool
+	{
+		$scope = $scope ? mb_strtoupper($scope) : self::getCurrentScopeId();
+		return !($scope === 'KNOWLEDGE' || $scope === 'GROUP');
 	}
 
 	/**

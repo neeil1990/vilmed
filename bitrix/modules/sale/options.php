@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET" && $RestoreDefaults <> '' && $SALE_RIGHT
 	$bWasUpdated = true;
 
 	COption::RemoveOption("sale");
-	$z = CGroup::GetList($v1="id",$v2="asc", array("ACTIVE" => "Y", "ADMIN" => "N"));
+	$z = CGroup::GetList("id", "asc", array("ACTIVE" => "Y", "ADMIN" => "N"));
 	while($zr = $z->Fetch())
 		$APPLICATION->DelGroupRight($module_id, array($zr["ID"]));
 }
@@ -851,7 +851,7 @@ $currentSettings['get_discount_percent_from_base_price'] = Option::get('sale', '
 $currentSettings['discount_apply_mode'] = (int)Option::get('sale', 'discount_apply_mode');
 $currentSettings['product_reserve_condition'] = (string)Option::get('sale', 'product_reserve_condition');
 $currentSettings['product_reserve_clear_period'] = (int)Option::get('sale', 'product_reserve_clear_period');
-$currentSettings['tracking_map_statuses'] = unserialize(Option::get('sale', 'tracking_map_statuses', ''));
+$currentSettings['tracking_map_statuses'] = unserialize(Option::get('sale', 'tracking_map_statuses', ''), ['allowed_classes' => false]);
 $currentSettings['tracking_check_switch'] = Option::get('sale', 'tracking_check_switch', 'N');
 $currentSettings['tracking_check_period'] = (int)Option::get('sale', 'tracking_check_period', '24');
 
@@ -1131,7 +1131,7 @@ $tabControl->BeginNextTab();
 		<td>
 			<?
 			$guestStatuses = \Bitrix\Main\Config\Option::get("sale", "allow_guest_order_view_status", "");
-			$guestStatuses = ($guestStatuses <> '') ?  unserialize($guestStatuses) : array();
+			$guestStatuses = ($guestStatuses <> '') ?  unserialize($guestStatuses, ['allowed_classes' => false]) : array();
 			$statusList = (array_slice($arStatuses,1));
 			?>
 
@@ -1145,7 +1145,7 @@ $tabControl->BeginNextTab();
 		</td>
 	</tr>
 	<?
-	$paths = unserialize(\Bitrix\Main\Config\Option::get("sale", "allow_guest_order_view_paths"));
+	$paths = unserialize(\Bitrix\Main\Config\Option::get("sale", "allow_guest_order_view_paths"), ['allowed_classes' => false]);
 	foreach($siteList as $site)
 	{
 		?>
@@ -1169,30 +1169,32 @@ $tabControl->BeginNextTab();
 		</td>
 	</tr>
 	<!-- end of order guest view -->
-	<tr class="heading">
-		<td colspan="2"><a name="section_reservation"></a><?=GetMessage('BX_SALE_SETTINGS_SECTION_RESERVATION')?></td>
-	</tr>
-	<tr>
-		<td width="40%"><? echo GetMessage('BX_SALE_SETTINGS_OPTION_PRODUCT_RESERVE_CONDITION'); ?></td>
-		<td width="60%"><select name="product_reserve_condition">
-			<?
-			foreach (Sale\Configuration::getReservationConditionList(true) as $reserveId => $reserveTitle)
-			{
-				?><option value="<? echo $reserveId; ?>"<?
-					echo ($reserveId == $currentSettings['product_reserve_condition'] ? ' selected' : '')
-				?>><? echo htmlspecialcharsex($reserveTitle); ?></option>
+	<? if (!(Loader::includeModule('crm') && !CCrmSaleHelper::isWithOrdersMode())):?>
+		<tr class="heading">
+			<td colspan="2"><a name="section_reservation"></a><?=GetMessage('BX_SALE_SETTINGS_SECTION_RESERVATION')?></td>
+		</tr>
+		<tr>
+			<td width="40%"><? echo GetMessage('BX_SALE_SETTINGS_OPTION_PRODUCT_RESERVE_CONDITION'); ?></td>
+			<td width="60%"><select name="product_reserve_condition">
 				<?
-			}
-			unset($reserveId, $reserveTitle);
-			?>
-		</select></td>
-	</tr>
-	<tr>
-		<td width="40%"><? echo GetMessage('BX_SALE_SETTINGS_OPTION_PRODUCT_RESERVE_CLEAR_PERIOD'); ?></td>
-		<td width="60%">
-			<input type="text" name="product_reserve_clear_period" value="<? echo $currentSettings['product_reserve_clear_period']; ?>">
-		</td>
-	</tr>
+				foreach (Sale\Configuration::getReservationConditionList(true) as $reserveId => $reserveTitle)
+				{
+					?><option value="<? echo $reserveId; ?>"<?
+						echo ($reserveId == $currentSettings['product_reserve_condition'] ? ' selected' : '')
+					?>><? echo htmlspecialcharsex($reserveTitle); ?></option>
+					<?
+				}
+				unset($reserveId, $reserveTitle);
+				?>
+			</select></td>
+		</tr>
+		<tr>
+			<td width="40%"><? echo GetMessage('BX_SALE_SETTINGS_OPTION_PRODUCT_RESERVE_CLEAR_PERIOD'); ?></td>
+			<td width="60%">
+				<input type="text" name="product_reserve_clear_period" value="<? echo $currentSettings['product_reserve_clear_period']; ?>">
+			</td>
+		</tr>
+	<?endif;?>
 	<tr class="heading">
 		<td colspan="2"><?=GetMessage('BX_SALE_SETTINGS_SECTION_LOCATIONS')?></td>
 	</tr>
@@ -1282,7 +1284,7 @@ $tabControl->BeginNextTab();
 			<?
 			$recStatuses = COption::GetOptionString("sale", "p2p_status_list", "");
 			if($recStatuses <> '')
-				$recStatuses = unserialize($recStatuses);
+				$recStatuses = unserialize($recStatuses, ['allowed_classes' => false]);
 			else
 				$recStatuses = array();
 
@@ -1380,7 +1382,7 @@ $tabControl->BeginNextTab();
 				$key = 0;
 				if($val <> '')
 				{
-					$arAmount = unserialize($val);
+					$arAmount = unserialize($val, ['allowed_classes' => false]);
 					foreach($arAmount as $key => $val)
 					{
 						?>
@@ -1417,12 +1419,12 @@ $tabControl->BeginNextTab();
 		<td colspan="2">
 			<?
 			$reminder = COption::GetOptionString("sale", "pay_reminder", "");
-			$arReminder = unserialize($reminder);
+			$arReminder = unserialize($reminder, ['allowed_classes' => false]);
 
 			$arSubscribeProd = array();
 			$subscribeProd = COption::GetOptionString("sale", "subscribe_prod", "");
 			if ($subscribeProd <> '')
-				$arSubscribeProd = unserialize($subscribeProd);
+				$arSubscribeProd = unserialize($subscribeProd, ['allowed_classes' => false]);
 
 			$aTabs2 = Array();
 			foreach($siteList as $val)
@@ -1913,10 +1915,8 @@ endfor;
 						$arCurrentGroups[] = (int)$arSiteGroup["GROUP_ID"];
 					}
 
-					$b = "c_sort";
-					$o = "asc";
 					$userGroupList = array();
-					$dbGroups = CGroup::GetList($b, $o, array("ANONYMOUS" => "N"));
+					$dbGroups = CGroup::GetList("c_sort", "asc", array("ANONYMOUS" => "N"));
 					while ($arGroup = $dbGroups->Fetch())
 					{
 						$arGroup["ID"] = (int)$arGroup["ID"];
@@ -2210,7 +2210,7 @@ endfor;
 	<?$tabControl->BeginNextTab();?>
 	<?
 	$filterValues = Option::get('sale', 'archive_params');
-	$filterValues = unserialize($filterValues);
+	$filterValues = unserialize($filterValues, ['allowed_classes' => false]);
 	?>
 	<tr>
 		<td>

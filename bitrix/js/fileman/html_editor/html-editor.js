@@ -524,20 +524,25 @@
 			if (this.iframeView.IsShown())
 			{
 				var
-					padding = 8,
+					padding = 15,
 					minHeight,
 					doc = this.GetIframeDoc();
 
 				if (doc && doc.body)
 				{
 					minHeight = doc.body.parentNode.offsetHeight - padding * 2;
+					
 					if (minHeight <= 20)
 					{
 						setTimeout(BX.proxy(this.CheckBodyHeight, this), 300);
 					}
 					else if (this.config.autoResize || minHeight > doc.body.offsetHeight)
 					{
-						doc.body.style.minHeight = minHeight + 'px';
+						setTimeout(function()
+						{
+							minHeight = doc.body.parentNode.offsetHeight - padding * 2;
+							doc.body.style.minHeight = minHeight + 'px';
+						}, 300);
 					}
 				}
 			}
@@ -1063,6 +1068,13 @@
 				BX.addCustomEvent(this, 'OnIframeKeydown', BX.proxy(this.CheckEscCollapse, this));
 				BX.bind(document.body, "keydown", BX.proxy(this.CheckEscCollapse, this));
 				BX.bind(window, "scroll", BX.proxy(this.PreventScroll, this));
+
+				if (BX.ZIndexManager)
+				{
+					BX.ZIndexManager.register(this.dom.cont);
+					BX.ZIndexManager.addStack(this.dom.cont);
+					BX.ZIndexManager.bringToFront(this.dom.cont);
+				}
 			}
 			else
 			{
@@ -1085,7 +1097,7 @@
 			this.dom.cont.style.top = startTop + 'px';
 			this.dom.cont.style.left = startLeft + 'px';
 
-			var content = this.GetContent();
+			var content = this.content;
 
 			this.expandAnimation = new BX.easing({
 				duration : 300,
@@ -1122,6 +1134,11 @@
 						_this.dom.cont.style.top = '';
 						_this.dom.cont.style.left = '';
 						BX.removeClass(_this.dom.cont, 'bx-html-editor-absolute');
+						if (BX.ZIndexManager)
+						{
+							BX.ZIndexManager.unregister(_this.dom.cont);
+						}
+						_this.dom.cont.style.removeProperty('z-index');
 						document.body.style.overflow = _this._bodyOverflow;
 						_this.config.width = _this.savedSize.configWidth;
 						_this.config.height = _this.savedSize.configHeight;

@@ -146,7 +146,7 @@ if($templateID === false)
 $edit_groups = explode(",", COption::GetOptionString('fileman', 'default_edit_groups', ''));
 $arGroupList = array();
 $arEditGroups = array();
-$gr = CGroup::GetList(($v1="sort"), ($v2="asc"), array("ACTIVE"=>"Y", "ADMIN"=>"N", "ANONYMOUS"=>"N"));
+$gr = CGroup::GetList("sort", "asc", array("ACTIVE"=>"Y", "ADMIN"=>"N", "ANONYMOUS"=>"N"));
 while($group = $gr->Fetch())
 {
 	$arGroupList[$group["ID"]] = $group;
@@ -472,7 +472,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_REQUEST["save"]) && $strWarn
 			if(COption::GetOptionString($module_id, "log_page", "Y")=="Y")
 			{
 				$mt = COption::GetOptionString("fileman", "menutypes", $default_value, $site);
-				$mt = unserialize(str_replace("\\", "", $mt));
+				$mt = unserialize(str_replace("\\", "", $mt), ['allowed_classes' => false]);
 				$res_log['menu_name'] = $mt[$menuType];
 				$res_log['path'] = mb_substr(dirname($arUndoParams['arContent']['path']), 1);
 				CEventLog::Log(
@@ -805,7 +805,7 @@ foreach ($arGlobalProperties as $propertyCode => $propertyValue):?>
 <?foreach ($arDirProperties as $propertyCode => $propertyValue):?>
 
 		<tr id="bx_user_property_<?=$propertyIndex?>">
-			<td class="bx-popup-label bx-width30"><?=htmlspecialcharsEx(ToUpper($propertyCode))?><input type="hidden" name="PROPERTY[<?=$propertyIndex?>][CODE]" value="<?=htmlspecialcharsEx(ToUpper($propertyCode))?>" />:</td>
+			<td class="bx-popup-label bx-width30"><?=htmlspecialcharsEx(mb_strtoupper($propertyCode))?><input type="hidden" name="PROPERTY[<?=$propertyIndex?>][CODE]" value="<?=htmlspecialcharsEx(mb_strtoupper($propertyCode))?>" />:</td>
 			<td><input type="text" name="PROPERTY[<?=$propertyIndex?>][VALUE]" value="<?=htmlspecialcharsEx($propertyValue)?>" style="width:90%;"></td>
 		</tr>
 

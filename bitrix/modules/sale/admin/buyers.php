@@ -31,13 +31,13 @@ ClearVars();
 
 $APPLICATION->SetTitle(GetMessage("BUYER_TITLE"));
 
-$rsSites = CSite::GetList($sby="sort", $sorder="desc", array("ACTIVE" => "Y"));
+$rsSites = CSite::GetList("sort", "desc", array("ACTIVE" => "Y"));
 $arSites = array();
 while ($arSite = $rsSites->Fetch())
 	$arSites[$arSite["ID"]] = array("ID" => $arSite["ID"], "NAME" => $arSite["NAME"]);
 
 $arUsersGroups = array();
-$dbGroups = CGroup::GetList(($b = "c_sort"), ($o = "asc"), array("ANONYMOUS" => "N"));
+$dbGroups = CGroup::GetList("c_sort", "asc", array("ANONYMOUS" => "N"));
 while ($arGroups = $dbGroups->Fetch())
 	$arUsersGroups[] = $arGroups;
 
@@ -61,7 +61,7 @@ foreach ($currencyList as $currencyId => $currencyName)
 	$listCurrency[$currencyId] = $currencyName;
 }
 $listSite = array();
-$sitesQueryObject = CSite::getList($bySite = "sort", $orderSite = "asc", array("ACTIVE" => "Y"));
+$sitesQueryObject = CSite::getList("sort", "asc", array("ACTIVE" => "Y"));
 while ($site = $sitesQueryObject->fetch())
 {
 	$listSite[$site["LID"]] = $site["NAME"]." [".$site["LID"]."]";
@@ -292,8 +292,8 @@ if ($publicMode && \Bitrix\Main\Loader::includeModule('crm'))
 	}
 
 	$gridColumns = $gridOptions->getUsedColumns();
-	$selectColumns = array_merge($gridColumns, ['ID']);
-	$selectColumns = array_intersect($selectColumns, array_keys(\Bitrix\Main\UserTable::getMap()));
+	$selectColumns = array_merge($gridColumns, ['ID', 'EXTERNAL_AUTH_ID']);
+	$selectColumns = array_intersect($selectColumns, array_keys(\Bitrix\Main\UserTable::getEntity()->getFields()));
 
 	$navyParams = CDBResult::GetNavParams(CAdminUiResult::GetNavSize($sTableID));
 	$navyParams['PAGEN'] = (int)$navyParams['PAGEN'];
@@ -457,6 +457,8 @@ else
 }
 
 $lAdmin->SetNavigationParams($resultUsersList, array("BASE_LINK" => $selfFolderUrl."sale_buyers.php"));
+$isIntranetInstalled = IsModuleInstalled('intranet');
+$isCrmInstalled = IsModuleInstalled('crm');
 
 while ($arBuyers = $resultUsersList->Fetch())
 {
@@ -469,6 +471,20 @@ while ($arBuyers = $resultUsersList->Fetch())
 
 	$profileUrl = $selfFolderUrl."sale_buyers_profile.php?USER_ID=".$userId."&lang=".LANGUAGE_ID;
 	$profileUrl = $adminSidePanelHelper->editUrlToPublicPage($profileUrl);
+
+	if(
+		$publicMode
+		&& $isIntranetInstalled
+		&& $isCrmInstalled
+		&& $arBuyers['EXTERNAL_AUTH_ID'] !== \Bitrix\Crm\Order\Buyer::AUTH_ID
+	)
+	{
+		$editUrl = '/company/personal/user/'.$userId.'/';
+	}
+	else
+	{
+		$editUrl = '/shop/buyer/'.$userId.'/edit/';
+	}
 
 	$row =& $lAdmin->AddRow($userId, $arBuyers, $profileUrl, GetMessage("BUYER_SUB_ACTION_PROFILE"));
 
@@ -496,7 +512,21 @@ while ($arBuyers = $resultUsersList->Fetch())
 
 	if (in_array("LID", $arVisibleColumns))
 	{
-		$row->AddField("LID", htmlspecialcharsbx($arSites[$arBuyers['LID']]["NAME"]));
+		$buyerLidId = null;
+		if (isset($arBuyers['LID']))
+		{
+			$buyerLidId = $arBuyers['LID'];
+		}
+		else if (isset($userOrderData[$userId]))
+		{
+			$buyerLidId = $userOrderData[$userId]['LID'] ?? null;
+		}
+		else if (defined('SITE_ID'))
+		{
+			$buyerLidId = SITE_ID;
+		}
+
+		$row->AddField("LID", htmlspecialcharsbx($arSites[$buyerLidId]["NAME"]));
 	}
 
 	/*BUYER*/
@@ -516,7 +546,7 @@ while ($arBuyers = $resultUsersList->Fetch())
 		$arActions[] = array(
 			'ICON' => 'edit',
 			'TEXT' => GetMessage('BUYER_SUB_ACTION_EDIT_PROFILE'),
-			'LINK' => '/shop/buyer/'.$userId.'/edit/',
+			'LINK' => $editUrl,
 		);
 	}
 

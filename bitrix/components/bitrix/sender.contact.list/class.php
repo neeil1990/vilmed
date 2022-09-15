@@ -144,6 +144,10 @@ class SenderContactListComponent extends Bitrix\Sender\Internals\CommonSenderCom
 				'RECIPIENT' => str_replace('#id#', $item['ID'], $this->arParams['PATH_TO_RECIPIENT']),
 			);
 
+			$item['CONSENT_STATUS'] = $item['CONSENT_STATUS'] === 'A'
+				? Loc::getMessage('SENDER_CONTACT_LIST_UI_YES')
+				: Loc::getMessage('SENDER_CONTACT_LIST_UI_NO');
+
 			$item['HAS_STATISTICS'] = true;//$item['IS_READ'] === 'Y' || $item['IS_CLICK'] === 'Y' || $item['IS_UNSUB'] === 'Y' || $item['IP'] || $item['AGENT'];
 
 			$this->arResult['ROWS'][] = $item;
@@ -161,8 +165,16 @@ class SenderContactListComponent extends Bitrix\Sender\Internals\CommonSenderCom
 	protected function getDataSelectedFields()
 	{
 		return [
-			'ID', 'NAME', 'TYPE_ID', 'CODE', 'BLACKLISTED', 'DATE_INSERT',
-			'IS_READ', 'IS_CLICK', 'IS_UNSUB', 'IP', 'AGENT'
+			'ID',
+			'NAME',
+			'TYPE_ID',
+			'CODE',
+			'BLACKLISTED',
+			'DATE_INSERT',
+			'IS_READ',
+			'IS_CLICK',
+			'IS_UNSUB',
+			'CONSENT_STATUS',
 		];
 	}
 
@@ -305,6 +317,11 @@ class SenderContactListComponent extends Bitrix\Sender\Internals\CommonSenderCom
 			array(
 				"id" => "STAT",
 				"name" => Loc::getMessage('SENDER_CONTACT_LIST_UI_COLUMN_STAT'),
+				"default" => true
+			),
+			array(
+				"id" => "CONSENT_STATUS",
+				"name" => Loc::getMessage('SENDER_CONTACT_LIST_UI_COLUMN_CONSENT_STATUS'),
 				"default" => true
 			),
 		);

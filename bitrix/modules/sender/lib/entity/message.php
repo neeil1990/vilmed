@@ -11,6 +11,7 @@ use Bitrix\Main\Error;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Sender\Internals\Model\MessageFieldTable;
 use Bitrix\Sender\Internals\Model\MessageTable;
+use Bitrix\Sender\Internals\Model\MessageUtmTable;
 use Bitrix\Sender\Message\Configuration;
 use Bitrix\Sender\Message\Result;
 
@@ -147,8 +148,9 @@ class Message extends Base
 
 	/**
 	 * Get fields.
+	 * @return array
 	 */
-	public function getFields()
+	public function getFields(): array
 	{
 		$result = array();
 		$data = $this->getData();
@@ -173,9 +175,38 @@ class Message extends Base
 	}
 
 	/**
-	 * Get code.
+	 * Get fields.
+	 * @return array
 	 */
-	public function getCode()
+	public function getUtm(): array
+	{
+		$result = array();
+		$data = $this->getData();
+		foreach ($data['UTM'] as $field)
+		{
+			$result[$field['CODE']] = $field['VALUE'];
+		}
+
+		return $result;
+	}
+	
+	/**
+	 * Set fields.
+	 *
+	 * @param array $utm
+	 * @return $this
+	 */
+	public function setUtm(array $utm): Message
+	{
+		$this->set('UTM', $utm);
+		return $this;
+	}
+
+	/**
+	 * Get code.
+	 * @return ?string
+	 */
+	public function getCode(): ?string
 	{
 		return $this->get('CODE');
 	}
@@ -186,7 +217,7 @@ class Message extends Base
 	 * @param string $code Code.
 	 * @return $this
 	 */
-	public function setCode($code)
+	public function setCode(string $code)
 	{
 		return $this->set('CODE', $code);
 	}
@@ -200,7 +231,8 @@ class Message extends Base
 	{
 		return array(
 			'CODE' => '',
-			'FIELDS' => array(),
+			'FIELDS' => [],
+			'UTM' => []
 		);
 	}
 
@@ -252,7 +284,9 @@ class Message extends Base
 	protected function saveData($id = null, array $data)
 	{
 		$fields = $data['FIELDS'];
+		$utmTags = $data['UTM'];
 		unset($data['FIELDS']);
+		unset($data['UTM']);
 
 		if(!is_array($fields) && count($fields) == 0)
 		{
@@ -269,12 +303,17 @@ class Message extends Base
 		MessageFieldTable::deleteByMessageId($id);
 		foreach ($fields as $field)
 		{
-			if(in_array($field['CODE'], ['MESSAGE_PERSONALIZE', 'SUBJECT_PERSONALIZE']))
+			if (!$field['CODE'])
 			{
 				continue;
 			}
 
-			if(in_array($field['CODE'], ['MESSAGE', 'SUBJECT']))
+			if(in_array($field['CODE'], ['MESSAGE_PERSONALIZE', 'SUBJECT_PERSONALIZE', 'TITLE_PERSONALIZE']))
+			{
+				continue;
+			}
+
+			if(in_array($field['CODE'], ['MESSAGE', 'SUBJECT', 'TITLE']))
 			{
 
 				preg_match_all("/#([0-9a-zA-Z_.|]+?)#/", $field['VALUE'], $matchesFindPlaceHolders);
@@ -301,6 +340,20 @@ class Message extends Base
 			));
 		}
 
+		MessageUtmTable::deleteByMessageId($id);
+		if($utmTags)
+		{
+			foreach ($utmTags as $utm)
+			{
+				MessageUtmTable::add(
+					[
+						'MESSAGE_ID' => $id,
+						'CODE'       => $utm['CODE'],
+						'VALUE'      => $utm['VALUE']
+					]
+				);
+			}
+		}
 
 		return $id;
 	}

@@ -11,6 +11,7 @@ use \Bitrix\Landing\Rights;
 use \Bitrix\Landing\Manager;
 use \Bitrix\Landing\Transfer;
 use \Bitrix\Landing\Restriction;
+use \Bitrix\Main\Context;
 use \Bitrix\Main\ModuleManager;
 use \Bitrix\Main\Loader;
 use \Bitrix\Main\Config\Option;
@@ -22,7 +23,7 @@ class LandingSitesComponent extends LandingBaseComponent
 	/**
 	 * Count items per page.
 	 */
-	const COUNT_PER_PAGE = 11;
+	const COUNT_PER_PAGE = 12;
 
 	/**
 	 * Rights array of sites.
@@ -90,16 +91,13 @@ class LandingSitesComponent extends LandingBaseComponent
 		{
 			return $sites;
 		}
-		if (!Loader::includeModule('extranet'))
-		{
-			return $sites;
-		}
 
 		// prepare filter
-		$disabledSiteIds = [
-			\CExtranet::getExtranetSiteID(),
-			SITE_ID
-		];
+		$disabledSiteIds = [SITE_ID];
+		if (Loader::includeModule('extranet'))
+		{
+			$disabledSiteIds[] = \CExtranet::getExtranetSiteID();
+		}
 		$search = LandingFilterComponent::getFilterRaw(
 			LandingFilterComponent::TYPE_SITE,
 			$this->arParams['TYPE']
@@ -117,6 +115,8 @@ class LandingSitesComponent extends LandingBaseComponent
 		// get data
 		$by = 'lid';
 		$order = 'desc';
+		$request = Context::getCurrent()->getRequest();
+		$protocol = ($request->isHttps() ? 'https://' : 'http://');
 		$res = \CSite::getList($by, $order, $filter);
 		while ($row = $res->fetch())
 		{
@@ -126,12 +126,12 @@ class LandingSitesComponent extends LandingBaseComponent
 			}
 
 			$row['DOMAIN_NAME'] = $defaultServerName;
-			$row['PUBLIC_URL'] = '//' . $defaultServerName;
+			$row['PUBLIC_URL'] = $protocol . $defaultServerName . $row['DIR'];
 
 			if ($row['SERVER_NAME'])
 			{
 				$row['DOMAIN_NAME'] = $row['SERVER_NAME'];
-				$row['PUBLIC_URL'] = '//' . $row['SERVER_NAME'];
+				$row['PUBLIC_URL'] = $protocol . $row['SERVER_NAME'];
 				$row['PUBLIC_URL'] .= $row['DIR'];
 			}
 			elseif ($row['DOMAINS'])
@@ -144,7 +144,7 @@ class LandingSitesComponent extends LandingBaseComponent
 				if ($url)
 				{
 					$row['DOMAIN_NAME'] = $url;
-					$row['PUBLIC_URL'] = '//' . $url;
+					$row['PUBLIC_URL'] = $protocol . $url;
 					$row['PUBLIC_URL'] .= $row['DIR'];
 				}
 			}
@@ -153,6 +153,36 @@ class LandingSitesComponent extends LandingBaseComponent
 		}
 
 		return $sites;
+	}
+
+	/**
+	 * Returns array of site ids with 'delete' locked.
+	 * @param array $ids Site ids.
+	 * @return array
+	 */
+	protected function getDeleteLocked(array $ids): array
+	{
+		$statuses = [];
+
+		if ($ids)
+		{
+			$res = \Bitrix\Landing\Lock::getList([
+				'select' => [
+					'SITE_ID' => 'ENTITY_ID'
+				],
+				'filter' => [
+					'ENTITY_ID' => $ids,
+					'=ENTITY_TYPE' => \Bitrix\Landing\Lock::ENTITY_TYPE_SITE,
+					'=LOCK_TYPE' => \Bitrix\Landing\Lock::LOCK_TYPE_DELETE
+				]
+			]);
+			while ($row = $res->fetch())
+			{
+				$statuses[] = $row['SITE_ID'];
+			}
+		}
+
+		return $statuses;
 	}
 
 	/**
@@ -175,11 +205,18 @@ class LandingSitesComponent extends LandingBaseComponent
 			$this->checkParam('TILE_MODE', 'list');
 			$this->checkParam('PAGE_URL_SITE', '');
 			$this->checkParam('PAGE_URL_SITE_EDIT', '');
+			$this->checkParam('PAGE_URL_SITE_DESIGN', '');
+			$this->checkParam('PAGE_URL_SITE_CONTACTS', '');
 			$this->checkParam('PAGE_URL_LANDING_EDIT', '');
+			$this->checkParam('PAGE_URL_SITE_DOMAIN_EDIT', '');
 			$this->checkParam('PAGE_URL_SITE_DOMAIN_SWITCH', '');
 			$this->checkParam('DRAFT_MODE', 'N');
 			$this->checkParam('ACCESS_CODE', '');
 			$this->checkParam('~AGREEMENT', []);
+			$this->checkParam(
+				'PAGE_URL_SITE_EXPORT',
+				str_replace(-1, '#site_edit#', Transfer\Export\Site::getUrl($this->arParams['TYPE'], -1))
+			);
 
 			\Bitrix\Landing\Hook::setEditMode(true);
 
@@ -231,19 +268,19 @@ class LandingSitesComponent extends LandingBaseComponent
 				'select' => [
 					'*',
 					'DOMAIN_NAME' => 'DOMAIN.DOMAIN',
-					'DOMAIN_PROVIDER' => 'DOMAIN.PROVIDER'
+					'DOMAIN_PROVIDER' => 'DOMAIN.PROVIDER',
+					'DOMAIN_PREV' => 'DOMAIN.PREV_DOMAIN'
 				],
 				'filter' => $filter,
-				'order' => $this->arResult['IS_DELETED']
-					? [
+				'order' => [
 						'DATE_MODIFY' => 'desc'
-					]
-					: [
-						'ID' => 'desc'
 					],
 				'navigation' => $this::COUNT_PER_PAGE
 			]);
 			$this->arResult['NAVIGATION'] = $this->getLastNavigation();
+			$this->arResult['DELETE_LOCKED'] = $this->getDeleteLocked(
+				array_keys($this->arResult['SITES'])
+			);
 
 			// detect preview of sites and set rights
 			$rights = Rights::getOperationsForSite(
@@ -276,6 +313,7 @@ class LandingSitesComponent extends LandingBaseComponent
 				$item['ACCESS_SETTINGS'] = 'Y';
 				$item['ACCESS_PUBLICATION'] = 'Y';
 				$item['ACCESS_DELETE'] = 'Y';
+				$item['ACCESS_SITE_NEW'] = $this->arResult['ACCESS_SITE_NEW'];
 				if (isset($rights[$item['ID']]))
 				{
 					$currRights = $rights[$item['ID']];
@@ -316,7 +354,7 @@ class LandingSitesComponent extends LandingBaseComponent
 				if ($item['DELETED'] == 'Y')
 				{
 					$item['DATE_DELETED_DAYS'] = $deletedLTdays - intval((time() - $item['DATE_MODIFY']->getTimeStamp()) / 86400);
-					$item['DELETE_FINISH'] = $item['DATE_DELETED_DAYS'] <= 0;//@tmp
+					$item['DELETE_FINISH'] = $item['DATE_DELETED_DAYS'] <= 0;
 				}
 				$item['DOMAIN_NAME'] = $puny->decode($item['DOMAIN_NAME']);
 				$item['DOMAIN_B24_NAME'] = Domain::getBitrix24Subdomain($item['DOMAIN_NAME']);
@@ -334,7 +372,7 @@ class LandingSitesComponent extends LandingBaseComponent
 					$item['PREVIEW'] = '';
 					if (isset($siteUrls[$item['ID']]))
 					{
-						$item['PUBLIC_URL'] = $this->getTimestampUrl($siteUrls[$item['ID']]);
+						$item['PUBLIC_URL'] = $siteUrls[$item['ID']];
 					}
 					if ($item['PUBLIC_URL'])
 					{
@@ -350,6 +388,11 @@ class LandingSitesComponent extends LandingBaseComponent
 				}
 				unset($siteUrls, $item, $ids);
 			}
+		}
+
+		if (\Bitrix\Main\Loader::includeModule('bitrix24'))
+		{
+			$this->arResult['LICENSE'] = \CBitrix24::getLicenseType();
 		}
 
 		parent::executeComponent();

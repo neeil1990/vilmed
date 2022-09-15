@@ -9,10 +9,16 @@ class CPullChannel
 
 	const CHANNEL_TTL = 43205;
 
-	public static function GetNewChannelId($extraString = '')
+	public static function GetNewChannelId($suffix = '')
 	{
 		global $APPLICATION;
-		return md5(uniqid().$_SERVER["REMOTE_ADDR"].$_SERVER["SERVER_NAME"].(is_object($APPLICATION)? $APPLICATION->GetServerUniqID(): '').$extraString);
+		return md5(uniqid().$_SERVER["REMOTE_ADDR"].$_SERVER["SERVER_NAME"].(is_object($APPLICATION)? $APPLICATION->GetServerUniqID(): '').$suffix);
+	}
+
+	public static function GetNewChannelIdByTag(string $tag, string $suffix = '')
+	{
+		global $APPLICATION;
+		return md5($tag.(is_object($APPLICATION)? $APPLICATION->GetServerUniqID(): '').$suffix);
 	}
 
 	public static function GetChannelShared($channelType = self::TYPE_SHARED, $cache = true, $reOpen = false)
@@ -477,7 +483,7 @@ class CPullChannel
 		$nginx_error = COption::GetOptionString("pull", "nginx_error", "N");
 		if ($nginx_error != "N")
 		{
-			$nginx_error = unserialize($nginx_error);
+			$nginx_error = unserialize($nginx_error, ["allowed_classes" => false]);
 			if (intval($nginx_error['date'])+120 < time())
 			{
 				COption::SetOptionString("pull", "nginx_error", "N");

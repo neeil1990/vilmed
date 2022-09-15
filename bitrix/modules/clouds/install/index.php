@@ -12,7 +12,7 @@ Class clouds extends CModule
 	var $MODULE_CSS;
 	var $MODULE_GROUP_RIGHTS = "Y";
 
-	function clouds()
+	public function __construct()
 	{
 		$arModuleVersion = array();
 
@@ -63,13 +63,13 @@ Class clouds extends CModule
 
 	function InstallDB($arParams = array())
 	{
-		global $DB, $DBType, $APPLICATION;
+		global $DB, $APPLICATION;
 		$this->errors = false;
 
 		// Database tables creation
 		if(!$DB->Query("SELECT 'x' FROM b_clouds_file_bucket WHERE 1=0", true))
 		{
-			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/clouds/install/db/".mb_strtolower($DB->type)."/install.sql");
+			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/clouds/install/db/mysql/install.sql");
 		}
 
 
@@ -123,12 +123,12 @@ Class clouds extends CModule
 
 	function UnInstallDB($arParams = array())
 	{
-		global $DB, $DBType, $APPLICATION;
+		global $DB, $APPLICATION;
 		$this->errors = false;
 
 		if(!array_key_exists("save_tables", $arParams) || $arParams["save_tables"] != "Y")
 		{
-			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/clouds/install/db/".mb_strtolower($DB->type)."/uninstall.sql");
+			$this->errors = $DB->RunSQLBatch($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/clouds/install/db/mysql/uninstall.sql");
 			$this->UnInstallTasks();
 		}
 
@@ -170,6 +170,33 @@ Class clouds extends CModule
 		}
 
 		return true;
+	}
+
+	function migrateToBox()
+	{
+		global $DB, $CACHE_MANAGER;
+
+		// Delete delayed resize
+		COption::RemoveOption("clouds", "delayed_resize");
+		$DB->Query("DELETE FROM b_clouds_file_resize");
+		// Cancel any backup sync jobs
+		$DB->Query("DELETE FROM b_clouds_copy_queue");
+		$DB->Query("DELETE FROM b_clouds_delete_queue");
+		// Cancel all multipart uploads in progress
+		$DB->Query("DELETE FROM b_clouds_file_upload");
+		// Remove file upload in progress info
+		$DB->Query("DELETE FROM b_clouds_file_save");
+		// Cleanup obsolete hash info
+		$DB->Query("DELETE FROM b_clouds_file_hash");
+
+		// Remove any cloud storage defined
+		$DB->Query("DELETE FROM b_clouds_file_bucket");
+		$CACHE_MANAGER->CleanDir("b_clouds_file_bucket");
+		$DB->Query("UPDATE b_file SET HANDLER_ID=NULL WHERE HANDLER_ID is not null");
+
+		// B24 cloud specific info
+		COption::RemoveOption("clouds", "ISSUE_TIME");
+		COption::RemoveOption("clouds", "master_bucket");
 	}
 
 	function InstallEvents()
@@ -246,7 +273,7 @@ Class clouds extends CModule
 		}
 	}
 
-	function OnGetTableSchema()
+	public static function OnGetTableSchema()
 	{
 		return array(
 			"clouds" => array(

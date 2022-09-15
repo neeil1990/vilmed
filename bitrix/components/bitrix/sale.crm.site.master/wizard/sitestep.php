@@ -1,6 +1,11 @@
 <?php
 namespace Bitrix\Sale\CrmSiteMaster\Steps;
 
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
+{
+	die();
+}
+
 use Bitrix\Main,
 	Bitrix\Main\Application,
 	Bitrix\Main\Config\Option,
@@ -234,9 +239,6 @@ class SiteStep extends \CWizardStep
 		$this->prepareSite($crmSite);
 
 		$this->component->setCrmSiteId($crmSite);
-
-		// set site for person types
-		$this->preparePersonTypes($crmSite);
 
 		if ($this->GetErrors())
 		{
@@ -815,31 +817,6 @@ class SiteStep extends \CWizardStep
 		}
 
 		return $param;
-	}
-
-	/**
-	 * Set site for person types
-	 *
-	 * @param $siteId
-	 * @throws Main\ArgumentException
-	 * @throws Main\ObjectPropertyException
-	 * @throws Main\SystemException
-	 */
-	public function preparePersonTypes($siteId)
-	{
-		$personTypePreparer = new Tools\PersonTypePreparer();
-		$personTypeList = $personTypePreparer->getPersonTypeList();
-
-		$result = $personTypePreparer->preparePersonType($siteId, $personTypeList);
-
-		if (!$result)
-		{
-			$errors = $personTypePreparer->getErrors();
-			foreach ($errors as $error)
-			{
-				$this->SetError($error);
-			}
-		}
 	}
 
 	/**

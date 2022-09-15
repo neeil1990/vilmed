@@ -11,9 +11,7 @@
 	  return data;
 	}
 
-	var PropertyCreationForm =
-	/*#__PURE__*/
-	function (_BX$Catalog$IblockFie) {
+	var PropertyCreationForm = /*#__PURE__*/function (_BX$Catalog$IblockFie) {
 	  babelHelpers.inherits(PropertyCreationForm, _BX$Catalog$IblockFie);
 
 	  function PropertyCreationForm() {
@@ -35,6 +33,11 @@
 	    key: "getInputTitle",
 	    value: function getInputTitle() {
 	      return !this.isCreationMode() ? this._field.getTitle() : '';
+	    }
+	  }, {
+	    key: "isAllowedMultipleCheckBox",
+	    value: function isAllowedMultipleCheckBox() {
+	      return !this.isCreationMode() && babelHelpers.get(babelHelpers.getPrototypeOf(PropertyCreationForm.prototype), "isAllowedMultipleCheckBox", this).call(this);
 	    }
 	  }, {
 	    key: "isCreationMode",
@@ -131,6 +134,7 @@
 	        NAME: fields.label,
 	        MULTIPLE: fields.multiple ? 'Y' : 'N',
 	        IS_REQUIRED: fields.mandatory ? 'Y' : 'N',
+	        IS_PUBLIC: fields.isPublic ? 'Y' : 'N',
 	        PROPERTY_TYPE: 'S'
 	      };
 
@@ -157,6 +161,7 @@
 	          break;
 
 	        case 'list':
+	        case 'multilist':
 	          formatted.PROPERTY_TYPE = 'L';
 	          fields.enumeration = fields.enumeration || [];
 	          fields.enumeration.forEach(function (enumItem, key) {
@@ -187,6 +192,11 @@
 	    key: "onFormCancel",
 	    value: function onFormCancel() {
 	      BX.SidePanel.Instance.close();
+	    }
+	  }, {
+	    key: "isAllowedShowAlwaysCheckBox",
+	    value: function isAllowedShowAlwaysCheckBox() {
+	      return false;
 	    }
 	  }]);
 	  return PropertyCreationForm;

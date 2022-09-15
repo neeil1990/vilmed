@@ -8,6 +8,9 @@
 
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
+use Bitrix\Main\HttpResponse;
+use Bitrix\Main\Application;
+
 IncludeModuleLangFile(__FILE__);
 
 define("ADMIN_THEMES_PATH", "/bitrix/themes");
@@ -51,7 +54,7 @@ class CAdminPage
 		$APPLICATION->AddBufferContent(array(&$this, "GetJsTitle"));
 	}
 
-	function GetTitle()
+	public function GetTitle()
 	{
 		global $APPLICATION;
 		return htmlspecialcharsex($APPLICATION->GetTitle(false, true));
@@ -67,7 +70,7 @@ class CAdminPage
 		$this->isHideTitle = true;
 	}
 
-	function GetJsTitle()
+	public function GetJsTitle()
 	{
 		global $APPLICATION;
 		return CUtil::JSEscape($APPLICATION->GetTitle(false, true));
@@ -214,7 +217,7 @@ var phpVars = {
 	'LANGUAGE_ID': '".CUtil::JSEscape(LANGUAGE_ID)."',
 	'FORMAT_DATE': '".CUtil::JSEscape(FORMAT_DATE)."',
 	'FORMAT_DATETIME': '".CUtil::JSEscape(FORMAT_DATETIME)."',
-	'opt_context_ctrl': ".($aUserOpt["context_ctrl"] == "Y"? "true":"false").",
+	'opt_context_ctrl': ".(($aUserOpt["context_ctrl"] ?? '') == "Y"? "true":"false").",
 	'cookiePrefix': '".CUtil::JSEscape(COption::GetOptionString("main", "cookie_name", "BITRIX_SM"))."',
 	'titlePrefix': '".CUtil::JSEscape(COption::GetOptionString("main", "site_name", $_SERVER["SERVER_NAME"]))." - ',
 	'bitrix_sessid': '".bitrix_sessid()."',
@@ -238,13 +241,9 @@ var phpVars = {
 };
 </script>
 ";
-
-		CJSCore::Init(array('admin_sidepanel'));
-
 		$APPLICATION->AddHeadScript('/bitrix/js/main/admin_tools.js');
 		$APPLICATION->AddHeadScript('/bitrix/js/main/popup_menu.js');
 		$APPLICATION->AddHeadScript('/bitrix/js/main/admin_search.js');
-		$APPLICATION->AddHeadScript('/bitrix/js/main/admin_sidepanel.js');
 
 		return $s;
 	}
@@ -284,7 +283,7 @@ var phpVars = {
 		echo '</div>';
 	}
 
-	function ShowSound()
+	public function ShowSound()
 	{
 		/** @global CMain $APPLICATION */
 		global $USER, $APPLICATION;
@@ -421,10 +420,6 @@ var phpVars = {
 	}
 }
 
-use Bitrix\Main\HttpResponse;
-use Bitrix\Main\Application;
-use Bitrix\Main\Web\Json;
-
 class CAdminAjaxHelper
 {
 	/** @var  \Bitrix\Main\Context */
@@ -445,9 +440,6 @@ class CAdminAjaxHelper
 
 	/**
      * Sends JSON response with status "success".
-	 * @throws \Bitrix\Main\ArgumentException
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
 	 */
 	public function sendJsonSuccessResponse()
 	{
@@ -457,9 +449,6 @@ class CAdminAjaxHelper
 	/**
      * Sends JSON response with status "error" and with errors.
 	 * @param string $message Error message.
-	 * @throws \Bitrix\Main\ArgumentException
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
 	 */
 	public function sendJsonErrorResponse($message)
 	{
@@ -469,17 +458,14 @@ class CAdminAjaxHelper
 	/**
 	 * Sends JSON response.
 	 * @param array $params Data structure.
-	 * @throws \Bitrix\Main\ArgumentException
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
 	 */
 	public function sendJsonResponse($params = array())
 	{
 		if ($this->isAjaxRequest() && !$this->skipResponse)
 		{
-			$this->httpResponse->addHeader("Content-Type", "application/json");
-			$this->httpResponse->flush(Json::encode($params));
-			$this->end();
+			$response = new Bitrix\Main\Engine\Response\Json($params);
+			$response = Bitrix\Main\Context::getCurrent()->getResponse()->copyHeadersTo($response);
+			Bitrix\Main\Application::getInstance()->end(0, $response);
 		}
 	}
 
@@ -519,6 +505,33 @@ class CAdminAjaxHelper
 
 class CAdminSidePanelHelper extends CAdminAjaxHelper
 {
+	/** @var bool */
+	protected $publicPageProcessMode;
+
+	public function __construct()
+	{
+		parent::__construct();
+		$this->initPublicPageProcessMode();
+	}
+
+	protected function initPublicPageProcessMode()
+	{
+		$this->setPublicPageProcessMode(
+			$this->isPublicSidePanel()
+			|| (defined("PUBLIC_MODE") && PUBLIC_MODE == 1)
+		);
+	}
+
+	public function setPublicPageProcessMode(bool $mode): void
+	{
+		$this->publicPageProcessMode = $mode;
+	}
+
+	public function getPublicPageProcessMode(): bool
+	{
+		return $this->publicPageProcessMode;
+	}
+
 	public function setSkipResponse($skip)
 	{
 		$this->skipResponse = $skip;
@@ -598,27 +611,27 @@ class CAdminSidePanelHelper extends CAdminAjaxHelper
 	 */
 	public function isSidePanelRequest()
 	{
-		return ($_REQUEST["IFRAME"] == "Y") && ($_REQUEST["IFRAME_TYPE"] == "SIDE_SLIDER");
+		return (($_REQUEST["IFRAME"] ?? '') == "Y") && (($_REQUEST["IFRAME_TYPE"] ?? '') == "SIDE_SLIDER");
 	}
 
 	public function isSidePanel()
 	{
-		return (isset($_REQUEST["IFRAME"]) && $_REQUEST["IFRAME"] === "Y");
+		return (($_REQUEST["IFRAME"] ?? '') === "Y");
 	}
 
 	public function isPublicSidePanel()
 	{
-		return ($this->isSidePanel() && ($_REQUEST["publicSidePanel"] === "Y" || $_REQUEST["IFRAME_TYPE"] == "PUBLIC_FRAME"));
+		return ($this->isSidePanel() && (($_REQUEST["publicSidePanel"] ?? '') === "Y" || ($_REQUEST["IFRAME_TYPE"] ?? '') == "PUBLIC_FRAME"));
 	}
 
 	public function isSidePanelFrame()
 	{
-		return ($_REQUEST["IFRAME"] == "Y") && ($_REQUEST["IFRAME_TYPE"] == "SIDE_SLIDER");
+		return (($_REQUEST["IFRAME"] ?? '') == "Y") && (($_REQUEST["IFRAME_TYPE"] ?? '') == "SIDE_SLIDER");
 	}
 
 	public function isPublicFrame()
 	{
-		return ($_REQUEST["IFRAME"] == "Y") && ($_REQUEST["IFRAME_TYPE"] == "PUBLIC_FRAME");
+		return (($_REQUEST["IFRAME"] ?? '') == "Y") && (($_REQUEST["IFRAME_TYPE"] ?? '') == "PUBLIC_FRAME");
 	}
 
 	public function setDefaultQueryParams($url)
@@ -645,7 +658,7 @@ class CAdminSidePanelHelper extends CAdminAjaxHelper
 
 	public function editUrlToPublicPage($url)
 	{
-		if ($this->isPublicSidePanel() || (defined("PUBLIC_MODE") && PUBLIC_MODE == 1))
+		if ($this->getPublicPageProcessMode())
 		{
 			$url = str_replace(".php", "/", $url);
 		}
@@ -657,8 +670,11 @@ class CAdminSidePanelHelper extends CAdminAjaxHelper
 	{
 		if ($this->isPublicFrame())
 		{
+			$url = (strpos($url, '/') === 0 ? $url: '/');
+			$url = '/'.ltrim($url, '/');
+
 			echo "<script>";
-			echo "top.window.location.href = '".$url."';";
+			echo "top.window.location.href = '".CUtil::JSEscape($url)."';";
 			echo "</script>";
 			exit;
 		}
@@ -982,19 +998,20 @@ class CAdminMenu
 				"items_id"=>$aMenu["items_id"],
 				"page_icon"=>isset($aMenu["page_icon"])? $aMenu["page_icon"]: null,
 				"text"=>$aMenu["text"],
-				"url"=>$aMenu["url"],
+				"url"=>isset($aMenu["url"]) ? $aMenu["url"] : null,
 				"skip_chain"=>isset($aMenu["skip_chain"])? $aMenu["skip_chain"]: null,
 				"help_section"=>isset($aMenu["help_section"])? $aMenu["help_section"]: null,
 			);
 
 		$bSelected = false;
-		$bMoreUrl = (isset($aMenu["more_url"]) && is_array($aMenu["more_url"]) && !empty($aMenu["more_url"]));
-		if($aMenu["url"] <> "" || $bMoreUrl)
+		$mainUrl = (isset($aMenu["url"]) && $aMenu["url"] <> "");
+		$bMoreUrl = (!empty($aMenu["more_url"]) && is_array($aMenu["more_url"]));
+		if($mainUrl || $bMoreUrl)
 		{
 			$cur_page = $APPLICATION->GetCurPage();
 
 			$all_links = array();
-			if($aMenu["url"] <> "")
+			if($mainUrl)
 				$all_links[] = $aMenu["url"];
 			if($bMoreUrl)
 				$all_links = array_merge($all_links, $aMenu["more_url"]);
@@ -1080,11 +1097,11 @@ class CAdminMenu
 			{
 				$aSections["_active"] = array(
 					"menu_id"=>$aMenu["menu_id"],
-					"page_icon"=>$aMenu["page_icon"],
+					"page_icon"=>isset($aMenu["page_icon"])? $aMenu["page_icon"]: null,
 					"text"=>$aMenu["text"],
 					"url"=>$aMenu["url"],
-					"skip_chain"=>$aMenu["skip_chain"],
-					"help_section"=>$aMenu["help_section"],
+					"skip_chain"=>isset($aMenu["skip_chain"])? $aMenu["skip_chain"]: null,
+					"help_section"=>isset($aMenu["help_section"]) ? $aMenu["help_section"]: null,
 				);
 			}
 			$aMenu["_active"] = true;
@@ -1448,7 +1465,7 @@ window.'.$this->name.' = new PopupMenu("'.$this->id.'"'.
 					$sMenuUrl .= "{'SEPARATOR':true}";
 				else
 				{
-					if($action["ONCLICK"] <> "")
+					if(($action["ONCLICK"] ?? '') <> "")
 						$action["ACTION"] = $action["ONCLICK"];
 
 					if (isset($action["ICON"]) && $action["ICON"]<>""
@@ -1473,11 +1490,11 @@ window.'.$this->name.' = new PopupMenu("'.$this->id.'"'.
 						(isset($action["DISABLED"]) && $action["DISABLED"] == true? "'DISABLED':true,":"").
 						(isset($action["AUTOHIDE"]) && $action["AUTOHIDE"] == false? "'AUTOHIDE':false,":"").
 						(isset($action["DEFAULT"]) && $action["DEFAULT"] == true? "'DEFAULT':true,":"").
-						($action["TEXT"]<>""? "'TEXT':'".CUtil::JSEscape($action["TEXT"])."',":"").
-						($action["HTML"]<>""? "'HTML':'".CUtil::JSEscape($action["HTML"])."',":"").
+						(($action["TEXT"] ?? '') <> '' ? "'TEXT':'".CUtil::JSEscape($action["TEXT"])."'," : "").
+						(($action["HTML"] ?? '') <> '' ? "'HTML':'".CUtil::JSEscape($action["HTML"])."'," : "").
 						(isset($action["TITLE"]) && $action["TITLE"]<>""? "'TITLE':'".CUtil::JSEscape($action["TITLE"])."',":"").
 						(isset($action["SHOW_TITLE"]) && $action["SHOW_TITLE"] == true ? "'SHOW_TITLE':true,":"").
-						($action["ACTION"]<>""? "'ONCLICK':'".CUtil::JSEscape(str_replace("&amp;", "&", $action["ACTION"]))."',":"").
+						(($action["ACTION"] ?? '') <> '' ? "'ONCLICK':'".CUtil::JSEscape(str_replace("&amp;", "&", $action["ACTION"]))."'," : "").
 						(isset($action["ONMENUPOPUP"]) && $action["ONMENUPOPUP"]<>""? "'ONMENUPOPUP':'".CUtil::JSEscape($action["ONMENUPOPUP"])."',":"").
 						(isset($action["MENU"]) && is_array($action["MENU"])? "'MENU':".CAdminPopup::PhpToJavaScript($action["MENU"]).",":"").
 						(isset($action["MENU_URL"]) && $action["MENU_URL"]<>''? "'MENU_URL':'".CUtil::JSEscape($action["MENU_URL"])."',":"").
@@ -1661,16 +1678,6 @@ class CAdminContextMenu
 		}
 	}
 
-	/**
-	 * @deprecated
-	 * @param $items
-	 * @param array $additional_items
-	 */
-	function CAdminContextMenu($items, $additional_items = array())
-	{
-		self::__construct($items, $additional_items);
-	}
-
 	function Show()
 	{
 		if (defined('BX_PUBLIC_MODE') && BX_PUBLIC_MODE == 1)
@@ -1807,7 +1814,7 @@ BX.Fix(right_bar, {type: 'right', limit_node: BX.previousSibling(right_bar)});
 				", {active_class: '".$this->GetActiveClassByID($item["ICON"])."', public_frame: '".($this->isPublicFrame ? 1 : 0)."'});";
 			$sClassName = $this->GetClassByID($item["ICON"]);
 ?>
-	<a href="javascript:void(0)" hidefocus="true" onclick="this.blur();<?=$sMenuUrl?> return false;" class="adm-btn<?=$sClassName != '' ? ' '.$sClassName : ''?> adm-btn-menu" title="<?=$item["TITLE"];?>"><?=$item["TEXT"]?></a>
+	<a href="javascript:void(0)" hidefocus="true" onclick="this.blur();<?=$sMenuUrl?> return false;" class="adm-btn<?=$sClassName != '' ? ' '.$sClassName : ''?> adm-btn-menu" title="<?=($item["TITLE"] ?? '');?>"><?=$item["TEXT"]?></a>
 <?
 		}
 		else
@@ -1901,7 +1908,7 @@ class CAdminSorting
 	{
 		$this->by_name = $by_name;
 		$this->ord_name = $ord_name;
-		$this->table_id = $table_id;
+		$this->table_id = preg_replace('/[^a-z0-9_]/i', '', $table_id);
 		$this->by_initial = $by_initial;
 		$this->order_initial = $order_initial;
 
@@ -1909,11 +1916,11 @@ class CAdminSorting
 		$needUserOrder = false;
 		if(isset($GLOBALS[$this->by_name]))
 		{
-			$_SESSION["SESS_SORT_BY"][$this->table_id] = $GLOBALS[$this->by_name];
+			\Bitrix\Main\Application::getInstance()->getSession()["SESS_SORT_BY"][$this->table_id] = $GLOBALS[$this->by_name];
 		}
-		elseif(isset($_SESSION["SESS_SORT_BY"][$this->table_id]))
+		elseif(isset(\Bitrix\Main\Application::getInstance()->getSession()["SESS_SORT_BY"][$this->table_id]))
 		{
-			$GLOBALS[$this->by_name] = $_SESSION["SESS_SORT_BY"][$this->table_id];
+			$GLOBALS[$this->by_name] = \Bitrix\Main\Application::getInstance()->getSession()["SESS_SORT_BY"][$this->table_id];
 		}
 		else
 		{
@@ -1922,11 +1929,11 @@ class CAdminSorting
 
 		if(isset($GLOBALS[$this->ord_name]))
 		{
-			$_SESSION["SESS_SORT_ORDER"][$this->table_id] = $GLOBALS[$this->ord_name];
+			\Bitrix\Main\Application::getInstance()->getSession()["SESS_SORT_ORDER"][$this->table_id] = $GLOBALS[$this->ord_name];
 		}
-		elseif(isset($_SESSION["SESS_SORT_ORDER"][$this->table_id]))
+		elseif(isset(\Bitrix\Main\Application::getInstance()->getSession()["SESS_SORT_ORDER"][$this->table_id]))
 		{
-			$GLOBALS[$this->ord_name] = $_SESSION["SESS_SORT_ORDER"][$this->table_id];
+			$GLOBALS[$this->ord_name] = \Bitrix\Main\Application::getInstance()->getSession()["SESS_SORT_ORDER"][$this->table_id];
 		}
 		else
 		{
@@ -2056,17 +2063,7 @@ class CAdminResult extends CDBResult
 	public function __construct($res, $table_id)
 	{
 		parent::__construct($res);
-		$this->table_id = $table_id;
-	}
-
-	/**
-	* @deprecated
- 	* @param mixed $res
-	* @param string $table_id
-	*/
-	public function CAdminResult($res, $table_id)
-	{
-		self::__construct($res, $table_id);
+		$this->table_id = preg_replace('/[^a-z0-9_]/i', '', $table_id);
 	}
 
 	public function NavStart($nPageSize=20, $bShowAll=true, $iNumPage=false)
@@ -2095,7 +2092,7 @@ class CAdminResult extends CDBResult
 	 * @param int|array $nPageSize
 	 * @return int
 	 */
-	public function GetNavSize($table_id=false, $nPageSize=20)
+	public static function GetNavSize($table_id=false, $nPageSize=20)
 	{
 		/** @global CMain $APPLICATION */
 		global $NavNum, $APPLICATION;
@@ -2112,11 +2109,11 @@ class CAdminResult extends CDBResult
 		{
 			$nSize = (int)$_REQUEST["SIZEN_".($NavNum+1)];
 			if($bSess)
-				$_SESSION["NAV_PAGE_SIZE"][$unique] = $nSize;
+				\Bitrix\Main\Application::getInstance()->getSession()["NAV_PAGE_SIZE"][$unique] = $nSize;
 		}
-		elseif($bSess && isset($_SESSION["NAV_PAGE_SIZE"][$unique]))
+		elseif($bSess && isset(\Bitrix\Main\Application::getInstance()->getSession()["NAV_PAGE_SIZE"][$unique]))
 		{
-			$nSize = $_SESSION["NAV_PAGE_SIZE"][$unique];
+			$nSize = \Bitrix\Main\Application::getInstance()->getSession()["NAV_PAGE_SIZE"][$unique];
 		}
 		else
 		{
@@ -2160,17 +2157,7 @@ class CAdminMessage
 		$this->exception = $exception;
 	}
 
-	/**
-	* @deprecated
-	 * @param string|array $message
-	 * @param CAdminException|bool $exception
-	*/
-	public function CAdminMessage($message, $exception=false)
-	{
-		self::__construct($message, $exception);
-	}
-
-	function Show()
+	public function Show()
 	{
 		$publicMode = false;
 		if (defined('BX_PUBLIC_MODE') && BX_PUBLIC_MODE == 1 && $this->message["TYPE"] != "PROGRESS" && (!isset($this->message['SKIP_PUBLIC_MODE']) || $this->message['SKIP_PUBLIC_MODE'] !== true))
@@ -2182,7 +2169,7 @@ class CAdminMessage
 			ob_end_clean();
 			echo "<script>
 			var currentWindow = top.window;
-			if (top.BX.SidePanel.Instance && top.BX.SidePanel.Instance.getTopSlider())
+			if (top.BX.SidePanel && top.BX.SidePanel.Instance && top.BX.SidePanel.Instance.getTopSlider())
 			{
 				currentWindow = top.BX.SidePanel.Instance.getTopSlider().getWindow();
 			}
@@ -2273,7 +2260,7 @@ class CAdminMessage
 		return $s;
 	}
 
-	function _getProgressHtml()
+	public function _getProgressHtml()
 	{
 		$w = isset($this->message['PROGRESS_WIDTH']) ? intval($this->message['PROGRESS_WIDTH']) : 500;
 		$p = 0;
@@ -2300,7 +2287,7 @@ class CAdminMessage
 		return $s;
 	}
 
-	function _getButtonsHtml()
+	public function _getButtonsHtml()
 	{
 		$s = '';
 		if(isset($this->message["BUTTONS"]) && is_array($this->message["BUTTONS"]))
@@ -2311,7 +2298,7 @@ class CAdminMessage
 		return $s;
 	}
 
-	function _formatHTML($html)
+	public function _formatHTML($html)
 	{
 		if($this->message["HTML"])
 			return $html;
@@ -2319,14 +2306,14 @@ class CAdminMessage
 			return _ShowHtmlspec($html);
 	}
 
-	function GetMessages()
+	public function GetMessages()
 	{
 		if($this->exception && method_exists($this->exception, 'GetMessages'))
 			return $this->exception->GetMessages();
 		return false;
 	}
 
-	function ShowOldStyleError($message)
+	public static function ShowOldStyleError($message)
 	{
 		if(!empty($message))
 		{
@@ -2335,7 +2322,7 @@ class CAdminMessage
 		}
 	}
 
-	function ShowMessage($message)
+	public static function ShowMessage($message)
 	{
 		if(!empty($message))
 		{
@@ -2344,7 +2331,7 @@ class CAdminMessage
 		}
 	}
 
-	function ShowNote($message)
+	public static function ShowNote($message)
 	{
 		if(!empty($message))
 			CAdminMessage::ShowMessage(array("MESSAGE"=>$message, "TYPE"=>"OK"));
@@ -2362,13 +2349,13 @@ class CAdminChain
 		$this->bVisible = $bVisible;
 	}
 
-	function AddItem($item)
+	public function AddItem($item)
 	{
 		//array("TEXT"=>"", "LINK"=>"", "ONCLICK"=>"", "MENU"=>array(array("TEXT"=>"", "LINK"=>"", "CLASS"=>""), ...))
 		$this->items[] = $item;
 	}
 
-	function Show()
+	public function Show()
 	{
 		if(empty($this->items))
 			return null;
@@ -2477,7 +2464,7 @@ class CAdminMainChain extends CAdminChain
 		}
 	}
 
-	function AddItem($item)
+	public function AddItem($item)
 	{
 		$this->Init();
 		parent::AddItem($item);
@@ -2524,14 +2511,21 @@ class CAdminTheme
 			}
 			closedir($dh);
 		}
-		usort($aThemes, create_function('$a, $b', 'return strcasecmp($a["ID"], $b["ID"]);'));
+
+		usort(
+			$aThemes,
+			function ($a, $b) {
+				return strcasecmp($a["ID"], $b["ID"]);
+			}
+		);
+
 		return $aThemes;
 	}
 
 	public static function GetCurrentTheme()
 	{
 		$aUserOpt = CUserOptions::GetOption("global", "settings");
-		if($aUserOpt["theme_id"] <> "")
+		if (is_array($aUserOpt) && ($aUserOpt["theme_id"] ?? '') <> '')
 		{
 			$theme = preg_replace("/[^a-z0-9_.-]/i", "", $aUserOpt["theme_id"]);
 			if($theme <> "")

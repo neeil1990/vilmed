@@ -1,4 +1,4 @@
-<?
+<?php
 $MESS["MAIN_MAIL_CONFIRM_AJAX_ERROR"] = "Error processing the request.";
 $MESS["MAIN_MAIL_CONFIRM_AUTH"] = "Authentication error";
 $MESS["MAIN_MAIL_CONFIRM_BACK"] = "Back";
@@ -7,6 +7,8 @@ $MESS["MAIN_MAIL_CONFIRM_CODE_HINT"] = "A message with the verification code has
 $MESS["MAIN_MAIL_CONFIRM_CODE_PLACEHOLDER"] = "Enter verification code";
 $MESS["MAIN_MAIL_CONFIRM_DELETE"] = "Delete";
 $MESS["MAIN_MAIL_CONFIRM_DELETE_SENDER_CONFIRM"] = "Are you sure you want to delete sender?";
+$MESS["MAIN_MAIL_CONFIRM_EDIT"] = "Edit";
+$MESS["MAIN_MAIL_CONFIRM_EDIT_TITLE"] = "Edit email address";
 $MESS["MAIN_MAIL_CONFIRM_EMAIL"] = "E-mail";
 $MESS["MAIN_MAIL_CONFIRM_EMAIL_HINT"] = "Enter your name and e-mail in the fields below. A message with the verification code will be sent to this address.";
 $MESS["MAIN_MAIL_CONFIRM_EMAIL_HINT_SMTP"] = "Enter your name and email in the fields below. A message with the verification code will be sent to this address. You can enter the code to verify the email, or <a href=\"#\" class=\"new-from-email-dialog-smtp-link\">provide SMTP server details</a>.";
@@ -29,16 +31,27 @@ $MESS["MAIN_MAIL_CONFIRM_MENU"] = "Add sender";
 $MESS["MAIN_MAIL_CONFIRM_MENU_PLACEHOLDER"] = "Default sender (\"From\")";
 $MESS["MAIN_MAIL_CONFIRM_MENU_UNKNOWN"] = "Select sender";
 $MESS["MAIN_MAIL_CONFIRM_NAME"] = "Name";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_ACCESS_ERROR"] = "You cannot delete these senders";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_ACCESS_ERROR_TITTLE"] = "Access denied";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_EMPTY_LIST_WARN"] = "Cannot find senders";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_EMPTY_LIST_WARN_TITTLE"] = "Warning";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_NOT_FULL_LIST_WARN"] = "Not all senders could be found";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_NOT_FULL_LIST_WARN_TITTLE"] = "Warning";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_SUCCESS"] = "Senders have been deleted";
+$MESS["MAIN_MAIL_CONFIRM_POST_DELETE_SUCCESS_TITLE"] = "Deleted";
 $MESS["MAIN_MAIL_CONFIRM_PUBLIC"] = "Available to everyone";
-$MESS["MAIN_MAIL_CONFIRM_PUBLIC_HINT"] = "This address will be available to all employees using CRM";
+$MESS["MAIN_MAIL_CONFIRM_PUBLIC_HINT1"] = "The address you added can be selected by any user";
 $MESS["MAIN_MAIL_CONFIRM_SAVE"] = "Save";
+$MESS["MAIN_MAIL_CONFIRM_SMTP_LIMIT"] = "Max. daily messages";
 $MESS["MAIN_MAIL_CONFIRM_SMTP_LOGIN"] = "Login";
 $MESS["MAIN_MAIL_CONFIRM_SMTP_PASSWORD"] = "Password";
 $MESS["MAIN_MAIL_CONFIRM_SMTP_PORT"] = "Port";
 $MESS["MAIN_MAIL_CONFIRM_SMTP_SERVER"] = "Server";
 $MESS["MAIN_MAIL_CONFIRM_SMTP_SSL"] = "use SSL";
+$MESS["MAIN_MAIL_CONFIRM_SMTP_USE_LIMIT"] = "enable daily message limit";
 $MESS["MAIN_MAIL_CONFIRM_SMTP_WARNING"] = "Important! Make sure the SMTP server details you provided are correct. Otherwise, mail will not be delivered.";
 $MESS["MAIN_MAIL_CONFIRM_SPACE_SMTP_PASSWORD"] = "Password starts or ends with a space character";
 $MESS["MAIN_MAIL_CONFIRM_TITLE"] = "Add new address";
+$MESS["MAIN_MAIL_CONFIRM_UI_GRID_EMAIL_COLUMN"] = "Email";
+$MESS["MAIN_MAIL_CONFIRM_UI_GRID_NAME_COLUMN"] = "Name";
 $MESS["MAIN_MAIL_DELETE_SENDER_ERROR"] = "Error deleting sender";
-?>

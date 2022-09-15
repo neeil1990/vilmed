@@ -114,7 +114,7 @@ if ($arOrder)
 	if ($order)
 	{
 		$guestStatuses = Main\Config\Option::get("sale", "allow_guest_order_view_status", "");
-		$guestStatuses = ($guestStatuses <> '') ?  unserialize($guestStatuses) : array();
+		$guestStatuses = ($guestStatuses <> '') ?  unserialize($guestStatuses, ['allowed_classes' => false]) : [];
 
 		if (
 			!Sale\OrderStatus::isAllowPay($order->getField('STATUS_ID'))
@@ -175,20 +175,6 @@ if ($arOrder)
 					if (!$result->isSuccess())
 					{
 						echo implode('<br>', $result->getErrorMessages());
-					}
-
-					if($service->getField('ENCODING') != '')
-					{
-						define("BX_SALE_ENCODING", $service->getField('ENCODING'));
-
-						AddEventHandler("main", "OnEndBufferContent", "ChangeEncoding");
-						function ChangeEncoding($content)
-						{
-							global $APPLICATION;
-							header("Content-Type: text/html; charset=".BX_SALE_ENCODING);
-							$content = $APPLICATION->ConvertCharset($content, SITE_CHARSET, BX_SALE_ENCODING);
-							$content = str_replace("charset=".SITE_CHARSET, "charset=".BX_SALE_ENCODING, $content);
-						}
 					}
 				}
 			}

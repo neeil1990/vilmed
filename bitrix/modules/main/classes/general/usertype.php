@@ -18,6 +18,7 @@
 
 use Bitrix\Main\DB\SqlExpression;
 use Bitrix\Main\Entity;
+use Bitrix\Main\UserField\Types\BaseType;
 use Bitrix\Main\UserField\Types\DateTimeType;
 
 CModule::AddAutoloadClasses(
@@ -191,7 +192,7 @@ class CAllUserTypeEntity extends CDBResult
 		$arFilter = array();
 		foreach($aFilter as $key => $val)
 		{
-			if(is_array($val) || $val == '')
+			if(is_array($val) || (string)$val == '')
 				continue;
 
 			$key = mb_strtoupper($key);
@@ -890,7 +891,7 @@ class CAllUserTypeEntity extends CDBResult
 		$res = parent::Fetch();
 		if($res && $res["SETTINGS"] <> '')
 		{
-			$res["SETTINGS"] = unserialize($res["SETTINGS"]);
+			$res["SETTINGS"] = unserialize($res["SETTINGS"], ['allowed_classes' => false]);
 		}
 		return $res;
 	}
@@ -1004,6 +1005,7 @@ class CUserTypeManager
 			if($arUserType)
 			{
 				$user_type_id = $arUserType["USER_TYPE_ID"];
+				$arUserField += $arUserType;
 			}
 		}
 
@@ -1127,7 +1129,7 @@ class CUserTypeManager
 							}
 							else
 							{
-								$value = unserialize($value);
+								$value = unserialize($value, ['allowed_classes' => false]);
 							}
 							$result[$key]["VALUE"] = $this->OnAfterFetch($result[$key], $value);
 						}
@@ -1201,7 +1203,7 @@ class CUserTypeManager
 			{
 				if($result[$key]["MULTIPLE"] == "Y" && !is_array($value))
 				{
-					$value = unserialize($value);
+					$value = unserialize($value, ['allowed_classes' => false]);
 				}
 
 				$result[$key]["VALUE"] = $this->OnAfterFetch($result[$key], $value);
@@ -1261,7 +1263,7 @@ class CUserTypeManager
 				if($ar = $rs->Fetch())
 				{
 					if($arUserField["MULTIPLE"] == "Y")
-						$result = $this->OnAfterFetch($arUserField, unserialize($ar["VALUE"]));
+						$result = $this->OnAfterFetch($arUserField, unserialize($ar["VALUE"], ['allowed_classes' => false]));
 					else
 						$result = $this->OnAfterFetch($arUserField, $ar["VALUE"]);
 				}
@@ -1584,7 +1586,7 @@ class CUserTypeManager
 		{
 			foreach($value as $v)
 			{
-				if($v <> '')
+				if((string)$v <> '')
 					return true;
 			}
 
@@ -1592,7 +1594,7 @@ class CUserTypeManager
 		}
 		else
 		{
-			if($value <> '')
+			if((string)$value <> '')
 				return true;
 			else
 				return false;
@@ -1906,7 +1908,7 @@ class CUserTypeManager
 
 						if(
 							(is_array($value) && (implode("", $value) <> ''))
-							|| ((!is_array($value)) && ($value <> ''))
+							|| ((!is_array($value)) && ((string)$value <> ''))
 						)
 						{
 							$html .= '<tr><td>' . call_user_func_array(
@@ -2008,7 +2010,7 @@ class CUserTypeManager
 					if(is_array($value))
 						$form_value = $value;
 					else
-						$form_value = unserialize($value);
+						$form_value = unserialize($value, ['allowed_classes' => false]);
 
 					if(!is_array($form_value))
 						$form_value = array();
@@ -2037,7 +2039,7 @@ class CUserTypeManager
 					if(is_array($value))
 						$form_value = $value;
 					else
-						$form_value = $value <> '' ? unserialize($value) : false;
+						$form_value = $value <> '' ? unserialize($value, ['allowed_classes' => false]) : false;
 
 					if(!is_array($form_value))
 						$form_value = array();
@@ -2090,7 +2092,7 @@ class CUserTypeManager
 					if(is_array($value))
 						$form_value = $value;
 					else
-						$form_value = $value <> '' ? unserialize($value) : false;
+						$form_value = $value <> '' ? unserialize($value, ['allowed_classes' => false]) : false;
 
 					if(!is_array($form_value))
 						$form_value = array();
@@ -2118,7 +2120,7 @@ class CUserTypeManager
 					if(is_array($value))
 						$form_value = $value;
 					else
-						$form_value = unserialize($value);
+						$form_value = unserialize($value, ['allowed_classes' => false]);
 
 					if(!is_array($form_value))
 						$form_value = array();
@@ -2175,7 +2177,7 @@ class CUserTypeManager
 			}
 			elseif(is_callable(array($userfield["USER_TYPE"]["CLASS_NAME"], "getadminlistviewhtmlmulty")))
 			{
-				$form_value = is_array($value) ? $value : unserialize($value);
+				$form_value = is_array($value) ? $value : unserialize($value, ['allowed_classes' => false]);
 
 				if(!is_array($form_value))
 					$form_value = array();
@@ -2198,7 +2200,7 @@ class CUserTypeManager
 				if(is_array($value))
 					$form_value = $value;
 				else
-					$form_value = $value <> '' ? unserialize($value) : false;
+					$form_value = $value <> '' ? unserialize($value, ['allowed_classes' => false]) : false;
 
 				if(!is_array($form_value))
 					$form_value = array();
@@ -2452,35 +2454,52 @@ class CUserTypeManager
 				? $checkRequired : ($requiredFieldMap && isset($requiredFieldMap[$FIELD_NAME]));
 
 			//common Check for all fields
-			if($enableRequiredFieldCheck && ((isset($ID) && $ID <= 0) || array_key_exists($FIELD_NAME, $arFields)))
+			$isSingleValue = ($arUserField["MULTIPLE"] === "N");
+			if (
+				$enableRequiredFieldCheck
+				&& (
+					(isset($ID) && $ID <= 0)
+					|| array_key_exists($FIELD_NAME, $arFields)
+				)
+			)
 			{
 				$EDIT_FORM_LABEL = $arUserField["EDIT_FORM_LABEL"] <> '' ? $arUserField["EDIT_FORM_LABEL"] : $arUserField["FIELD_NAME"];
 
-				if($arUserField["USER_TYPE"]["BASE_TYPE"] == "file")
+				if($arUserField["USER_TYPE"]["BASE_TYPE"] === "file")
 				{
-					$bWasInput = false;
+					$isNewFilePresent = false;
+					$files = [];
 					if(is_array($arUserField["VALUE"]))
-						$arDBFiles = array_flip($arUserField["VALUE"]);
+					{
+						$files = array_flip($arUserField["VALUE"]);
+					}
 					elseif($arUserField["VALUE"] > 0)
-						$arDBFiles = array($arUserField["VALUE"] => 0);
+					{
+						$files = [$arUserField["VALUE"] => 0];
+					}
 					elseif(is_numeric($arFields[$FIELD_NAME]))
-						$arDBFiles = array($arFields[$FIELD_NAME] => 0);
-					else
-						$arDBFiles = array();
+					{
+						$files = [$arFields[$FIELD_NAME] => 0];
+					}
 
-					if($arUserField["MULTIPLE"] == "N")
+					if ($isSingleValue)
 					{
 						$value = $arFields[$FIELD_NAME];
 						if(is_array($value) && array_key_exists("tmp_name", $value))
 						{
 							if(array_key_exists("del", $value) && $value["del"])
-								unset($arDBFiles[$value["old_id"]]);
+							{
+								unset($files[$value["old_id"]]);
+							}
 							elseif(array_key_exists("size", $value) && $value["size"] > 0)
-								$bWasInput = true;
+							{
+								$isNewFilePresent = true;
+							}
 						}
 						elseif($value > 0)
 						{
-							$bWasInput = true;
+							$isNewFilePresent = true;
+							$files[$value] = $value;
 						}
 					}
 					else
@@ -2492,26 +2511,31 @@ class CUserTypeManager
 								if(is_array($value) && array_key_exists("tmp_name", $value))
 								{
 									if(array_key_exists("del", $value) && $value["del"])
-										unset($arDBFiles[$value["old_id"]]);
+									{
+										unset($files[$value["old_id"]]);
+									}
 									elseif(array_key_exists("size", $value) && $value["size"] > 0)
-										$bWasInput = true;
+									{
+										$isNewFilePresent = true;
+									}
 								}
 								elseif($value > 0)
 								{
-									$bWasInput = true;
+									$isNewFilePresent = true;
+									$files[$value] = $value;
 								}
 							}
 						}
 					}
 
-					if(!$bWasInput && empty($arDBFiles))
+					if(!$isNewFilePresent && empty($files))
 					{
 						$aMsg[] = array("id" => $FIELD_NAME, "text" => str_replace("#FIELD_NAME#", $EDIT_FORM_LABEL, GetMessage("USER_TYPE_FIELD_VALUE_IS_MISSING")));
 					}
 				}
-				elseif($arUserField["MULTIPLE"] == "N")
+				elseif ($isSingleValue)
 				{
-					if((string)$arFields[$FIELD_NAME] === '')
+					if ($this->isValueEmpty($arUserField, $arFields[$FIELD_NAME]))
 					{
 						$aMsg[] = array("id" => $FIELD_NAME, "text" => str_replace("#FIELD_NAME#", $EDIT_FORM_LABEL, GetMessage("USER_TYPE_FIELD_VALUE_IS_MISSING")));
 					}
@@ -2528,8 +2552,15 @@ class CUserTypeManager
 						foreach($arFields[$FIELD_NAME] as $value)
 						{
 							if(
-								(is_array($value) && (implode("", $value) <> ''))
-								|| ((!is_array($value)) && ($value <> ''))
+								(
+									is_array($value)
+									&& (implode("", $value) <> '')
+								)
+								||
+								(
+									!is_array($value)
+									&& !$this->isValueEmpty($arUserField, $value)
+								)
 							)
 							{
 								$bFound = true;
@@ -2549,7 +2580,7 @@ class CUserTypeManager
 				$CLASS_NAME = $arUserField["USER_TYPE"]["CLASS_NAME"];
 				if(array_key_exists($FIELD_NAME, $arFields)	&& is_callable(array($CLASS_NAME, "checkfields")))
 				{
-					if($arUserField["MULTIPLE"] == "N")
+					if($isSingleValue)
 					{
 						if (!($arFields[$FIELD_NAME] instanceof SqlExpression))
 						{
@@ -2629,29 +2660,43 @@ class CUserTypeManager
 				if(array_key_exists($FIELD_NAME, $arFields) && is_callable(array($CLASS_NAME, "checkfields")))
 				{
 					// check required values
-					if($arUserField["MANDATORY"] == "Y")
+					if($arUserField["MANDATORY"] === "Y")
 					{
-						if($arUserField["USER_TYPE"]["BASE_TYPE"] == "file")
+						if($arUserField["USER_TYPE"]["BASE_TYPE"] === "file")
 						{
-							$bWasInput = false;
+							$isNewFilePresent = false;
+							$files = [];
 							if(is_array($arUserField["VALUE"]))
-								$arDBFiles = array_flip($arUserField["VALUE"]);
+							{
+								$files = array_flip($arUserField["VALUE"]);
+							}
 							elseif($arUserField["VALUE"] > 0)
-								$arDBFiles = array($arUserField["VALUE"] => 0);
+							{
+								$files = array($arUserField["VALUE"] => 0);
+							}
 							elseif(is_numeric($arFields[$FIELD_NAME]))
-								$arDBFiles = array($arFields[$FIELD_NAME] => 0);
-							else
-								$arDBFiles = array();
+							{
+								$files = array($arFields[$FIELD_NAME] => 0);
+							}
 
-							if($arUserField["MULTIPLE"] == "N")
+							if($arUserField["MULTIPLE"] === "N")
 							{
 								$value = $arFields[$FIELD_NAME];
 								if(is_array($value) && array_key_exists("tmp_name", $value))
 								{
 									if(array_key_exists("del", $value) && $value["del"])
-										unset($arDBFiles[$value["old_id"]]);
+									{
+										unset($files[$value["old_id"]]);
+									}
 									elseif(array_key_exists("size", $value) && $value["size"] > 0)
-										$bWasInput = true;
+									{
+										$isNewFilePresent = true;
+									}
+								}
+								elseif ($value > 0)
+								{
+									$isNewFilePresent = true;
+									$files[$value] = $value;
 								}
 							}
 							else
@@ -2663,22 +2708,31 @@ class CUserTypeManager
 										if(is_array($value) && array_key_exists("tmp_name", $value))
 										{
 											if(array_key_exists("del", $value) && $value["del"])
-												unset($arDBFiles[$value["old_id"]]);
+											{
+												unset($files[$value["old_id"]]);
+											}
 											elseif(array_key_exists("size", $value) && $value["size"] > 0)
-												$bWasInput = true;
+											{
+												$isNewFilePresent = true;
+											}
+										}
+										elseif ($value > 0)
+										{
+											$isNewFilePresent = true;
+											$files[$value] = $value;
 										}
 									}
 								}
 							}
 
-							if(!$bWasInput && empty($arDBFiles))
+							if(!$isNewFilePresent && empty($files))
 							{
 								$aMsg[] = array("id" => $FIELD_NAME, "text" => str_replace("#FIELD_NAME#", $EDIT_FORM_LABEL, GetMessage("USER_TYPE_FIELD_VALUE_IS_MISSING")));
 							}
 						}
 						elseif($arUserField["MULTIPLE"] == "N")
 						{
-							if($arFields[$FIELD_NAME] == '')
+							if ($this->isValueEmpty($arUserField, $arFields[$FIELD_NAME]))
 							{
 								$aMsg[] = array("id" => $FIELD_NAME, "text" => str_replace("#FIELD_NAME#", $EDIT_FORM_LABEL, GetMessage("USER_TYPE_FIELD_VALUE_IS_MISSING")));
 							}
@@ -2696,7 +2750,7 @@ class CUserTypeManager
 								{
 									if(
 										(is_array($value) && (implode("", $value) <> ''))
-										|| ((!is_array($value)) && ($value <> ''))
+										|| ((!is_array($value)) && ((string)$value <> ''))
 									)
 									{
 										$bFound = true;
@@ -2751,6 +2805,34 @@ class CUserTypeManager
 		return true;
 	}
 
+	protected function isValueEmpty(array $userField, $value): bool
+	{
+		$className = $userField['USER_TYPE']['CLASS_NAME'] ?? null;
+		if (!is_a($className, BaseType::class, true))
+		{
+			$className = BaseType::class;
+		}
+		if (!$className::isMandatorySupported())
+		{
+			return false;
+		}
+		$isNumberType = (
+			$userField['USER_TYPE_ID'] === \Bitrix\Main\UserField\Types\IntegerType::USER_TYPE_ID
+			|| $userField['USER_TYPE_ID'] === \Bitrix\Main\UserField\Types\DoubleType::USER_TYPE_ID
+		);
+		if (
+			$isNumberType
+			&& (
+				$value === 0 || $value === 0.0 || $value === "0" || $value === "0.0" || $value === "0,0"
+			)
+		)
+		{
+			return false;
+		}
+
+		return (string)$value === "";
+	}
+
 	function Update($entity_id, $ID, $arFields, $user_id = false)
 	{
 		global $DB;
@@ -2781,7 +2863,7 @@ class CUserTypeManager
 					if(is_callable(array($arUserField["USER_TYPE"]["CLASS_NAME"], "onbeforesave")))
 						$arFields[$FIELD_NAME] = call_user_func_array(array($arUserField["USER_TYPE"]["CLASS_NAME"], "onbeforesave"), array($arUserField, $arFields[$FIELD_NAME], $user_id));
 
-					if($arFields[$FIELD_NAME] <> '')
+					if((string)$arFields[$FIELD_NAME] !== '')
 						$arUpdate[$FIELD_NAME] = $arFields[$FIELD_NAME];
 					else
 						$arUpdate[$FIELD_NAME] = false;
@@ -2803,7 +2885,7 @@ class CUserTypeManager
 							if(is_callable(array($arUserField["USER_TYPE"]["CLASS_NAME"], "onbeforesave")))
 								$value = call_user_func_array(array($arUserField["USER_TYPE"]["CLASS_NAME"], "onbeforesave"), array($arUserField, $value, $user_id));
 
-							if($value <> '')
+							if((string)$value <> '')
 							{
 								switch($arInsertType[$arUserField["ID"]]["BASE_TYPE"])
 								{
@@ -3094,31 +3176,51 @@ class CUserTypeManager
 
 		if(is_callable(array($arUserField['USER_TYPE']['CLASS_NAME'], 'getEntityField')))
 		{
-			return call_user_func(array($arUserField['USER_TYPE']['CLASS_NAME'], 'getEntityField'), $fieldName, $fieldParameters);
+			$field = call_user_func(array($arUserField['USER_TYPE']['CLASS_NAME'], 'getEntityField'), $fieldName, $fieldParameters);
+		}
+		elseif($arUserField['USER_TYPE']['USER_TYPE_ID'] == 'date')
+		{
+			$field = new Entity\DateField($fieldName, $fieldParameters);
+		}
+		else
+		{
+			switch($arUserField['USER_TYPE']['BASE_TYPE'])
+			{
+				case 'int':
+				case 'enum':
+				case 'file':
+					$field = (new Entity\IntegerField($fieldName, $fieldParameters))
+						->configureNullable();
+					break;
+				case 'double':
+					$field = (new Entity\FloatField($fieldName, $fieldParameters))
+						->configureNullable();
+					break;
+				case 'string':
+					$field = (new Entity\StringField($fieldName, $fieldParameters))
+						->configureNullable();
+					break;
+				case 'datetime':
+					$field = (new Entity\DatetimeField($fieldName, $fieldParameters))
+						->configureNullable()
+						->configureUseTimezone($arUserField['SETTINGS']['USE_TIMEZONE'] == 'Y');
+					break;
+				default:
+					throw new \Bitrix\Main\ArgumentException(sprintf(
+						'Unknown userfield base type `%s`', $arUserField["USER_TYPE"]['BASE_TYPE']
+					));
+			}
 		}
 
-		if($arUserField['USER_TYPE']['USER_TYPE_ID'] == 'date')
+		$ufHandlerClass = $arUserField['USER_TYPE']['CLASS_NAME'];
+
+		if (is_subclass_of($ufHandlerClass, BaseType::class))
 		{
-			return new Entity\DateField($fieldName, $fieldParameters);
+			$defaultValue = $ufHandlerClass::getDefaultValue($arUserField);
+			$field->configureDefaultValue($defaultValue);
 		}
 
-		switch($arUserField['USER_TYPE']['BASE_TYPE'])
-		{
-			case 'int':
-			case 'enum':
-			case 'file':
-				return new Entity\IntegerField($fieldName, $fieldParameters);
-			case 'double':
-				return new Entity\FloatField($fieldName, $fieldParameters);
-			case 'string':
-				return new Entity\StringField($fieldName, $fieldParameters);
-			case 'datetime':
-				return new Entity\DatetimeField($fieldName, $fieldParameters);
-			default:
-				throw new \Bitrix\Main\ArgumentException(sprintf(
-					'Unknown userfield base type `%s`', $arUserField["USER_TYPE"]['BASE_TYPE']
-				));
-		}
+		return $field;
 	}
 
 	/**
@@ -3426,7 +3528,7 @@ class CUserFieldEnum
 		$salt = RandString(8);
 		foreach($values as $key => $value)
 		{
-			if(strncmp($key, "n", 1) === 0 && $value["DEL"] != "Y" && $value["VALUE"] <> '')
+			if(strncmp($key, "n", 1) === 0 && $value["DEL"] != "Y" && (string)$value["VALUE"] <> '')
 			{
 				if($value["XML_ID"] == '')
 				{
@@ -3462,7 +3564,7 @@ class CUserFieldEnum
 			if(array_key_exists($arEnum["ID"], $values))
 			{
 				$value = $values[$arEnum["ID"]];
-				if($value["VALUE"] == '' || $value["DEL"] == "Y")
+				if((string)$value["VALUE"] == '' || $value["DEL"] == "Y")
 				{
 				}
 				elseif(
@@ -3513,7 +3615,7 @@ class CUserFieldEnum
 
 		foreach($values as $key => $value)
 		{
-			if(strncmp($key, "n", 1) === 0 && $value["DEL"] != "Y" && $value["VALUE"] <> '')
+			if(strncmp($key, "n", 1) === 0 && $value["DEL"] != "Y" && (string)$value["VALUE"] <> '')
 			{
 				if($value["XML_ID"] == '')
 					$value["XML_ID"] = md5($value["VALUE"]);
@@ -3534,7 +3636,7 @@ class CUserFieldEnum
 			if(array_key_exists($arEnum["ID"], $values))
 			{
 				$value = $values[$arEnum["ID"]];
-				if($value["VALUE"] == '' || $value["DEL"] == "Y")
+				if((string)$value["VALUE"] == '' || $value["DEL"] == "Y")
 				{
 					$DB->Query("DELETE FROM b_user_field_enum WHERE ID = " . $arEnum["ID"], false, "FILE: " . __FILE__ . "<br>LINE: " . __LINE__);
 				}
@@ -3562,7 +3664,7 @@ class CUserFieldEnum
 		return true;
 	}
 
-	function GetList($aSort = array(), $aFilter = array())
+	public static function GetList($aSort = array(), $aFilter = array())
 	{
 		global $DB, $CACHE_MANAGER;
 
@@ -3595,7 +3697,7 @@ class CUserFieldEnum
 			}
 			else
 			{
-				if($val == '')
+				if((string)$val == '')
 					continue;
 				$val = "('" . $DB->ForSql($val) . "')";
 			}

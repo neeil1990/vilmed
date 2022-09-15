@@ -11,13 +11,14 @@ use Bitrix\Main\Application;
 use Bitrix\Main\Error;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Type\DateTime;
-use Bitrix\Sender\ContactTable;
-use Bitrix\Sender\GroupDealCategoryTable;
-use Bitrix\Sender\ListTable;
-use Bitrix\Sender\GroupTable;
-use Bitrix\Sender\GroupConnectorTable;
 use Bitrix\Sender\Connector;
+use Bitrix\Sender\ContactTable;
+use Bitrix\Sender\GroupConnectorTable;
+use Bitrix\Sender\GroupDealCategoryTable;
+use Bitrix\Sender\GroupTable;
 use Bitrix\Sender\Internals\Model\GroupCounterTable;
+use Bitrix\Sender\ListTable;
+use Bitrix\Sender\Posting\SegmentDataBuilder;
 
 Loc::loadMessages(__FILE__);
 
@@ -114,6 +115,7 @@ class Segment extends Base
 				continue;
 			}
 
+			$groupConnector['ENDPOINT']['FILTER_ID'] = $groupConnector['FILTER_ID'];
 			$data['ENDPOINTS'][] = $groupConnector['ENDPOINT'];
 		}
 
@@ -132,10 +134,9 @@ class Segment extends Base
 		$endpoints = $data['ENDPOINTS'];
 		unset($data['ENDPOINTS']);
 
-		if(!is_array($endpoints) || count($endpoints) == 0)
+		if (!$id)
 		{
-			$this->addError(Loc::getMessage('SENDER_ENTITY_SEGMENT_ERROR_NO_FILTERS'));
-			return $id;
+			$data['STATUS'] = GroupTable::STATUS_DONE;
 		}
 
 		$id = $this->saveByEntity(GroupTable::getEntity(), $id, $data);
@@ -146,45 +147,60 @@ class Segment extends Base
 
 		$dataCounters = array();
 		GroupConnectorTable::delete(array('GROUP_ID' => $id));
-		foreach ($endpoints as $endpoint)
+
+		if ($endpoints)
 		{
-			$connector = Connector\Manager::getConnector($endpoint);
-			if (!$connector)
+			foreach ($endpoints as $endpoint)
 			{
-				continue;
+				$connector = Connector\Manager::getConnector($endpoint);
+				if (!$connector)
+				{
+					continue;
+				}
+
+				if ($this->isFilterOnly() && !($connector instanceof Connector\BaseFilter))
+				{
+					continue;
+				}
+
+				$connector->setFieldValues($endpoint['FIELDS']);
+				$endpoint['FIELDS'] = $connector->getFieldValues();
+				$statFields = $connector->getStatFields();
+
+				foreach (array_intersect($statFields, array_keys($endpoint['FIELDS'])) as $field)
+				{
+					\Bitrix\Sender\Log::stat('segment_field', $field, $id);
+				}
+				$isIncrementally = $connector instanceof Connector\IncrementallyConnector;
+
+				$dataCounter = $isIncrementally
+					? new Connector\DataCounter([])
+					: $connector->getDataCounter();
+
+				$groupConnector = array(
+					'GROUP_ID' => $id,
+					'NAME' => $connector->getName(),
+					'ENDPOINT' => $endpoint,
+					'ADDRESS_COUNT' => $dataCounter->getSummary()
+				);
+
+				if($endpoint['FILTER_ID'])
+				{
+					$groupConnector['FILTER_ID'] = $endpoint['FILTER_ID'];
+				}
+
+				$connectorResultDb = GroupConnectorTable::add($groupConnector);
+				if($connectorResultDb->isSuccess())
+				{
+					$dataCounters[] = $dataCounter;
+				}
+
+				$this->updateDealCategory($id, $connector);
 			}
 
-			if ($this->isFilterOnly() && !($connector instanceof Connector\BaseFilter))
-			{
-				continue;
-			}
-
-			$connector->setFieldValues($endpoint['FIELDS']);
-			$endpoint['FIELDS'] = $connector->getFieldValues();
-			$statFields = $connector->getStatFields();
-
-			foreach (array_intersect($statFields, array_keys($endpoint['FIELDS'])) as $field)
-			{
-				\Bitrix\Sender\Log::stat('segment_field', $field, $id);
-			}
-
-			$groupConnector = array(
-				'GROUP_ID' => $id,
-				'NAME' => $connector->getName(),
-				'ENDPOINT' => $endpoint,
-				'ADDRESS_COUNT' => $connector->getDataCounter()->getSummary()
-			);
-
-			$connectorResultDb = GroupConnectorTable::add($groupConnector);
-			if($connectorResultDb->isSuccess())
-			{
-				$dataCounters[] = $connector->getDataCounter();
-			}
-
-			$this->updateDealCategory($id, $connector);
+			SegmentDataBuilder::checkIsSegmentPrepared($id);
+			$this->updateAddressCounters($id, $dataCounters);
 		}
-
-		$this->updateAddressCounters($id, $dataCounters);
 
 		return $id;
 	}
@@ -199,7 +215,7 @@ class Segment extends Base
 			{
 				continue;
 			}
-			GroupDealCategoryTable::delete(array('GROUP_ID' => $groupId));
+			GroupDealCategoryTable::deleteList(array('GROUP_ID' => $groupId));
 
 			foreach ($fieldValue as $dealCategory)
 			{

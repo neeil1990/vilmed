@@ -1,9 +1,7 @@
 (function (exports,main_core,catalog_entityCard,main_core_events) {
 	'use strict';
 
-	var VariationCard =
-	/*#__PURE__*/
-	function (_EntityCard) {
+	var VariationCard = /*#__PURE__*/function (_EntityCard) {
 	  babelHelpers.inherits(VariationCard, _EntityCard);
 
 	  function VariationCard(id) {
@@ -12,7 +10,9 @@
 	    var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	    babelHelpers.classCallCheck(this, VariationCard);
 	    _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(VariationCard).call(this, id, settings));
-	    main_core_events.EventEmitter.subscribe('BX.UI.EntityEditorSection:onLayout', _this.onSectionLayout.bind(babelHelpers.assertThisInitialized(_this)));
+	    main_core_events.EventEmitter.subscribe('BX.Grid.SettingsWindow:save', function () {
+	      return _this.postSliderMessage('onUpdate', {});
+	    });
 	    return _this;
 	  }
 
@@ -27,11 +27,10 @@
 	      var _event$getCompatData = event.getCompatData(),
 	          _event$getCompatData2 = babelHelpers.slicedToArray(_event$getCompatData, 2),
 	          eventData = _event$getCompatData2[1];
-	      /*if (eventData.id === 'catalog_parameters')
-	      {
-	      	eventData.visible = this.isCardSettingEnabled('CATALOG_PARAMETERS');
-	      }*/
 
+	      if (eventData.id === 'catalog_parameters') {
+	        eventData.visible = this.isCardSettingEnabled('CATALOG_PARAMETERS');
+	      }
 	    }
 	  }]);
 	  return VariationCard;

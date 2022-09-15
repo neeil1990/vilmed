@@ -64,7 +64,7 @@ class LandingSiteDomainComponent extends LandingBaseComponent
 		{
 			return false;
 		}
-		$registrator = \Bitrix\Landing\Domain\Register::getInstance();
+		$registrator = Register::getInstance();
 		if ($registrator->registrationDomain($param, ['CNAME' => $this->arResult['CNAME']]))
 		{
 			$result = $this->actionSavePrivate($param);
@@ -99,7 +99,7 @@ class LandingSiteDomainComponent extends LandingBaseComponent
 	 * @param string $siteId Site id.
 	 * @return bool
 	 */
-	protected function actionSwitch(string $siteId): bool
+	protected function actionSwitchToThis(string $siteId): bool
 	{
 		$siteId = intval($siteId);
 		if ($this->checkAccess())
@@ -127,7 +127,7 @@ class LandingSiteDomainComponent extends LandingBaseComponent
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -166,25 +166,9 @@ class LandingSiteDomainComponent extends LandingBaseComponent
 	 */
 	protected function getPostFix(): string
 	{
-		$zone = Manager::getZone();
-		$postfix = '.bitrix24.site';
-
-		if ($this->arParams['TYPE'] == 'STORE')
-		{
-			$postfix = ($zone == 'by')
-				? '.bitrix24shop.by'
-				: '.bitrix24.shop';
-		}
-		else if ($zone == 'by')
-		{
-			$postfix = '.bitrix24site.by';
-		}
-		else if ($zone == 'ua')
-		{
-			$postfix = '.bitrix24site.ua';
-		}
-
-		return $postfix;
+		return Domain::getBitrix24Postfix(
+			$this->arParams['TYPE']
+		);
 	}
 
 	/**
@@ -266,6 +250,7 @@ class LandingSiteDomainComponent extends LandingBaseComponent
 		{
 			$this->arResult['REGISTER'] = Register::getInstance();
 			$this->arResult['TLD'] = $this->arResult['REGISTER']->getTld();
+			$this->arResult['AGREEMENTS_URL'] = $this->arResult['REGISTER']->getAgreementURL();
 			$this->arResult['DOMAIN_PROVIDER'] = $currentSite['DOMAIN_PROVIDER'];
 			$this->arResult['~DOMAIN_NAME'] = $currentSite['DOMAIN_NAME'];
 			$this->arResult['DOMAIN_NAME'] = $puny->decode($currentSite['DOMAIN_NAME']);

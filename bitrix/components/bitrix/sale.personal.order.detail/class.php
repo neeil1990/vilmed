@@ -548,6 +548,7 @@ class CBitrixPersonalOrderDetailComponent extends CBitrixComponent
 
 			$basketValues['FORMATED_SUM'] = SaleFormatCurrency($basketValues["PRICE"] * $basketValues['QUANTITY'], $basketValues["CURRENCY"]);
 			$basketValues['FORMATED_BASE_SUM'] = SaleFormatCurrency($basketValues["BASE_PRICE"] * $basketValues['QUANTITY'], $basketValues["CURRENCY"]);
+			$basketValues['FORMATED_DISCOUNT_SUM'] = SaleFormatCurrency($basketValues["BASE_PRICE"] * $basketValues['QUANTITY'] - $basketValues["PRICE"] * $basketValues['QUANTITY'], $basketValues["CURRENCY"]);
 
 			$basket[$basketValues['ID']] = $basketValues;
 		}
@@ -688,16 +689,9 @@ class CBitrixPersonalOrderDetailComponent extends CBitrixComponent
 				}
 
 				// resampling picture
-				if(intval($item["DETAIL_PICTURE"]))
-				{
-					$pict = $item["DETAIL_PICTURE"];
-				}
-				else
-				{
-					$pict = $item["PREVIEW_PICTURE"];
-				}
+				$pict = $this->getPictureId($item);
 
-				if($pict)
+				if ($pict)
 				{
 					$arImage = CFile::GetFileArray($pict);
 					if ($arImage && ($this->arParams['PICTURE_WIDTH'] || $this->arParams['PICTURE_HEIGHT']))
@@ -718,6 +712,26 @@ class CBitrixPersonalOrderDetailComponent extends CBitrixComponent
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param $item
+	 * @return int
+	 */
+	protected function getPictureId($item): int
+	{
+		$result = 0;
+
+		if ((int)$item['DETAIL_PICTURE'] > 0)
+		{
+			$result = $item['DETAIL_PICTURE'];
+		}
+		elseif ((int)$item['PREVIEW_PICTURE'] > 0)
+		{
+			$result = $item['PREVIEW_PICTURE'];
+		}
+
+		return (int)$result;
 	}
 
 	/**
@@ -1464,7 +1478,7 @@ class CBitrixPersonalOrderDetailComponent extends CBitrixComponent
 				$payment["PAY_SYSTEM"]['NAME'] = htmlspecialcharsbx($payment["PAY_SYSTEM"]['NAME']);
 				$payment["PAY_SYSTEM"]["SRC_LOGOTIP"] = CFile::GetPath($payment["PAY_SYSTEM"]['LOGOTIP']);
 			}
-			if ($payment["PAID"] != "Y" && $this->dbResult["CANCELED"] != "Y" &&  $this->dbResult["ALLOW_PAY"] != "N")
+			if ($payment["PAID"] != "Y" && $this->dbResult["CANCELED"] != "Y" &&  $this->dbResult["IS_ALLOW_PAY"] != "N")
 			{
 				$payment['BUFFERED_OUTPUT'] = '';
 				$payment['ERROR'] = '';
@@ -1791,6 +1805,12 @@ class CBitrixPersonalOrderDetailComponent extends CBitrixComponent
 
 		$arResult["PRODUCT_SUM_FORMATED"] = SaleFormatCurrency($arResult["PRODUCT_SUM"], $arResult["CURRENCY"]);
 		$arResult["BASE_PRODUCT_SUM_FORMATED"] = SaleFormatCurrency($arResult["BASE_PRODUCT_SUM"], $arResult["CURRENCY"]);
+		$arResult["PRODUCT_SUM_DISCOUNT_FORMATED"] = '';
+		$discountSum = $arResult["BASE_PRODUCT_SUM"] - $arResult["PRODUCT_SUM"];
+		if ($discountSum > 0)
+		{
+			$arResult["PRODUCT_SUM_DISCOUNT_FORMATED"] = SaleFormatCurrency($discountSum, $arResult["CURRENCY"]);
+		}
 
 		$arResult["PRICE_DELIVERY_FORMATED"] = SaleFormatCurrency($arResult['PRICE_DELIVERY'], $arResult["CURRENCY"]);
 		foreach ($arResult['PAYMENT'] as &$payment)

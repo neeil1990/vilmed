@@ -1,7 +1,15 @@
 <?php
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
+{
+	die();
+}
+
 /**
  * @var $component \CatalogProductVariationGridComponent
  * @var $this \CBitrixComponentTemplate
+ * @var \CMain $APPLICATION
+ * @var array $arParams
+ * @var array $arResult
  */
 
 use Bitrix\Main\Localization\Loc;
@@ -16,27 +24,29 @@ Extension::load([
 	'ui.hint',
 ]);
 
-if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
-{
-	die();
-}
-
 $containerId = 'catalog_variation_grid';
 $createPropertyId = $containerId.'_create_property';
 $createPropertyHintId = $createPropertyId.'_hint';
+
+$isProduct = $arParams['VARIATION_ID_LIST'] === null;
 ?>
 <div class="catalog-variation-grid" id="<?=$containerId?>">
 	<div class="catalog-variation-grid-content">
 		<?php
-		$disabledClass = $arResult['CAN_HAVE_SKU'] ? '' : ' ui-btn-disabled';
+		if ($isProduct)
+		{
+			$disabledClass = $arResult['CAN_HAVE_SKU'] ? '' : ' ui-btn-disabled';
+			?>
+			<div class="catalog-variation-grid-add-block">
+				<a class="ui-btn ui-btn-sm ui-btn-light catalog-variation-grid-add-btn<?=$disabledClass?>"
+						data-role="catalog-productcard-variation-add-row"
+						tabindex="-1">
+					<?=Loc::getMessage('C_PVG_CREATE_VARIATION')?>
+				</a>
+			</div>
+			<?php
+		}
 		?>
-		<div class="catalog-variation-grid-add-block">
-			<a class="ui-btn ui-btn-sm ui-btn-light catalog-variation-grid-add-btn<?=$disabledClass?>"
-					data-role="catalog-productcard-variation-add-row"
-					tabindex="-1">
-				<?=Loc::getMessage('C_PVG_CREATE_VARIATION')?>
-			</a>
-		</div>
 		<?php
 		$APPLICATION->IncludeComponent(
 			'bitrix:main.ui.grid',
@@ -57,32 +67,33 @@ $createPropertyHintId = $createPropertyId.'_hint';
 				// 'TOTAL_ROWS_COUNT' => $arResult['GRID']['TOTAL_ROWS_COUNT'],
 
 				'ADVANCED_EDIT_MODE' => true,
-				'SHOW_CHECK_ALL_CHECKBOXES' => $arResult['GRID']['SHOW_CHECK_ALL_CHECKBOXES'],
+				'SHOW_CHECK_ALL_CHECKBOXES' => $isProduct ? $arResult['GRID']['SHOW_CHECK_ALL_CHECKBOXES'] : false,
 				'SHOW_ROW_CHECKBOXES' => $arResult['GRID']['SHOW_ROW_CHECKBOXES'],
-				'SHOW_ROW_ACTIONS_MENU' => $arResult['GRID']['SHOW_ROW_ACTIONS_MENU'],
+				'SHOW_ROW_ACTIONS_MENU' => $isProduct ? $arResult['GRID']['SHOW_ROW_ACTIONS_MENU'] : false,
 				'SHOW_GRID_SETTINGS_MENU' => $arResult['GRID']['SHOW_GRID_SETTINGS_MENU'],
-				'SHOW_NAVIGATION_PANEL' => $arResult['GRID']['SHOW_NAVIGATION_PANEL'],
+				'SHOW_NAVIGATION_PANEL' => $isProduct ? $arResult['GRID']['SHOW_NAVIGATION_PANEL'] : false,
 				'SHOW_PAGINATION' => $arResult['GRID']['SHOW_PAGINATION'],
 				'SHOW_SELECTED_COUNTER' => $arResult['GRID']['SHOW_SELECTED_COUNTER'],
 				'SHOW_TOTAL_COUNTER' => $arResult['GRID']['SHOW_TOTAL_COUNTER'],
 				'TOTAL_ROWS_COUNT' => is_array($arResult['GRID']['ROWS']) ? count($arResult['GRID']['ROWS']) : 0,
 				'SHOW_PAGESIZE' => $arResult['GRID']['SHOW_PAGESIZE'],
 
-				'SHOW_ACTION_PANEL' => $arResult['GRID']['SHOW_ACTION_PANEL'],
-				'ACTION_PANEL' => $arResult['GRID']['ACTION_PANEL'],
+				'SHOW_ACTION_PANEL' => $isProduct ? $arResult['GRID']['SHOW_ACTION_PANEL'] : false,
+				'ACTION_PANEL' => $isProduct ? $arResult['GRID']['ACTION_PANEL'] : false,
+				'HANDLE_RESPONSE_ERRORS' => true,
 			],
 			$component
 		);
 		?>
 	</div>
 	<?php
-	if ($arResult['CAN_HAVE_SKU'])
+	if ($arResult['CAN_HAVE_SKU'] && $isProduct)
 	{
 		?>
 		<div class="catalog-variation-grid-link">
 			<a class="ui-link ui-link-secondary ui-link-dashed" id="<?=$createPropertyId?>"
 			><?=Loc::getMessage('C_PVG_CREATE_VARIATION_PROPERTY')?></a>
-			<a href="<?=Util::getArticleUrlByCode('11657102')?>"
+			<a href="<?=Util::getArticleUrlByCode('13274510')?>"
 					class="ui-hint-icon"
 					id="<?=$createPropertyHintId?>"></a>
 		</div>
@@ -103,6 +114,10 @@ $createPropertyHintId = $createPropertyId.'_hint';
 			'modifyPropertyLink' => $arResult['PROPERTY_MODIFY_LINK'],
 			'gridEditData' => $arResult['GRID']['EDIT_DATA'],
 			'canHaveSku' => $arResult['CAN_HAVE_SKU'],
+			'copyItemsMap' => $arResult['COPY_ITEM_MAP'] ?? null,
+			'storeAmount' => $arResult['STORE_AMOUNT'],
+			'isShowedStoreReserve' => $arResult['IS_SHOWED_STORE_RESERVE'],
+			'reservedDealsSliderLink' => $arResult['RESERVED_DEALS_SLIDER_LINK'],
 		])?>);
 	});
 </script>

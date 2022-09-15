@@ -192,7 +192,7 @@ class CSVUserImport
 		if (!$dbRes->Fetch())
 		{
 			$arLabelNames = Array();
-			$rsLanguage = CLanguage::GetList($by, $order, array());
+			$rsLanguage = CLanguage::GetList();
 			while($arLanguage = $rsLanguage->Fetch())
 			{
 				IncludeModuleLangFile($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/csv_user_import_labels.php", $arLanguage["LID"]);
@@ -316,7 +316,7 @@ class CSVUserImport
 			$arFields["EMAIL"] = $defaultEmail;
 
 		if (!array_key_exists("LOGIN", $arFields))
-			$arFields["LOGIN"] = ToLower($arFields["NAME"]." ".$arFields["LAST_NAME"]);
+			$arFields["LOGIN"] = mb_strtolower($arFields["NAME"]." ".$arFields["LAST_NAME"]);
 
 		if (array_key_exists("PERSONAL_BIRTHDAY", $arFields) && (mb_strlen($arFields["PERSONAL_BIRTHDAY"]) < 2 || !CheckDateTime($arFields["PERSONAL_BIRTHDAY"])))
 			unset($arFields["PERSONAL_BIRTHDAY"]);

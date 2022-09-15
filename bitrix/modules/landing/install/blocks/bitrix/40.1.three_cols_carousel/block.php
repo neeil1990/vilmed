@@ -38,7 +38,7 @@
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/695x1135/img1.jpg" alt="">
 					</figure>
 
-					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-color-white g-pa-30">
+					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-pa-30">
 						<div>
 							<span class="landing-block-node-card-icon-container g-color-primary g-font-size-22 g-mr-10">
 								<i class="landing-block-node-card-icon fa fa-calendar"></i>
@@ -47,15 +47,15 @@
 								<p>Duration, 3 Months.</p>
 							</div>
 						</div>
-						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-mb-10">
+						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-color-white g-mb-10">
 							Dance courses
 						</h2>
 						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-color-white-opacity-0_8 g-mb-30">
 							<p>Curabitur eget tortor sed urna
-								faucibus iaculis id et nulla.</p>
+								faucibus iaculis id et nulla sed fringilla quam.</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary g-bg-transparent--hover rounded-0 g-py-15"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary rounded-0"
 							   href="#">Learn More</a>
 						</div>
 					</header>
@@ -71,7 +71,7 @@
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/695x1135/img2.jpg" alt="">
 					</figure>
 
-					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-color-white g-pa-30">
+					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-pa-30">
 						<div>
 							<span class="landing-block-node-card-icon-container g-color-primary g-font-size-22 g-mr-10">
 								<i class="landing-block-node-card-icon fa fa-calendar"></i>
@@ -80,15 +80,15 @@
 								<p>Duration, 4 Months.</p>
 							</div>
 						</div>
-						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-mb-10">
+						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-color-white g-mb-10">
 							Creative photos
 						</h2>
 						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-color-white-opacity-0_8 g-mb-30">
 							<p>Curabitur eget tortor sed urna
-								faucibus iaculis id et nulla.</p>
+								faucibus iaculis id et nulla sed fringilla quam.</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary g-bg-transparent--hover rounded-0 g-py-15"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary rounded-0"
 							   href="#">Learn More</a>
 						</div>
 					</header>
@@ -104,7 +104,7 @@
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/695x1135/img3.jpg" alt="">
 					</figure>
 
-					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-color-white g-pa-30">
+					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-pa-30">
 						<div>
 							<span class="landing-block-node-card-icon-container g-color-primary g-font-size-22 g-mr-10">
 								<i class="landing-block-node-card-icon fa fa-calendar"></i>
@@ -113,15 +113,15 @@
 								<p>Duration, 10 Months.</p>
 							</div>
 						</div>
-						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-mb-10">
+						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-color-white g-mb-10">
 							Art for all
 						</h2>
 						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-color-white-opacity-0_8 g-mb-30">
 							<p>Curabitur eget tortor sed urna
-								faucibus iaculis id et nulla.</p>
+								faucibus iaculis id et nulla sed fringilla quam.</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary g-bg-transparent--hover rounded-0 g-py-15"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary rounded-0"
 							   href="#">Learn More</a>
 						</div>
 					</header>
@@ -137,7 +137,7 @@
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/695x1135/img4.jpg" alt="">
 					</figure>
 
-					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-color-white g-pa-30">
+					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-pa-30">
 						<div>
 							<span class="landing-block-node-card-icon-container g-color-primary g-font-size-22 g-mr-10">
 								<i class="landing-block-node-card-icon fa fa-calendar"></i>
@@ -146,15 +146,15 @@
 								<p>Duration, 8 Months.</p>
 							</div>
 						</div>
-						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-mb-10">
+						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-color-white g-mb-10">
 							Painting
 						</h2>
 						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-color-white-opacity-0_8 g-mb-30">
 							<p>Curabitur eget tortor sed urna
-								faucibus iaculis id et nulla.</p>
+								faucibus iaculis id et nulla sed fringilla quam.</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary g-bg-transparent--hover rounded-0 g-py-15"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary rounded-0"
 							   href="#">Learn More</a>
 						</div>
 					</header>
@@ -170,7 +170,7 @@
 							 src="https://cdn.bitrix24.site/bitrix/images/landing/business/695x1135/img5.jpg" alt="">
 					</figure>
 
-					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-color-white g-pa-30">
+					<header class="g-pos-abs g-bottom-0 g-left-0 w-100 g-pa-30">
 						<div>
 							<span class="landing-block-node-card-icon-container g-color-primary g-font-size-22 g-mr-10">
 								<i class="landing-block-node-card-icon fa fa-calendar"></i>
@@ -179,15 +179,15 @@
 								<p>Duration, 7 Months.</p>
 							</div>
 						</div>
-						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-mb-10">
+						<h2 class="landing-block-node-card-title landing-semantic-title-image-small text-uppercase g-line-height-1 g-font-weight-700 g-font-size-40 g-color-white g-mb-10">
 							Courses for elderly
 						</h2>
 						<div class="landing-block-node-card-text landing-semantic-text-image-medium g-color-white-opacity-0_8 g-mb-30">
 							<p>Curabitur eget tortor sed urna
-								faucibus iaculis id et nulla.</p>
+								faucibus iaculis id et nulla sed fringilla quam.</p>
 						</div>
 						<div class="landing-block-node-card-button-container">
-							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary g-bg-transparent--hover rounded-0 g-py-15"
+							<a class="landing-block-node-card-button landing-semantic-link-image-medium btn g-btn-type-solid g-btn-size-sm g-btn-px-l text-uppercase g-btn-primary rounded-0"
 							   href="#">Learn More</a>
 						</div>
 					</header>

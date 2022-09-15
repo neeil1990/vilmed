@@ -11,7 +11,7 @@ class CDataXMLNode
 	var $name;
 	var $content;
 	/** @var CDataXMLNode[] */
-	var $children;
+	var $children = [];
 	/** @var CDataXMLNode[] */
 	var $attributes;
 	var $_parent;
@@ -136,7 +136,7 @@ class CDataXMLNode
 		return $result;
 	}
 
-	function &__toString()
+	function __toString()
 	{
 		switch ($this->name)
 		{
@@ -349,9 +349,6 @@ class CDataXML
 
 	function Load($file)
 	{
-		/** @global CMain $APPLICATION */
-		global $APPLICATION;
-
 		unset($this->tree);
 		$this->tree = False;
 
@@ -363,7 +360,7 @@ class CDataXML
 			{
 				$charset = trim($matches[1]);
 			}
-			$content = $APPLICATION->ConvertCharset($content, $charset, SITE_CHARSET);
+			$content = \Bitrix\Main\Text\Encoding::convertEncoding($content, $charset, SITE_CHARSET);
 			$this->tree = &$this->__parse($content);
 			return $this->tree !== false;
 		}

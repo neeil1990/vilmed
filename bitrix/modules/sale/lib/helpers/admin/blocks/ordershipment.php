@@ -146,9 +146,6 @@ class OrderShipment
 			$title = Loc::getMessage('SALE_ORDER_SHIPMENT_BLOCK_NEW_SHIPMENT_TITLE');
 		}
 
-		$curFormat = \CCurrencyLang::GetFormatDescription($data['CURRENCY']);
-		$currencyLang = preg_replace("/(^|[^&])#/", '$1', $curFormat["FORMAT_STRING"]);
-
 		$customPriceDelivery = isset($post['CUSTOM_PRICE_DELIVERY']) ? htmlspecialcharsbx($post['CUSTOM_PRICE_DELIVERY']) : $data['CUSTOM_PRICE_DELIVERY'];
 		$customWeightDelivery = isset($post['CUSTOM_WEIGHT_DELIVERY']) ? htmlspecialcharsbx($post['CUSTOM_WEIGHT_DELIVERY']) : $data['CUSTOM_WEIGHT_DELIVERY'];
 
@@ -257,7 +254,7 @@ class OrderShipment
 				$checkLink .= OrderShipment::buildCheckHtml($data['CHECK']);
 			}
 			$checkLink .= '</td></tr>';
-			if ($data['HAS_ENABLED_CASHBOX'] === 'Y')
+			if ($data['HAS_ENABLED_CASHBOX'] === 'Y' && $data['CAN_PRINT_CHECK'] === 'Y')
 			{
 				$checkLink .= '<tr><td class="adm-detail-content-cell-r tac"><a href="javascript:void(0);" onclick="BX.Sale.Admin.OrderShipment.prototype.showCreateCheckWindow('.$data['ID'].');">'.Loc::getMessage('SALE_ORDER_SHIPMENT_CHECK_ADD').'</a></td></tr>';
 			}
@@ -311,7 +308,12 @@ class OrderShipment
 									<tbody>
 										<tr style="display: none;">
 											<td class="adm-detail-content-cell-l" width="40%">'.Loc::getMessage('SALE_ORDER_SHIPMENT_DELIVERY_SUM_PRICE').':</td>
-											<td class="adm-detail-content-cell-r tal"><span id="BASE_PRICE_DELIVERY_T_'.$index.'">'.$basePriceDelivery.'</span> '.htmlspecialcharsbx($currencyLang).'<br></td>
+											<td class="adm-detail-content-cell-r tal">'
+											.\CCurrencyLang::getPriceControl(
+												'<span id="BASE_PRICE_DELIVERY_T_'.$index.'">'.$basePriceDelivery.'</span>',
+												$data['CURRENCY']
+											)
+											. '<br></td>
 										</tr>
 										<tr id="sale-order-shipment-discounts-row-'.$index.'" style="display: none;">
 											<td class="adm-detail-content-cell-l" width="40%">'.Loc::getMessage('SALE_ORDER_SHIPMENT_DISCOUNT').':</td>
@@ -319,7 +321,12 @@ class OrderShipment
 										</tr>
 										<tr>
 											<td class="adm-detail-content-cell-l" width="40%">'.Loc::getMessage('SALE_ORDER_SHIPMENT_DELIVERY_SUM_DISCOUNT_PRICE').':</td>
-											<td class="adm-detail-content-cell-r tal"><input type="text" class="adm-bus-input-price" name="SHIPMENT['.$index.'][PRICE_DELIVERY]" id="PRICE_DELIVERY_'.$index.'" value="'.$priceDelivery.'"> '.htmlspecialcharsbx($currencyLang).'</td>
+											<td class="adm-detail-content-cell-r tal">'
+											.\CCurrencyLang::getPriceControl(
+											'<input type="text" class="adm-bus-input-price" name="SHIPMENT['.$index.'][PRICE_DELIVERY]" id="PRICE_DELIVERY_'.$index.'" value="'.$priceDelivery.'">',
+												$data['CURRENCY']
+											)
+											.'</td>
 										</tr>
 									</tbody>
 								</table>
@@ -330,7 +337,10 @@ class OrderShipment
 									<tbody>
 										<tr>
 											<td class="adm-detail-content-cell-l" width="40%">'.Loc::getMessage('SALE_ORDER_SHIPMENT_DELIVERY_WEIGHT').':</td>
-											<td class="adm-detail-content-cell-r tal"><input type="text" class="adm-bus-input-price" name="SHIPMENT['.$index.'][WEIGHT]" id="WEIGHT_DELIVERY_'.$index.'" value="'.$weight.'"> '.$weightMeasureUnits.'</td>
+											<td class="adm-detail-content-cell-r tal">
+												<input type="text" class="adm-bus-input-price" name="SHIPMENT['.$index.'][WEIGHT]" id="WEIGHT_DELIVERY_'.$index.'" value="'.$weight.'"> '.$weightMeasureUnits.'
+												<span id="UPDATE_DELIVERY_INFO_'.$index.'" class="new_delivery_price_button">'.Loc::getMessage('SALE_ORDER_SHIPMENT_RECALCULATE_DELIVERY_PRICE').'</span>
+											</td>
 										</tr>
 									</tbody>
 								</table>
@@ -529,6 +539,7 @@ class OrderShipment
 		$result .= self::initJsShipment($params);
 		return $result;
 	}
+
 	public static function getWeightUnit($siteId)
 	{
 		return htmlspecialcharsbx(Option::get('sale', 'weight_unit', "", $siteId));
@@ -546,7 +557,7 @@ class OrderShipment
 		return $weightKoef;
 	}
 
-	public function getImgDeliveryServiceList($items)
+	public static function getImgDeliveryServiceList($items)
 	{
 		$srcList = array();
 		foreach ($items as $item)
@@ -717,6 +728,7 @@ class OrderShipment
 
 		return $result;
 	}
+
 	/**
 	 * @param $shipment
 	 * @param int $index
@@ -1249,7 +1261,7 @@ class OrderShipment
 				$checkLink .= OrderShipment::buildCheckHtml($data['CHECK']);
 			}
 			$checkLink .= "</td></tr>";
-			if($formType != 'archive' && $data['HAS_ENABLED_CASHBOX'] === 'Y')
+			if($formType != 'archive' && $data['HAS_ENABLED_CASHBOX'] === 'Y' && $data['CAN_PRINT_CHECK'] === 'Y')
 			{
 				$checkLink .= '<tr><td class="adm-detail-content-cell-r tac"><a href="javascript:void(0);" onclick="BX.Sale.Admin.OrderShipment.prototype.showCreateCheckWindow('.$data['ID'].');">'.Loc::getMessage('SALE_ORDER_SHIPMENT_CHECK_ADD').'</a></td></tr>';
 			}
@@ -1268,7 +1280,7 @@ class OrderShipment
 				static::renderShipmentEditLink($data+['backurl'=>$backUrl]).
 				Loc::getMessage('SALE_ORDER_SHIPMENT_BLOCK_SHIPMENT_EDIT').'</a></div>';
 		}
-			
+
 		$weightView = roundEx(
 			floatval(
 				$data['WEIGHT']/self::getWeightKoef($data['SITE_ID'])
@@ -1580,7 +1592,7 @@ class OrderShipment
 		$checkLink = '';
 		if ($data['FFD_105_ENABLED'] === 'Y' &&
 			(
-				($formType != 'archive' && $data['HAS_ENABLED_CASHBOX'] === 'Y') ||
+				($formType != 'archive' && $data['HAS_ENABLED_CASHBOX'] === 'Y' && $data['CAN_PRINT_CHECK'] === 'Y') ||
 				!empty($data['CHECK'])
 			)
 		)
@@ -1592,7 +1604,7 @@ class OrderShipment
 				$checkLink .= OrderShipment::buildCheckHtml($data['CHECK']);
 			}
 			$checkLink .= "</div>";
-			if ($formType != 'archive' && $data['HAS_ENABLED_CASHBOX'] === 'Y')
+			if ($formType != 'archive' && $data['HAS_ENABLED_CASHBOX'] === 'Y' && $data['CAN_PRINT_CHECK'] === 'Y')
 			{
 				$checkLink .= '<div><a href="javascript:void(0);" onclick="BX.Sale.Admin.OrderShipment.prototype.showCreateCheckWindow('.$data['ID'].');">'.Loc::getMessage('SALE_ORDER_SHIPMENT_CHECK_ADD').'</a></div>';
 			}
@@ -1812,6 +1824,11 @@ class OrderShipment
 		$dbRes = CashboxTable::getList(array('filter' => array('=ACTIVE' => 'Y', '=ENABLED' => 'Y')));
 		$fields['HAS_ENABLED_CASHBOX'] = ($dbRes->fetch()) ? 'Y' : 'N';
 
+		$fields['CAN_PRINT_CHECK'] = 'Y';
+		if (Sale\Cashbox\Manager::isEnabledPaySystemPrint())
+		{
+			$fields['CAN_PRINT_CHECK'] = 'N';
+		}
 
 		$registry = Sale\Registry::getInstance(Sale\Registry::REGISTRY_TYPE_ORDER);
 		/** @var Sale\Order $orderClass */
@@ -1823,7 +1840,6 @@ class OrderShipment
 
 		return $fields;
 	}
-
 
 	private static function getDisallowFields()
 	{
@@ -1842,6 +1858,7 @@ class OrderShipment
 			'DELIVERY_ID',
 		);
 	}
+
 	/**
 	 * @param Order $order
 	 * @param array $shipments
@@ -1853,7 +1870,7 @@ class OrderShipment
 		global $USER, $APPLICATION;
 
 		$saleModulePermissions = $APPLICATION->GetGroupRight("sale");
-		
+
 		$result = new Result();
 		$data = array();
 		$basketResult = null;

@@ -108,7 +108,7 @@ $arParams["PAGER_TEMPLATE"] = trim($arParams["PAGER_TEMPLATE"]);
 $arParams["PAGER_DESC_NUMBERING"] = $arParams["PAGER_DESC_NUMBERING"]=="Y";
 $arParams["PAGER_DESC_NUMBERING_CACHE_TIME"] = intval($arParams["PAGER_DESC_NUMBERING_CACHE_TIME"]);
 $arParams["PAGER_SHOW_ALL"] = $arParams["PAGER_SHOW_ALL"]=="Y";
-$arParams["CHECK_PERMISSIONS"] = $arParams["CHECK_PERMISSIONS"]!="N";
+$arParams["CHECK_PERMISSIONS"] = ($arParams["CHECK_PERMISSIONS"] ?? '') != "N";
 
 if($arParams["DISPLAY_TOP_PAGER"] || $arParams["DISPLAY_BOTTOM_PAGER"])
 {
@@ -141,8 +141,8 @@ else
 		$pagerParameters = array();
 }
 
-$arParams["USE_PERMISSIONS"] = $arParams["USE_PERMISSIONS"]=="Y";
-if(!is_array($arParams["GROUP_PERMISSIONS"]))
+$arParams["USE_PERMISSIONS"] = ($arParams["USE_PERMISSIONS"] ?? '') == "Y";
+if(!is_array(($arParams["GROUP_PERMISSIONS"] ?? null)))
 	$arParams["GROUP_PERMISSIONS"] = array(1);
 
 $bUSER_HAVE_ACCESS = !$arParams["USE_PERMISSIONS"];
@@ -299,6 +299,7 @@ if($this->startResultCache(false, array(($arParams["CACHE_GROUPS"]==="N"? false:
 		}
 	}
 
+	$listPageUrl = '';
 	$arResult["ITEMS"] = array();
 	$arResult["ELEMENTS"] = array();
 	$rsElement = CIBlockElement::GetList($arSort, array_merge($arFilter , $arrFilter), false, $arNavParams, $shortSelect);
@@ -317,10 +318,14 @@ if($this->startResultCache(false, array(($arParams["CACHE_GROUPS"]==="N"? false:
 			"IBLOCK_LID" => SITE_ID,
 			"ID" => $arResult["ELEMENTS"]
 		);
+		if (isset($arrFilter['SHOW_NEW']))
+		{
+			$elementFilter['SHOW_NEW'] = $arrFilter['SHOW_NEW'];
+		}
 
 		$obParser = new CTextParser;
 		$iterator = CIBlockElement::GetList(array(), $elementFilter, false, false, $arSelect);
-		$iterator->SetUrlTemplates($arParams["DETAIL_URL"], "", $arParams["IBLOCK_URL"]);
+		$iterator->SetUrlTemplates($arParams["DETAIL_URL"], '', ($arParams["IBLOCK_URL"] ?? ''));
 		while ($arItem = $iterator->GetNext())
 		{
 			$arButtons = CIBlock::GetPanelButtons(
@@ -358,6 +363,11 @@ if($this->startResultCache(false, array(($arParams["CACHE_GROUPS"]==="N"? false:
 					|| $time->getTimestamp() > $arResult["ITEMS_TIMESTAMP_X"]->getTimestamp()
 				)
 					$arResult["ITEMS_TIMESTAMP_X"] = $time;
+			}
+
+			if ($listPageUrl === '' && isset($arItem['~LIST_PAGE_URL']))
+			{
+				$listPageUrl = $arItem['~LIST_PAGE_URL'];
 			}
 
 			$id = (int)$arItem["ID"];
@@ -427,10 +437,10 @@ if($this->startResultCache(false, array(($arParams["CACHE_GROUPS"]==="N"? false:
 				$pagerBaseLink = $arResult["SECTION"]["PATH"][0]["~SECTION_PAGE_URL"];
 			}
 			elseif (
-				isset($arItem) && isset($arItem["~LIST_PAGE_URL"])
+				$listPageUrl !== ''
 			)
 			{
-				$pagerBaseLink = $arItem["~LIST_PAGE_URL"];
+				$pagerBaseLink = $listPageUrl;
 			}
 		}
 

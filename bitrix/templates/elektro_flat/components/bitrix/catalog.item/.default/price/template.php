@@ -25,16 +25,13 @@ use \Bitrix\Main\Localization\Loc;?>
 				<?} else {?>
 					<img src="<?=SITE_TEMPLATE_PATH?>/images/no-photo.jpg" width="150" height="150" alt="<?=$strAlt?>" title="<?=$strTitle?>" />
 				<?}?>
-				<span class="sticker">
-					<?=$sticker?>
-				</span>
 			</a>
 		</div>
         </div>
 	<?//ITEM_TITLE//?>
 	<div class="catalog-item-title<?=$class?>">
 		<a href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>" itemprop="url">
-			<span itemprop="name"><?=$arElement['IPROPERTY_VALUES']['ELEMENT_PAGE_TITLE']?></span>
+			<span itemprop="name"><?=str_replace(['&amp;', 'amp;', 'quot;'], '', html_entity_decode($arElement['IPROPERTY_VALUES']['ELEMENT_PAGE_TITLE']))?></span>
 		</a>
 	</div>
 	<meta content="<?=strip_tags($arElement['PREVIEW_TEXT'])?>" itemprop="description" />

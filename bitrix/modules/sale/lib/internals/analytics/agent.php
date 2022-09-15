@@ -1,59 +1,48 @@
 <?php
 namespace Bitrix\Sale\Internals\Analytics;
 
-use Bitrix\Main\Type\Date,
-	Bitrix\Main\Type\DateTime,
-	Bitrix\Main\Config\Option,
-	Bitrix\Main\SystemException;
+use Bitrix\Main;
+use Bitrix\Sale;
 
 /**
  * Class Agent
  * @package Bitrix\Sale\Internals\Analytics
+ * @internal
  */
-abstract class Agent
+class Agent
 {
-	private const LAST_SEND_DATE = '~last_send_date_';
-	private const LAST_ATTEMPT_DATE = '~last_attempt_date_';
+	/** @var Main\Type\DateTime $date */
+	private static $date;
 
 	/**
-	 * @return string
-	 */
-	abstract protected static function getProviderCode(): string;
-
-	/**
-	 * @throws SystemException
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
-	 * @throws \Bitrix\Main\LoaderException
-	 * @throws \Bitrix\Main\ObjectException
+	 * Sends data
+	 *
+	 * @return void
 	 */
 	public static function send(): void
 	{
-		/** @var Provider $provider */
-		$provider = Factory::create(static::getProviderCode());
-		if ($provider === null)
+		self::$date = new Main\Type\DateTime();
+
+		foreach (self::getProviders() as $provider)
 		{
-			throw new SystemException('Failed to create provider');
+			$providerCode = $provider::getCode();
+			$payload = Storage::getPayloadByCode($providerCode, self::$date);
+
+			$sender = new Sender($providerCode, $payload);
+			if ($sender->send())
+			{
+				static::onSuccessfullySent($providerCode, self::$date);
+			}
 		}
 
-		$sender = new Sender($provider);
-		if ($sender->sendForPeriod(self::getLastSendDate(), self::getLastAttemptDate()))
-		{
-			$nextExecutionAgentDate = self::getSuccessNextExecutionAgentDate();
-			self::updateDate();
-		}
-		else
-		{
-			$nextExecutionAgentDate = self::getFailureNextExecutionAgentDate();
-		}
-
-		self::createAgent($nextExecutionAgentDate);
+		static::createAgent(static::getNextExecutionAgentDate());
 	}
 
 	/**
-	 * @param DateTime $nextExecutionAgentDate
+	 * @param Main\Type\DateTime $nextExecutionAgentDate
+	 * @return void
 	 */
-	protected static function createAgent(DateTime $nextExecutionAgentDate): void
+	protected static function createAgent(Main\Type\DateTime $nextExecutionAgentDate): void
 	{
 		\CAgent::Add([
 			'NAME' => '\\'.static::class.'::send();',
@@ -66,93 +55,50 @@ abstract class Agent
 	}
 
 	/**
-	 * @return DateTime
-	 * @throws \Bitrix\Main\ObjectException
+	 * @return Main\Type\DateTime
 	 */
-	private static function getSuccessNextExecutionAgentDate(): DateTime
+	protected static function getNextExecutionAgentDate(): Main\Type\DateTime
 	{
 		$date = new \DateTime();
 		$currentMonth = $date->format('n');
-		$date->modify('+1 week')->format(DateTime::getFormat());
+
+		$date->modify('+1 day');
 		$modifiedMonth = $date->format('n');
 
 		if ($modifiedMonth > $currentMonth)
 		{
-			$nextDate = $date->modify('first day of next month')->format(DateTime::getFormat());
+			$nextDate =
+				$date
+					->modify('first day of '.$date->format('F'))
+					->format(Main\Type\DateTime::getFormat())
+			;
 		}
 		else
 		{
-			$nextDate = $date->format(DateTime::getFormat());
+			$nextDate = $date->format(Main\Type\DateTime::getFormat());
 		}
 
-		return new DateTime($nextDate);
+		return new Main\Type\DateTime($nextDate);
 	}
 
 	/**
-	 * @return DateTime
-	 * @throws \Bitrix\Main\ObjectException
+	 * @return void
 	 */
-	private static function getFailureNextExecutionAgentDate(): DateTime
+	protected static function onSuccessfullySent(string $providerCode, Main\Type\DateTime $dateTo): void
 	{
-		$date = new \DateTime();
-		return new DateTime($date->modify('+1 hour')->format(DateTime::getFormat()));
+		Storage::clean($providerCode, $dateTo);
 	}
 
 	/**
-	 * @return DateTime
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
-	 * @throws \Bitrix\Main\ObjectException
+	 * @return Provider[]
 	 */
-	private static function getLastSendDate(): DateTime
+	private static function getProviders(): array
 	{
-		$optionName = self::LAST_SEND_DATE.static::getProviderCode();
-
-		$date = Option::get('sale', $optionName, null);
-		if ($date)
-		{
-			return new DateTime($date);
-		}
-
-		$date = (new \DateTime())->modify('first day of this month')->format(Date::getFormat().' 00:00:00');
-		$date = new DateTime($date);
-
-		Option::set('sale', $optionName, $date);
-		return $date;
-	}
-
-	/**
-	 * @return DateTime
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
-	 * @throws \Bitrix\Main\ObjectException
-	 */
-	private static function getLastAttemptDate(): DateTime
-	{
-		$optionName = self::LAST_ATTEMPT_DATE.static::getProviderCode();
-
-		$date = Option::get('sale', $optionName, null);
-		if ($date)
-		{
-			return new DateTime($date);
-		}
-
-		$date = (new \DateTime())->format(DateTime::getFormat());
-		$date = new DateTime($date);
-
-		Option::set('sale', $optionName, $date);
-		return $date;
-	}
-
-	/**
-	 * @throws \Bitrix\Main\ArgumentNullException
-	 * @throws \Bitrix\Main\ArgumentOutOfRangeException
-	 * @throws \Bitrix\Main\ObjectException
-	 */
-	private static function updateDate(): void
-	{
-		$lastAttemptDate = self::getLastAttemptDate();
-		Option::set('sale', self::LAST_SEND_DATE.static::getProviderCode(), $lastAttemptDate);
-		Option::delete('sale', ['name' => self::LAST_ATTEMPT_DATE.static::getProviderCode()]);
+		return [
+			Sale\PaySystem\Internals\Analytics\Provider::class,
+			Sale\Delivery\Internals\Analytics\Provider::class,
+			Sale\Cashbox\Internals\Analytics\Provider::class,
+			Sale\Internals\Analytics\Events\Provider::class,
+		];
 	}
 }

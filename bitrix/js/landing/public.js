@@ -8,7 +8,7 @@
 
 			BX.Landing.getMode = function()
 			{
-				return window.top === window ? "view" : "design";
+				return "view";
 			};
 
 			var blocks = [].slice.call(document.getElementsByClassName("block-wrapper"));
@@ -24,6 +24,30 @@
 			{
 				BX.Landing.EventTracker.getInstance().run();
 			}
+
+			// emulate browser back button
+			var backLinks = [].slice.call(document.querySelectorAll('.js-link-back'));
+			if (backLinks.length > 0)
+			{
+				backLinks.forEach(function(link)
+				{
+					var referrer = document.referrer;
+					if (
+						window.history.length > 1
+						&& referrer !== ""
+						&& referrer.includes(location.hostname)
+					)
+					{
+						link.addEventListener('click', function (event)
+						{
+							event.preventDefault();
+							window.history.back();
+						})
+						link.href = '#';
+					}
+				});
+			}
+
 
 			// pseudo links
 			var pseudoLinks = [].slice.call(document.querySelectorAll("[data-pseudo-url*=\"{\"]"));
@@ -65,10 +89,10 @@
 						}
 
 						// stop click from children
-						var children = link.children;
-						if(children.length > 0)
+						var childLinks = link.getElementsByTagName('a');
+						if(childLinks.length > 0)
 						{
-							[].slice.call(children).map(function(node){
+							[].slice.call(childLinks).map(function(node){
 								stopPropagation(node);
 							})
 						}
@@ -160,6 +184,7 @@
 								});
 								// disable :focus after click
 								event.target.blur();
+								history.pushState({}, '', link.href);
 							});
 						}
 					}

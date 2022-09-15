@@ -25,6 +25,8 @@ abstract class Cashbox
 	/** @var array $fields */
 	private $fields = array();
 
+	private $ofd;
+
 	/**
 	 * @throws Main\LoaderException
 	 * @return void
@@ -50,18 +52,55 @@ abstract class Cashbox
 
 		if (!$handlerList)
 		{
-			$handlerList = array(
-				'\Bitrix\Sale\Cashbox\CashboxAtolFarm' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarm.php',
-				'\Bitrix\Sale\Cashbox\CashboxAtolFarmV4' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarmv4.php',
-				'\Bitrix\Sale\Cashbox\CashboxOrangeData' => '/bitrix/modules/sale/lib/cashbox/cashboxorangedata.php'
-			);
-
-			if (!IsModuleInstalled('bitrix24'))
+			$zone = '';
+			$isCloud = Main\Loader::includeModule("bitrix24");
+			if ($isCloud)
 			{
-				$handlerList['\Bitrix\Sale\Cashbox\CashboxBitrixV2'] = '/bitrix/modules/sale/lib/cashbox/cashboxbitrixv2.php';
-				$handlerList['\Bitrix\Sale\Cashbox\CashboxBitrix'] = '/bitrix/modules/sale/lib/cashbox/cashboxbitrix.php';
-				$handlerList['\Bitrix\Sale\Cashbox\Cashbox1C'] = '/bitrix/modules/sale/lib/cashbox/cashbox1c.php';
+				$zone = \CBitrix24::getLicensePrefix();
 			}
+			elseif (Main\Loader::includeModule('intranet'))
+			{
+				$zone = \CIntranetUtils::getPortalZone();
+			}
+			if ($zone === 'ru' && $isCloud)
+			{
+				$handlerList = [
+					'\Bitrix\Sale\Cashbox\CashboxAtolFarm' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarm.php',
+					'\Bitrix\Sale\Cashbox\CashboxAtolFarmV4' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarmv4.php',
+					'\Bitrix\Sale\Cashbox\CashboxAtolFarmV5' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarmv5.php',
+					'\Bitrix\Sale\Cashbox\CashboxOrangeData' => '/bitrix/modules/sale/lib/cashbox/cashboxorangedata.php',
+					'\Bitrix\Sale\Cashbox\CashboxOrangeDataFfd12' => '/bitrix/modules/sale/lib/cashbox/cashboxorangedataffd12.php',
+					'\Bitrix\Sale\Cashbox\CashboxBusinessRu' => '/bitrix/modules/sale/lib/cashbox/cashboxbusinessru.php',
+					'\Bitrix\Sale\Cashbox\CashboxBusinessRuV5' => '/bitrix/modules/sale/lib/cashbox/cashboxbusinessruv5.php',
+				];
+			}
+			elseif ($zone === 'ua')
+			{
+				$handlerList = [
+					'\Bitrix\Sale\Cashbox\CashboxCheckbox' => '/bitrix/modules/sale/lib/cashbox/cashboxcheckbox.php',
+				];
+			}
+			else
+			{
+				$handlerList = [
+					'\Bitrix\Sale\Cashbox\CashboxAtolFarm' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarm.php',
+					'\Bitrix\Sale\Cashbox\CashboxAtolFarmV4' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarmv4.php',
+					'\Bitrix\Sale\Cashbox\CashboxAtolFarmV5' => '/bitrix/modules/sale/lib/cashbox/cashboxatolfarmv5.php',
+					'\Bitrix\Sale\Cashbox\CashboxOrangeData' => '/bitrix/modules/sale/lib/cashbox/cashboxorangedata.php',
+					'\Bitrix\Sale\Cashbox\CashboxOrangeDataFfd12' => '/bitrix/modules/sale/lib/cashbox/cashboxorangedataffd12.php',
+					'\Bitrix\Sale\Cashbox\CashboxBitrixV2' => '/bitrix/modules/sale/lib/cashbox/cashboxbitrixv2.php',
+					'\Bitrix\Sale\Cashbox\CashboxBitrixV3' => '/bitrix/modules/sale/lib/cashbox/cashboxbitrixv3.php',
+					'\Bitrix\Sale\Cashbox\CashboxBitrix' => '/bitrix/modules/sale/lib/cashbox/cashboxbitrix.php',
+					'\Bitrix\Sale\Cashbox\Cashbox1C' => '/bitrix/modules/sale/lib/cashbox/cashbox1c.php',
+					'\Bitrix\Sale\Cashbox\CashboxCheckbox' => '/bitrix/modules/sale/lib/cashbox/cashboxcheckbox.php',
+					'\Bitrix\Sale\Cashbox\CashboxBusinessRu' => '/bitrix/modules/sale/lib/cashbox/cashboxbusinessru.php',
+					'\Bitrix\Sale\Cashbox\CashboxBusinessRuV5' => '/bitrix/modules/sale/lib/cashbox/cashboxbusinessruv5.php',
+				];
+			}
+
+			$handlerList['\Bitrix\Sale\Cashbox\CashboxRest'] = '/bitrix/modules/sale/lib/cashbox/cashboxrest.php';
+
+			$handlerList['\Bitrix\Sale\Cashbox\CashboxRobokassa'] = '/bitrix/modules/sale/lib/cashbox/cashboxrobokassa.php';
 
 			$event = new Main\Event('sale', static::EVENT_ON_GET_CUSTOM_CASHBOX_HANDLERS);
 			$event->send();
@@ -88,6 +127,7 @@ abstract class Cashbox
 	/**
 	 * @param array $settings
 	 * @return Cashbox|null
+	 * @throws Main\LoaderException
 	 */
 	public static function create(array $settings)
 	{
@@ -123,14 +163,12 @@ abstract class Cashbox
 	 */
 	public function getOfd()
 	{
-		static $ofd = null;
-
-		if ($ofd === null)
+		if ($this->ofd === null)
 		{
-			$ofd = Ofd::create($this);
+			$this->ofd = Ofd::create($this);
 		}
 
-		return $ofd;
+		return $this->ofd;
 	}
 
 	/**
@@ -419,9 +457,37 @@ abstract class Cashbox
 	/**
 	 * @return bool
 	 */
-	public static function isSupportedFFD105()
+	public function isCorrection()
 	{
-		return false;
+		return (
+			$this instanceof ICorrection
+			&& $this::isCorrectionOn()
+		);
 	}
 
+	/**
+	 * @return bool
+	 */
+	public static function isCorrectionOn(): bool
+	{
+		return true;
+	}
+
+	/**
+	 * @return float|null
+	 */
+	public static function getFfdVersion(): ?float
+	{
+		return null;
+	}
+
+	/**
+	 * @deprecated Use \Bitrix\Sale\Cashbox\Cashbox::getFfdVersion instead
+	 *
+	 * @return bool
+	 */
+	public static function isSupportedFFD105()
+	{
+		return static::getFfdVersion() >= 1.05;
+	}
 }

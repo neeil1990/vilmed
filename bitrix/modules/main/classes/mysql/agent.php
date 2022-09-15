@@ -6,15 +6,11 @@
  * @copyright 2001-2013 Bitrix
  */
 
-require($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/classes/general/agent.php");
-
 class CAgent extends CAllAgent
 {
 	public static function CheckAgents()
 	{
-		global $CACHE_MANAGER;
-
-		define("START_EXEC_AGENTS_1", microtime());
+		define("START_EXEC_AGENTS_1", microtime(true));
 
 		define("BX_CHECK_AGENT_START", true);
 
@@ -22,33 +18,27 @@ class CAgent extends CAllAgent
 		if((defined("NO_AGENT_CHECK") && NO_AGENT_CHECK===true) || (defined("BX_CLUSTER_GROUP") && BX_CLUSTER_GROUP !== 1))
 			return null;
 
-		$agents_use_crontab = COption::GetOptionString("main", "agents_use_crontab", "N");
-		$str_crontab = "";
-		if($agents_use_crontab=="Y" || (defined("BX_CRONTAB_SUPPORT") && BX_CRONTAB_SUPPORT===true))
-		{
-			if(defined("BX_CRONTAB") && BX_CRONTAB===true)
-				$str_crontab = " AND IS_PERIOD='N' ";
-			else
-				$str_crontab = " AND IS_PERIOD='Y' ";
-		}
+		$res = CAgent::ExecuteAgents();
 
-		if(CACHED_b_agent !== false && $CACHE_MANAGER->Read(CACHED_b_agent, ($cache_id = "agents".$str_crontab), "agents"))
-		{
-			$saved_time = $CACHE_MANAGER->Get($cache_id);
-			if(time() < $saved_time)
-				return "";
-		}
-
-		$res = CAgent::ExecuteAgents($str_crontab);
-
-		define("START_EXEC_AGENTS_2", microtime());
+		define("START_EXEC_AGENTS_2", microtime(true));
 
 		return $res;
 	}
 
-	public static function ExecuteAgents($str_crontab)
+	public static function ExecuteAgents()
 	{
 		global $DB, $CACHE_MANAGER, $pPERIOD;
+
+		$cron = static::OnCron();
+
+		if ($cron !== null)
+		{
+			$str_crontab = ($cron ? " AND IS_PERIOD='N' " : " AND IS_PERIOD='Y' ");
+		}
+		else
+		{
+			$str_crontab = "";
+		}
 
 		$saved_time = 0;
 		$cache_id = "agents".$str_crontab;
@@ -80,7 +70,7 @@ class CAgent extends CAllAgent
 		{
 			if (CACHED_b_agent !== false)
 			{
-				$rs = $DB->Query("SELECT UNIX_TIMESTAMP(MIN(NEXT_EXEC))-UNIX_TIMESTAMP(NOW()) DATE_DIFF FROM b_agent WHERE ACTIVE = 'Y' ".$str_crontab."");
+				$rs = $DB->Query("SELECT UNIX_TIMESTAMP(NEXT_EXEC)-UNIX_TIMESTAMP(NOW()) DATE_DIFF FROM b_agent WHERE ACTIVE = 'Y' ".$str_crontab." ORDER BY NEXT_EXEC ASC LIMIT 1");
 				$ar = $rs->Fetch();
 				if (!$ar || $ar["DATE_DIFF"] < 0)
 					$date_diff = 0;
@@ -100,14 +90,23 @@ class CAgent extends CAllAgent
 			return "";
 		}
 
-		$strSql=
+		$strSql =
 			"SELECT ID, NAME, AGENT_INTERVAL, IS_PERIOD, MODULE_ID, RETRY_COUNT ".
 			"FROM b_agent ".
 			"WHERE ACTIVE = 'Y' ".
 			"	AND NEXT_EXEC <= now() ".
 			"	AND (DATE_CHECK IS NULL OR DATE_CHECK <= now()) ".
 			$str_crontab.
-			" ORDER BY RUNNING ASC, SORT desc";
+			" ORDER BY RUNNING ASC, SORT desc ";
+
+		if ($cron !== true)
+		{
+			$limit = (int)COption::GetOptionString("main", "agents_limit", 100);
+			if ($limit > 0)
+			{
+				$strSql .= 'LIMIT ' . $limit;
+			}
+		}
 
 		$db_result_agents = $DB->Query($strSql);
 		$ids = '';

@@ -2,7 +2,6 @@
 
 namespace Bitrix\Sale\Delivery\Services;
 
-use Bitrix\Main\IO\File;
 use Bitrix\Sale\Order;
 use Bitrix\Main\Loader;
 use Bitrix\Sale\Result;
@@ -28,6 +27,9 @@ Loc::loadMessages(__FILE__);
  */
 class Automatic extends Base
 {
+	/** @var string */
+	protected $handlerCode = 'BITRIX_AUTOMATIC';
+
 	protected $sid = "";
 	protected $oldConfig = array();
 	protected $handlerInitParams = array();
@@ -66,6 +68,14 @@ class Automatic extends Base
 			$this->oldConfig = $initParams["CONFIG"];
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	public function getHandlerCode(): string
+	{
+		return 'BITRIX_' . (string)$this->sid;
+	}
+
 	public static function getClassTitle()
 	{
 		return Loc::getMessage("SALE_DLVR_HANDL_AUT_NAME");
@@ -82,6 +92,7 @@ class Automatic extends Base
 		static $jsData = array();
 
 		$initedHandlers = self::getRegisteredHandlers("SID");
+
 		sortByColumn($initedHandlers, array(mb_strtoupper("NAME") => SORT_ASC));
 
 		if($handlers === null)
@@ -90,8 +101,15 @@ class Automatic extends Base
 
 			foreach($initedHandlers as $handler)
 			{
-				if(isset($handler["DEPRECATED"]) && $handler["DEPRECATED"] = "Y")
+				if (isset($handler["DEPRECATED"]) && $handler["DEPRECATED"] = "Y")
+				{
 					continue;
+				}
+
+				if (!self::isAutomaticHandlerCompatible($handler))
+				{
+					continue;
+				}
 					
 				$handlers[$handler["SID"]] = $handler["NAME"]." [".$handler["SID"]."]";
 				$jsData[$handler["SID"]] = array(
@@ -475,6 +493,7 @@ class Automatic extends Base
 		{
 			$initParams = ExecuteModuleEventEx($arHandler);
 
+
 			if($indexBy <> '' && isset($initParams[$indexBy]))
 				$arHandlersList[$indexBy][$initParams[$indexBy]] = $initParams;
 			else
@@ -536,7 +555,7 @@ class Automatic extends Base
 			$siteId = Helper::getDefaultSiteId();
 
 		$service["CONFIG"] = self::createConfig($handlers[$service["SID"]], $service["SETTINGS"], $siteId);
-		$service["SETTINGS"] = unserialize($service["SETTINGS"]);
+		$service["SETTINGS"] = unserialize($service["SETTINGS"], ['allowed_classes' => false]);
 		$service["PROFILES"] = array();
 
 		if(isset($service["ID"]) && intval($service["ID"]) > 0)
@@ -628,7 +647,7 @@ class Automatic extends Base
 
 				if ($settings <> '' && is_callable($initHandlerParams["DBGETSETTINGS"]))
 				{
-					$settings = unserialize($settings);
+					$settings = unserialize($settings, ['allowed_classes' => false]);
 					$arConfigValues = call_user_func($initHandlerParams["DBGETSETTINGS"], $settings);
 				}
 				else
@@ -693,7 +712,7 @@ class Automatic extends Base
 			foreach($oldOrder["ITEMS"] as $item)
 			{
 				if(is_string($item["DIMENSIONS"]))
-					$item["DIMENSIONS"] = unserialize($item["DIMENSIONS"]);
+					$item["DIMENSIONS"] = unserialize($item["DIMENSIONS"], ['allowed_classes' => false]);
 
 				if(!is_array($item["DIMENSIONS"]) || empty($item["DIMENSIONS"]))
 					continue;
@@ -1053,6 +1072,25 @@ class Automatic extends Base
 
 			if(!is_array($result))
 				throw new SystemException('GET_ADD_INFO_SHIPMENT_VIEW return value must be array!');
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks is automatic handler compatible
+	 *
+	 * @param mixed $handler Old automatic handler.
+	 * @return bool
+	 */
+	protected static function isAutomaticHandlerCompatible($handler): bool
+	{
+		$result = true;
+
+		if (isset($handler["IS_HANDLER_COMPATIBLE"])
+			&& is_callable($handler["IS_HANDLER_COMPATIBLE"]))
+		{
+			$result = call_user_func($handler["IS_HANDLER_COMPATIBLE"]);
 		}
 
 		return $result;

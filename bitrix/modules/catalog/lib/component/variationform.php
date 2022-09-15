@@ -2,14 +2,111 @@
 
 namespace Bitrix\Catalog\Component;
 
-use Bitrix\Catalog\ProductTable;
+use Bitrix\Catalog\v2\Property\Property;
 use Bitrix\Currency\CurrencyManager;
+use Bitrix\Main\Component\ParameterSigner;
 use Bitrix\Main\Localization\Loc;
 
 class VariationForm extends BaseForm
 {
 	/** @var \Bitrix\Catalog\v2\Sku\BaseSku */
 	protected $entity;
+
+	public static function formatFieldName($name): string
+	{
+		return $name;
+	}
+
+	public function getControllers(): array
+	{
+		$controllers = parent::getControllers();
+
+		$controllers[] = [
+			'name' => 'VARIATION_GRID_CONTROLLER',
+			'type' => 'variation_grid',
+			'config' => [
+				'reloadUrl' => '/bitrix/components/bitrix/catalog.productcard.variation.grid/list.ajax.php',
+				'signedParameters' => $this->getVariationGridSignedParameters(),
+				'gridId' => $this->getVariationGridId(),
+			],
+		];
+		$controllers[] = [
+			'name' => 'IBLOCK_SECTION_CONTROLLER',
+			'type' => 'iblock_section',
+			'config' => [],
+		];
+
+		return $controllers;
+	}
+
+	protected function getPropertyDescription(Property $property): array
+	{
+		$description = parent::getPropertyDescription($property);
+
+		$propertyFeatureOfferTree = $property->getPropertyFeatureCollection()->findByFeatureId('OFFER_TREE');
+		$offerTreeParams = $propertyFeatureOfferTree ? $propertyFeatureOfferTree->getSettings() : null;
+
+		if ($offerTreeParams)
+		{
+			$description['isEnabledOfferTree'] = $offerTreeParams['IS_ENABLED'] === 'Y';
+		}
+
+		return $description;
+	}
+
+	public function collectFieldConfigs(): array
+	{
+		$config = parent::collectFieldConfigs();
+
+		$config['right']['elements'][] = [
+			'name' => 'variation_grid',
+			'title' => 'Variation grid',
+			'type' => 'included_area',
+			'data' => [
+				'isRemovable' => false,
+				'type' => 'component',
+				'componentName' => $this->getVariationGridComponentName(),
+				'action' => 'getProductGrid',
+				'mode' => 'ajax',
+				'signedParametersName' => 'VARIATION_GRID_SIGNED_PARAMETERS',
+			],
+			'sort' => 100,
+		];
+
+		return $config;
+	}
+
+	protected function getVariationGridComponentName(): string
+	{
+		return 'bitrix:catalog.productcard.variation.grid';
+	}
+
+	protected function getVariationGridParameters(): array
+	{
+		$variationIdList = null;
+		$variationId = $this->params['VARIATION_ID'] ?? null;
+		if (!empty($variationId))
+		{
+			$variationIdList = [$this->params['VARIATION_ID']];
+		}
+
+		return [
+			'IBLOCK_ID' => $this->params['IBLOCK_ID'] ?? null,
+			'PRODUCT_ID' => $this->params['PRODUCT_ID'] ?? null,
+			'VARIATION_ID_LIST' => $variationIdList,
+			'COPY_PRODUCT_ID' => $this->params['COPY_PRODUCT_ID'] ?? null,
+			'EXTERNAL_FIELDS' => $this->params['EXTERNAL_FIELDS'] ?? null,
+			'PATH_TO' => $this->params['PATH_TO'] ?? [],
+		];
+	}
+
+	protected function getVariationGridSignedParameters(): string
+	{
+		return ParameterSigner::signParameters(
+			$this->getVariationGridComponentName(),
+			$this->getVariationGridParameters()
+		);
+	}
 
 	protected function showCatalogProductFields(): bool
 	{
@@ -21,18 +118,30 @@ class VariationForm extends BaseForm
 		return true;
 	}
 
-	public static function formatFieldName($name): string
-	{
-		return $name;
-	}
-
 	protected function buildDescriptions(): array
 	{
 		return array_merge(
 			parent::buildDescriptions(),
 			$this->getPriceDescriptions(),
-			$this->getMeasureRatioDescription()
+			$this->getMeasureRatioDescription(),
+			$this->getNameCodeDescription()
 		);
+	}
+
+	protected function buildIblockPropertiesDescriptions(): array
+	{
+		$propertyDescriptions = [];
+
+		foreach ($this->entity->getPropertyCollection() as $property)
+		{
+			if ($property->getUserType() === \CIBlockPropertySKU::USER_TYPE)
+			{
+				continue;
+			}
+			$propertyDescriptions[] = $this->getPropertyDescription($property);
+		}
+
+		return $propertyDescriptions;
 	}
 
 	protected function getPriceDescriptions(): array
@@ -40,38 +149,13 @@ class VariationForm extends BaseForm
 		$descriptions = [];
 		$priceTypeList = \CCatalogGroup::GetListArray();
 
-		$currencyList = [];
-
-		foreach (CurrencyManager::getCurrencyList() as $currency => $currencyName)
-		{
-			$currencyList[] = [
-				'VALUE' => $currency,
-				'NAME' => htmlspecialcharsbx($currencyName),
-			];
-		}
-
 		if (!empty($priceTypeList))
 		{
 			foreach ($priceTypeList as $priceType)
 			{
-				$title = htmlspecialcharsbx(!empty($priceType['NAME_LANG']) ? $priceType['NAME_LANG'] : $priceType['NAME']);
-
-				if ($priceType['BASE'] === 'Y')
-				{
-					$basePriceFieldName = static::formatFieldName(BaseForm::PRICE_FIELD_PREFIX.'BASE');
-					$descriptions[] = $this->preparePriceDescription([
-						'NAME' => $basePriceFieldName.'_FIELD',
-						'TYPE_ID' => (int)$priceType['ID'],
-						'TITLE' => Loc::getMessage(
-							'CATALOG_C_F_VARIATION_SETTINGS_BASE_PRICE',
-							['#PRICE_NAME#' => $title]
-						),
-						'PRICE_FIELD' => $basePriceFieldName,
-						'CURRENCY_FIELD' => static::formatFieldName(BaseForm::CURRENCY_FIELD_PREFIX.'BASE'),
-					]);
-				}
-
+				$title = !empty($priceType['NAME_LANG']) ? $priceType['NAME_LANG'] : $priceType['NAME'];
 				$priceFieldName = static::formatFieldName(BaseForm::PRICE_FIELD_PREFIX.$priceType['ID']);
+
 				$descriptions[] = $this->preparePriceDescription([
 					'NAME' => $priceFieldName.'_FIELD',
 					'TYPE_ID' => (int)$priceType['ID'],
@@ -110,31 +194,13 @@ class VariationForm extends BaseForm
 				],
 				'currency' => [
 					'name' => $fields['CURRENCY_FIELD'],
-					'items' => self::getDescriptionCurrencyList(),
+					'items' => $this->getCurrencyList(),
 				],
 				'amount' => $fields['PRICE_FIELD'],
 				'formatted' => 'FORMATTED_'.$fields['PRICE_FIELD'].'_PRICE',
 				'formattedWithCurrency' => 'FORMATTED_'.$fields['PRICE_FIELD'].'_WITH_CURRENCY',
 			],
 		];
-	}
-
-	private static function getDescriptionCurrencyList()
-	{
-		static $currencyList = null;
-		if (!$currencyList)
-		{
-			$currencyList = [];
-			foreach (CurrencyManager::getCurrencyList() as $currency => $currencyName)
-			{
-				$currencyList[] = [
-					'VALUE' => $currency,
-					'NAME' => htmlspecialcharsbx($currencyName),
-				];
-			}
-		}
-
-		return $currencyList;
 	}
 
 	protected function getMeasureRatioDescription(): array
@@ -146,7 +212,7 @@ class VariationForm extends BaseForm
 				'title' => Loc::getMessage('CATALOG_C_F_VARIATION_SETTINGS_MEASURE_RATIO_TITLE'),
 				'type' => 'number',
 				'editable' => true,
-				'required' => true,
+				'required' => false,
 				'defaultValue' => 1,
 			],
 		];
@@ -172,8 +238,18 @@ class VariationForm extends BaseForm
 		return parent::getFieldValue($field);
 	}
 
+	protected function getHiddenPropertyCodes(): array
+	{
+		return [self::MORE_PHOTO];
+	}
+
 	protected function getPriceFieldValue(array $field)
 	{
+		if ($field['priceTypeId'] === 'PURCHASING_PRICE')
+		{
+			return $this->entity->getField('PURCHASING_PRICE');
+		}
+
 		$price = $this->entity
 			->getPriceCollection()
 			->findByGroupId($field['priceTypeId'])
@@ -182,14 +258,28 @@ class VariationForm extends BaseForm
 		return $price ? $price->getPrice() : null;
 	}
 
-	protected function getCurrencyFieldValue(array $field)
+	protected function getCurrencyFieldValue(array $field): string
 	{
-		$price = $this->entity
-			->getPriceCollection()
-			->findByGroupId($field['priceTypeId'])
-		;
+		$currency = null;
 
-		return $price ? $price->getCurrency() : \Bitrix\Currency\CurrencyManager::getBaseCurrency();
+		if ($field['priceTypeId'] === 'PURCHASING_PRICE')
+		{
+			$currency = $this->entity->getField('PURCHASING_CURRENCY');
+		}
+		else
+		{
+			$price = $this->entity
+				->getPriceCollection()
+				->findByGroupId($field['priceTypeId'])
+			;
+			if ($price)
+			{
+				$currency = $price->getCurrency();
+			}
+		}
+
+
+		return $currency ?: CurrencyManager::getBaseCurrency();
 	}
 
 	protected function getMeasureRatioFieldValue()
@@ -202,25 +292,17 @@ class VariationForm extends BaseForm
 		return $measureRatio ? $measureRatio->getRatio() : null;
 	}
 
-	protected function getAdditionalValues(array $values): array
+	protected function getAdditionalValues(array $values, array $descriptions = []): array
 	{
-		$additionalValues = parent::getAdditionalValues($values);
-		foreach ($this->getDescriptions() as $description)
+		$additionalValues = parent::getAdditionalValues($values, $descriptions);
+		foreach ($descriptions as $description)
 		{
 			if ($description['entity'] === 'money' && \Bitrix\Main\Loader::includeModule('currency'))
 			{
-				$descriptionData = $description['data'];
-				if ($description['priceTypeId'] === 'PURCHASING_PRICE')
-				{
-					$amount = $values[static::formatFieldName('PURCHASING_PRICE')];
-					$currency = $values[static::formatFieldName('PURCHASING_CURRENCY')];
-				}
-				else
-				{
-					$amount = $this->getPriceFieldValue($description);
-					$currency = $this->getCurrencyFieldValue($description);
-				}
+				$amount = $this->getPriceFieldValue($description);
+				$currency = $this->getCurrencyFieldValue($description);
 
+				$descriptionData = $description['data'];
 				$additionalValues[$descriptionData['currency']['name']] = $currency;
 				$additionalValues[$descriptionData['amount']] = $amount;
 				$additionalValues[$descriptionData['formatted']] = \CCurrencyLang::CurrencyFormat($amount, $currency, false);
@@ -228,19 +310,16 @@ class VariationForm extends BaseForm
 			}
 		}
 
+		$additionalValues['VARIATION_GRID_SIGNED_PARAMETERS'] = $this->getVariationGridSignedParameters();
+
 		return $additionalValues;
 	}
 
-	public function getControllers(): array
+	protected function getCatalogProductFieldsList(): array
 	{
-		$controllers = parent::getControllers();
+		$fieldList = parent::getCatalogProductFieldsList();
+		$fieldList[] = 'AVAILABLE';
 
-		$controllers[] = [
-			'name' => 'IBLOCK_SECTION_CONTROLLER',
-			'type' => 'iblock_section',
-			'config' => [],
-		];
-
-		return $controllers;
+		return $fieldList;
 	}
 }

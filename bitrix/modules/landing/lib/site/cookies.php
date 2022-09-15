@@ -6,6 +6,7 @@ use \Bitrix\Landing\Manager;
 use \Bitrix\Landing\Site;
 use \Bitrix\Landing\Internals\BlockTable;
 use \Bitrix\Landing\Internals\HookDataTable;
+use \Bitrix\Main\Loader;
 use \Bitrix\Main\Localization\Loc;
 use \Bitrix\Main\ORM\Data\AddResult;
 use \Bitrix\Main\ORM\Data\UpdateResult;
@@ -38,9 +39,10 @@ class Cookies
 
 	/**
 	 * Creates new agreement for current language, if not exists.
+	 * @param int|null Agreement id.
 	 * @return array
 	 */
-	public static function getMainAgreement(): ?array
+	public static function getMainAgreement(?int $agreementId = null): ?array
 	{
 		$currentLang = LANGUAGE_ID;
 		$agreementCode = 'landing_cookie_agreement';
@@ -61,7 +63,12 @@ class Cookies
 			'select' => [
 				'ID', 'NAME', 'AGREEMENT_TEXT', 'LABEL_TEXT'
 			],
-			'filter' => [
+			'filter' =>
+				$agreementId
+				? [
+					'ID' => $agreementId
+				]
+				: [
 				'=ACTIVE' => 'Y',
 				'=CODE' => $agreementCode,
 				'=LANGUAGE_ID' => $currentLang
@@ -124,10 +131,26 @@ class Cookies
 			return $agreements;
 		}
 
+		//get zone
+		$zone = '';
+		if (Loader::includeModule('bitrix24'))
+		{
+			$zone = \CBitrix24::getPortalZone();
+		}
+		elseif (file_exists($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lang/ru")
+			&& !file_exists($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/lang/ua"))
+		{
+			$zone = 'ru';
+		}
+
 		// first get system messages
 		foreach (self::SYSTEM_COOKIES as $code => $cookieItem)
 		{
 			if (in_array($code, ['ym', 'vkp']) && !Manager::availableOnlyForZone('ru'))
+			{
+				continue;
+			}
+			if ($code === 'fbp' && $zone === 'ru')
 			{
 				continue;
 			}
@@ -143,6 +166,11 @@ class Cookies
 				'CONTENT' => Loc::getMessage('LANDING_COOKIES_SYS_' . $codeUp . '_TEXT'),
 				'~CONTENT' => $viewMode ? '' : Loc::getMessage('LANDING_COOKIES_SYS_' . $codeUp . '_TEXT')
 			];
+		}
+
+		if ($siteId < 0)
+		{
+			return $agreements;
 		}
 
 		// then get custom messages from DB
@@ -254,7 +282,13 @@ class Cookies
 	 */
 	public static function acceptAgreement(int $siteId, array $accepted = []): void
 	{
-		$agreement = self::getMainAgreement();
+		$agreementId = \Bitrix\Landing\Hook\Page\Cookies::getAgreementIdBySiteId($siteId);
+		if (!$agreementId)
+		{
+			return;
+		}
+
+		$agreement = self::getMainAgreement($agreementId);
 		if (!$agreement)
 		{
 			return;
@@ -398,7 +432,8 @@ class Cookies
 								'ID', 'TITLE'
 							],
 							'filter' => [
-								'ID' => $id
+								'ID' => $id,
+								'=DELETED' => ['Y', 'N']
 							],
 							'limit' => 1
 						])->fetch();
@@ -421,7 +456,13 @@ class Cookies
 				},
 				'ITEMS' => function ($code = null) use(&$currentSite)
 				{
-					return $currentSite['AGREEMENTS'][$code]['TITLE'] ?? null;
+					if (!$currentSite)
+					{
+						$currentSite = [
+							'AGREEMENTS' => self::getAgreements(-1)
+						];
+					}
+					return $currentSite['AGREEMENTS'][$code]['TITLE'] ?? $code;
 				},
 			]
 		];

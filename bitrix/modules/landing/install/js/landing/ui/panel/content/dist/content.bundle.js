@@ -1,7 +1,7 @@
 this.BX = this.BX || {};
 this.BX.Landing = this.BX.Landing || {};
 this.BX.Landing.UI = this.BX.Landing.UI || {};
-(function (exports, main_core, landing_ui_panel_base) {
+(function (exports,landing_ui_panel_base,main_core) {
 	'use strict';
 
 	function getDeltaFromEvent(event) {
@@ -167,9 +167,7 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	 * @memberOf BX.Landing.UI.Panel
 	 */
 
-	var Content =
-	/*#__PURE__*/
-	function (_BasePanel) {
+	var Content = /*#__PURE__*/function (_BasePanel) {
 	  babelHelpers.inherits(Content, _BasePanel);
 	  babelHelpers.createClass(Content, null, [{
 	    key: "createOverlay",
@@ -214,12 +212,12 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	    }
 	  }, {
 	    key: "scrollTo",
-	    value: function scrollTo$1(container, element) {
+	    value: function scrollTo$$1(container, element) {
 	      return scrollTo(container, element);
 	    }
 	  }, {
 	    key: "getDeltaFromEvent",
-	    value: function getDeltaFromEvent$1(event) {
+	    value: function getDeltaFromEvent$$1(event) {
 	      return getDeltaFromEvent(event);
 	    }
 	  }]);
@@ -230,6 +228,7 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	    babelHelpers.classCallCheck(this, Content);
 	    _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Content).call(this, id, data));
+	    babelHelpers.defineProperty(babelHelpers.assertThisInitialized(_this), "adjustActionsPanels", true);
 	    main_core.Dom.addClass(_this.layout, 'landing-ui-panel-content');
 	    _this.data = Object.freeze(data);
 	    _this.overlay = Content.createOverlay();
@@ -277,17 +276,20 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	      main_core.Dom.addClass(_this.layout, 'landing-ui-panel-content-with-subtitle');
 	    }
 
+	    if (_this.data.showFromRight === true) {
+	      _this.setLayoutClass('landing-ui-panel-show-from-right');
+	    }
+
 	    _this.init();
 
 	    main_core.Event.bind(window.top, 'keydown', _this.onKeyDown.bind(babelHelpers.assertThisInitialized(_this)));
-	    BX.Landing.PageObject.getInstance().view().then(function (frame) {
-	      void (!!frame && main_core.Event.bind(frame.contentWindow, 'keydown', _this.onKeyDown.bind(babelHelpers.assertThisInitialized(_this))));
-	    }, console.warn);
+	    BX.Landing.PageObject.getEditorWindow();
 
 	    if (_this.data.scrollAnimation) {
 	      _this.scrollObserver = new IntersectionObserver(_this.onIntersecting.bind(babelHelpers.assertThisInitialized(_this)));
 	    }
 
+	    _this.checkReadyToSave = _this.checkReadyToSave.bind(babelHelpers.assertThisInitialized(_this));
 	    return _this;
 	  }
 
@@ -386,13 +388,18 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	    }
 	  }, {
 	    key: "scrollTo",
-	    value: function scrollTo(element) {
+	    value: function scrollTo$$1(element) {
 	      void Content.scrollTo(this.content, element);
 	    }
 	  }, {
 	    key: "isShown",
 	    value: function isShown() {
 	      return this.state === 'shown';
+	    }
+	  }, {
+	    key: "shouldAdjustActionsPanels",
+	    value: function shouldAdjustActionsPanels() {
+	      return this.adjustActionsPanels;
 	    } // eslint-disable-next-line no-unused-vars
 
 	  }, {
@@ -401,6 +408,10 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	      var _this4 = this;
 
 	      if (!this.isShown()) {
+	        if (this.shouldAdjustActionsPanels()) {
+	          main_core.Dom.addClass(document.body, 'landing-ui-hide-action-panels');
+	        }
+
 	        void BX.Landing.Utils.Show(this.overlay);
 	        return BX.Landing.Utils.Show(this.layout).then(function () {
 	          _this4.state = 'shown';
@@ -415,6 +426,10 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	      var _this5 = this;
 
 	      if (this.isShown()) {
+	        if (this.shouldAdjustActionsPanels()) {
+	          main_core.Dom.removeClass(document.body, 'landing-ui-hide-action-panels');
+	        }
+
 	        void BX.Landing.Utils.Hide(this.overlay);
 	        return BX.Landing.Utils.Hide(this.layout).then(function () {
 	          _this5.state = 'hidden';
@@ -473,11 +488,59 @@ this.BX.Landing.UI = this.BX.Landing.UI || {};
 	      this.sidebarButtons.add(button);
 	      main_core.Dom.append(button.layout, this.sidebar);
 	    }
+	  }, {
+	    key: "setOverlayClass",
+	    value: function setOverlayClass(className) {
+	      main_core.Dom.addClass(this.overlay, className);
+	    }
+	  }, {
+	    key: "renderTo",
+	    value: function renderTo(target) {
+	      babelHelpers.get(babelHelpers.getPrototypeOf(Content.prototype), "renderTo", this).call(this, target);
+	      main_core.Dom.append(this.overlay, target);
+	    }
+	  }, {
+	    key: "checkReadyToSave",
+	    value: function checkReadyToSave() {
+	      var _this6 = this;
+
+	      var canSave = true;
+	      this.forms.forEach(function (form) {
+	        form.fields.forEach(function (field) {
+	          if (field.readyToSave === false) {
+	            canSave = false;
+	          }
+
+	          if (!field.getListeners('onChangeReadyToSave').has(_this6.checkReadyToSave)) {
+	            field.subscribe('onChangeReadyToSave', _this6.checkReadyToSave);
+	          }
+	        });
+	      });
+	      canSave ? this.enableSave() : this.disableSave();
+	    }
+	  }, {
+	    key: "disableSave",
+	    value: function disableSave() {
+	      var saveButton = this.buttons.get('save_block_content');
+
+	      if (saveButton) {
+	        saveButton.disable();
+	      }
+	    }
+	  }, {
+	    key: "enableSave",
+	    value: function enableSave() {
+	      var saveButton = this.buttons.get('save_block_content');
+
+	      if (saveButton) {
+	        saveButton.enable();
+	      }
+	    }
 	  }]);
 	  return Content;
 	}(landing_ui_panel_base.BasePanel);
 
 	exports.Content = Content;
 
-}(this.BX.Landing.UI.Panel = this.BX.Landing.UI.Panel || {}, BX, BX.Landing.UI.Panel));
+}((this.BX.Landing.UI.Panel = this.BX.Landing.UI.Panel || {}),BX.Landing.UI.Panel,BX));
 //# sourceMappingURL=content.bundle.js.map

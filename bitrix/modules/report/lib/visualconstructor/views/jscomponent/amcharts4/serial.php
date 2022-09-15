@@ -13,8 +13,8 @@ use Bitrix\Report\VisualConstructor\Handler\BaseReport;
 abstract class Serial extends Base
 {
 	const MAX_RENDER_REPORT_COUNT = 15;
-
 	const ENABLE_SORTING = true;
+	const USE_IN_VISUAL_CONSTRUCTOR = false;
 
 	/**
 	 * Serial widget base constructor.
@@ -119,7 +119,7 @@ abstract class Serial extends Base
 							"valueUrl" => "targetUrl_1",
 						],
 						"width" => "85%",
-						"tooltipText" => $data["config"]["reportTitle"]." {valueY}",
+						"tooltipText" => htmlspecialcharsbx($data["config"]["reportTitle"]) . " {valueY}",
 					],
 
 					"tooltip" => [

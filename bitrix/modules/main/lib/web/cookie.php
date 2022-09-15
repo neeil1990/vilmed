@@ -5,17 +5,23 @@ use Bitrix\Main\Config;
 
 class Cookie
 {
-	const SPREAD_SITES = 1;
-	const SPREAD_DOMAIN = 2;
+	public const SPREAD_SITES = 1;
+	public const SPREAD_DOMAIN = 2;
+
+	public const SAME_SITE_NONE = 'None';
+	public const SAME_SITE_LAX = 'Lax';
+	public const SAME_SITE_STRICT = 'Strict';
 
 	protected $domain;
 	protected $expires;
 	protected $httpOnly = true;
 	protected $spread;
 	protected $name;
+	protected $originalName;
 	protected $path = '/';
 	protected $secure = false;
 	protected $value;
+	protected $sameSite;
 
 	/**
 	 * Cookie constructor.
@@ -34,6 +40,7 @@ class Cookie
 		{
 			$this->name = $name;
 		}
+		$this->originalName = $name;
 		$this->value = $value;
 		$this->expires = $expires;
 		if ($this->expires === null)
@@ -64,8 +71,12 @@ class Cookie
 	{
 		$cookiesSettings = Config\Configuration::getValue("cookies");
 
-		$this->secure = (isset($cookiesSettings["secure"])? $cookiesSettings["secure"] : false);
-		$this->httpOnly = (isset($cookiesSettings["http_only"])? $cookiesSettings["http_only"] : true);
+		$this->secure = ($cookiesSettings["secure"] ?? false);
+		$this->httpOnly = ($cookiesSettings["http_only"] ?? true);
+		if (isset($cookiesSettings["samesite"]))
+		{
+			$this->sameSite = $cookiesSettings["samesite"];
+		}
 	}
 
 	public function setDomain($domain)
@@ -110,6 +121,11 @@ class Cookie
 	{
 		$this->name = $name;
 		return $this;
+	}
+
+	public function getOriginalName(): string
+	{
+		return $this->originalName;
 	}
 
 	public function getName()
@@ -161,6 +177,17 @@ class Cookie
 		return $this->spread;
 	}
 
+	public function setSameSite(string $sameSite)
+	{
+		$this->sameSite = $sameSite;
+		return $this;
+	}
+
+	public function getSameSite()
+	{
+		return $this->sameSite;
+	}
+
 	/**
 	 * Returns the domain from the sites settings to use with cookies.
 	 *
@@ -182,7 +209,7 @@ class Cookie
 		$httpHost = $request->getHttpHost();
 
 		$cacheFlags = Config\Configuration::getValue("cache_flags");
-		$cacheTtl = (isset($cacheFlags["site_domain"]) ? $cacheFlags["site_domain"] : 0);
+		$cacheTtl = ($cacheFlags["site_domain"] ?? 0);
 
 		if ($cacheTtl === false)
 		{

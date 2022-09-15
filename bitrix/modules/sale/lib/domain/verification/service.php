@@ -22,13 +22,10 @@ final class Service
 	{
 		$result = new Main\Entity\EventResult;
 
-		$code = $event->getParameter('code');
-		if ($code === '404 Not Found')
+		if (class_exists('\LandingPubComponent'))
 		{
-			$context = Main\Application::getInstance()->getContext();
-			$requestUri = $context->getServer()->getRequestUri();
-
-			if (class_exists('\LandingPubComponent'))
+			$code = $event->getParameter('code');
+			if ($code === \LandingPubComponent::ERROR_STATUS_NOT_FOUND)
 			{
 				$landingInstance = \LandingPubComponent::getMainInstance();
 				if ($landingInstance)
@@ -38,16 +35,45 @@ final class Service
 							'DOMAIN_NAME' => 'DOMAIN.DOMAIN'
 						],
 						'filter' => [
+							'CHECK_PERMISSIONS' => 'N',
 							'ID' => $landingInstance['SITE_ID']
 						]
 					]);
 					if ($row = $res->fetch())
 					{
-						$domainVerification = BaseManager::searchByRequest($row['DOMAIN_NAME'], $requestUri);
+						$context = Main\Application::getInstance()->getContext();
+
+						$realFilePath = $context->getServer()->get('REAL_FILE_PATH');
+						if (!$realFilePath)
+						{
+							$realFilePath = $_SERVER['REAL_FILE_PATH'] ?? null;
+						}
+						if (!$realFilePath)
+						{
+							$realFilePath = $context->getServer()->get('SCRIPT_NAME');
+						}
+
+						$requestURL = $context->getRequest()->getRequestedPage();
+
+						$landingUrl = Landing\Site::getPublicUrl($landingInstance['SITE_ID']);
+						$realFilePath = str_replace('/index.php', '/', $realFilePath);
+						if (mb_strpos($landingUrl, $realFilePath) === false)
+						{
+							$requestURL = str_replace($realFilePath.$landingInstance['SITE_ID'], '', $requestURL);
+						}
+
+						$domainVerification = BaseManager::searchByRequest($row['DOMAIN_NAME'], $requestURL);
+
+						if (!$domainVerification)
+						{
+							$pubPath = \Bitrix\Landing\Manager::getPublicationPath($landingInstance['SITE_ID']);
+							$domainVerification = BaseManager::searchByRequest($row['DOMAIN_NAME'], substr($requestURL, strlen($pubPath)-1));
+						}
+
 						if ($domainVerification)
 						{
 							$result->modifyFields([
-								'code' => '200 OK'
+								'code' => \LandingPubComponent::ERROR_STATUS_OK
 							]);
 
 							self::setEndBufferContentHandler($domainVerification['CONTENT']);
@@ -119,6 +145,7 @@ final class Service
 			'onEndBufferContent',
 			static function(&$resultContent) use ($content)
 			{
+				header('Content-Type: text/plain');
 				$resultContent = $content;
 			}
 		);

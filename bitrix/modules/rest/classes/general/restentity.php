@@ -962,7 +962,7 @@ class CBitrixRestEntity extends IRestService
 		if(CModule::IncludeModule('iblock'))
 		{
 			$dbRes = \CIBlock::GetList(array(), array(
-				'TYPE' => self::getIBlockType(),
+				'=TYPE' => self::getIBlockType(),
 				'CODE' => self::ENTITY_IBLOCK_CODE_PREFIX."_".$appId.'%'
 			));
 			while ($arRes = $dbRes->Fetch())
@@ -1018,8 +1018,8 @@ class CBitrixRestEntity extends IRestService
 	protected static function getIBlock($code, $bSkipCheck = false)
 	{
 		$dbRes = \CIBlock::GetList(array(), array(
-			'TYPE' => self::getIBlockType(),
-			'CODE' => $code
+			'=TYPE' => self::getIBlockType(),
+			'=CODE' => $code,
 		));
 
 		$arRes = $dbRes->Fetch();
@@ -1035,7 +1035,7 @@ class CBitrixRestEntity extends IRestService
 	protected static function getIBlocks($server)
 	{
 		return \CIBlock::GetList(array(), array(
-			'TYPE' => self::getIBlockType(),
+			'=TYPE' => self::getIBlockType(),
 			'CODE' => self::getEntityIBlockCode('%', $server)
 		));
 	}
@@ -1062,7 +1062,7 @@ class CBitrixRestEntity extends IRestService
 		{
 			$params['ENTITY'] = preg_replace('/[^a-zA-Z0-9_]/i', '', trim(strval($params['ENTITY'])));
 
-			if(strlen($params['ENTITY']) <= 0)
+			if($params['ENTITY'] == '')
 			{
 				throw new \Bitrix\Main\ArgumentNullException("ENTITY");
 			}
@@ -1165,9 +1165,9 @@ class CBitrixRestEntity extends IRestService
 
 		$str = self::ENTITY_IBLOCK_CODE_PREFIX."_".$server->getClientId()."_";
 
-		if(substr($iblock, 0, strlen($str)) === $str)
+		if(mb_substr($iblock, 0, mb_strlen($str)) === $str)
 		{
-			return substr($iblock, strlen($str));
+			return mb_substr($iblock, mb_strlen($str));
 		}
 		else
 		{

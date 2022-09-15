@@ -5,7 +5,7 @@
 /** @global string $strSubIBlockType */
 /** @global int $intSubPropValue */
 /** @global int $strSubTMP_ID */
-/** @global array $arCatalog */
+/** @global array $arSubCatalog */
 /** @global array $arSubIBlock */
 /** @global string $by */
 /** @global string $order */
@@ -88,7 +88,7 @@ $basePriceTypeId = 0;
 if ($boolSubCatalog)
 {
 	$useStoreControl = Catalog\Config\State::isUsedInventoryManagement();
-	$strSaveWithoutPrice = (string)Main\Config\Option::get('catalog','save_product_without_price');
+	$strSaveWithoutPrice = Main\Config\Option::get('catalog','save_product_without_price');
 	$boolCatalogRead = $USER->CanDoOperation('catalog_read');
 	$boolCatalogPrice = $USER->CanDoOperation('catalog_price');
 	$boolCatalogPurchasInfo = $USER->CanDoOperation('catalog_purchas_info');
@@ -100,9 +100,10 @@ if ($boolSubCatalog)
 	if (!empty($basePriceType))
 		$basePriceTypeId = $basePriceType['ID'];
 }
+$changeUserByActive = Main\Config\Option::get('iblock', 'change_user_by_group_active_modify') === 'Y';
 
-define("MODULE_ID", "iblock");
-define("ENTITY", "CIBlockDocument");
+const MODULE_ID = "iblock";
+const ENTITY = "CIBlockDocument";
 define("DOCUMENT_TYPE", "iblock_".$intSubIBlockID);
 
 $currentUser = array(
@@ -133,7 +134,7 @@ $maxImageSize = array(
 	"H" => $listImageSize,
 );
 unset($listImageSize);
-$useCalendarTime = (string)Main\Config\Option::get('iblock', 'list_full_date_edit') == 'Y';
+$useCalendarTime = Main\Config\Option::get('iblock', 'list_full_date_edit') == 'Y';
 
 $arProps = array();
 $iterator = Iblock\PropertyTable::getList([
@@ -152,7 +153,7 @@ while($arProp = $iterator->fetch())
 
 $sTableID = "tbl_iblock_sub_element_".md5($strSubIBlockType.".".$intSubIBlockID);
 
-$arHideFields = array('PROPERTY_'.$arCatalog['SKU_PROPERTY_ID']);
+$arHideFields = array('PROPERTY_'.$arSubCatalog['SKU_PROPERTY_ID']);
 $lAdmin = new CAdminSubList($sTableID,false,$strSubElementAjaxPath,$arHideFields);
 
 $groupParams = array(
@@ -173,7 +174,7 @@ if ($by == 'CATALOG_TYPE')
 
 // only sku property filter
 $arFilterFields = array(
-	"find_el_property_".$arCatalog['SKU_PROPERTY_ID'],
+	"find_el_property_".$arSubCatalog['SKU_PROPERTY_ID'],
 );
 
 $find_section_section = -1;
@@ -633,6 +634,8 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 			Catalog\Product\Sku::enableDeferredCalculation();
 		}
 
+		$ib = new CIBlockElement();
+
 		foreach ($_POST['FIELDS'] as $subID => $arFields)
 		{
 			if (!$lAdmin->IsUpdated($subID))
@@ -791,7 +794,7 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 			}
 
 			$arFields["MODIFIED_BY"] = $currentUser['ID'];
-			$ib = new CIBlockElement();
+			$ib->LAST_ERROR = '';
 			$DB->StartTransaction();
 
 			if (!$ib->Update($subID, $arFields, true, true, true))
@@ -901,6 +904,8 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 				}
 			}
 		}
+
+		unset($ib);
 
 		if ($boolSubCatalog)
 		{
@@ -1097,6 +1102,8 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 				Catalog\Product\Sku::enableDeferredCalculation();
 			}
 
+			$ob = new CIBlockElement();
+
 			foreach ($arID as $subID)
 			{
 				$subID = (int)$subID;
@@ -1205,8 +1212,12 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 					case ActionType::DEACTIVATE:
 						if (CIBlockElementRights::UserHasRightTo($intSubIBlockID, $subID, "element_edit"))
 						{
-							$ob = new CIBlockElement();
+							$ob->LAST_ERROR = '';
 							$arFields = array("ACTIVE" => ($actionId == ActionType::ACTIVATE ? "Y" : "N"));
+							if ($changeUserByActive)
+							{
+								$arFields['MODIFIED_BY'] = $currentUser['ID'];
+							}
 							if (!$ob->Update($subID, $arFields, true))
 								$lAdmin->AddGroupError(Loc::getMessage("IBEL_A_UPDERR").$ob->LAST_ERROR, $subID);
 						}
@@ -1229,13 +1240,13 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 								{
 									if ($arRes["WF_STATUS_ID"] != $new_status)
 									{
-										$obE = new CIBlockElement();
-										$res = $obE->Update($subID, array(
+										$ob->LAST_ERROR = '';
+										$res = $ob->Update($subID, array(
 											"WF_STATUS_ID" => $new_status,
 											"MODIFIED_BY" => $currentUser['ID'],
 										), true);
 										if (!$res)
-											$lAdmin->AddGroupError(Loc::getMessage("IBEL_A_SAVE_ERROR", array("#ID#" => $subID, "#ERROR_TEXT#" => $obE->LAST_ERROR)), $subID);
+											$lAdmin->AddGroupError(Loc::getMessage("IBEL_A_SAVE_ERROR", array("#ID#" => $subID, "#ERROR_TEXT#" => $ob->LAST_ERROR)), $subID);
 									}
 								}
 								else
@@ -1275,7 +1286,7 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 					case ActionType::CLEAR_COUNTER:
 						if (CIBlockElementRights::UserHasRightTo($intSubIBlockID, $subID, "element_edit"))
 						{
-							$ob = new CIBlockElement();
+							$ob->LAST_ERROR = '';
 							$arFields = array('SHOW_COUNTER' => false, 'SHOW_COUNTER_START' => false);
 							if (!$ob->Update($subID, $arFields, true))
 								$lAdmin->AddGroupError(Loc::getMessage("IBEL_A_UPDERR").$ob->LAST_ERROR, $subID);
@@ -1324,6 +1335,8 @@ if (defined('B_ADMIN_SUBELEMENTS_LIST') && true === B_ADMIN_SUBELEMENTS_LIST)
 					}
 				}
 			}
+
+			unset($ob);
 
 			if (
 				$boolSubCatalog
@@ -1380,7 +1393,7 @@ if (true == B_ADMIN_SUBELEMENTS_LIST)
 
 if (!(false == B_ADMIN_SUBELEMENTS_LIST && $bCopy))
 {
-	if(isset($_REQUEST["mode"]) && $_REQUEST["mode"] == "excel")
+	if ($lAdmin->isExportMode())
 	{
 		$arNavParams = false;
 	}
@@ -1557,29 +1570,54 @@ if (!(false == B_ADMIN_SUBELEMENTS_LIST && $bCopy))
 
 		$row->AddViewField("ID", $itemId);
 
-		if ($publicMode)
-		{
-			$contentLockedUserName = '['.$arRes['WF_LOCKED_BY'].']&nbsp;'.$arRes['LOCKED_USER_NAME'];
-			$contentUserName = '['.$arRes['MODIFIED_BY'].']&nbsp;'.$arRes['USER_NAME'];
-			$contentCreatedUserName = '['.$arRes['CREATED_BY'].']&nbsp;'.$arRes['CREATED_USER_NAME'];
-		}
-		else
-		{
-			$contentLockedUserName = '[<a href="'.$selfFolderUrl.'user_edit.php?lang='.LANGUAGE_ID.'&ID='.$arRes['WF_LOCKED_BY'].'" title="'.Loc::getMessage("IBEL_A_USERINFO").'">'.$arRes['WF_LOCKED_BY'].'</a>]&nbsp;'.$arRes['LOCKED_USER_NAME'];
-			$contentUserName = '[<a href="'.$selfFolderUrl.'user_edit.php?lang='.LANGUAGE_ID.'&ID='.$arRes['MODIFIED_BY'].'" title="'.Loc::getMessage("IBEL_A_USERINFO").'">'.$arRes['MODIFIED_BY'].'</a>]&nbsp;'.$arRes['USER_NAME'];
-			$contentCreatedUserName = '[<a href="'.$selfFolderUrl.'user_edit.php?lang='.LANGUAGE_ID.'&ID='.$arRes['CREATED_BY'].'" title="'.Loc::getMessage("IBEL_A_USERINFO").'">'.$arRes['CREATED_BY'].'</a>]&nbsp;'.$arRes['CREATED_USER_NAME'];
-		}
 		if (isset($arRes['LOCKED_USER_NAME']) && $arRes['LOCKED_USER_NAME'] != '')
+		{
+			$arRes['LOCKED_USER_NAME'] = htmlspecialcharsEx($arRes['LOCKED_USER_NAME']);
+			if ($publicMode)
+			{
+				$contentLockedUserName = '['.$arRes['WF_LOCKED_BY'].']&nbsp;'.$arRes['LOCKED_USER_NAME'];
+			}
+			else
+			{
+				$contentLockedUserName = '[<a href="'.$selfFolderUrl.'user_edit.php?lang='.LANGUAGE_ID.'&ID='.$arRes['WF_LOCKED_BY'].'" title="'.Loc::getMessage("IBEL_A_USERINFO").'">'.$arRes['WF_LOCKED_BY'].'</a>]&nbsp;'.$arRes['LOCKED_USER_NAME'];
+			}
 			$row->AddViewField("LOCKED_USER_NAME", $contentLockedUserName);
+			unset($contentLockedUserName);
+		}
 		if (isset($arRes['USER_NAME']) && $arRes['USER_NAME'] != '')
+		{
+			$arRes['USER_NAME'] = htmlspecialcharsEx($arRes['USER_NAME']);
+			if ($publicMode)
+			{
+				$contentUserName = '['.$arRes['MODIFIED_BY'].']&nbsp;'.$arRes['USER_NAME'];
+			}
+			else
+			{
+				$contentUserName = '[<a href="'.$selfFolderUrl.'user_edit.php?lang='.LANGUAGE_ID.'&ID='.$arRes['MODIFIED_BY'].'" title="'.Loc::getMessage("IBEL_A_USERINFO").'">'.$arRes['MODIFIED_BY'].'</a>]&nbsp;'.$arRes['USER_NAME'];
+			}
 			$row->AddViewField("USER_NAME", $contentUserName);
-		$row->AddViewField("CREATED_USER_NAME", $contentCreatedUserName);
+			unset($contentUserName);
+		}
+		if (isset($arRes['CREATED_USER_NAME']) && $arRes['CREATED_USER_NAME'] != '')
+		{
+			$arRes['CREATED_USER_NAME'] = htmlspecialcharsEx($arRes['CREATED_USER_NAME']);
+			if ($publicMode)
+			{
+				$contentCreatedUserName = '['.$arRes['CREATED_BY'].']&nbsp;'.$arRes['CREATED_USER_NAME'];
+			}
+			else
+			{
+				$contentCreatedUserName = '[<a href="'.$selfFolderUrl.'user_edit.php?lang='.LANGUAGE_ID.'&ID='.$arRes['CREATED_BY'].'" title="'.Loc::getMessage("IBEL_A_USERINFO").'">'.$arRes['CREATED_BY'].'</a>]&nbsp;'.$arRes['CREATED_USER_NAME'];
+			}
+			$row->AddViewField("CREATED_USER_NAME", $contentCreatedUserName);
+			unset($contentCreatedUserName);
+		}
 
 		if ($boolSubWorkFlow || $boolSubBizproc)
 		{
 			$lamp = '<span class="adm-lamp adm-lamp-in-list adm-lamp-'.$lockStatus.'"></span>';
 			if ($lockStatus=='red' && $arRes_orig['LOCKED_USER_NAME']!='')
-				$row->AddViewField("LOCK_STATUS", $lamp.$arRes_orig['LOCKED_USER_NAME']);
+				$row->AddViewField("LOCK_STATUS", $lamp.htmlspecialcharsEx($arRes_orig['LOCKED_USER_NAME']));
 			else
 				$row->AddViewField("LOCK_STATUS", $lamp);
 		}
@@ -2031,10 +2069,11 @@ if (!(false == B_ADMIN_SUBELEMENTS_LIST && $bCopy))
 			$row->AddViewField("BIZPROC", $str);
 		}
 	}
+	unset($row);
 
 	$boolIBlockElementAdd = CIBlockSectionRights::UserHasRightTo($intSubIBlockID, $find_section_section, "section_element_bind");
 
-$defaultQuantityTrace = ((string)Main\Config\Option::get("catalog", "default_quantity_trace") == 'Y'
+$defaultQuantityTrace = (Main\Config\Option::get("catalog", "default_quantity_trace") == 'Y'
 	? Loc::getMessage("IBEL_YES_VALUE")
 	: Loc::getMessage("IBEL_NO_VALUE")
 );
@@ -2043,7 +2082,7 @@ $quantityTraceStatus = array(
 	Catalog\ProductTable::STATUS_YES => Loc::getMessage("IBEL_YES_VALUE"),
 	Catalog\ProductTable::STATUS_NO => Loc::getMessage("IBEL_NO_VALUE"),
 );
-$defaultCanBuyZero = ((string)Main\Config\Option::get('catalog', 'default_can_buy_zero') == 'Y'
+$defaultCanBuyZero = (Main\Config\Option::get('catalog', 'default_can_buy_zero') == 'Y'
 	? Loc::getMessage("IBEL_YES_VALUE")
 	: Loc::getMessage("IBEL_NO_VALUE")
 );
@@ -2619,6 +2658,7 @@ if (!empty($arRows))
 		if (!empty($arActions))
 			$row->AddActions($arActions);
 	}
+	unset($row);
 
 	if (!empty($priceTypeIndex) && !empty($productShowPrices))
 	{
@@ -3114,7 +3154,7 @@ function ShowSkuGenerator(id)
 		);
 	}
 
-	$excelExport = ((string)Main\Config\Option::get("iblock", "excel_export_rights") == "Y"
+	$excelExport = (Main\Config\Option::get("iblock", "excel_export_rights") == "Y"
 		? CIBlockRights::UserHasRightTo($intSubIBlockID, $intSubIBlockID, "iblock_export")
 		: true
 	);

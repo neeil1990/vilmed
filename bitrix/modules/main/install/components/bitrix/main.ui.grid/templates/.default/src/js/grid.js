@@ -41,6 +41,8 @@
 	 * @param {string} arParams.CONFIRM_MESSAGE
 	 * @param {string} arParams.CONFIRM_FOR_ALL_MESSAGE
 	 * @param {string} arParams.CONFIRM_RESET_MESSAGE
+	 * @param {object} arParams.COLUMNS_ALL_WITH_SECTIONS
+	 * @param {boolean} arParams.ENABLE_FIELDS_SEARCH
 	 * @param {string} arParams.RESET_DEFAULT
 	 * @param {object} userOptions
 	 * @param {object} userOptionsActions
@@ -132,6 +134,7 @@
 			this.userOptions = new BX.Grid.UserOptions(this, userOptions, userOptionsActions, userOptionsHandlerUrl);
 			this.gridSettings = new BX.Grid.SettingsWindow(this);
 			this.messages = new BX.Grid.Message(this, messageTypes);
+			this.cache = new BX.Cache.MemoryCache();
 
 			if (this.getParam('ALLOW_PIN_HEADER'))
 			{
@@ -209,12 +212,16 @@
 			BX.removeCustomEvent(window, 'Grid::unselectRows', BX.proxy(this._onUnselectRows, this));
 			BX.removeCustomEvent(window, 'Grid::allRowsUnselected', BX.proxy(this._onUnselectRows, this));
 			BX.removeCustomEvent(window, 'Grid::headerPinned', BX.proxy(this.bindOnCheckAll, this));
+			BX.removeCustomEvent(window, 'Grid::updated', BX.proxy(this._onGridUpdated, this));
 			this.getPinHeader() && this.getPinHeader().destroy();
 			this.getFader() && this.getFader().destroy();
 			this.getResize() && this.getResize().destroy();
 			this.getColsSortable() && this.getColsSortable().destroy();
 			this.getRowsSortable() && this.getRowsSortable().destroy();
 			this.getSettingsWindow() && this.getSettingsWindow().destroy();
+			this.getActionsPanel() && this.getActionsPanel().destroy();
+			this.getPinPanel() && this.getPinPanel().destroy();
+			this.getPageSize() && this.getPageSize().destroy();
 		},
 
 		_onFrameResize: function()
@@ -464,6 +471,8 @@
 			{
 				this.getPinHeader()._onGridUpdate();
 			}
+
+			BX.onCustomEvent(window, 'Grid::resize', [this]);
 		},
 
 		editSelectedSave: function()
@@ -704,6 +713,11 @@
 			return this.actionPanel;
 		},
 
+		getPinPanel: function()
+		{
+			return this.pinPanel;
+		},
+
 		getApplyButton: function()
 		{
 			return BX.Grid.Utils.getByClass(this.getContainer(), this.settings.get('classPanelButton'), true);
@@ -731,78 +745,86 @@
 
 		adjustEmptyTable: function(rows)
 		{
-			requestAnimationFrame(function() {
-				function adjustEmptyBlockPosition(event) {
-					var target = event.currentTarget;
-					BX.Grid.Utils.requestAnimationFrame(function() {
-						BX.style(emptyBlock, 'transform', 'translate3d(' + BX.scrollLeft(target) + 'px, 0px, 0');
-					});
+			function adjustEmptyBlockPosition(event) {
+				var target = event.currentTarget;
+				BX.style(emptyBlock, 'transform', 'translate3d(' + BX.scrollLeft(target) + 'px, 0px, 0');
+			}
+
+			var filteredRows = rows.filter(function(row) {
+				return (
+					BX.Dom.attr(row, 'data-id') !== 'template_0'
+					&& !BX.Dom.hasClass(row, 'main-grid-hide')
+				);
+			});
+
+			if (
+				!BX.hasClass(document.documentElement, 'bx-ie')
+				&& filteredRows.length === 1
+				&& BX.hasClass(filteredRows[0], this.settings.get('classEmptyRows'))
+			)
+			{
+				var gridRect = BX.pos(this.getContainer());
+				var scrollBottom = BX.scrollTop(window) + BX.height(window);
+				var diff = gridRect.bottom - scrollBottom;
+				var panelsHeight = BX.height(this.getPanels());
+				var emptyBlock = this.getEmptyBlock();
+				var containerWidth = BX.width(this.getContainer());
+
+				if (containerWidth)
+				{
+					BX.width(emptyBlock, containerWidth);
 				}
 
-				var filteredRows = rows.filter(function(row) {
-					return BX.Dom.attr(row, 'data-id') !== 'template_0';
-				});
+				BX.style(emptyBlock, 'transform', 'translate3d(' + BX.scrollLeft(this.getScrollContainer()) + 'px, 0px, 0');
 
-				if (!BX.hasClass(document.documentElement, 'bx-ie') &&
-					BX.type.isArray(rows) && filteredRows.length === 1 &&
-					BX.hasClass(rows[0], this.settings.get('classEmptyRows')))
+				BX.unbind(this.getScrollContainer(), 'scroll', adjustEmptyBlockPosition);
+				BX.bind(this.getScrollContainer(), 'scroll', adjustEmptyBlockPosition);
+
+				var parent = this.getContainer();
+				var paddingOffset = 0;
+
+				while (parent = parent.parentElement)
 				{
-					var gridRect = BX.pos(this.getContainer());
-					var scrollBottom = BX.scrollTop(window) + BX.height(window);
-					var diff = gridRect.bottom - scrollBottom;
-					var panelsHeight = BX.height(this.getPanels());
-					var emptyBlock = this.getEmptyBlock();
-					var containerWidth = BX.width(this.getContainer());
+					var parentPaddingTop = parseFloat(BX.style(parent, "padding-top"));
+					var parentPaddingBottom = parseFloat(BX.style(parent, "padding-bottom"));
 
-					if (containerWidth)
+					if (!isNaN(parentPaddingTop))
 					{
-						BX.width(emptyBlock, containerWidth);
+						paddingOffset += parentPaddingTop;
 					}
 
-					BX.style(emptyBlock, 'transform', 'translate3d(' + BX.scrollLeft(this.getScrollContainer()) + 'px, 0px, 0');
-
-					BX.unbind(this.getScrollContainer(), 'scroll', adjustEmptyBlockPosition);
-					BX.bind(this.getScrollContainer(), 'scroll', adjustEmptyBlockPosition);
-
-					var parent = this.getContainer();
-					var paddingOffset = 0;
-
-					while (parent = parent.parentElement)
+					if (!isNaN(parentPaddingBottom))
 					{
-						var parentPaddingTop = parseFloat(BX.style(parent, "padding-top"));
-						var parentPaddingBottom = parseFloat(BX.style(parent, "padding-bottom"));
-
-						if (!isNaN(parentPaddingTop))
-						{
-							paddingOffset += parentPaddingTop;
-						}
-
-						if (!isNaN(parentPaddingBottom))
-						{
-							paddingOffset += parentPaddingBottom;
-						}
+						paddingOffset += parentPaddingBottom;
 					}
+				}
 
-					if (diff > 0)
-					{
-						BX.style(this.getTable(), 'min-height', (gridRect.height - diff - panelsHeight - paddingOffset) + 'px');
-					}
-					else
-					{
-						BX.style(this.getTable(), 'min-height', (gridRect.height + Math.abs(diff) - panelsHeight - paddingOffset) + 'px');
-					}
+				if (diff > 0)
+				{
+					BX.style(this.getTable(), 'min-height', (gridRect.height - diff - panelsHeight - paddingOffset) + 'px');
 				}
 				else
 				{
-					BX.style(this.getTable(), 'min-height', '');
-
-					// Chrome hack for 0116845 bug. @todo refactoring
-					BX.style(this.getTable(), 'height', '1px');
-					requestAnimationFrame(function() {
-						BX.style(this.getTable(), 'height', '1px');
-					}.bind(this));
+					BX.style(this.getTable(), 'min-height', (gridRect.height + Math.abs(diff) - panelsHeight - paddingOffset) + 'px');
 				}
-			}.bind(this));
+
+				if (this.getCurrentPage() <= 1)
+				{
+					BX.Dom.hide(this.getPanels());
+				}
+			}
+			else
+			{
+				BX.style(this.getTable(), 'min-height', '');
+
+				// Chrome hack for 0116845 bug. @todo refactoring
+				BX.style(this.getTable(), 'height', '1px');
+				requestAnimationFrame(function() {
+					BX.style(this.getTable(), 'height', '1px');
+				}.bind(this));
+
+				BX.Dom.show(this.getPanels());
+			}
 		},
 
 		reloadTable: function(method, data, callback, url)
@@ -828,6 +850,7 @@
 			}
 
 			this.getData().request(url, method, data, '', function() {
+				BX.onCustomEvent(window, 'BX.Main.Grid:onBeforeReload', [self]);
 				self.getRows().reset();
 				bodyRows = this.getBodyRows();
 				self.getUpdater().updateHeadRows(this.getHeadRows());
@@ -989,6 +1012,17 @@
 
 				if (cell && self.isSortableHeader(cell) && !self.preventSortableClick)
 				{
+					var onBeforeSortEvent = new BX.Event.BaseEvent({
+						data: {
+							grid: self,
+							columnName: BX.data(cell, 'name')
+						},
+					});
+					BX.Event.EventEmitter.emit('BX.Main.grid:onBeforeSort', onBeforeSortEvent);
+					if (onBeforeSortEvent.isDefaultPrevented())
+					{
+						return;
+					}
 					self.preventSortableClick = false;
 					self._clickOnSortableHeader(cell, event);
 				}
@@ -1284,7 +1318,6 @@
 
 						self.bindOnMoreButtonEvents();
 						self.bindOnClickPaginationLinks();
-						self.bindOnClickHeader();
 						self.bindOnCheckAll();
 						self.updateCounterDisplayed();
 						self.updateCounterSelected();
@@ -1609,85 +1642,87 @@
 				if (event.target.nodeName !== 'A' && event.target.nodeName !== 'INPUT')
 				{
 					row = this.getRows().get(event.target);
-
-					contentContainer = row.getContentContainer(event.target);
-
-					if (BX.type.isDomNode(contentContainer) && event.target.nodeName !== 'TD' && event.target !== contentContainer)
+					if (row)
 					{
-						isPrevent = BX.data(contentContainer, 'prevent-default') === 'true';
-					}
+						contentContainer = row.getContentContainer(event.target);
 
-					if (isPrevent)
-					{
-						if (row.getCheckbox())
+						if (BX.type.isDomNode(contentContainer) && event.target.nodeName !== 'TD' && event.target !== contentContainer)
 						{
-							rows = [];
-
-							this.currentIndex = 0;
-
-							this.getRows().getRows().forEach(function(currentRow, index) {
-								if (currentRow === row)
-								{
-									this.currentIndex = index;
-								}
-							}, this);
-
-							this.lastIndex = this.lastIndex || this.currentIndex;
-
-							if (!event.shiftKey)
-							{
-								if (!row.isSelected())
-								{
-									this.lastRowAction = 'select';
-									row.select();
-									BX.onCustomEvent(window, 'Grid::selectRow', [row, this]);
-								}
-								else
-								{
-									this.lastRowAction = 'unselect';
-									row.unselect();
-									BX.onCustomEvent(window, 'Grid::unselectRow', [row, this]);
-								}
-							}
-							else
-							{
-								min = Math.min(this.currentIndex, this.lastIndex);
-								max = Math.max(this.currentIndex, this.lastIndex);
-
-								while (min <= max)
-								{
-									rows.push(this.getRows().getRows()[min]);
-									min++;
-								}
-
-								containsNotSelected = rows.some(function(current) {
-									return !current.isSelected();
-								});
-
-								if (containsNotSelected)
-								{
-									rows.forEach(function(current) {
-										current.select();
-									});
-									this.lastRowAction = 'select';
-									BX.onCustomEvent(window, 'Grid::selectRows', [rows, this]);
-								}
-								else
-								{
-									rows.forEach(function(current) {
-										current.unselect();
-									});
-									this.lastRowAction = 'unselect';
-									BX.onCustomEvent(window, 'Grid::unselectRows', [rows, this]);
-								}
-							}
-
-							this.updateCounterSelected();
-							this.lastIndex = this.currentIndex;
+							isPrevent = BX.data(contentContainer, 'prevent-default') === 'true';
 						}
 
-						this.adjustRows();
-						this.adjustCheckAllCheckboxes();
+						if (isPrevent)
+						{
+							if (row.getCheckbox())
+							{
+								rows = [];
+
+								this.currentIndex = 0;
+
+								this.getRows().getRows().forEach(function(currentRow, index) {
+									if (currentRow === row)
+									{
+										this.currentIndex = index;
+									}
+								}, this);
+
+								this.lastIndex = this.lastIndex || this.currentIndex;
+
+								if (!event.shiftKey)
+								{
+									if (!row.isSelected())
+									{
+										this.lastRowAction = 'select';
+										row.select();
+										BX.onCustomEvent(window, 'Grid::selectRow', [row, this]);
+									}
+									else
+									{
+										this.lastRowAction = 'unselect';
+										row.unselect();
+										BX.onCustomEvent(window, 'Grid::unselectRow', [row, this]);
+									}
+								}
+								else
+								{
+									min = Math.min(this.currentIndex, this.lastIndex);
+									max = Math.max(this.currentIndex, this.lastIndex);
+
+									while (min <= max)
+									{
+										rows.push(this.getRows().getRows()[min]);
+										min++;
+									}
+
+									containsNotSelected = rows.some(function(current) {
+										return !current.isSelected();
+									});
+
+									if (containsNotSelected)
+									{
+										rows.forEach(function(current) {
+											current.select();
+										});
+										this.lastRowAction = 'select';
+										BX.onCustomEvent(window, 'Grid::selectRows', [rows, this]);
+									}
+									else
+									{
+										rows.forEach(function(current) {
+											current.unselect();
+										});
+										this.lastRowAction = 'unselect';
+										BX.onCustomEvent(window, 'Grid::unselectRows', [rows, this]);
+									}
+								}
+
+								this.updateCounterSelected();
+								this.lastIndex = this.currentIndex;
+							}
+
+							this.adjustRows();
+							this.adjustCheckAllCheckboxes();
+						}
 					}
 				}
 			}
@@ -1697,7 +1732,7 @@
 		{
 			if (this.getRows().isSelected())
 			{
-				BX.onCustomEvent(window, 'Grid::thereSelectedRows', []);
+				BX.onCustomEvent(window, 'Grid::thereSelectedRows', [this]);
 				this.enableActionsPanel();
 			}
 			else
@@ -1755,7 +1790,6 @@
 					self.bindOnRowEvents();
 					self.bindOnMoreButtonEvents();
 					self.bindOnClickPaginationLinks();
-					self.bindOnClickHeader();
 					self.bindOnCheckAll();
 					self.updateCounterDisplayed();
 					self.updateCounterSelected();
@@ -1804,7 +1838,6 @@
 
 				self.bindOnMoreButtonEvents();
 				self.bindOnClickPaginationLinks();
-				self.bindOnClickHeader();
 				self.bindOnCheckAll();
 				self.updateCounterDisplayed();
 				self.updateCounterSelected();
@@ -2200,6 +2233,17 @@
 			}
 		},
 
+		getCurrentPage: function()
+		{
+			var currentPage = parseInt(this.arParams.CURRENT_PAGE);
+			if (BX.Type.isNumber(currentPage))
+			{
+				return currentPage;
+			}
+
+			return 0;
+		},
+
 		/**
 		 * @private
 		 * @return {Element | any}
@@ -2218,6 +2262,10 @@
 			if (stub)
 			{
 				BX.Dom.attr(stub, 'hidden', null);
+				if (this.getCurrentPage() <= 1)
+				{
+					BX.Dom.hide(this.getPanels());
+				}
 			}
 		},
 
@@ -2230,11 +2278,12 @@
 			if (stub)
 			{
 				BX.Dom.attr(stub, 'hidden', true);
+				BX.Dom.style(this.getTable(), 'min-height', null);
+				BX.Dom.show(this.getPanels());
 			}
 		},
 
 		/**
-		 * @private
 		 * @return {BX.Grid.Row}
 		 */
 		getTemplateRow: function()
@@ -2326,14 +2375,50 @@
 		 */
 		prependRowEditor: function()
 		{
+			return this.addRowEditor('prepend');
+		},
+
+		/**
+		 * @return {BX.Grid.Row}
+		 */
+		appendRowEditor: function()
+		{
+			return this.addRowEditor('append');
+		},
+
+		/**
+		 * @return {BX.Grid.Row}
+		 */
+		addRowEditor: function(direction = 'prepend')
+		{
 			BX.Dom.style(this.getTable(), 'min-height', null);
 			const templateRow = this.getTemplateRow();
 			this.editableRows.push(templateRow);
 
-			templateRow.prependTo(this.getBody());
+			if (direction === 'prepend')
+			{
+				templateRow.prependTo(this.getBody());
+			}
+			else
+			{
+				templateRow.appendTo(this.getBody());
+			}
+
 			templateRow.show();
 			templateRow.select();
 			templateRow.edit();
+
+			this.getRows().reset();
+
+			if (this.getParam('ALLOW_ROWS_SORT'))
+			{
+				this.rowsSortable.reinit();
+			}
+
+			if (this.getParam('ALLOW_COLUMNS_SORT'))
+			{
+				this.colsSortable.reinit();
+			}
 
 			this.hideEmptyStub();
 
@@ -2374,6 +2459,15 @@
 
 					this.editableRows = [];
 				});
+		},
+
+		getRealtime(): BX.Grid.Realtime
+		{
+			return this.cache.remember('realtime', () => {
+				return new BX.Grid.Realtime({
+					grid: this,
+				});
+			});
 		},
 	};
 })();

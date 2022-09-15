@@ -29,8 +29,6 @@ return [
 			'METAMAIN_TITLE' => Loc::getMessage("LANDING_DEMO_WIKI_LIGHT_SEDEBAR_TITLE"),
 			'METAMAIN_DESCRIPTION' => '',
 			'METAOG_TITLE' => Loc::getMessage("LANDING_DEMO_WIKI_LIGHT_SEDEBAR_TITLE"),
-			'METAOG_DESCRIPTION' => '',
-			'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/wiki-light/sidebar/preview.jpg',
 			'PIXELFB_USE' => 'N',
 			'GACOUNTER_USE' => 'N',
 			'GACOUNTER_SEND_CLICK' => 'N',
@@ -56,7 +54,7 @@ return [
 			],
 			'style' => [
 				'#wrapper' => [
-					0 => 'landing-block landing-block-menu g-pl-auto g-pr-auto g-mt-auto g-pt-30 g-pb-30',
+					0 => 'landing-block landing-block-menu g-pt-30 g-pb-30 g-pl-60 g-pr-60 g-mt-60',
 				],
 			],
 		],

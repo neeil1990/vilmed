@@ -17,7 +17,7 @@ use Bitrix\Iblock,
 
 Loc::loadMessages(__FILE__);
 
-require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/general/admin_tool.php");
+require_once __DIR__.'/../../../../general/admin_tool.php';
 
 class OrderBasket
 {
@@ -81,6 +81,11 @@ class OrderBasket
 				"VISIBLE_COLUMNS" => $this->visibleColumns
 			));
 		}
+	}
+
+	public function setSettingsShowPropsVisible(bool $isVisible): void
+	{
+		$this->settingsDialog->setShowPropsVisible($isVisible);
 	}
 
 	/**
@@ -454,6 +459,8 @@ class OrderBasket
 		}
 		else
 		{
+			$showProps = OrderBasketSettings::loadIsShowPropsVisible();
+
 			$result .= '
 				BX.ready(function(){
 					var obParams = {
@@ -467,6 +474,7 @@ class OrderBasket
 						discounts: '.\CUtil::phpToJSObject(OrderEdit::getOrderedDiscounts($this->order, false)).',
 						createBasketBottom: true,
 						mode: "view",
+						showProps: '.($showProps ? 'true' : 'false').',
 						formatQuantity: "'.Option::get('sale', 'format_quantity', 'AUTO').'",
 						weightUnit: "'.$this->weightUnit.'",
 						'.$this->getTotalBlockFieldsJs($totalPrices, array("WEIGHT" => $weight)).'
@@ -1046,7 +1054,7 @@ class OrderBasket
 					if ($bUseHLIblock)
 					{
 						if(!is_array($arProp["USER_TYPE_SETTINGS"]))
-							$arProp["USER_TYPE_SETTINGS"] = unserialize($arProp["USER_TYPE_SETTINGS"]);
+							$arProp["USER_TYPE_SETTINGS"] = unserialize($arProp["USER_TYPE_SETTINGS"], ['allowed_classes' => false]);
 
 						$hlblock = HL\HighloadBlockTable::getList(array("filter" => array("TABLE_NAME" => $arProp["USER_TYPE_SETTINGS"]["TABLE_NAME"])))->fetch();
 						if ($hlblock)
@@ -1198,7 +1206,7 @@ class OrderBasket
 		return $flagAll? static::$arSkuProps[$iblockId] : static::filterProps(static::$arSkuProps[$iblockId]);
 	}
 
-	protected function getOffersCatalog($iblockId)
+	protected static function getOffersCatalog($iblockId)
 	{
 		if (self::$catalogIncluded === null)
 			self::$catalogIncluded = Main\Loader::includeModule('catalog');
@@ -1211,7 +1219,7 @@ class OrderBasket
 		return static::$offersCatalog[$iblockId];
 	}
 
-	protected function getPropsList($iblockId, $skuPropertyId = 0)
+	protected static function getPropsList($iblockId, $skuPropertyId = 0)
 	{
 		if (self::$catalogIncluded === null)
 			self::$catalogIncluded = Main\Loader::includeModule('catalog');
@@ -1249,7 +1257,7 @@ class OrderBasket
 		return $arResult;
 	}
 
-	protected function filterProps(&$props)
+	protected static function filterProps(&$props)
 	{
 		$result = array();
 		if ($props)
@@ -1818,7 +1826,7 @@ class OrderBasket
 			elseif ($arElementInfo["DETAIL_PICTURE"] > 0)
 				$imgCode = $arElementInfo["DETAIL_PICTURE"];
 
-			if ($imgCode == "" && count($arParent) > 0)
+			if ($imgCode == "" && !empty($arParent) && is_array($arParent))
 			{
 				if ($arParent["PREVIEW_PICTURE"] > 0)
 					$imgCode = $arParent["PREVIEW_PICTURE"];

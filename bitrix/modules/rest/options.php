@@ -11,6 +11,7 @@ if (!Loader::includeModule($module_id))
 }
 
 $context = Application::getInstance()->getContext();
+$request = $context->getRequest();
 $docRoot = $context->getServer()->getDocumentRoot();
 
 Loc::loadMessages($docRoot . BX_ROOT . "/modules/main/options.php");
@@ -87,9 +88,9 @@ $filterOptions = [
 ];
 
 // post save
-if (strlen($Apply.$RestoreDefaults) > 0 && \check_bitrix_sessid())
+if ($Apply.$RestoreDefaults <> '' && \check_bitrix_sessid())
 {
-	if (strlen($RestoreDefaults) > 0)
+	if ($RestoreDefaults <> '')
 	{
 		include_once('default_option.php');
 		if (is_array($rest_default_option))
@@ -319,7 +320,12 @@ $tabControl->Begin();
 		<td colspan="2"><?=GetMessage("REST_OPT_LOG_FILTERS")?></td>
 	</tr>
 	<? foreach($filterOptions as $option):
-		$filters = @unserialize(\Bitrix\Main\Config\Option::get('rest', 'log_filters', ''));
+		$filters = @unserialize(
+			\Bitrix\Main\Config\Option::get('rest', 'log_filters', ''),
+			[
+				'allowed_classes' => false
+			]
+		);
 		if (!is_array($filters))
 		{
 			$filters = array();
@@ -346,7 +352,7 @@ $tabControl->Begin();
 	<input type="submit" name="Apply" value="<?=GetMessage("MAIN_APPLY")?>" title="<?=GetMessage("MAIN_OPT_APPLY_TITLE")?>">
 	<input type="button" title="<?echo GetMessage("MAIN_HINT_RESTORE_DEFAULTS")?>" OnClick="RestoreDefaults();" value="<?echo GetMessage("MAIN_RESTORE_DEFAULTS")?>">
 
-	<? if (strlen($backUrl) > 0): ?>
+	<? if ($backUrl <> ''): ?>
 		<input
 			type="button"
 			name="Cancel"

@@ -11,8 +11,9 @@ use CRestUtil;
 
 class AppConfiguration
 {
+	public const REST_APPLICATION = 'REST_APPLICATION';
 	private static $entityList = [
-		'REST_APPLICATION' => 100,
+		self::REST_APPLICATION => 100,
 	];
 
 	private static $accessManifest = [
@@ -45,19 +46,15 @@ class AppConfiguration
 	{
 		$result = null;
 		$code = $event->getParameter('CODE');
-		if(!static::$entityList[$code])
+		if (
+			!static::$entityList[$code]
+			|| !Manifest::isEntityAvailable($code, $event->getParameters(), static::$accessManifest)
+		)
 		{
 			return $result;
 		}
 
-		$manifest = $event->getParameter('MANIFEST');
-		$access = array_intersect($manifest['USES'], static::$accessManifest);
-		if(!$access)
-		{
-			return $result;
-		}
-
-		if(static::checkRequiredParams($code))
+		if (static::checkRequiredParams($code))
 		{
 			$step = $event->getParameter('STEP');
 			$setting = $event->getParameter('SETTING');
@@ -75,13 +72,13 @@ class AppConfiguration
 	public static function onEventClearController(Event $event)
 	{
 		$result = null;
-		if(!static::checkAccessImport($event))
+		if (!static::checkAccessImport($event))
 		{
 			return $result;
 		}
 
 		$code = $event->getParameter('CODE');
-		if(static::checkRequiredParams($code))
+		if (static::checkRequiredParams($code))
 		{
 			$option = $event->getParameters();
 			switch ($code)
@@ -98,13 +95,13 @@ class AppConfiguration
 	public static function onEventImportController(Event $event)
 	{
 		$result = null;
-		if(!static::checkAccessImport($event))
+		if (!static::checkAccessImport($event))
 		{
 			return $result;
 		}
 
 		$code = $event->getParameter('CODE');
-		if(static::checkRequiredParams($code))
+		if (static::checkRequiredParams($code))
 		{
 			$data = $event->getParameters();
 			switch ($code)
@@ -121,19 +118,10 @@ class AppConfiguration
 	private static function checkAccessImport(Event $event)
 	{
 		$code = $event->getParameter('CODE');
-		if(!static::$entityList[$code])
-		{
-			return false;
-		}
-
-		$manifest = $event->getParameter('IMPORT_MANIFEST');
-		if(empty($manifest['USES']))
-		{
-			return false;
-		}
-
-		$access = array_intersect($manifest['USES'], static::$accessManifest);
-		if(!$access)
+		if (
+			!static::$entityList[$code]
+			|| !Manifest::isEntityAvailable($code, $event->getParameters(), static::$accessManifest)
+		)
 		{
 			return false;
 		}
@@ -155,11 +143,11 @@ class AppConfiguration
 	private static function importApp($item)
 	{
 		$result = false;
-		if(!empty($item['CONTENT']['DATA']['code']))
+		if (!empty($item['CONTENT']['DATA']['code']))
 		{
 			$code = $item['CONTENT']['DATA']['code'];
 			$result = CRestUtil::InstallApp($code);
-			if($result === true)
+			if ($result === true)
 			{
 				$res = AppTable::getList(
 					[
@@ -172,7 +160,7 @@ class AppConfiguration
 						'limit' => 1
 					]
 				);
-				if($app = $res->fetch())
+				if ($app = $res->fetch())
 				{
 					$res = EventTable::getList(
 						[
@@ -184,7 +172,7 @@ class AppConfiguration
 							'limit' => 1
 						]
 					);
-					if(!$event = $res->fetch())
+					if (!$event = $res->fetch())
 					{
 						$res = EventTable::add(
 							[
@@ -223,7 +211,7 @@ class AppConfiguration
 		$result = [
 			'NEXT' => false
 		];
-		if($option['CLEAR_FULL'])
+		if ($option['CLEAR_FULL'])
 		{
 			$dbRes = AppTable::getList(
 				[
@@ -239,18 +227,18 @@ class AppConfiguration
 				]
 			);
 
-			while($appInfo = $dbRes->Fetch())
+			while ($appInfo = $dbRes->Fetch())
 			{
 				$result['NEXT'] = $appInfo['ID'];
 
 				$currentApp = Helper::getInstance()->getContextAction($appInfo['ID']);
-				if(!empty($option['CONTEXT']) && $option['CONTEXT'] === $currentApp)
+				if (!empty($option['CONTEXT']) && $option['CONTEXT'] === $currentApp)
 				{
 					continue;
 				}
 
 				$checkResult = AppTable::checkUninstallAvailability($appInfo['ID']);
-				if($checkResult->isEmpty())
+				if ($checkResult->isEmpty())
 				{
 					AppTable::uninstall($appInfo['ID']);
 					$appFields = [
@@ -279,48 +267,58 @@ class AppConfiguration
 			'=ACTIVE' => AppTable::ACTIVE,
 		];
 
-		if(!empty($setting['APP_REQUIRED']) && is_array($setting['APP_REQUIRED']))
+		if (is_array($setting))
 		{
-			$filter = [
-				[
-					'LOGIC' => 'OR',
-					$filter,
+			if (!empty($setting['APP_REQUIRED']) && is_array($setting['APP_REQUIRED']))
+			{
+				$filter = [
 					[
-						'=ID' => $setting['APP_REQUIRED']
-					]
+						'LOGIC' => 'OR',
+						$filter,
+						[
+							'=ID' => $setting['APP_REQUIRED'],
+						],
+					],
+				];
+			}
+			elseif (array_key_exists('APP_USES_REQUIRED', $setting))
+			{
+				$filter = [];
+				if (!empty($setting['APP_USES_REQUIRED']))
+				{
+					$filter = [
+						'=ID' => $setting['APP_USES_REQUIRED'],
+					];
+				}
+			}
+		}
+
+		if (!empty($filter))
+		{
+			$res = AppTable::getList(
+				[
+					'order' => [
+						'ID' => 'ASC',
+					],
+					'filter' => $filter,
+					'select' => [
+						'ID',
+						'CODE',
+					],
+					'limit' => 1,
+					'offset' => $step,
 				]
-			];
-		}
-		elseif(!empty($setting['APP_USES_REQUIRED']) && is_array($setting['APP_USES_REQUIRED']))
-		{
-			$filter = [
-				'=ID' => $setting['APP_USES_REQUIRED']
-			];
-		}
+			);
 
-		$res = AppTable::getList(
-			[
-				'order' => [
-					'ID' => 'ASC'
-				],
-				'filter' => $filter,
-				'select' => [
-					'ID',
-					'CODE'
-				],
-				'limit' => 1,
-				'offset' => $step
-			]
-		);
-
-		if($app = $res->Fetch())
-		{
-			$return['FILE_NAME'] = $step;
-			$return['NEXT'] = $step;
-			$return['CONTENT'] = [
-				'code' => $app['CODE'],
-				'settings' => []
-			];
+			if ($app = $res->Fetch())
+			{
+				$return['FILE_NAME'] = $step;
+				$return['NEXT'] = $step;
+				$return['CONTENT'] = [
+					'code' => $app['CODE'],
+					'settings' => [],
+				];
+			}
 		}
 
 		return $return;

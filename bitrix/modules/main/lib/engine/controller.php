@@ -2,11 +2,11 @@
 
 namespace Bitrix\Main\Engine;
 
-
 use Bitrix\Main\Application;
 use Bitrix\Main\Component\ParameterSigner;
 use Bitrix\Main\Config\Configuration;
 use Bitrix\Main\Diag\ExceptionHandlerFormatter;
+use Bitrix\Main\Engine\AutoWire\BinderArgumentException;
 use Bitrix\Main\Engine\AutoWire\Parameter;
 use Bitrix\Main\Engine\Contract\Controllerable;
 use Bitrix\Main\Engine\Response\Converter;
@@ -20,14 +20,11 @@ use Bitrix\Main\Event;
 use Bitrix\Main\EventManager;
 use Bitrix\Main\EventResult;
 use Bitrix\Main\HttpResponse;
-use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Request;
 use Bitrix\Main\Response;
 use Bitrix\Main\Security\Sign\BadSignatureException;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Web\PostDecodeFilter;
-
-Loc::loadMessages(__FILE__);
 
 class Controller implements Errorable, Controllerable
 {
@@ -74,7 +71,7 @@ class Controller implements Errorable, Controllerable
 
 	/**
 	 * Constructor Controller.
-	 * @param Request $request
+	 * @param Request|null $request
 	 */
 	public function __construct(Request $request = null)
 	{
@@ -85,6 +82,37 @@ class Controller implements Errorable, Controllerable
 		$this->converter = Converter::toJson();
 
 		$this->init();
+	}
+
+	/**
+	 * @param Controller $controller
+	 * @param string     $actionName
+	 * @param array|null      $parameters
+	 *
+	 * @return HttpResponse|mixed
+	 * @throws SystemException
+	 */
+	public function forward($controller, string $actionName, array $parameters = null)
+	{
+		if (is_string($controller))
+		{
+			$controller = new $controller;
+		}
+
+		// override parameters
+		$controller->request = $this->getRequest();
+		$controller->setScope($this->getScope());
+		$controller->setCurrentUser($this->getCurrentUser());
+
+		// run action
+		$result = $controller->run(
+			$actionName,
+			$parameters === null ? $this->getSourceParametersList() : [$parameters]
+		);
+
+		$this->addErrors($controller->getErrors());
+
+		return $result;
 	}
 
 	/**
@@ -114,6 +142,14 @@ class Controller implements Errorable, Controllerable
 	final public function getModuleId()
 	{
 		return getModuleId($this->getFilePath());
+	}
+
+	final public function isLocatedUnderPsr4(): bool
+	{
+		// do not lower if probably psr4
+		$firstLetter = mb_substr(basename($this->getFilePath()), 0, 1);
+
+		return $firstLetter !== mb_strtolower($firstLetter);
 	}
 
 	final protected function getFilePath()
@@ -341,7 +377,6 @@ class Controller implements Errorable, Controllerable
 	{
 		$this->collectDebugInfo();
 
-		$e = null;
 		$result = null;
 
 		try
@@ -382,8 +417,8 @@ class Controller implements Errorable, Controllerable
 		}
 		catch (\Throwable $e)
 		{
-			$this->processExceptionInDebug($e);
 			$this->runProcessingThrowable($e);
+			$this->processExceptionInDebug($e);
 		}
 
 		$this->logDebugInfo();
@@ -399,7 +434,10 @@ class Controller implements Errorable, Controllerable
 
 	private function processExceptionInDebug(\Throwable $e)
 	{
-		$this->writeToLogException($e);
+		if (!($e instanceof BinderArgumentException))
+		{
+			$this->writeToLogException($e);
+		}
 
 		$exceptionHandling = Configuration::getValue('exception_handling');
 		if (!empty($exceptionHandling['debug']))
@@ -564,6 +602,10 @@ class Controller implements Errorable, Controllerable
 		}
 		else
 		{
+			if (!$config && ($this instanceof Contract\FallbackActionInterface))
+			{
+				return new FallbackAction($actionName, $this, []);
+			}
 			if (!$config)
 			{
 				throw new SystemException(
@@ -811,7 +853,11 @@ class Controller implements Errorable, Controllerable
 
 	protected function runProcessingThrowable(\Throwable $throwable)
 	{
-		if ($throwable instanceof \Exception)
+		if ($throwable instanceof BinderArgumentException)
+		{
+			$this->runProcessingBinderThrowable($throwable);
+		}
+		elseif ($throwable instanceof \Exception)
 		{
 			$this->runProcessingException($throwable);
 		}
@@ -836,6 +882,28 @@ class Controller implements Errorable, Controllerable
 	{
 		//		throw $error;
 		$this->errorCollection[] = $this->buildErrorFromPhpError($error);
+	}
+
+	protected function runProcessingBinderThrowable(BinderArgumentException $e): void
+	{
+		$currentControllerErrors = $this->getErrors();
+		$errors = $e->getErrors();
+		if ($errors)
+		{
+			foreach ($errors as $error)
+			{
+				if (in_array($error, $currentControllerErrors, true))
+				{
+					continue;
+				}
+
+				$this->addError($error);
+			}
+		}
+		else
+		{
+			$this->runProcessingException($e);
+		}
 	}
 
 	protected function buildErrorFromException(\Exception $e)
@@ -873,6 +941,11 @@ class Controller implements Errorable, Controllerable
 		$this->errorCollection[] = new Error('Invalid csrf token');
 
 		throw new SystemException('Invalid csrf token');
+	}
+
+	public function redirectTo($url): HttpResponse
+	{
+		return Context::getCurrent()->getResponse()->redirectTo($url);
 	}
 
 	/**

@@ -1283,7 +1283,7 @@ class CSaleOrderLoader
 
 		$shipment = $shipmentCollection->createItem($service);
 
-		$shipment->setField('DELIVERY_NAME', $service->getName());
+		$shipment->setField('DELIVERY_NAME', $service ? $service->getName() : 'Not Found');
 
 		$this->updateShipmentQuantityFromDocument($arDocument, $shipment);
 
@@ -1697,7 +1697,7 @@ class CSaleOrderLoader
         }
         else
         {
-            $r = \Bitrix\Sale\Internals\PaySystemActionTable::getList(array(
+            $r = \Bitrix\Sale\PaySystem\Manager::getList(array(
                 'select' => array('ID'),
                 'filter' => array('!ACTION_FILE' => 'inner', 'ACTIVE'=>'Y'),
                 'order' => array('ID'=>'ASC')
@@ -1771,7 +1771,7 @@ class CSaleOrderLoader
 			$dbExport = CSaleExport::GetList(array(), array("PERSON_TYPE_ID" => $this->arPersonTypesIDs));
 			while($arExport = $dbExport->Fetch())
 			{
-				$this->arExportInfo[$arExport["PERSON_TYPE_ID"]] = unserialize($arExport["VARS"]);
+				$this->arExportInfo[$arExport["PERSON_TYPE_ID"]] = unserialize($arExport["VARS"], ['allowed_classes' => false]);
 			}
 		}
 	}
@@ -2093,7 +2093,7 @@ class CSaleOrderLoader
 		 */
 
 		if(Sale\Configuration::useStoreControl() || \Bitrix\Main\Config\Option::get('catalog', 'enable_reservation', 'N')=='Y')
-			$this->strErrorDocument .= "\n".GetMessage("CC_BSC1_USE_STORE_SALE");
+			$this->strErrorDocument .= "\n".GetMessage("CC_BSC1_USE_STORE_SALE_1");
 		else
 		{
 			if(\Bitrix\Main\Config\Option::get("main", "~sale_converted_15", 'N') <> 'Y')
@@ -2697,7 +2697,7 @@ class CSaleOrderLoader
 						$dbExport = CSaleExport::GetList(array(), array("PERSON_TYPE_ID" => $arPersonTypesIDs));
 						while($arExport = $dbExport->Fetch())
 						{
-							$arExportInfo[$arExport["PERSON_TYPE_ID"]] = unserialize($arExport["VARS"]);
+							$arExportInfo[$arExport["PERSON_TYPE_ID"]] = unserialize($arExport["VARS"], ['allowed_classes' => false]);
 						}
 					}
 
@@ -3790,7 +3790,7 @@ class CSaleOrderLoader
 					$dbExport = CSaleExport::GetList(array(), array("PERSON_TYPE_ID" => $arPersonTypesIDs));
 					while($arExport = $dbExport->Fetch())
 					{
-						$arExportInfo[$arExport["PERSON_TYPE_ID"]] = unserialize($arExport["VARS"]);
+						$arExportInfo[$arExport["PERSON_TYPE_ID"]] = unserialize($arExport["VARS"], ['allowed_classes' => false]);
 					}
 				}
 
@@ -3821,7 +3821,7 @@ class CSaleOrderLoader
 						)
 							unset($arAgent[$k]);
 					}
-					
+
 					if(intval($arOrder["USER_ID"]) > 0)
 					{
 						$orderFields = array(

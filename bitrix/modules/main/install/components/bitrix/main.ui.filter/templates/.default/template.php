@@ -14,10 +14,12 @@ use Bitrix\Main\UI\Filter\NumberType;
 Extension::load([
 	"ui.buttons",
 	"ui.fonts.opensans",
+	"ui.layout-form",
 	"ui",
 	"dnd",
 	"loader",
-	"date"
+	"date",
+	"ui.icons.service",
 ]);
 
 global $USER;
@@ -58,6 +60,14 @@ $filterSearchClass = "main-ui-filter-theme-".mb_strtolower($arResult["THEME"]);
 if ($arResult["DISABLE_SEARCH"] || !$arParams["CONFIG"]["SEARCH"])
 {
 	$filterSearchClass .= " main-ui-filter-no-search";
+}
+
+if (
+	$arResult["THEME"] === \Bitrix\Main\UI\Filter\Theme::LIGHT
+	&& strlen($arResult["CURRENT_PRESET"]["FIND"]) > 0
+)
+{
+	$filterSearchClass .= " main-ui-filter-search--active";
 }
 
 if ($arResult["COMPACT_STATE"])
@@ -108,6 +118,11 @@ if ($arResult["LIMITS_ENABLED"])
 {
 	$filterWrapperClass .= " main-ui-filter-field-limits-active main-ui-filter-field-limits-animate";
 }
+
+if ($arResult["ENABLE_ADDITIONAL_FILTERS"])
+{
+	$filterWrapperClass .= " main-ui-filter-with-additional-filters";
+}
 ?>
 
 <script type="text/html" id="<?=$arParams["FILTER_ID"]?>_GENERAL_template">
@@ -122,11 +137,11 @@ if ($arResult["LIMITS_ENABLED"])
 						<? foreach ($arResult["PRESETS"] as $key => $preset) : ?>
 							<div class="main-ui-filter-sidebar-item<?=$preset["ID"] === $arResult["CURRENT_PRESET"]["ID"] ? " main-ui-filter-current-item" : ""?><?
 							?><?=$preset["ID"] === "default_filter" || $preset["ID"] === "tmp_filter" ? " main-ui-hide" : ""?><?
-							?><?=$preset["IS_PINNED"] && $arParams["CONFIG"]["DEFAULT_PRESET"] ? " main-ui-item-pin" : ""?>" data-id="<?=$preset["ID"]?>"<?
+							?><?=$preset["IS_PINNED"] && $arParams["CONFIG"]["DEFAULT_PRESET"] ? " main-ui-item-pin" : ""?>" data-id="<?=htmlspecialcharsbx($preset["ID"])?>"<?
 							?><?=$preset["IS_PINNED"] && $arParams["CONFIG"]["DEFAULT_PRESET"] ? " title=\"".Loc::getMessage("MAIN_UI_FILTER__IS_SET_AS_DEFAULT_PRESET")."\"" : " "?>>
 								<span class="main-ui-item-icon main-ui-filter-icon-grab" title="<?=Loc::getMessage("MAIN_UI_FILTER__DRAG_TITLE")?>"></span>
 								<span class="main-ui-filter-sidebar-item-text-container">
-									<span class="main-ui-filter-sidebar-item-text"><?=\Bitrix\Main\Text\HtmlFilter::encode(htmlspecialcharsback($preset["TITLE"]))?></span>
+									<span class="main-ui-filter-sidebar-item-text" title="<?=\Bitrix\Main\Text\HtmlFilter::encode(htmlspecialcharsback($preset["TITLE"]))?>"><?=\Bitrix\Main\Text\HtmlFilter::encode(htmlspecialcharsback($preset["TITLE"]))?></span>
 									<input type="text" placeholder="<?=Loc::getMessage("MAIN_UI_FILTER__FILTER_NAME_PLACEHOLDER")?>" value="<?=\Bitrix\Main\Text\HtmlFilter::encode(htmlspecialcharsback($preset["TITLE"]))?>" class="main-ui-filter-sidebar-item-input">
 									<span class="main-ui-item-icon main-ui-filter-icon-pin" title="<?=Loc::getMessage("MAIN_UI_FILTER__IS_SET_AS_DEFAULT_PRESET")?>"></span>
 								</span>
@@ -208,14 +223,16 @@ if ($arResult["LIMITS_ENABLED"])
 
 <?
     $frame->end();
+    $messages = CUtil::phpToJSObject(Loc::loadLanguageFile(__FILE__), false);
 ?>
 
 <script>
+	BX.Loc.setMessage(<?= $messages ?>);
 	BX.ready(function() {
 		BX.Main.filterManager.push(
 			'<?=\CUtil::jSEscape($arParams["FILTER_ID"])?>',
 			new BX.Main.Filter(
-				<?=CUtil::PhpToJSObject($arResult)?>,
+				<?=CUtil::PhpToJSObject($arResult, false, false, true)?>,
 				<?=CUtil::PhpToJSObject($arParams["CONFIG"])?>,
 				<?=CUtil::PhpToJSObject(Type::getList())?>,
 				<?=CUtil::PhpToJSObject(DateType::getList())?>,

@@ -46,7 +46,21 @@ if($bBadBlock)
 
 $useTree = (isset($_GET['tree']) && $_GET['tree'] === 'Y');
 
-$urlBuilder = Iblock\Url\AdminPage\BuilderManager::getInstance()->getBuilder();
+$request = Main\Context::getCurrent()->getRequest();
+// TODO: hack for psevdo-excel export in crm (\CAdminUiList::GetSystemContextMenu)
+$urlBuilderManager = Iblock\Url\AdminPage\BuilderManager::getInstance();
+$urlBuilder = null;
+$urlBuilderId = (string)$request->get('urlBuilderId') ;
+if ($urlBuilderId !== '')
+{
+	$urlBuilder = $urlBuilderManager->getBuilder($urlBuilderId);
+}
+// TODO end
+if ($urlBuilder === null)
+{
+	$urlBuilder = $urlBuilderManager->getBuilder();
+}
+unset($urlBuilderManager);
 if ($urlBuilder === null)
 {
 	$APPLICATION->SetTitle($arIBTYPE["NAME"]);
@@ -55,6 +69,7 @@ if ($urlBuilder === null)
 	require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
 	die();
 }
+$urlBuilderId = $urlBuilder->getId();
 $urlBuilder->setIblockId($IBLOCK_ID);
 $urlBuilder->setUrlParams(array());
 
@@ -62,24 +77,32 @@ $pageConfig = array(
 	'IBLOCK_EDIT' => false,
 	'CHECK_NEW_CARD' => false,
 	'USE_NEW_CARD' => false,
+	'CATALOG' => false,
 
 	'LIST_ID_PREFIX' => '',
 	'LIST_ID' => $type.'.'.$IBLOCK_ID,
 	'SHOW_NAVCHAIN' => true,
 	'NAVCHAIN_ROOT' => false,
+
+	'ALLOW_USER_EDIT' => true
 );
-switch ($urlBuilder->getId())
+switch ($urlBuilderId)
 {
 	case 'CRM':
 	case 'SHOP':
+	case 'INVENTORY':
 		$pageConfig['LIST_ID_PREFIX'] = 'tbl_catalog_section_';
 		$pageConfig['CHECK_NEW_CARD'] = true;
 		$pageConfig['SHOW_NAVCHAIN'] = false;
 		$pageConfig['CONTEXT_PATH'] = '/shop/settings/cat_section_admin.php'; // TODO: temporary hack
+		$pageConfig['CATALOG'] = true;
+		$pageConfig['ALLOW_USER_EDIT'] = false;
 		break;
 	case 'CATALOG':
 		$pageConfig['LIST_ID_PREFIX'] = 'tbl_catalog_section_';
 		$pageConfig['CONTEXT_PATH'] = '/bitrix/admin/cat_section_admin.php'; // TODO: temporary hack
+		$pageConfig['CATALOG'] = true;
+		$pageConfig['ALLOW_USER_EDIT'] = false;
 		break;
 	case 'IBLOCK':
 		$pageConfig['IBLOCK_EDIT'] = true;
@@ -88,6 +111,19 @@ switch ($urlBuilder->getId())
 		$pageConfig['CONTEXT_PATH'] = '/bitrix/admin/iblock_section_admin.php'; // TODO: temporary hack
 		break;
 }
+
+$canViewUserList = (
+	$USER->CanDoOperation('view_subordinate_users')
+	|| $USER->CanDoOperation('view_all_users')
+);
+$canViewUser = (
+	(
+		$USER->CanDoOperation('edit_all_users')
+		|| $USER->CanDoOperation('edit_subordinate_users')
+		|| $canViewUserList
+	)
+	&& $pageConfig['ALLOW_USER_EDIT']
+);
 
 $sectionTranslit = $arIBlock["FIELDS"]["SECTION_CODE"]["DEFAULT_VALUE"];
 $useSectionTranslit = $sectionTranslit["TRANSLITERATION"] == "Y" && $sectionTranslit["USE_GOOGLE"] != "Y";
@@ -188,48 +224,54 @@ $filterFields = array(
 		"name" => GetMessage("IBSEC_A_TIMESTAMP"),
 		"type" => "date",
 		"filterable" => ""
-	),
-	array(
+	)
+);
+if ($canViewUserList)
+{
+	$filterFields[] = array(
 		"id" => "MODIFIED_BY",
 		"name" => GetMessage("IBSEC_A_MODIFIED_BY"),
 		"type" => "custom_entity",
 		"selector" => array("type" => "user"),
 		"filterable" => ""
-	),
-	array(
-		"id" => "DATE_CREATE",
-		"name" => GetMessage("IBSEC_A_DATE_CREATE"),
-		"type" => "date",
-		"filterable" => ""
-	),
-	array(
+	);
+}
+$filterFields[] = array(
+	"id" => "DATE_CREATE",
+	"name" => GetMessage("IBSEC_A_DATE_CREATE"),
+	"type" => "date",
+	"filterable" => ""
+);
+if ($canViewUserList)
+{
+	$filterFields[] = array(
 		"id" => "CREATED_BY",
 		"name" => GetMessage("IBSEC_A_CREATED_BY"),
 		"type" => "custom_entity",
 		"selector" => array("type" => "user"),
 		"filterable" => ""
+	);
+}
+$filterFields[] = array(
+	"id" => "ACTIVE",
+	"name" => GetMessage("IBSEC_A_ACTIVE"),
+	"type" => "list",
+	"items" => array(
+		"" => GetMessage("IBLOCK_ALL"),
+		"Y" => GetMessage("IBLOCK_YES"),
+		"N" => GetMessage("IBLOCK_NO")
 	),
-	array(
-		"id" => "ACTIVE",
-		"name" => GetMessage("IBSEC_A_ACTIVE"),
-		"type" => "list",
-		"items" => array(
-			"" => GetMessage("IBLOCK_ALL"),
-			"Y" => GetMessage("IBLOCK_YES"),
-			"N" => GetMessage("IBLOCK_NO")
-		),
-		"filterable" => ""
-	),
-	array(
-		"id" => "CODE",
-		"name" => GetMessage("IBSEC_A_CODE"),
-		"filterable" => ""
-	),
-	array(
-		"id" => "EXTERNAL_ID",
-		"name" => GetMessage("IBSEC_A_XML_ID"),
-		"filterable" => ""
-	),
+	"filterable" => ""
+);
+$filterFields[] = array(
+	"id" => "CODE",
+	"name" => GetMessage("IBSEC_A_CODE"),
+	"filterable" => ""
+);
+$filterFields[] = array(
+	"id" => "EXTERNAL_ID",
+	"name" => GetMessage("IBSEC_A_XML_ID"),
+	"filterable" => ""
 );
 
 global $USER_FIELD_MANAGER;
@@ -245,7 +287,9 @@ if ($parent_section_id < 0)
 }
 
 //This is all parameters needed for proper navigation
-$sThisSectionUrl = '&type='.urlencode($type).'&lang='.LANGUAGE_ID.'&IBLOCK_ID='.$IBLOCK_ID.'&find_section_section='.$find_section_section;
+$sThisSectionUrl = $urlBuilder->getUrlParams([
+	'find_section_section' => (int)$find_section_section
+]);
 
 $arFilter = $baseFilter = array("IBLOCK_ID" => $IBLOCK_ID);
 
@@ -291,6 +335,8 @@ if($lAdmin->EditAction()) //save button pressed
 	if (!empty($_FILES['FIELDS']) && is_array($_FILES['FIELDS']))
 		CFile::ConvertFilesToPost($_FILES['FIELDS'], $_POST['FIELDS']);
 
+	$ib = new CIBlockSection;
+
 	foreach($_POST['FIELDS'] as $ID=>$arFields)
 	{
 		$ID = intval($ID);
@@ -304,7 +350,7 @@ if($lAdmin->EditAction()) //save button pressed
 		$USER_FIELD_MANAGER->AdminListPrepareFields($entity_id, $arFields);
 		$arFields["IBLOCK_ID"] = $IBLOCK_ID;
 
-		$ib = new CIBlockSection;
+		$ib->LAST_ERROR = '';
 		$DB->StartTransaction();
 		if(!$ib->Update($ID, $arFields))
 		{
@@ -322,6 +368,8 @@ if($lAdmin->EditAction()) //save button pressed
 			$DB->Commit();
 		}
 	}
+
+	unset($ib);
 }
 
 // action handler
@@ -348,6 +396,9 @@ if ($arID = $lAdmin->GroupAction())
 			}
 			unset($arRes, $rsData);
 		}
+
+		$ob = new CIBlockSection();
+
 		foreach ($arID as $ID)
 		{
 			$ID = (int)$ID;
@@ -384,7 +435,7 @@ if ($arID = $lAdmin->GroupAction())
 				case ActionType::DEACTIVATE:
 					if (CIBlockSectionRights::UserHasRightTo($IBLOCK_ID, $ID, "section_edit"))
 					{
-						$ob = new CIBlockSection();
+						$ob->LAST_ERROR = '';
 						$arFields = array(
 							"ACTIVE" => ($actionId == ActionType::ACTIVATE ? "Y" : "N"),
 						);
@@ -407,10 +458,29 @@ if ($arID = $lAdmin->GroupAction())
 								$sectionTranslitSettings
 							)
 						);
-						$ob = new CIBlockSection();
+						$ob->LAST_ERROR = '';
 						if (!$ob->Update($ID, $arFields))
 						{
 							$lAdmin->AddGroupError(GetMessage("IBSEC_A_UPDERR").$ob->LAST_ERROR, $ID);
+						}
+					}
+					break;
+				case ActionType::MOVE_TO_SECTION:
+					$new_section = (int)$actionParams['SECTION_ID'];
+					if ($new_section >= 0)
+					{
+						if (CIBlockSectionRights::UserHasRightTo($IBLOCK_ID, $new_section, "section_section_bind"))
+						{
+							$ob->LAST_ERROR = '';
+							if (!$ob->Update($ID, array("IBLOCK_SECTION_ID" => $new_section)))
+							{
+								$lAdmin->AddGroupError(GetMessage("IBSEC_A_UPDERR").$ob->LAST_ERROR, $ID);
+							}
+							else
+							{
+								$ipropValues = new \Bitrix\Iblock\InheritedProperty\SectionValues($IBLOCK_ID, $ID);
+								$ipropValues->clearValues();
+							}
 						}
 					}
 					break;
@@ -432,6 +502,8 @@ if ($arID = $lAdmin->GroupAction())
 				}
 			}
 		}
+
+		unset($ob);
 
 		if (
 			$useCatalog
@@ -595,7 +667,7 @@ $arVisibleColumnsMap = array();
 foreach($arVisibleColumns as $value)
 	$arVisibleColumnsMap[$value] = true;
 
-if (isset($_REQUEST["mode"]) && $_REQUEST["mode"] == "excel")
+if ($lAdmin->isExportMode())
 {
 	$arNavParams = false;
 }
@@ -621,7 +693,6 @@ unset($listImageSize);
 
 $rsData = new CAdminUiResult($rsData, $sTableID);
 $rsData->NavStart();
-//$lAdmin->SetNavigationParams($rsData, array("BASE_LINK" => $baseLink));
 $lAdmin->SetNavigationParams($rsData, array());
 $arRows = array();
 
@@ -669,6 +740,9 @@ while ($arRes = $rsData->Fetch())
 	));
 
 	$arRows[$arRes["ID"]] = $row = $lAdmin->AddRow($arRes["ID"], $arRes, $sec_list_url, GetMessage("IBSEC_A_LIST"));
+	$row->setConfig([
+		CAdminUiListRow::DEFAULT_ACTION_TYPE_FIELD => CAdminUiListRow::LINK_TYPE_URL,
+	]);
 	$USER_FIELD_MANAGER->AddUserFields($entity_id, $arRes, $row);
 
 	$row->AddViewField("ID", '<a href="'.$edit_url.'" title="'.GetMessage("IBSEC_A_EDIT").'">'.$arRes["ID"].'</a>');
@@ -757,6 +831,7 @@ while ($arRes = $rsData->Fetch())
 		$row->AddViewField("DESCRIPTION", ($row->arRes["DESCRIPTION_TYPE"] == "text" ? htmlspecialcharsEx($row->arRes["DESCRIPTION"]) : HTMLToTxt($row->arRes["DESCRIPTION"])));
 	}
 }
+unset($row);
 
 $arSectionOps = CIBlockSectionRights::UserHasRightTo(
 	$IBLOCK_ID,
@@ -837,7 +912,8 @@ foreach ($arRows as $id => $row)
 					'find_section_section' => $find_section_section,
 					'from' => 'iblock_section_admin',
 				)
-			)
+			),
+			'PUBLIC' => $pageConfig['USE_NEW_CARD']
 		);
 		if ($useSectionTranslit)
 		{
@@ -859,6 +935,7 @@ foreach ($arRows as $id => $row)
 
 	$row->AddActions($arActions);
 }
+unset($row);
 
 $actionList = [];
 foreach ($arSectionOps as $arOps)
@@ -899,6 +976,7 @@ foreach ($arSectionOps as $arOps)
 				'CONFIRM_MESSAGE' => GetMessage('IBSEC_A_CODE_TRANSLIT_SECTION_CONFIRM_MULTI')
 			];
 		}
+		$actionList[] = ActionType::MOVE_TO_SECTION;
 		if ($useCatalog && $productEdit)
 		{
 			$actionList[] = Catalog\Grid\ProductAction::SET_FIELD;
@@ -922,6 +1000,8 @@ if (CIBlockSectionRights::UserHasRightTo($IBLOCK_ID, $find_section_section, "sec
 				'from' => 'iblock_section_admin',
 			)
 		),
+		"PUBLIC" => $pageConfig['USE_NEW_CARD'],
+		"SHOW_TITLE" => true,
 		"TITLE" => GetMessage("IBSEC_A_SECTADD_PRESS")
 	);
 }
@@ -966,7 +1046,7 @@ $aContext[] = array(
 	"LINK" => $urlBuilder->getElementListUrl($parent_section_id),
 	"TITLE" => GetMessage("IBSEC_A_LISTEL_TITLE")
 );
-if ($urlBuilder->getId() == 'IBLOCK')
+if ($urlBuilderId === Iblock\Url\AdminPage\IblockBuilder::TYPE_ID)
 {
 	if ($useTree)
 		$aContext[] = array(
@@ -988,15 +1068,25 @@ if ($urlBuilder->getId() == 'IBLOCK')
 		);
 }
 
+// TODO: hack for psevdo-excel export in crm (\CAdminUiList::GetSystemContextMenu)
+$_GET['urlBuilderId'] = $urlBuilderId;
+// TODO end
 $lAdmin->setContextSettings(array("pagePath" => $pageConfig['CONTEXT_PATH']));
-$excelExport = ((string)Main\Config\Option::get("iblock", "excel_export_rights") == "Y"
+$contextConfig = array();
+$excelExport = (Main\Config\Option::get("iblock", "excel_export_rights") == "Y"
 	? CIBlockRights::UserHasRightTo($IBLOCK_ID, $IBLOCK_ID, "iblock_export")
 	: true
 );
-$lAdmin->AddAdminContextMenu(
-	$aContext,
-	$excelExport
-);
+if ($excelExport)
+{
+	$contextConfig['excel'] = true;
+}
+$additional = $urlBuilder->getContextMenuItems($urlBuilder::PAGE_SECTION_LIST);
+if ($additional === null)
+{
+	$additional = [];
+}
+$lAdmin->SetContextMenu($aContext, $additional, $contextConfig);
 
 if ($pageConfig['SHOW_NAVCHAIN'])
 {
@@ -1040,13 +1130,13 @@ if ($pageConfig['SHOW_NAVCHAIN'])
 
 $lAdmin->CheckListMode();
 
-if(defined("CATALOG_PRODUCT"))
+if($pageConfig['CATALOG'])
 {
 	$sSectionName = $arIBlock["SECTIONS_NAME"];
 	if($parent_section_id > 0)
 	{
 		$rsSection = CIBlockSection::GetList(array(), array("=ID" => $parent_section_id), false, array("NAME"));
-		$arSection = $rsSection->GetNext();
+		$arSection = $rsSection->Fetch();
 		if($arSection)
 			$sSectionName = $arSection["NAME"];
 	}
@@ -1061,8 +1151,8 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_aft
 
 
 $lAdmin->DisplayFilter($filterFields);
-$lAdmin->DisplayList(array("default_action" => true));
-if(CIBlockRights::UserHasRightTo($IBLOCK_ID, $IBLOCK_ID, 'iblock_edit') && !defined("CATALOG_PRODUCT") && !$publicMode)
+$lAdmin->DisplayList();
+if($pageConfig['IBLOCK_EDIT'] && CIBlockRights::UserHasRightTo($IBLOCK_ID, $IBLOCK_ID, 'iblock_edit'))
 {
 	echo
 		BeginNote(),

@@ -20,6 +20,7 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/prolog.php");
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/general/admin_tool.php");
 
 $saleModulePermissions = $APPLICATION->GetGroupRight("sale");
+$isCanUsePersonalization = \Bitrix\Sale\Configuration::isCanUsePersonalization();
 
 if($saleModulePermissions == "D")
 	$APPLICATION->AuthForm(Loc::getMessage("ACCESS_DENIED"));
@@ -98,6 +99,8 @@ $arFilterFields = array(
 	"filter_product_xml_id",
 	"filter_catalog_xml_id",
 	"filter_affiliate_id",
+	"filter_order_use_discounts",
+	"filter_order_use_coupons",
 	"filter_discount_coupon",
 	"filter_person_type",
 	"filter_user_id",
@@ -345,7 +348,45 @@ if(is_array($filter_group_id) && count($filter_group_id) > 0)
 }
 
 if(intval($filter_affiliate_id)>0) $arFilter["AFFILIATE_ID"] = intval($filter_affiliate_id);
-if($filter_discount_coupon <> '') $arFilter["=ORDER_COUPONS.COUPON"] = trim($filter_discount_coupon);
+if(isset($filter_discount_coupon) && $filter_discount_coupon <> '') $arFilter["=ORDER_COUPONS.COUPON"] = trim($filter_discount_coupon);
+if (isset($filter_order_use_discounts))
+{
+	switch ($filter_order_use_discounts)
+	{
+		case 'Y':
+			$runtimeFields["REQUIRED_DISCOUNT_RULES"] = [
+				'data_type' => 'boolean',
+				'expression' => [
+					'CASE WHEN EXISTS (SELECT ID FROM b_sale_order_rules WHERE ORDER_ID = %s) THEN 1 ELSE 0 END',
+					'ID'
+				]
+			];
+			$arFilter['=REQUIRED_DISCOUNT_RULES'] = 1;
+			break;
+		case 'N':
+			$arFilter['=ORDER_DISCOUNT_RULES.ID'] = null;
+			break;
+	}
+}
+if (isset($filter_order_use_coupons))
+{
+	switch ($filter_order_use_coupons)
+	{
+		case 'Y':
+			$runtimeFields["REQUIRED_COUPONS"] = [
+				'data_type' => 'boolean',
+				'expression' => [
+					'CASE WHEN EXISTS (SELECT ID FROM b_sale_order_coupons WHERE ORDER_ID = %s) THEN 1 ELSE 0 END',
+					'ID'
+				]
+			];
+			$arFilter['=REQUIRED_COUPONS'] = 1;
+			break;
+		case 'N':
+			$arFilter['=ORDER_COUPONS.ID'] = null;
+			break;
+	}
+}
 if(floatval($filter_price_from)>0) $arFilter[">=PRICE"] = floatval($filter_price_from);
 if(floatval($filter_price_to)>0) $arFilter["<=PRICE"] = floatval($filter_price_to);
 if($filter_xml_id <> '') $arFilter["%XML_ID"] = trim($filter_xml_id);
@@ -475,7 +516,7 @@ if(!empty($filter_delivery_service) && is_array($filter_delivery_service))
 		$runtimeFields["REQUIRED_DLV_PRESENTED"] = array(
 			'data_type' => 'boolean',
 			'expression' => array(
-				'CASE WHEN EXISTS (SELECT ID FROM b_sale_order_delivery WHERE ORDER_ID = %s AND SYSTEM="N" AND '.$whereExpression.') THEN 1 ELSE 0 END',
+				'CASE WHEN EXISTS (SELECT ID FROM b_sale_order_delivery WHERE ORDER_ID = %s AND `SYSTEM`="N" AND '.$whereExpression.') THEN 1 ELSE 0 END',
 				'ID'
 			)
 		);
@@ -868,8 +909,13 @@ if(($arID = $lAdmin->GroupAction()) && $saleModulePermissions >= "P")
 		);
 	}
 
+	if ($by === 'USER_EMAIL')
+	{
+		$by = 'USER.EMAIL';
+	}
+
 	$dbOrderList = \Bitrix\Sale\Internals\OrderTable::getList(array(
-		'order' => array($by => $order),
+		'order' => [$by => $order],
 		'filter' => $filter,
 		'select' => array_merge(["ID", "PERSON_TYPE_ID", "PAYED", "CANCELED", "DEDUCTED", "STATUS_ID"], $arSelectFields),
 		'runtime' => $runtimeFields
@@ -1462,14 +1508,11 @@ $arHeaders = array(
 	array("id"=>"AFFILIATE_ID","content"=>Loc::getMessage("SI_AFFILIATE"), "sort"=>"AFFILIATE_ID", "default"=>false),
 );
 
-if($DBType == "mysql")
-{
-	$arHeaders[] = array("id"=>"COMMENTS","content"=>Loc::getMessage("SI_COMMENTS"), "sort"=>"COMMENTS", "default"=>false);
-	$arHeaders[] = array("id"=>"PS_STATUS_DESCRIPTION","content"=>Loc::getMessage("SOA_PS_STATUS_DESCR"), "sort"=>"", "default"=>false);
-	$arHeaders[] = array("id"=>"USER_DESCRIPTION","content"=>Loc::getMessage("SI_USER_DESCRIPTION"), "sort"=>"", "default"=>false);
-	$arHeaders[] = array("id"=>"REASON_CANCELED","content"=>Loc::getMessage("SI_REASON_CANCELED"), "sort"=>"", "default"=>false);
-	$arHeaders[] = array("id"=>"REASON_MARKED","content"=>Loc::getMessage("SI_REASON_MARKED"), "sort"=>"", "default"=>false);
-}
+$arHeaders[] = array("id"=>"COMMENTS","content"=>Loc::getMessage("SI_COMMENTS"), "sort"=>"COMMENTS", "default"=>false);
+$arHeaders[] = array("id"=>"PS_STATUS_DESCRIPTION","content"=>Loc::getMessage("SOA_PS_STATUS_DESCR"), "sort"=>"", "default"=>false);
+$arHeaders[] = array("id"=>"USER_DESCRIPTION","content"=>Loc::getMessage("SI_USER_DESCRIPTION"), "sort"=>"", "default"=>false);
+$arHeaders[] = array("id"=>"REASON_CANCELED","content"=>Loc::getMessage("SI_REASON_CANCELED"), "sort"=>"", "default"=>false);
+$arHeaders[] = array("id"=>"REASON_MARKED","content"=>Loc::getMessage("SI_REASON_MARKED"), "sort"=>"", "default"=>false);
 
 foreach ($arOrderProps as $key => $value)
 {
@@ -1529,9 +1572,7 @@ foreach ($arVisibleColumns as $visibleColumn)
 	}
 }
 
-$b = "sort";
-$o = "asc";
-$dbSite = CSite::GetList($b, $o, array());
+$dbSite = CSite::GetList();
 while ($arSite = $dbSite->Fetch())
 {
 	$serverName[$arSite["LID"]] = $arSite["SERVER_NAME"];
@@ -1887,7 +1928,7 @@ if (!empty($orderList) && is_array($orderList))
 		$fieldValue = "";
 		if(in_array("ACCOUNT_NUMBER", $arVisibleColumns))
 		{
-			$fieldValue = str_replace('##ID##', Loc::getMessage("SO_ORDER_ID_PREF").$arOrder["ACCOUNT_NUMBER"], $idTmp);
+			$fieldValue = str_replace('##ID##', Loc::getMessage("SO_ORDER_ID_PREF").htmlspecialcharsbx($arOrder["ACCOUNT_NUMBER"]), $idTmp);
 		}
 		$row->AddField("ACCOUNT_NUMBER", $fieldValue);
 
@@ -2077,11 +2118,11 @@ if (!empty($orderList) && is_array($orderList))
 				}
 				$colorRGB = array();
 				$colorRGB = sscanf($LOCAL_STATUS_CACHE[$arOrder["STATUS_ID"]]['COLOR'], "#%02x%02x%02x");
-				if (count($colorRGB))
+				if (is_array($colorRGB) && count($colorRGB))
 				{
 					$color = "background:rgba(".$colorRGB[0].",".$colorRGB[1].",".$colorRGB[2].",0.6);";
 					$fieldValue = '<div style=	"'.$color.'
-									margin: 0 0 0 -16px;
+									margin: -11px 0 -10px -16px;
 									padding: 11px 10px 10px 16px;
 									min-height: 100%;
 								">'.$fieldValue."</div>";
@@ -2174,7 +2215,7 @@ if (!empty($orderList) && is_array($orderList))
 					{
 						$color = "background:rgba(".$colorRGB[0].",".$colorRGB[1].",".$colorRGB[2].",0.6);";
 						$fieldValue = '<div style=	"'.$color.'
-									margin: 0 0 0 -16px;
+									margin: -11px 0 -10px -16px;
 									padding: 11px 10px 10px 16px;
 									min-height: 100%;
 								">'.$fieldValue."</div>";
@@ -2616,10 +2657,15 @@ if (!empty($orderList) && is_array($orderList))
 				}
 				else
 					$fieldWeight .= "<br />";
-				if($arItem["NOTES"] <> '')
-					$fieldNotes .= $arItem["NOTES"];
-				else
-					$fieldNotes .= "<br />";
+
+				if (!CSaleBasketHelper::isSetItem($arItem))
+				{
+					$priceTypeName = \CSaleBasketHelper::getPriceTypeName($arItem);
+					$fieldNotes .= $priceTypeName !== ''
+						? $priceTypeName
+						: '<br />';
+				}
+
 				if($arItem["DISCOUNT_PRICE"] <> '')
 					$fieldDiscountPrice .= "<nobr>".SaleFormatCurrency($arItem["DISCOUNT_PRICE"], $arItem["CURRENCY"])."</nobr>";
 				else
@@ -3251,44 +3297,48 @@ $arResult = array(
 );
 
 // prepare recommendation widget
-ob_start();
-?>
+$bigdataWidgetHtml = '';
+if ($isCanUsePersonalization)
+{
+	ob_start();
+	?>
 
-	<div class="adm-c-bigdatabar-container">
-		<div class="adm-c-bigdatabar-summ"><?=Loc::getMessage('SALE_BIGDATA_SUM')?>
-			<?if(!empty($arResult['RECOMMENDATION_ORDERS_VALUE'])):?>
-				<strong><?=$arResult['RECOMMENDATION_ORDERS_VALUE']?></strong>
-			<? else: ?>
-				<?=Loc::getMessage('SALE_BIGDATA_SALES_NODATA')?>
-			<? endif; ?>
-		</div>
-		<div class="adm-c-bigdatabar-content">
-			<div class="adm-c-bigdatabar-line">
-				<strong><?=Loc::getMessage('SALE_BIGDATA_SALES_TITLE')?></strong> <?=Loc::getMessage('SALE_BIGDATA_SALES_COUNT')?> <?=$arResult['RECOMMENDATION_ORDERS_COUNT']?>
-			</div>
-			<div class="adm-c-bigdatabar-line">
-				<? $installed = (time()-Bitrix\Main\Config\Option::get('main', 'rcm_component_usage', 0)<3600*24);?>
-				<? if($installed): ?>
-					<span class="adm-c-bigdatabar-line-task"><?=Loc::getMessage('SALE_BIGDATA_WIDGET_ENABLED')?></span>
+		<div class="adm-c-bigdatabar-container">
+			<div class="adm-c-bigdatabar-summ"><?=Loc::getMessage('SALE_BIGDATA_SUM')?>
+				<?if(!empty($arResult['RECOMMENDATION_ORDERS_VALUE'])):?>
+					<strong><?=$arResult['RECOMMENDATION_ORDERS_VALUE']?></strong>
 				<? else: ?>
-					<span class="adm-c-bigdatabar-line-task bx-not-available"><?=Loc::getMessage('SALE_BIGDATA_WIDGET_DISABLED')?></span>
+					<?=Loc::getMessage('SALE_BIGDATA_SALES_NODATA')?>
 				<? endif; ?>
-
-				<? $available = \Bitrix\Main\Analytics\Catalog::isOn(); ?>
-				<? if($available): ?>
-					<span class="adm-c-bigdatabar-line-task"><?=Loc::getMessage('SALE_BIGDATA_IS_ON')?></span>
-				<? else: ?>
-					<span class="adm-c-bigdatabar-line-task bx-not-available"><?=Loc::getMessage('SALE_BIGDATA_IS_OFF')?></span>
-				<? endif; ?>
-
-				<a href="sale_personalization.php?lang=<?=LANGUAGE_ID?>" class="adm-c-bigdatabar-line-task-link"><?=Loc::getMessage('SALE_BIGDATA_ABOUT')?></a>
 			</div>
+			<div class="adm-c-bigdatabar-content">
+				<div class="adm-c-bigdatabar-line">
+					<strong><?=Loc::getMessage('SALE_BIGDATA_SALES_TITLE')?></strong> <?=Loc::getMessage('SALE_BIGDATA_SALES_COUNT')?> <?=$arResult['RECOMMENDATION_ORDERS_COUNT']?>
+				</div>
+				<div class="adm-c-bigdatabar-line">
+					<? $installed = (time()-Bitrix\Main\Config\Option::get('main', 'rcm_component_usage', 0)<3600*24);?>
+					<? if($installed): ?>
+						<span class="adm-c-bigdatabar-line-task"><?=Loc::getMessage('SALE_BIGDATA_WIDGET_ENABLED')?></span>
+					<? else: ?>
+						<span class="adm-c-bigdatabar-line-task bx-not-available"><?=Loc::getMessage('SALE_BIGDATA_WIDGET_DISABLED')?></span>
+					<? endif; ?>
+
+					<? $available = \Bitrix\Main\Analytics\Catalog::isOn(); ?>
+					<? if($available): ?>
+						<span class="adm-c-bigdatabar-line-task"><?=Loc::getMessage('SALE_BIGDATA_IS_ON')?></span>
+					<? else: ?>
+						<span class="adm-c-bigdatabar-line-task bx-not-available"><?=Loc::getMessage('SALE_BIGDATA_IS_OFF')?></span>
+					<? endif; ?>
+
+					<a href="sale_personalization.php?lang=<?=LANGUAGE_ID?>" class="adm-c-bigdatabar-line-task-link"><?=Loc::getMessage('SALE_BIGDATA_ABOUT')?></a>
+				</div>
+			</div>
+			<div class="clb"></div>
 		</div>
-		<div class="clb"></div>
-	</div>
-<?
-$bigdataWidgetHtml = ob_get_contents();
-ob_end_clean();
+	<?
+	$bigdataWidgetHtml = ob_get_contents();
+	ob_end_clean();
+}
 
 $lAdmin->BeginEpilogContent();
 echo "<script>", $sScript, "\nif(document.getElementById('order_sum')) {setTimeout(function(){document.getElementById('order_sum').innerHTML = '".CUtil::JSEscape($order_sum)."';}, 10);}\n","</script>";
@@ -3498,7 +3548,7 @@ else
 		$arSiteMenu = array();
 		$arSitesShop = array();
 		$arSitesTmp = array();
-		$rsSites = CSite::GetList($b = "id", $o = "asc", Array("ACTIVE" => "Y"));
+		$rsSites = CSite::GetList("id", "asc", Array("ACTIVE" => "Y"));
 
 		while ($arSite = $rsSites->GetNext())
 		{
@@ -3667,6 +3717,8 @@ else
 			"filter_product_xml_id" => Loc::getMessage("SO_PRODUCT_XML_ID"),
 			"filter_catalog_xml_id" => Loc::getMessage("SOA_BASKET_CATALOG_XML_ID"),
 			"filter_affiliate_id" => Loc::getMessage("SO_AFFILIATE_ID"),
+			"filter_order_use_discounts" => Loc::getMessage("SALE_ORDER_LIST_FILTER_NAME_ORDER_USE_DISCOUNTS"),
+			"filter_order_use_coupons" => Loc::getMessage("SALE_ORDER_LIST_FILTER_NAME_ORDER_USE_COUPONS"),
 			"filter_coupon" => Loc::getMessage("SALE_ORDER_LIST_HEADER_NAME_COUPONS"),
 			"filter_sum_paid" => Loc::getMessage("SO_SUM_PAID"),
 			"filter_xml_id" => Loc::getMessage("SO_XML_ID"),
@@ -3823,9 +3875,7 @@ else
 				<select name="filter_lang">
 					<option value=""><?= htmlspecialcharsbx(Loc::getMessage("SALE_F_ALL")) ?></option>
 					<?
-					$b1 = "SORT";
-					$o1 = "ASC";
-					$dbSitesList = CLang::GetList($b1, $o1);
+					$dbSitesList = CLang::GetList();
 					while ($arSitesList = $dbSitesList->Fetch())
 					{
 						if(!in_array($arSitesList["LID"], $arAccessibleSites)
@@ -4206,6 +4256,26 @@ else
 			</td>
 		</tr>
 		<tr>
+			<td><?echo Loc::getMessage("SALE_ORDER_LIST_FILTER_NAME_ORDER_USE_DISCOUNTS")?>:</td>
+			<td>
+				<select name="filter_order_use_discounts">
+					<option value=""><?echo Loc::getMessage("SALE_F_ALL")?></option>
+					<option value="Y"<?if($filter_order_use_discounts=="Y") echo " selected"?>><?echo Loc::getMessage("SALE_YES")?></option>
+					<option value="N"<?if($filter_order_use_discounts=="N") echo " selected"?>><?echo Loc::getMessage("SALE_NO")?></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><?echo Loc::getMessage("SALE_ORDER_LIST_FILTER_NAME_ORDER_USE_COUPONS")?>:</td>
+			<td>
+				<select name="filter_order_use_coupons">
+					<option value=""><?echo Loc::getMessage("SALE_F_ALL")?></option>
+					<option value="Y"<?if($filter_order_use_coupons=="Y") echo " selected"?>><?echo Loc::getMessage("SALE_YES")?></option>
+					<option value="N"<?if($filter_order_use_coupons=="N") echo " selected"?>><?echo Loc::getMessage("SALE_NO")?></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td><?= Loc::getMessage("SALE_ORDER_LIST_HEADER_NAME_COUPONS") ?>:</td>
 			<td><input name="filter_discount_coupon" value="<?= htmlspecialcharsbx($filter_discount_coupon) ?>" size="40" type="text"></td>
 		</tr>
@@ -4336,7 +4406,7 @@ else
 	</form>
 
 	<?
-	if($link->getType() !== Admin\ModeType::APP_LAYOUT_TYPE):?>
+	if($isCanUsePersonalization && $link->getType() !== Admin\ModeType::APP_LAYOUT_TYPE):?>
 		<div class="adm-c-bigdatabar" id="bigdatabar">
 			<?=$bigdataWidgetHtml?>
 		</div>

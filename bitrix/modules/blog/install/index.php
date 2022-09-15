@@ -13,13 +13,11 @@ Class blog extends CModule
 	var $MODULE_CSS;
 	var $MODULE_GROUP_RIGHTS = "Y";
 
-	function blog()
+	public function __construct()
 	{
 		$arModuleVersion = array();
 
-		$path = str_replace("\\", "/", __FILE__);
-		$path = substr($path, 0, strlen($path) - strlen("/index.php"));
-		include($path."/version.php");
+		include(__DIR__.'/version.php');
 
 		if (is_array($arModuleVersion) && array_key_exists("VERSION", $arModuleVersion))
 		{
@@ -137,7 +135,7 @@ Class blog extends CModule
 		return $errors;
 	}
 
-	function InstallUserFields($id = "all")
+	public static function InstallUserFields($id = "all")
 	{
 		global $USER_FIELD_MANAGER;
 		$errors = null;
@@ -282,7 +280,7 @@ Class blog extends CModule
 
 		if (empty($errors))
 		{
-			$errors = $this->InstallUserFields();
+			$errors = static::InstallUserFields();
 		}
 
 		if (!empty($errors))
@@ -484,7 +482,8 @@ Class blog extends CModule
 
 		$arSite = Array();
 		$public_installed = false;
-		$dbSites = CSite::GetList(($b = ""), ($o = ""), Array("ACTIVE" => "Y"));
+
+		$dbSites = CSite::GetList('', '', Array("ACTIVE" => "Y"));
 		while ($site = $dbSites->Fetch())
 		{
 			$arSite[] = Array(
@@ -568,7 +567,7 @@ Class blog extends CModule
 	function DoInstall()
 	{
 		global $APPLICATION, $step;
-		$step = IntVal($step);
+		$step = intval($step);
 		if ($step < 2)
 			$APPLICATION->IncludeAdminFile(GetMessage("BLOG_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/blog/install/step1.php");
 		elseif($step==2)
@@ -585,7 +584,7 @@ Class blog extends CModule
 	function DoUninstall()
 	{
 		global $APPLICATION, $step;
-		$step = IntVal($step);
+		$step = intval($step);
 		if($step<2)
 			$APPLICATION->IncludeAdminFile(GetMessage("BLOG_INSTALL_TITLE"), $_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/blog/install/unstep1.php");
 		elseif($step==2)

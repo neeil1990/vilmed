@@ -25,6 +25,8 @@ class MapTypeCaster implements TypeCasterContract
 
 	public const INT = 'Int';
 	public const NULLABLE_INT = 'NullableInt';
+	public const MULTI_INT = 'MultiInt';
+	public const NULLABLE_MULTI_INT = 'NullableMultiInt';
 
 	public const FLOAT = 'Float';
 	public const NULLABLE_FLOAT = 'NullableFloat';
@@ -60,7 +62,7 @@ class MapTypeCaster implements TypeCasterContract
 	{
 		if ($value !== null)
 		{
-			$value = (string)$value;
+			$value = $this->castToString($value);
 		}
 
 		return $value;
@@ -75,7 +77,40 @@ class MapTypeCaster implements TypeCasterContract
 	{
 		if ($value !== null)
 		{
-			$value = (int)$value;
+			$value = $this->castToInt($value);
+		}
+
+		return $value;
+	}
+
+	private function castToMultiInt($value): array
+	{
+		$result = [];
+		if (!is_array($value))
+		{
+			$value = [$value];
+		}
+		foreach ($value as $item)
+		{
+			if ($item === '' || $item === null)
+			{
+				continue;
+			}
+			$result[] = (int)$item;
+		}
+
+		return $result;
+	}
+
+	private function castToNullableMultiInt($value): ?array
+	{
+		if ($value !== null)
+		{
+			$value = $this->castToMultiInt($value);
+			if (empty($value))
+			{
+				$value = [];
+			}
 		}
 
 		return $value;
@@ -90,7 +125,7 @@ class MapTypeCaster implements TypeCasterContract
 	{
 		if ($value !== null)
 		{
-			$value = (float)$value;
+			$value = $this->castToFloat($value);
 		}
 
 		return $value;
@@ -128,14 +163,24 @@ class MapTypeCaster implements TypeCasterContract
 		return (bool)$value;
 	}
 
-	private function castToDate($value): Date
+	private function castToDate($value): ?Date
 	{
-		return new Date($value);
+		if ($value !== null && $value !== '')
+		{
+			return new Date($value);
+		}
+
+		return null;
 	}
 
-	private function castToDateTime($value): DateTime
+	private function castToDateTime($value): ?DateTime
 	{
-		return new DateTime($value);
+		if ($value !== null && $value !== '')
+		{
+			return new DateTime($value);
+		}
+
+		return null;
 	}
 
 	public function cast($name, $value)

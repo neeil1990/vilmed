@@ -64,13 +64,21 @@ export default class VariationGridController extends BX.UI.EntityEditorControlle
 		super.rollback();
 		this.checkEditorToolbar();
 		this.unsubscribeGridEvents();
+
+		BX.Main.gridManager.destroy(this.getGridId());
 	}
 
 	onAfterSave()
 	{
-		if (this.isChanged())
+		if (this.isChanged() || this._editor.isChanged())
 		{
 			this.setGridControlCache(null);
+			EventEmitter.emit(
+				'onAfterVariationGridSave',
+				{
+					gridId: this.getGridId(),
+				}
+			);
 		}
 
 		this.subscribeToFormSubmit();
@@ -105,8 +113,17 @@ export default class VariationGridController extends BX.UI.EntityEditorControlle
 		const gridComponent = this.getVariationGridComponent();
 		if (gridComponent)
 		{
-			gridComponent.unsubscribeCustomEvents();
+			gridComponent.destroy();
 		}
+
+		const popup = this.getGrid()?.getSettingsWindow()?.getPopup();
+		if (popup)
+		{
+			EventEmitter.emit(this.getGrid().getSettingsWindow().getPopup(), 'onDestroy');
+		}
+
+		EventEmitter.unsubscribeAll('BX.Main.grid:paramsUpdated');
+		this.getGrid()?.destroy();
 	}
 
 	ajaxSuccessHandler(event: BaseEvent)
@@ -159,7 +176,12 @@ export default class VariationGridController extends BX.UI.EntityEditorControlle
 
 	onBeforeGridRequest(event: BaseEvent)
 	{
-		const [, eventArgs] = event.getCompatData();
+		const [grid, eventArgs] = event.getCompatData();
+
+		if (!grid || !grid.parent || grid.parent.getId() !== this.getGridId())
+		{
+			return;
+		}
 
 		eventArgs.sessid = BX.bitrix_sessid();
 		eventArgs.method = 'POST';
@@ -209,10 +231,16 @@ export default class VariationGridController extends BX.UI.EntityEditorControlle
 
 		const skuGridName = this.getGridId();
 		const skuGridData = grid.getRows().getEditSelectedValues();
+		const copyItemsMap = grid.getParam('COPY_ITEMS_MAP', {});
 
 		// replace sku custom properties edit data names with original names
 		for (let id in skuGridData)
 		{
+			if (!skuGridData.hasOwnProperty(id))
+			{
+				continue;
+			}
+
 			for (let name in skuGridData[id])
 			{
 				if (!skuGridData[id].hasOwnProperty(name))
@@ -276,6 +304,11 @@ export default class VariationGridController extends BX.UI.EntityEditorControlle
 					delete skuGridData[id][name];
 				}
 			}
+
+			if (!Type.isNil(copyItemsMap[id]))
+			{
+				skuGridData[id]['COPY_SKU_ID'] = copyItemsMap[id];
+			}
 		}
 
 		if (!Type.isPlainObject(eventArgs.options))
@@ -291,5 +324,7 @@ export default class VariationGridController extends BX.UI.EntityEditorControlle
 		eventArgs.options.data[skuGridName] = skuGridData;
 
 		this.areaHeight = this.getGridControl().getWrapper().offsetHeight;
+
+		BX.Main.gridManager.destroy(this.getGridId());
 	}
 }

@@ -10,7 +10,7 @@
 		{
 			return;
 		}
-		
+
 		for (var i = 0, c = params.nodes.length; i < c; i++)
 		{
 			BX.bind(params.nodes[i], 'click', function(e)
@@ -44,6 +44,26 @@
 			);
 	};
 
+	BX.Landing.AlertShow = function(params)
+	{
+		var msg = BX.Landing.UI.Tool.ActionDialog.getInstance();
+		var promise = msg.show({
+			title: params.title ? params.title : null,
+			content: params.message,
+			contentColor: 'grey',
+			type: params.type || null
+		});
+		promise
+			.then(function()
+				{
+					top.window.location.href = '/settings/license_all.php';
+				},
+				function()
+				{
+				}
+			);
+	};
+
 	BX.ready(function()
 	{
 		var querySelector = document.querySelectorAll('.bitrix24-metrika');
@@ -51,14 +71,22 @@
 		{
 			return;
 		}
+		if (typeof BX.Landing.Metrika === 'undefined')
+		{
+			return;
+		}
+
+		var metrika = new BX.Landing.Metrika(true);
 		for (var i = 0, c = querySelector.length; i < c; i++)
 		{
 			BX.bind(querySelector[i], 'click', function(e)
 			{
-				BX.ajax({
-					url: '/bitrix/images/1.gif?action=' + this
-				});
-			}.bind(BX.data(querySelector[i], 'metrika24')));
+				metrika.sendLabel(
+					null,
+					BX.data(this, 'metrika24'),
+					BX.data(this, 'metrika24value')
+				);
+			}.bind(querySelector[i]));
 		}
 	});
 

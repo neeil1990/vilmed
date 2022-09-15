@@ -8,6 +8,7 @@ use Bitrix\Main\ArgumentException;
 use Bitrix\Main\Event;
 use Bitrix\Main\EventManager;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\ModuleManager;
 use Bitrix\Sender\Access\AccessController;
 use Bitrix\Sender\Access\ActionDictionary;
 use Bitrix\Sender\Access\SectionDictionary;
@@ -33,6 +34,8 @@ class Access
 	protected $permissions;
 
 	private static $instance;
+
+	protected const ACTION_VIEW = 'VIEW';
 
 	/**
 	 * Get Access instance for current user.
@@ -93,6 +96,8 @@ class Access
 			$this->canViewRc()
 			||
 			$this->canViewSegments()
+			||
+			$this->canViewTemplates()
 		);
 	}
 
@@ -201,6 +206,30 @@ class Access
 	}
 
 	/**
+	 * Return can user start stop or pause
+	 *
+	 * @param string $letterClass
+	 *
+	 * @return bool
+	 */
+	public function canStopStartPause(string $letterClass)
+	{
+		$letterType = explode("\\", $letterClass);
+
+		switch ($letterType[count($letterType) - 1])
+		{
+			case 'Rc':
+				return AccessController::can($this->user->getId(), ActionDictionary::ACTION_RC_PAUSE_START_STOP);
+				break;
+			case 'Ad':
+				return AccessController::can($this->user->getId(), ActionDictionary::ACTION_ADS_PAUSE_START_STOP);
+				break;
+			default:
+				return AccessController::can($this->user->getId(), ActionDictionary::ACTION_MAILING_PAUSE_START_STOP);
+		}
+	}
+
+	/**
 	 * Return true if can view letters.
 	 *
 	 * @return bool
@@ -236,6 +265,11 @@ class Access
 	 */
 	public function canViewRc()
 	{
+		if(!ModuleManager::isModuleInstalled('crm'))
+		{
+			return false;
+		}
+
 		return AccessController::can($this->user->getId(), ActionDictionary::ACTION_RC_VIEW);
 	}
 
@@ -259,6 +293,11 @@ class Access
 	 */
 	public function canModifyRc()
 	{
+		if(!ModuleManager::isModuleInstalled('crm'))
+		{
+			return false;
+		}
+
 		return AccessController::can($this->user->getId(), ActionDictionary::ACTION_RC_EDIT);
 	}
 
@@ -271,6 +310,17 @@ class Access
 	public function canViewSegments()
 	{
 		return AccessController::can($this->user->getId(), ActionDictionary::ACTION_SEGMENT_VIEW);
+	}
+
+	/**
+	 * Return true if can view segment contacts.
+	 *
+	 * @return bool
+	 * @throws ArgumentException
+	 */
+	public function canViewSegmentContact()
+	{
+		return AccessController::can($this->user->getId(), ActionDictionary::ACTION_SEGMENT_CLIENT_VIEW);
 	}
 
 	/**
@@ -379,12 +429,10 @@ class Access
 			return true;
 		}
 
-		return Role\Permission::check(
-			$this->permissions,
-			$entityCode,
-			$actionCode,
-			$minPerm
-		);
+		if($actionCode === self::ACTION_VIEW)
+			return $this->user->canView();
+
+		return false;
 	}
 
 	private static function getSectionAndAction($action)

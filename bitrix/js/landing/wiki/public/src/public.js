@@ -7,9 +7,15 @@ Event.bind(document, 'click', (event: MouseEvent) => {
 		const link = event.target.closest('a:not(.ui-btn):not([data-fancybox])');
 		if (Type.isDomNode(link))
 		{
-			if (Type.isStringFilled(link.href) && link.target !== '_blank')
+			const isCurrentPageLink =
+				Type.isStringFilled(link.href)
+				&& link.hash !== ''
+				&& link.pathname === document.location.pathname
+				&& link.hostname === document.location.hostname;
+			if (Type.isStringFilled(link.href) && link.target !== '_blank' && !isCurrentPageLink)
 			{
 				event.preventDefault();
+				BX.Landing.Pub.TopPanel.pushHistory(link.href);
 				void SliderHacks.reloadSlider(link.href);
 			}
 		}
@@ -32,6 +38,7 @@ Event.bind(document, 'click', (event: MouseEvent) => {
 				if (urlParams.target === '_self')
 				{
 					event.stopImmediatePropagation();
+					BX.Landing.Pub.TopPanel.pushHistory(urlParams.href);
 					void SliderHacks.reloadSlider(urlParams.href);
 				}
 				else

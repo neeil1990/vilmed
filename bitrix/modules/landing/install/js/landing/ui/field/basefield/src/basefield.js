@@ -1,10 +1,13 @@
-import {Type, Event, Tag, Text, Dom, Runtime} from 'main.core';
+import {Type, Event, Tag, Text, Dom, Runtime, Cache} from 'main.core';
+import {EventEmitter} from 'main.core.events';
+import {fetchEventsFromOptions} from 'landing.ui.component.internal';
+
 import './css/style.css';
 
 /**
  * @memberOf BX.Landing.UI.Field
  */
-export class BaseField extends Event.EventEmitter
+export class BaseField extends EventEmitter
 {
 	static createLayout(): HTMLDivElement
 	{
@@ -31,8 +34,10 @@ export class BaseField extends Event.EventEmitter
 	{
 		super(options);
 		this.setEventNamespace('BX.Landing.UI.Field');
+		this.subscribeFromOptions(fetchEventsFromOptions(options));
 
 		this.data = {...options};
+		this.options = this.data;
 		this.id = Reflect.has(this.data, 'id') ? this.data.id : Text.getRandom();
 		this.selector = Reflect.has(this.data, 'selector') ? this.data.selector : Text.getRandom();
 		this.content = Reflect.has(this.data, 'content') ? this.data.content : '';
@@ -45,6 +50,9 @@ export class BaseField extends Event.EventEmitter
 		this.hidden = Text.toBoolean(this.data.hidden);
 		this.property = Type.isString(this.data.property) ? this.data.property : '';
 		this.style = Reflect.has(this.data, 'style') ? this.data.style : '';
+		this.cache = new Cache.MemoryCache();
+		this.contentRoot = Reflect.has(this.data, 'contentRoot') ? this.data.contentRoot : null;
+		this.readyToSave = true;    // false - if data not loaded yet
 
 		const {onValueChange} = this.data;
 		this.onValueChangeHandler = Type.isFunction(onValueChange) ? onValueChange : (() => {});
@@ -53,7 +61,7 @@ export class BaseField extends Event.EventEmitter
 		this.layout = BaseField.createLayout();
 		this.header = BaseField.createHeader();
 		this.input = this.createInput();
-		this.header.innerHTML = Text.encode(this.title);
+		this.setTitle(this.title);
 
 		Dom.append(this.header, this.layout);
 		Dom.append(this.input, this.layout);
@@ -66,14 +74,7 @@ export class BaseField extends Event.EventEmitter
 			Dom.addClass(this.layout, this.className);
 		}
 
-		if (
-			Type.isString(this.descriptionText)
-			&& this.descriptionText !== ''
-		)
-		{
-			this.description = BaseField.createDescription(this.descriptionText);
-			Dom.append(this.description, this.layout);
-		}
+		this.setDescription(this.descriptionText);
 
 		if (this.data.disabled === true)
 		{
@@ -83,6 +84,43 @@ export class BaseField extends Event.EventEmitter
 		Event.bind(this.input, 'paste', this.onPaste);
 
 		this.init();
+
+		if (this.data.help)
+		{
+			BX.Dom.append(top.BX.UI.Hint.createNode(this.data.help), this.header);
+			top.BX.UI.Hint.init(BX.Landing.UI.Panel.StylePanel.getInstance().layout);
+		}
+	}
+
+	setTitle(title: string)
+	{
+		this.header.innerHTML = Text.encode(title);
+	}
+
+	getDescription(): ?HTMLDivElement
+	{
+		return this.layout.querySelector('.landing-ui-field-description');
+	}
+
+	setDescription(description: string)
+	{
+		if (
+			Type.isString(description)
+			&& description !== ''
+		)
+		{
+			this.descriptionText = description;
+			this.description = BaseField.createDescription(this.descriptionText);
+			Dom.remove(this.getDescription());
+			Dom.append(this.description, this.layout);
+		}
+	}
+
+	removeDescription()
+	{
+		Dom.remove(this.getDescription());
+		this.description = null;
+		this.descriptionText = '';
 	}
 
 	createInput(): HTMLDivElement
@@ -95,20 +133,34 @@ export class BaseField extends Event.EventEmitter
 	// eslint-disable-next-line class-methods-use-this
 	init() {}
 
+	getContext(): Window
+	{
+		if (this.input.ownerDocument)
+		{
+			return this.input.ownerDocument.defaultView;
+		}
+
+		return window;
+	}
+
 	// eslint-disable-next-line class-methods-use-this
 	onPaste(event)
 	{
 		event.preventDefault();
+		event.stopPropagation();
 
 		if (event.clipboardData && event.clipboardData.getData)
 		{
-			const text = event.clipboardData.getData('text/plain');
-			document.execCommand('insertHTML', false, Text.encode(text));
+			const sourceText = event.clipboardData.getData('text/plain');
+			const encodedText = BX.Text.encode(sourceText);
+			const formattedHtml = encodedText.replace(new RegExp('\n', 'g'), '<br>');
+			this.getContext().document.execCommand('insertHTML', false, formattedHtml);
 		}
 		else
 		{
+			// ie11
 			const text = window.clipboardData.getData('text');
-			document.execCommand('paste', true, Text.encode(text));
+			this.getContext().document.execCommand('paste', true, BX.Text.encode(text));
 		}
 	}
 
@@ -154,11 +206,12 @@ export class BaseField extends Event.EventEmitter
 		});
 
 		this.emit('change', event);
+		this.emit('onChange', event);
 	}
 
 	enable()
 	{
-		Dom.attr(this.layout, 'disabled', false);
+		Dom.attr(this.layout, 'disabled', null);
 		Dom.removeClass(this.layout, 'landing-ui-disabled');
 	}
 
@@ -170,11 +223,51 @@ export class BaseField extends Event.EventEmitter
 
 	// eslint-disable-next-line class-methods-use-this
 	reset() {}
+	onFrameLoad() {}
 
 	clone(data): BaseField
 	{
 		return new this.constructor(
 			Runtime.clone(data || this.data),
 		);
+	}
+
+	getLayout(): HTMLElement
+	{
+		return this.layout;
+	}
+
+	setLayoutClass(className: string)
+	{
+		Dom.addClass(this.layout, className);
+	}
+
+	/**
+	 * If field has inline style-properties (f.e. css variables) - get name of them
+ 	 * @returns {string[]}
+	 */
+	getInlineProperties(): [string]
+	{
+		return [];
+	}
+
+	/**
+	 * If field need match computed styles by node - get name of style properties
+	 * @returns {string[]}
+	 */
+	getComputedProperties(): [string]
+	{
+		// todo: get from typeSetting
+		return [];
+	}
+
+	/**
+	 * If field work with pseudo element - return them (f.e. :after)
+	 * @returns {?string}
+	 */
+	getPseudoElement(): ?string
+	{
+		// todo: from type settings
+		return null;
 	}
 }

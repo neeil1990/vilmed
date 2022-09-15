@@ -223,41 +223,30 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		$sort = 200;
 		foreach ($controls as $controlId)
 		{
+			$row = array(
+				'ID' => $controlId,
+				'GROUP' => 'Y',
+				'GetControlShow' => array($className, 'GetControlShow'),
+				'GetConditionShow' => array($className, 'GetConditionShow'),
+				'IsGroup' => array($className, 'IsGroup'),
+				'Parse' => array($className, 'Parse'),
+				'Generate' => array($className, 'Generate'),
+				'ApplyValues' => array($className, 'ApplyValues'),
+				'InitParams' => array($className, 'InitParams'),
+				'SORT' => $sort,
+			);
+			if ($controlId !== 'CondBsktSubGroup' && $controlId !== 'CondBsktProductGroup')
+			{
+				$row['EXECUTE_MODULE'] = 'sale';
+			}
 			if ($controlId === 'CondCumulativeGroup')
 			{
-				$result[] = array(
-					'ID' => $controlId,
-					'GROUP' => 'Y',
-					'EXECUTE_MODULE' => 'sale',
-					'FORCED_SHOW_LIST' => array('Period', 'PeriodRelative'),
-					'GetControlShow' => array($className, 'GetControlShow'),
-					'GetConditionShow' => array($className, 'GetConditionShow'),
-					'IsGroup' => array($className, 'IsGroup'),
-					'Parse' => array($className, 'Parse'),
-					'Generate' => array($className, 'Generate'),
-					'ApplyValues' => array($className, 'ApplyValues'),
-					'InitParams' => array($className, 'InitParams'),
-					'SORT' => $sort,
-				);
+				$row['FORCED_SHOW_LIST'] = array('Period', 'PeriodRelative');
 			}
-			else
-			{
-				$result[] = array(
-					'ID' => $controlId,
-					'GROUP' => 'Y',
-					'GetControlShow' => array($className, 'GetControlShow'),
-					'GetConditionShow' => array($className, 'GetConditionShow'),
-					'IsGroup' => array($className, 'IsGroup'),
-					'Parse' => array($className, 'Parse'),
-					'Generate' => array($className, 'Generate'),
-					'ApplyValues' => array($className, 'ApplyValues'),
-					'InitParams' => array($className, 'InitParams'),
-					'SORT' => $sort,
-				);
-			}
+			$result[] = $row;
 			$sort++;
 		}
-		unset($controlId, $sort, $controls, $className);
+		unset($row, $controlId, $sort, $controls, $className);
 		return $result;
 	}
 
@@ -881,7 +870,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		return static::searchControl($arControlList, $strControlID);
 	}
 
-	private function __GetVisual($boolExt = false)
+	private static function __GetVisual($boolExt = false)
 	{
 		$boolExt = ($boolExt === true);
 		if ($boolExt)
@@ -993,7 +982,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		);
 	}
 
-	private function __GetSubGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
+	private static function __GetSubGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
 	{
 		$mxResult = '';
 		$boolError = false;
@@ -1035,7 +1024,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		return $mxResult;
 	}
 
-	private function __GetRowGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
+	private static function __GetRowGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
 	{
 		$boolError = false;
 		$strFunc = '';
@@ -1107,7 +1096,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		}
 	}
 
-	private function __GetProductGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
+	private static function __GetProductGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
 	{
 		$strFunc = '';
 
@@ -1141,7 +1130,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		}
 	}
 
-	private function __GetAmtGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
+	private static function __GetAmtGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
 	{
 		$boolError = false;
 
@@ -1216,7 +1205,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		}
 	}
 
-	private function __GetAmtBaseGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
+	private static function __GetAmtBaseGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
 	{
 		$boolError = false;
 
@@ -1291,7 +1280,7 @@ class CSaleCondCtrlBasketGroup extends CSaleCondCtrlGroup
 		}
 	}
 
-	private function __GetCntGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
+	private static function __GetCntGroupCond($arOneCondition, $arValues, $arParams, $arControl, $arSubs)
 	{
 		$boolError = false;
 
@@ -2262,18 +2251,21 @@ class CSaleCondCtrlOrderFields extends CSaleCondCtrlComplex
 		}
 		unset($arPersonType, $rsPersonTypes);
 
-		$arSalePaySystemList = array();
-		$arFilter = array();
-		$rsPaySystems = CSalePaySystem::GetList(
-			array('SORT' => 'ASC', 'NAME' => 'ASC'),
-			$arFilter,
-			false,
-			false,
-			array('ID', 'NAME', 'SORT')
-		);
-		while ($arPaySystem = $rsPaySystems->Fetch())
-			$arSalePaySystemList[$arPaySystem['ID']] = $arPaySystem['NAME'];
-		unset($arPaySystem, $rsPaySystems);
+		;
+		$salePaySystemList = [];
+		$filter = [
+			'!=ID' => Sale\PaySystem\Manager::getInnerPaySystemId(),
+		];
+		$iterator = Sale\PaySystem\Manager::getList([
+			'select' => ['ID', 'NAME', 'SORT'],
+			'filter' => $filter,
+			'order' => ['SORT' => 'ASC', 'NAME' => 'ASC']
+		]);
+		while ($row = $iterator->fetch())
+		{
+			$salePaySystemList[$row['ID']] = $row['NAME'];
+		}
+		unset($row, $iterator);
 
 		$linearDeliveryList = array();
 		$deliveryList = array();
@@ -2382,6 +2374,7 @@ class CSaleCondCtrlOrderFields extends CSaleCondCtrlComplex
 					'type' => 'select',
 					'multiple' => 'Y',
 					'values' => $arSalePersonTypes,
+					'size' => self::getSelectSize($arSalePersonTypes),
 					'show_value' => 'Y'
 				),
 				'PHP_VALUE' => array(
@@ -2398,7 +2391,8 @@ class CSaleCondCtrlOrderFields extends CSaleCondCtrlComplex
 				'JS_VALUE' => array(
 					'type' => 'select',
 					'multiple' => 'Y',
-					'values' => $arSalePaySystemList,
+					'values' => $salePaySystemList,
+					'size' => self::getSelectSize($salePaySystemList),
 					'show_value' => 'Y'
 				),
 				'PHP_VALUE' => array(
@@ -2417,6 +2411,7 @@ class CSaleCondCtrlOrderFields extends CSaleCondCtrlComplex
 					'type' => 'select',
 					'multiple' => 'Y',
 					'values' => $linearDeliveryList,
+					'size' => self::getSelectSize($linearDeliveryList),
 					'show_value' => 'Y'
 				),
 				'PHP_VALUE' => array(
@@ -2458,6 +2453,21 @@ class CSaleCondCtrlOrderFields extends CSaleCondCtrlComplex
 	public static function GetJSControl($arControl, $arParams = array())
 	{
 		return array();
+	}
+
+	private static function getSelectSize(array $rows): int
+	{
+		$result = 3;
+		$rowCount = count($rows);
+		if ($rowCount > 10)
+		{
+			$result = 10;
+		}
+		elseif ($rowCount > 3)
+		{
+			$result = $rowCount;
+		}
+		return $result;
 	}
 }
 
@@ -2843,6 +2853,11 @@ class CSaleCondTree extends CGlobalCondTree
 			$arParams['ROW_NUM'] = $intRowNum;
 			if (!empty($arLevel['CLASS_ID']))
 			{
+				$defaultBlock = $this->GetDefaultConditions();
+				if ($arLevel['CLASS_ID'] !== $defaultBlock['CLASS_ID'])
+				{
+					return false;
+				}
 				if (isset($this->arControlList[$arLevel['CLASS_ID']]))
 				{
 					$arOneControl = $this->arControlList[$arLevel['CLASS_ID']];

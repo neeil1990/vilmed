@@ -1,5 +1,5 @@
 this.BX = this.BX || {};
-(function (exports, main_core, landing_pageobject, landing_main, landing_ui_highlight) {
+(function (exports,landing_main,main_core,landing_pageobject,landing_ui_highlight) {
 	'use strict';
 
 	var UNDO = 'undo';
@@ -308,6 +308,40 @@ this.BX = this.BX || {};
 	  });
 	}
 
+	/**
+	 * History entry action for add node.
+	 * @param {string} state State code.
+	 * @param {object} entry History entry.
+	 * @return {Promise}
+	 */
+	function addNode(state, entry) {
+	  var _this = this;
+
+	  // entry.block === null >> designer mode
+	  return new Promise(function (resolve, reject) {
+	    var tags = (entry.redo || {}).tags || (entry.undo || {}).tags || [];
+	    top.BX.onCustomEvent(_this, 'Landing:onHistoryAddNode', [tags]);
+	    resolve();
+	  });
+	}
+
+	/**
+	 * History entry action for remove node.
+	 * @param {string} state State code.
+	 * @param {object} entry History entry.
+	 * @return {Promise}
+	 */
+	function removeNode(state, entry) {
+	  var _this = this;
+
+	  // entry.block === null >> designer mode
+	  return new Promise(function (resolve, reject) {
+	    var tags = (entry.redo || {}).tags || (entry.undo || {}).tags || [];
+	    top.BX.onCustomEvent(_this, 'Landing:onHistoryRemoveNode', [tags]);
+	    resolve();
+	  });
+	}
+
 	var _BX$Landing$Utils$a = BX.Landing.Utils,
 	    scrollTo$a = _BX$Landing$Utils$a.scrollTo,
 	    slice = _BX$Landing$Utils$a.slice;
@@ -341,7 +375,12 @@ this.BX = this.BX || {};
 
 	    elements.forEach(function (element) {
 	      element.className = entry[state].className;
-	      element.style = entry[state].style;
+
+	      if (entry[state].style) {
+	        element.style = entry[state].style;
+	      } else {
+	        element.removeAttribute('style');
+	      }
 	    });
 	    return block;
 	  }).then(function (block) {
@@ -385,6 +424,26 @@ this.BX = this.BX || {};
 	    return scrollTo$b(block.node).then(function () {
 	      void highlight$a(block.node);
 	      block.updateBlockState(BX.clone(entry[state]), true);
+	    });
+	  });
+	}
+
+	var _BX$Landing$Utils$c = BX.Landing.Utils,
+	    scrollTo$c = _BX$Landing$Utils$c.scrollTo,
+	    highlight$b = _BX$Landing$Utils$c.highlight;
+	/**
+	 * @param {string} state
+	 * @param {object} entry
+	 * @return {Promise}
+	 */
+
+	function updateContent(state, entry) {
+	  return BX.Landing.PageObject.getInstance().blocks().then(function (blocks) {
+	    var block = blocks.get(entry.block);
+	    block.forceInit();
+	    return scrollTo$c(block.node).then(function () {
+	      void highlight$b(block.node);
+	      return block.updateContent(entry[state]);
 	    });
 	  });
 	}
@@ -468,9 +527,24 @@ this.BX = this.BX || {};
 	    redo: removeCard.bind(null, REDO)
 	  }));
 	  history.registerCommand(new Command({
+	    id: 'addNode',
+	    undo: removeNode.bind(null, UNDO),
+	    redo: addNode.bind(null, REDO)
+	  }));
+	  history.registerCommand(new Command({
+	    id: 'removeNode',
+	    undo: addNode.bind(null, UNDO),
+	    redo: removeNode.bind(null, REDO)
+	  }));
+	  history.registerCommand(new Command({
 	    id: 'updateBlockState',
 	    undo: updateBlockState.bind(null, UNDO),
 	    redo: updateBlockState.bind(null, REDO)
+	  }));
+	  history.registerCommand(new Command({
+	    id: 'updateContent',
+	    undo: updateContent.bind(null, UNDO),
+	    redo: updateContent.bind(null, REDO)
 	  }));
 	  return Promise.resolve(history);
 	}
@@ -676,7 +750,7 @@ this.BX = this.BX || {};
 	          return history;
 	        }).catch(function () {
 	          history.commandState = RESOLVED;
-	          return history[state === UNDO ? 'undo' : 'redo']();
+	          return offset(history, offsetValue);
 	        });
 	      }
 	    }
@@ -729,9 +803,7 @@ this.BX = this.BX || {};
 	  this.redo = options.redo;
 	};
 
-	var Highlight =
-	/*#__PURE__*/
-	function (_HighlightNode) {
+	var Highlight = /*#__PURE__*/function (_HighlightNode) {
 	  babelHelpers.inherits(Highlight, _HighlightNode);
 
 	  function Highlight() {
@@ -779,9 +851,7 @@ this.BX = this.BX || {};
 	 * @memberOf BX.Landing
 	 */
 
-	var History =
-	/*#__PURE__*/
-	function () {
+	var History = /*#__PURE__*/function () {
 	  function History() {
 	    babelHelpers.classCallCheck(this, History);
 	    this.stack = [];
@@ -891,7 +961,7 @@ this.BX = this.BX || {};
 
 	  }, {
 	    key: "removePageHistory",
-	    value: function removePageHistory$1(pageId) {
+	    value: function removePageHistory$$1(pageId) {
 	      return removePageHistory(pageId, this).then(function (history) {
 	        var currentPageId;
 
@@ -933,7 +1003,7 @@ this.BX = this.BX || {};
 	    value: function onNewBranch(entries) {
 	      var _this = this;
 
-	      return fetchEntities(entries).then(function (entities) {
+	      return fetchEntities(entries, this).then(function (entities) {
 	        return removeEntities(entities, _this);
 	      });
 	    }
@@ -967,10 +1037,13 @@ this.BX = this.BX || {};
 	  addCard: addCard,
 	  removeCard: removeCard,
 	  editStyle: editStyle,
-	  updateBlockState: updateBlockState
+	  updateBlockState: updateBlockState,
+	  addNode: addNode,
+	  removeNode: removeNode,
+	  updateContent: updateContent
 	});
 
 	exports.History = History;
 
-}(this.BX.Landing = this.BX.Landing || {}, BX, BX.Landing, BX.Landing, BX.Landing.UI));
+}((this.BX.Landing = this.BX.Landing || {}),BX.Landing,BX,BX.Landing,BX.Landing.UI));
 //# sourceMappingURL=history.bundle.js.map

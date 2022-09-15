@@ -41,26 +41,6 @@ abstract class BaseConfigurable extends Base
 	}
 
 	/**
-	 * Get default From.
-	 * @return null|string
-	 */
-	public function getDefaultFrom()
-	{
-		$fromList = $this->getFromList();
-		$from = isset($fromList[0]) ? $fromList[0]['id'] : null;
-		//Try to find alphanumeric from
-		foreach ($fromList as $item)
-		{
-			if (!preg_match('#^[0-9]+$#', $item['id']))
-			{
-				$from = $item['id'];
-				break;
-			}
-		}
-		return $from;
-	}
-
-	/**
 	 * Set default From.
 	 * @param string $from From.
 	 * @return $this
@@ -110,7 +90,7 @@ abstract class BaseConfigurable extends Base
 	/**
 	 * @return string
 	 */
-	public function getManageUrl()
+	public function getManageUrl(): string
 	{
 		if (defined('ADMIN_SECTION') && ADMIN_SECTION === true)
 		{
@@ -231,10 +211,7 @@ abstract class BaseConfigurable extends Base
 			$providerId = $this->getId();
 			$providerType = mb_strtolower($this->getType());
 			$optionsString = Option::get('messageservice', 'sender.'.$providerType.'.'.$providerId);
-			if (CheckSerializedData($optionsString))
-			{
-				$this->options = unserialize($optionsString);
-			}
+			$this->options = unserialize($optionsString, ['allowed_classes' => false]);
 
 			if (!is_array($this->options))
 			{
@@ -287,5 +264,47 @@ abstract class BaseConfigurable extends Base
 		$providerType = mb_strtolower($this->getType());
 		Option::delete('messageservice', array('name' => 'sender.'.$providerType.'.'.$providerId));
 		return true;
+	}
+
+	public function getConfigComponentTemplatePageName(): string
+	{
+		return static::getId();
+	}
+
+	/**
+	 * Can message be created from template only
+	 *
+	 * @return bool
+	 */
+	public function isTemplatesBased(): bool
+	{
+		return false;
+	}
+
+	/**
+	 *
+	 * List of available templates for templates-based senders
+	 * Should return array of templates like this:
+	 *
+	 * [
+	 * 		['ID' => '1', 'TITLE' => 'Template 1', 'PREVIEW' => 'Message created from template 1'],
+	 * 		['ID' => '2', 'TITLE' => 'Template 2', 'PREVIEW' => 'Message created from template 2'],
+	 * ]
+	 *
+	 * @param array|null $context Context for context-dependant templates
+	 *
+	 * @return array
+	 */
+	public function getTemplatesList(array $context = null): array
+	{
+		return [];
+	}
+
+	/**
+	 * Prepare template for save in message headers
+	 */
+	public function prepareTemplate($templateData)
+	{
+		return $templateData;
 	}
 }

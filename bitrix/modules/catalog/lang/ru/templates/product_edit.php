@@ -1,4 +1,4 @@
-<?
+<?php
 $MESS["BASE_PRICE"] = "Базовая цена";
 $MESS["BASE_CURRENCY"] = "Валюта базовой цены";
 $MESS["BASE_WEIGHT"] = "Вес (грамм)";
@@ -59,6 +59,7 @@ $MESS["C2IT_NO_ACTIVE_DISCOUNTS"] = "Активные скидки для дан
 $MESS["C2IT_DISCOUNT_HINT"] = "Показаны только активные общие скидки. Неактивные скидки, а так же скидки по купонам смотрите в форме управления скидками.";
 $MESS["C2IT_PRICES_D"] = "Управление ценами";
 $MESS["C2IT_PRICES_EXT_D"] = "Расширенные цены";
+$MESS["C2IT_PRICES_EXT_TARIFF_ENABLE"] = "Включить";
 $MESS["C2IT_PARAMS_D"] = "Дополнительные параметры";
 $MESS["C2IT_GROUPS_D"] = "Группы пользователей";
 $MESS["C2IT_DISCOUNTS_D"] = "Управление скидками";
@@ -99,7 +100,7 @@ $MESS["BASE_QUANTITY_RESERVED"] = "Зарезервированное колич
 $MESS["FULL_QUANTITY"] = "Доступное количество";
 $MESS["ENABLE_STORE_TRACE"] = "Включить количественный учет";
 $MESS["QUANTITY_RESERVED_NOTICE"] = "Изменение поля влияет на остаток товара, будьте внимательны!";
-$MESS["CAT_BARCODE_EDIT_CONFIRM"] = "Внимание! Редактирование поля штрихкода может привести к проблемам в складском учете при наличии остатков товара на складах";
+$MESS["CAT_BARCODE_EDIT_CONFIRM"] = "Внимание! Редактирование поля штрихкода может привести к проблемам в складском учёте при наличии остатков товара на складах";
 $MESS["C2IT_BAR_CODE_EDIT"] = "Изменить штрихкод";
 $MESS["C2IT_SUBSCRIBE"] = "Разрешить подписку при отсутствии товара";
 $MESS["C2IT_BASE_WIDTH"] = "Ширина (мм)";
@@ -122,4 +123,5 @@ $MESS["C2IT_NUMBER_ACTIVE_SUBSCRIPTIONS"] = "Количество активны
 $MESS["C2IT_LIST_SUBSCRIPTIONS"] = "Список подписок:";
 $MESS["C2IT_LIST_SUBSCRIPTIONS_TEXT"] = "посмотреть";
 $MESS["C2IT_UF_FIELDS"] = "Расширенные параметры";
-?>
+$MESS["C2IT_UF_SYSTEM_FIELDS"] = "Системные параметры";
+$MESS["C2IT_PROD_QUANTITY_RESERVED"] = "В резерве";

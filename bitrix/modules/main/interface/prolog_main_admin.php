@@ -61,7 +61,7 @@ if (!defined('ADMIN_SECTION_LOAD_AUTH') || !ADMIN_SECTION_LOAD_AUTH):
 <meta http-equiv="Content-Type" content="text/html; charset=<?=htmlspecialcharsbx(LANG_CHARSET)?>">
 <meta name="viewport" content="initial-scale=1.0, width=device-width">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><?$adminPage->ShowTitle()?> - <?echo COption::GetOptionString("main","site_name", $_SERVER["SERVER_NAME"])?></title>
+<title><?$adminPage->ShowTitle()?> - <?= htmlspecialcharsbx(COption::GetOptionString("main","site_name", $_SERVER["SERVER_NAME"])) ?></title>
 <?
 else:
 ?>
@@ -393,7 +393,7 @@ if($USER->IsAuthorized()):
 		echo EndNote();
 
 	elseif(defined("TIMELIMIT_EDITION") && TIMELIMIT_EDITION == "Y"):
-	
+
 		$delta = $SiteExpireDate - time();
 		$daysToExpire = ceil($delta / 86400);
 		$sWarnDate = ConvertTimeStamp($SiteExpireDate, "SHORT");
@@ -486,18 +486,18 @@ if($USER->IsAuthorized()):
 						{
 							BX.PopupMenu.show("prolong-popup", bindElement, [
 								{
-									text : '<b><?=GetMessageJS("prolog_main_support_menu1")?></b>'
+									html : '<b><?=GetMessageJS("prolog_main_support_menu1")?></b>'
 								},
 								{
-									text : '<?=GetMessageJS("prolog_main_support_menu2")?>',
+									html : '<?=GetMessageJS("prolog_main_support_menu2")?>',
 									onclick : function() {prolongRemind('<?=AddToTimeStamp(array("DD" => 7));?>', this)}
 								},
 								{
-									text : '<?=GetMessageJS("prolog_main_support_menu3")?>',
+									html : '<?=GetMessageJS("prolog_main_support_menu3")?>',
 									onclick : function() {prolongRemind('<?=AddToTimeStamp(array("DD" => 14));?>', this)}
 								},
 								{
-									text : '<?=GetMessageJS("prolog_main_support_menu4")?>',
+									html : '<?=GetMessageJS("prolog_main_support_menu4")?>',
 									onclick : function() {prolongRemind('<?=AddToTimeStamp(array("MM" => 1));?>', this)}
 								}
 							],

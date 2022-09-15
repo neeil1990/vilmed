@@ -25,6 +25,7 @@ use Bitrix\Sender\PostingTable;
 use Bitrix\Sender\PostingRecipientTable;
 use Bitrix\Sender\Integration;
 use Bitrix\Sender\Internals\Model;
+use Bitrix\Sender\Transport\Adapter;
 
 class Manager
 {
@@ -531,7 +532,7 @@ class Manager
 		{
 			$resultList[$endpoint['MODULE_ID']][$endpoint['CODE']][] = $endpoint['FIELDS'];
 		}
-		
+
 		return $resultList;
 	}
 
@@ -671,7 +672,8 @@ class Manager
 						continue;
 					}
 
-					$connectorCode = call_user_func(array($connectorClassName, 'getCode'));
+					$connector = new $connectorClassName;
+					$connectorCode = $connector->getCode();
 					if($moduleConnectorFilter && !in_array($connectorCode, $moduleConnectorFilter[$eventResult->getModuleId()]))
 					{
 						continue;
@@ -681,8 +683,8 @@ class Manager
 					if(is_subclass_of($connectorClassName,  '\Bitrix\Sender\TriggerConnectorClosed'))
 						$isClosedTrigger = true;
 
-					$connectorName = call_user_func(array($connectorClassName, 'getName'));
-					$connectorRequireConfigure = call_user_func(array($connectorClassName, 'requireConfigure'));
+					$connectorName = $connector->getName();
+					$connectorRequireConfigure = $connector->requireConfigure();
 					$resultList[] = array(
 						'MODULE_ID' => $eventResult->getModuleId(),
 						'CLASS_NAME' => $connectorClassName,

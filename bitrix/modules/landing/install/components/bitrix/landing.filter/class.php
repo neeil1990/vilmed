@@ -181,6 +181,18 @@ class LandingFilterComponent extends LandingBaseComponent
 					}
 					$filter[] = $flt;
 				}
+				// include areas
+				if (isset($search['IS_AREA']))
+				{
+					if ($search['IS_AREA'] == 'Y')
+					{
+						$filter['!==AREAS.ID'] = null;
+					}
+					else
+					{
+						$filter['==AREAS.ID'] = null;
+					}
+				}
 				// simple fields
 				if (isset($search['DELETED']))
 				{
@@ -283,6 +295,11 @@ class LandingFilterComponent extends LandingBaseComponent
 				'default' => true,
 				'type' => 'checkbox'
 			],
+			'IS_AREA' => [
+				'id' => 'IS_AREA',
+				'default' => true,
+				'type' => 'checkbox'
+			],
 			'ID' => [
 				'id' => 'ID',
 				'default' => false,
@@ -319,6 +336,11 @@ class LandingFilterComponent extends LandingBaseComponent
 				'type' => 'date'
 			]
 		];
+
+		if ($this->arParams['FILTER_TYPE'] == self::TYPE_SITE)
+		{
+			unset($return['IS_AREA']);
+		}
 
 		if ($this->arParams['DRAFT_MODE'] == 'Y')
 		{
@@ -365,6 +387,7 @@ class LandingFilterComponent extends LandingBaseComponent
 			$this->checkParam('FILTER_TYPE', '');
 			$this->checkParam('SETTING_LINK', '');
 			$this->checkParam('DRAFT_MODE', 'N');
+			$this->checkParam('FOLDER_ID', 0);
 			$this->checkParam('FOLDER_SITE_ID', 0);
 
 			$this->arParams['TYPE'] = trim($this->arParams['TYPE']);

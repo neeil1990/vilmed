@@ -21,6 +21,7 @@ class CCloudStorageBucket extends CAllCloudStorageBucket
 {
 	protected/*.array[string]string.*/$arBucket;
 	protected $enabledFailover = true;
+	protected/*.CCloudStorageBucket.*/$failoverBucket;
 	protected $queueFlag = true;
 	/** @var CCloudStorageService $service */
 	protected/*.CCloudStorageService.*/ $service;
@@ -75,15 +76,19 @@ class CCloudStorageBucket extends CAllCloudStorageBucket
 				&& $this->arBucket["FAILOVER_BUCKET_ID"] > 0
 			)
 			{
-				$failoverBucket = new CCloudStorageBucket($this->FAILOVER_BUCKET_ID, false);
-				if ($failoverBucket->Init())
+				$this->failoverBucket = new CCloudStorageBucket($this->FAILOVER_BUCKET_ID, false);
+				if ($this->failoverBucket->Init())
 				{
-					$this->arBucket["SERVICE_ID"] = $failoverBucket->SERVICE_ID;
-					$this->arBucket["BUCKET"] = $failoverBucket->BUCKET;
-					$this->arBucket["LOCATION"] = $failoverBucket->LOCATION;
-					$this->arBucket["CNAME"] = $failoverBucket->CNAME;
-					$this->arBucket["PREFIX"] = $failoverBucket->PREFIX;
-					$this->arBucket["SETTINGS"] = $failoverBucket->SETTINGS;
+					$this->arBucket["SERVICE_ID"] = $this->failoverBucket->SERVICE_ID;
+					$this->arBucket["BUCKET"] = $this->failoverBucket->BUCKET;
+					$this->arBucket["LOCATION"] = $this->failoverBucket->LOCATION;
+					$this->arBucket["CNAME"] = $this->failoverBucket->CNAME;
+					$this->arBucket["PREFIX"] = $this->failoverBucket->PREFIX;
+					$this->arBucket["SETTINGS"] = $this->failoverBucket->SETTINGS;
+				}
+				else
+				{
+					$this->failoverBucket = null;
 				}
 			}
 		}
@@ -232,14 +237,14 @@ class CCloudStorageBucket extends CAllCloudStorageBucket
 			while(is_array($ar = $rs->Fetch()))
 			{
 				if($ar["FILE_RULES"] != "")
-					$arRules = unserialize($ar["FILE_RULES"]);
+					$arRules = unserialize($ar["FILE_RULES"], ['allowed_classes' => false]);
 				else
 					$arRules = array();
 
 				$ar["FILE_RULES_COMPILED"] = self::CompileRules($arRules);
 
 				if($ar["SETTINGS"] != "")
-					$arSettings = unserialize($ar["SETTINGS"]);
+					$arSettings = unserialize($ar["SETTINGS"], ['allowed_classes' => false]);
 				else
 					$arSettings = array();
 
@@ -290,16 +295,27 @@ class CCloudStorageBucket extends CAllCloudStorageBucket
 	{
 		if ($this->service->tokenHasExpired)
 		{
+			$arBucket = $this->failoverBucket? $this->failoverBucket->arBucket: $this->arBucket;
 			$newSettings = false;
 			foreach(GetModuleEvents("clouds", "OnExpiredToken", true) as $arEvent)
 			{
-				$newSettings = ExecuteModuleEventEx($arEvent, array($this->arBucket));
+				$newSettings = ExecuteModuleEventEx($arEvent, array($arBucket));
 				if ($newSettings)
 					break;
 			}
+
 			if ($newSettings)
 			{
-				$updateResult = $this->Update(array("SETTINGS" => $newSettings));
+				if ($this->failoverBucket)
+				{
+					$updateResult = $this->failoverBucket->Update(array("SETTINGS" => $newSettings));
+					$this->arBucket = null;
+				}
+				else
+				{
+					$updateResult = $this->Update(array("SETTINGS" => $newSettings));
+				}
+
 				if ($updateResult)
 				{
 					$this->service->tokenHasExpired = false;
@@ -384,7 +400,7 @@ class CCloudStorageBucket extends CAllCloudStorageBucket
 	 * @param string $filePath
 	 * @return bool
 	*/
-	function DeleteFile($filePath)
+	function DeleteFile($filePath, $fileSize = null)
 	{
 		$result = $this->service->DeleteFile($this->arBucket, $filePath);
 		if ($result)
@@ -394,9 +410,13 @@ class CCloudStorageBucket extends CAllCloudStorageBucket
 				CCloudFailover::queueDelete($this, $filePath);
 			}
 
-			foreach(GetModuleEvents("clouds", "OnAfterDeleteFile", true) as $arEvent)
+			$eventData = [
+				'del' => 'Y',
+				'size' => $fileSize,
+			];
+			foreach (GetModuleEvents("clouds", "OnAfterDeleteFile", true) as $arEvent)
 			{
-				ExecuteModuleEventEx($arEvent, array($this, array('del' => 'Y'), $filePath));
+				ExecuteModuleEventEx($arEvent, array($this, $eventData, $filePath));
 			}
 		}
 		return $result;

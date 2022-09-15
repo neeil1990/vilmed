@@ -134,9 +134,21 @@ class SaveFile
 				$langFile->setOperatingEncoding(Main\Localization\Translation::getSourceEncoding($langId));
 			}
 
-			if (!$langFile->load() && $langFile->hasErrors())
+			if (!$langFile->loadTokens())
 			{
-				$this->addErrors($langFile->getErrors());
+				if (!$langFile->load() && $langFile->hasErrors())
+				{
+					foreach ($langFile->getErrors() as $error)
+					{
+						if ($error->getCode() !== 'EMPTY_CONTENT')
+						{
+							$this->addError($error);
+						}
+					}
+				}
+			}
+			if (count($this->getErrors()) > 0)
+			{
 				continue;
 			}
 
@@ -210,8 +222,10 @@ class SaveFile
 			{
 				if ($langFile->count() > 0)
 				{
-					$this->updateLangFile($langFile);
-					$langFile->updatePhraseIndex();
+					if ($this->updateLangFile($langFile))
+					{
+						$langFile->updatePhraseIndex();
+					}
 				}
 				else
 				{

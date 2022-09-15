@@ -40,7 +40,7 @@ class StringHelper
 			return mb_strlen($str, $encoding);
 		}
 
-		return Main\Text\BinaryString::getLength($str);
+		return strlen($str);
 	}
 
 	/**
@@ -62,7 +62,7 @@ class StringHelper
 			return mb_substr($str, $start, $length, $encoding);
 		}
 
-		return Main\Text\BinaryString::getSubstring($str, $start, $length);
+		return substr($str, $start, $length);
 	}
 
 	/**
@@ -84,7 +84,7 @@ class StringHelper
 			return mb_strpos($haystack, $needle, $offset, $encoding);
 		}
 
-		return Main\Text\BinaryString::getPosition($haystack, $needle, $offset);
+		return strpos($haystack, $needle, $offset);
 	}
 
 	/**
@@ -155,29 +155,69 @@ class StringHelper
 	 */
 	public static function validateUtf8OctetSequences($string)
 	{
-		$prevBits8and7 = 0;
-		$isUtf = 0;
-		foreach (unpack("C*", $string) as $byte)
+		return Main\Text\Encoding::detectUtf8($string, false);
+	}
+
+	/**
+	 * Escapes symbols of "'$ in given string.
+	 *
+	 * @param string $str String to escape.
+	 * @param string $enclosure Enclosure symbol " or ' and <<< for heredoc syntax.
+	 * @param string $additional Additional symbols to escape.
+	 *
+	 * @return string
+	 */
+	public static function escapePhp($str, $enclosure = '"', $additional = '')
+	{
+		//Lookaround negative lookbehind (?<!ASD)
+		if ($enclosure === "'")
 		{
-			$hiBits8and7 = $byte & 0xC0;
-			if ($hiBits8and7 == 0x80)
-			{
-				if ($prevBits8and7 == 0xC0)
-				{
-					$isUtf++;
-				}
-				elseif (($prevBits8and7 & 0x80) == 0x00)
-				{
-					$isUtf--;
-				}
-			}
-			elseif ($prevBits8and7 == 0xC0)
-			{
-				$isUtf--;
-			}
-			$prevBits8and7 = $hiBits8and7;
+			$str = preg_replace("/((?<![\\\\])['{$additional}]{1})/", "\\\\$1", $str);
+			// \${end of str} -> \\
+			$str = preg_replace("/((?<![\\\\])\\\\)$/", "\\\\$1", $str);
+		}
+		elseif ($enclosure === '"')
+		{
+			// " -> \"
+			$str = preg_replace("/((?<![\\\\])[\"{$additional}]{1})/", "\\\\$1", $str);
+			// $x -> \$x
+			$str = preg_replace("/((?<![\\\\])[\$]{1}\w)/", "\\\\$1", $str);
+			// \${end of str} -> \\
+			$str = preg_replace("/((?<![\\\\])\\\\)$/", "\\\\$1", $str);
+		}
+		elseif ($enclosure === '<<<')
+		{
+			// $x -> \$x
+			$str = preg_replace("/((?<![\\\\])[\$]{1}\w)/", "\\\\$1", $str);
 		}
 
-		return ($isUtf > 0);
+		return $str;
+	}
+
+	/**
+	 * Removes escape symbols in given string.
+	 *
+	 * @param string $str String to unescape.
+	 * @param string $enclosure Enclosure symbol " or '.
+	 *
+	 * @return string
+	 */
+	public static function unescapePhp($str, $enclosure = '"')
+	{
+		//Lookaround positive lookbehind (?<=ASD)
+		// (?<=[\\]+)['\"\\\$]{1}
+
+		if ($enclosure == "'")
+		{
+			$from = ["\\'"];
+			$to = ["'"];
+		}
+		else
+		{
+			$from = ["\\\$", "\\\""];
+			$to = ["\$", "\""];
+		}
+
+		return str_replace($from, $to, $str);
 	}
 }

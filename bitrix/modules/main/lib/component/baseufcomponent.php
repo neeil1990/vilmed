@@ -432,12 +432,20 @@ abstract class BaseUfComponent extends CBitrixComponent
 
 		$fieldName = $this->additionalParameters['NAME'] ?? $this->userField['FIELD_NAME'];
 
-		if($this->userField['MULTIPLE'] === 'Y' && !mb_substr_count($fieldName, '[]'))
+		if($this->isMultiple() && !mb_substr_count($fieldName, '[]'))
 		{
 			$fieldName .= '[]';
 		}
 
 		return $fieldName;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isMultiple(): bool
+	{
+		return (isset($this->userField['MULTIPLE']) && $this->userField['MULTIPLE'] === 'Y');
 	}
 
 	/**
@@ -524,6 +532,14 @@ abstract class BaseUfComponent extends CBitrixComponent
 	final public function isMobileMode(): bool
 	{
 		return ($this->getMediaType() === static::MEDIA_TYPE_MOBILE);
+	}
+
+	/**
+	 * @return bool
+	 */
+	final public function isAjaxRequest(): bool
+	{
+		return Context::getCurrent()->getRequest()->isAjaxRequest();
 	}
 
 	/**

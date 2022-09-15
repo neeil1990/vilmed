@@ -78,11 +78,10 @@
 	 */
 	function getBackgroundUrl(node)
 	{
-		var style = node.node.getAttribute('style');
-
-		if (style)
+		var bg = node.node.style.getPropertyValue('background-image');
+		if (bg)
 		{
-			var res = style.split(";")[0].match(/url\((.*?)\)/);
+			var res = bg.match(/url\((.*?)\)/);
 
 			if (res && res[1])
 			{
@@ -100,11 +99,10 @@
 	 */
 	function getBackgroundUrl2x(node)
 	{
-		var style = node.node.getAttribute('style');
-
-		if (style)
+		var bg = node.node.style.getPropertyValue('background-image');
+		if (bg)
 		{
-			var res = style.match(/1x, url\(["|'](.*)["|']\) 2x\); /);
+			var res = bg.match(/1x, url\(["|'](.*)["|']\) 2x\)/);
 
 			if (res && res[1])
 			{
@@ -382,7 +380,7 @@
 				var value = this.getValue();
 				value.url = decodeDataValue(value.url);
 
-				var disableLink = !!this.node.closest("a");
+				var disableLink = !!this.node.closest("a") || !!this.manifest.disableLink;
 
 				this.field = new BX.Landing.UI.Field.Image({
 					selector: this.selector,
@@ -391,6 +389,7 @@
 					disableLink: disableLink,
 					content: value,
 					dimensions: !!this.manifest.dimensions ? this.manifest.dimensions : {},
+					create2xByDefault: this.manifest.create2xByDefault,
 					disableAltField: isBackground(this),
 					uploadParams: this.uploadParams
 				});

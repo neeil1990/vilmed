@@ -1,5 +1,7 @@
-<?
+<?php
+
 use Bitrix\Main\Loader;
+
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/sale/general/product.php");
 
 class CSaleProduct extends CALLSaleProduct
@@ -13,7 +15,7 @@ class CSaleProduct extends CALLSaleProduct
 	 * @param boolean $getParentOnly - return only parent product ID
 	 * @return dbres
 	 */
-	function GetProductList($ID, $minCNT, $limit, $getParentOnly = false)
+	public static function GetProductList($ID, $minCNT, $limit, $getParentOnly = false)
 	{
 		global $DB;
 
@@ -82,7 +84,7 @@ class CSaleProduct extends CALLSaleProduct
 		return $DB->Query($strSql, false, "File: ".__FILE__."<br>Line: ".__LINE__);
 	}
 
-	function GetBestSellerList($by = "AMOUNT", $arFilter = Array(), $arOrderFilter = Array(), $limit = 0)
+	public static function GetBestSellerList($by = "AMOUNT", $arFilter = Array(), $arOrderFilter = Array(), $limit = 0)
 	{
 		global $DB;
 
@@ -202,7 +204,7 @@ class CSaleProduct extends CALLSaleProduct
 		return $dbRes;
 	}
 
-	function GetFilterOperation($key, $value)
+	public static function GetFilterOperation($key, $value)
 	{
 		global $DB;
 		$field = "";
@@ -288,7 +290,7 @@ class CSaleViewedProduct extends CAllSaleViewedProduct
 	* @param array $arFields - params for add
 	* @return true false
 	*/
-	public function Add($arFields)
+	public static function Add($arFields)
 	{
 		global $DB;
 
@@ -321,7 +323,15 @@ class CSaleViewedProduct extends CAllSaleViewedProduct
 		{
 			if (\Bitrix\Main\Loader::includeModule('catalog'))
 			{
-				return \Bitrix\Catalog\CatalogViewedProductTable::refresh($arFields["PRODUCT_ID"], CSaleBasket::GetBasketUserID(), $arFields["LID"]);
+				if ((string)\Bitrix\Main\Config\Option::get('catalog', 'enable_viewed_products') !== 'N')
+				{
+					$result = \Bitrix\Catalog\CatalogViewedProductTable::refresh(
+						$arFields["PRODUCT_ID"],
+						CSaleBasket::GetBasketUserID(),
+						$arFields["LID"]
+					);
+					return ($result > 0);
+				}
 			}
 		}
 
@@ -677,7 +687,7 @@ class CSaleViewedProduct extends CAllSaleViewedProduct
 	* @param
 	* @return true false
 	*/
-	public function _ClearViewed()
+	public static function _ClearViewed()
 	{
 		global $DB;
 
@@ -700,7 +710,7 @@ class CSaleViewedProduct extends CAllSaleViewedProduct
 	* @param int $LIMIT - fields count for delete
 	* @return true false
 	*/
-	public function DeleteForUser($FUSER_ID, $LIMIT = NULL)
+	public static function DeleteForUser($FUSER_ID, $LIMIT = NULL)
 	{
 		global $DB;
 

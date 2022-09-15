@@ -1,4 +1,4 @@
-<?
+<?php
 $MESS["BX_CAT_ENABLE_PROCESSING_DEPRECATED_EVENTS"] = "Enable legacy event support:";
 $MESS["BX_CAT_RESERVE_CONDITION_EMPTY"] = "unassigned";
 $MESS["BX_CAT_SYSTEM_SETTINGS"] = "System settings";
@@ -38,6 +38,7 @@ $MESS["CAT_ENABLE_QUANTITY_TRACE"] = "Enable stock control:";
 $MESS["CAT_ENABLE_RESERVATION"] = "Enable reservations";
 $MESS["CAT_ENABLE_RESERVATION_HINT"] = "This setting defines the default reservation behavior for all products whose \"Enable stock control\" option is set to \"default\".";
 $MESS["CAT_ENABLE_SHOW_CATALOG_TAB_WITH_OFFERS"] = "This is a legacy option. Checking it will disable automatic calculation of SKU based product stock. Instead, product in-stock status will be calculated based on the product data.";
+$MESS["CAT_ENABLE_VIEWED_PRODUCTS"] = "Save preferences for recently viewed products:";
 $MESS["CAT_EXPORT_DEFAULT_PATH"] = "Default path for exported files:";
 $MESS["CAT_IBLOCK_CATALOG_SUCCESSFULLY_UPDATE"] = "The catalog parameters have been saved successfully.";
 $MESS["CAT_IBLOCK_OFFERS_EMPTY"] = "not selected";
@@ -114,14 +115,14 @@ $MESS["CAT_SHOW_OFFERS_IBLOCK"] = "Show SKU information blocks in product select
 $MESS["CAT_SHOW_OFFERS_NAME"] = "Show SKU names";
 $MESS["CAT_SIMPLE_SEARCH"] = "Force text search filter in product select form";
 $MESS["CAT_SKU_SETTINGS"] = "SKU";
-$MESS["CAT_STORE"] = "Inventory control";
+$MESS["CAT_STORE_1"] = "Inventory management";
 $MESS["CAT_STORE_ACTIVE_ERROR"] = "You have an inactive warehouse. Please activate or delete this warehouse before enabling stock control.";
-$MESS["CAT_STORE_DEACTIVATE_NOTICE"] = "Attention! Disabling stock control will render stock control documentation unavailable.";
+$MESS["CAT_STORE_DEACTIVATE_NOTICE_1"] = "Attention! Disabling inventory management will render stock control documentation unavailable.";
 $MESS["CAT_STORE_LIST_IS_EMPTY"] = "There are no warehouses.";
 $MESS["CAT_STORE_NAME"] = "Warehouse";
 $MESS["CAT_STORE_SYNCHRONIZE_ERROR"] = "Attention! The total and the warehouse stock values are inconsistent for some products.";
-$MESS["CAT_STORE_SYNCHRONIZE_WARNING"] = "Attention! You have enabled stock control. It is possible that the product totals and the warehouse stocks will not match for some products because the warehouses had already been added to the system.";
-$MESS["CAT_USE_STORE_CONTROL"] = "Enable warehouse management";
+$MESS["CAT_STORE_SYNCHRONIZE_WARNING_1"] = "Attention! You have enabled inventory management. It is possible that the product totals and the warehouse stocks will not match for some products because the warehouses had already been added to the system.";
+$MESS["CAT_USE_STORE_CONTROL_1"] = "Enable inventory management";
 $MESS["CAT_VIEWED_COUNT"] = "Maximum items in viewed products list:";
 $MESS["CAT_VIEWED_PERIOD"] = "Delete outdated items after (days):";
 $MESS["CAT_VIEWED_PRODUCTS_TITLE"] = "Preferences for recently viewed products";
@@ -160,4 +161,3 @@ $MESS["CO_USER_GROUP_ALT"] = "View the user group details";
 $MESS["SMALL_BUSINESS_RECURRING_ERR"] = "The content selling feature is not included in your edition.";
 $MESS["SMALL_BUSINESS_RECURRING_ERR_LIST"] = "The following information blocks are content selling enabled:";
 $MESS["SMALL_BUSINESS_RECURRING_ERR_LIST_CLEAR"] = "This option will be deactivated once the module settings have been saved.";
-?>

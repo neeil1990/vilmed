@@ -1,4 +1,4 @@
-<?
+<?php
 
 use	Bitrix\Sale\Compatible,
 	Bitrix\Sale\Internals,
@@ -9,7 +9,7 @@ Loc::loadMessages(__FILE__);
 
 class CAllSaleOrderPropsValue
 {
-	function GetList($arOrder = array(), $arFilter = array(), $arGroupBy = false, $arNavStartParams = false, $arSelectFields = array())
+	public static function GetList($arOrder = array(), $arFilter = array(), $arGroupBy = false, $arNavStartParams = false, $arSelectFields = array())
 	{
 		global $DB;
 
@@ -101,6 +101,8 @@ class CAllSaleOrderPropsValue
 		if ($relationFilter)
 			$query->addFilter(null, $relationFilter);
 
+		$arFilter['ENTITY_TYPE'] = \Bitrix\Sale\Registry::ENTITY_ORDER;
+
 		// execute
 
 		$query->prepare($arOrder, $arFilter, $arGroupBy, $arSelectFields);
@@ -135,14 +137,14 @@ class CAllSaleOrderPropsValue
 		}
 	}
 
-	function GetByID($ID)
+	public static function GetByID($ID)
 	{
 		return $ID
 			? self::GetList(array(), array('ID' => $ID))->Fetch()
 			: false;
 	}
 
-	function GetOrderProps($ORDER_ID)
+	public static function GetOrderProps($ORDER_ID)
 	{
 		return self::GetList(
 			array('GROUP_SORT' => 'ASC', 'GROUP_NAME' => 'ASC', 'PROP_SORT' => 'ASC', 'PROPERTY_NAME' => 'ASC', 'PROP_ID' => 'ASC'),
@@ -157,7 +159,7 @@ class CAllSaleOrderPropsValue
 		);
 	}
 
-	function GetOrderRelatedProps($ORDER_ID, $arFilter = array())
+	public static function GetOrderRelatedProps($ORDER_ID, $arFilter = array())
 	{
 		if (! is_array($arFilter))
 			$arFilter = array();
@@ -175,7 +177,7 @@ class CAllSaleOrderPropsValue
 		);
 	}
 
-	function CheckFields($ACTION, &$arFields, $ID = 0)
+	public static function CheckFields($ACTION, &$arFields, $ID = 0)
 	{
 		if ((is_set($arFields, "ORDER_ID") || $ACTION=="ADD") && intval($arFields["ORDER_ID"]) <= 0)
 		{
@@ -223,19 +225,22 @@ class CAllSaleOrderPropsValue
 			}
 		}
 
+		if (
+			$ACTION === 'UPDATE'
+			&& $ID > 0
+			&& !self::GetByID($ID)
+		)
+		{
+			return false;
+		}
+
 		return true;
 	}
 
-	function Add($arFields)
+	public static function Add($arFields)
 	{
 		if (! self::CheckFields('ADD', $arFields, 0))
 			return false;
-
-//		if ($arFields['VALUE'] && ($oldProperty = CSaleOrderProps::GetById($arFields['ORDER_PROPS_ID'])))
-//		{
-//			$oldProperty['VALUE'] = $arFields['VALUE'];
-//			$arFields['VALUE'] = CSaleOrderPropsAdapter::convertOldToNew($oldProperty, 'VALUE', true);
-//		}
 
 		// location ID to CODE, VALUE is always present
 		if((string) $arFields['VALUE'] != '')
@@ -249,28 +254,24 @@ class CAllSaleOrderPropsValue
 			}
 		}
 
-		return Internals\OrderPropsValueTable::add(array_intersect_key($arFields, CSaleOrderPropsValueAdapter::$allFields))->getId();
+		$arFields = array_intersect_key($arFields, CSaleOrderPropsValueAdapter::$allFields);
+
+		$arFields['ENTITY_ID'] = $arFields['ORDER_ID'];
+		$arFields['ENTITY_TYPE'] = \Bitrix\Sale\Registry::ENTITY_ORDER;
+
+		$res = Internals\OrderPropsValueTable::add($arFields);
+		if ($res->isSuccess())
+		{
+			return $res->getId();
+		}
+
+		return 0;
 	}
 
-	function Update($ID, $arFields)
+	public static function Update($ID, $arFields)
 	{
 		if (! self::CheckFields('UPDATE', $arFields, $ID))
 			return false;
-
-//		if ($arFields['VALUE'])
-//		{
-//			if (!  ($propertyId = $arFields['ORDER_PROPS_ID'])
-//				&& ($propertyValue = Internals\OrderPropsValueTable::getById($ID)->fetch()))
-//			{
-//				$propertyId = $propertyValue['ORDER_PROPS_ID'];
-//			}
-//
-//			if ($propertyId && ($oldProperty = CSaleOrderProps::GetById($propertyId)))
-//			{
-//				$oldProperty['VALUE'] = $arFields['VALUE'];
-//				$arFields['VALUE'] = CSaleOrderPropsAdapter::convertOldToNew($oldProperty, 'VALUE', true);
-//			}
-//		}
 
 		// location ID to CODE
 		if((string) $arFields['VALUE'] != '')
@@ -294,7 +295,20 @@ class CAllSaleOrderPropsValue
 			}
 		}
 
-		return Internals\OrderPropsValueTable::update($ID, array_intersect_key($arFields, CSaleOrderPropsValueAdapter::$allFields))->getId();
+		$arFields = array_intersect_key($arFields, CSaleOrderPropsValueAdapter::$allFields);
+
+		if (isset($arFields['ORDER_ID']))
+		{
+			$arFields['ENTITY_ID'] = $arFields['ORDER_ID'];
+		}
+
+		$res = Internals\OrderPropsValueTable::update($ID, $arFields);
+		if ($res->isSuccess())
+		{
+			return $res->getId();
+		}
+
+		return 0;
 	}
 
 	/**
@@ -341,7 +355,7 @@ class CAllSaleOrderPropsValue
 		return $id;
 	}
 
-	function Delete($ID)
+	public static function Delete($ID)
 	{
 		global $DB;
 		$ID = intval($ID);
@@ -350,7 +364,7 @@ class CAllSaleOrderPropsValue
 		return $DB->Query($strSql, True);
 	}
 
-	function DeleteByOrder($orderID)
+	public static function DeleteByOrder($orderID)
 	{
 		global $DB;
 		$orderID = intval($orderID);

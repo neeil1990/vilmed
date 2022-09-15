@@ -36,10 +36,26 @@ class Register
 	}
 
 	/**
+	 * Returns IP for A record DNS.
+	 * @param string|null $tld Top level domain.
+	 * @return string
+	 */
+	protected static function getINA(?string $tld = null): string
+	{
+		$http = new HttpClient;
+		$zone = ($tld == 'kz') ? 'kz' : Manager::getZone();
+		$ip = $http->get(self::B24_SERVICE_DETECT_IP . $zone);
+		$ip = \CUtil::jsObjectToPhp($ip);
+
+		return isset($ip['IP']) ? $ip['IP'] : self::B24_DEFAULT_DNS_IP;
+	}
+
+	/**
 	 * Returns INA && CNAME records value for domain registration.
+	 * @param string|null $tld Top level domain.
 	 * @return array
 	 */
-	public static function getDNSRecords(): array
+	public static function getDNSRecords(?string $tld = null): array
 	{
 		static $result = null;
 
@@ -49,24 +65,15 @@ class Register
 		}
 
 		$result = [
-			'INA' => self::B24_DEFAULT_DNS_IP,
+			'INA' => self::getINA($tld),
 			'CNAME' => self::B24_DEFAULT_DNS_CNAME
 		];
-
-		$http = new HttpClient;
-		$ip = $http->get(self::B24_SERVICE_DETECT_IP . Manager::getZone());
-		$ip = \CUtil::jsObjectToPhp($ip);
-
-		if (isset($ip['IP']))
-		{
-			$result['INA'] = $ip['IP'];
-		}
 
 		return $result;
 	}
 
 	/**
-	 * Returns true if domain is enable and active now.
+	 * Returns true if domain is enabled and active now.
 	 * @param string $domainName Domain name.
 	 * @return bool
 	 */
@@ -75,6 +82,11 @@ class Register
 		$http = new HttpClient;
 		$status = $http->get(self::B24_SERVICE_DETECT_DOMAIN . $domainName);
 		$status = \CUtil::jsObjectToPhp($status);
-		return isset($status['status']) && $status['status'] == 'ready';
+		// protect from bad answer
+		if (!isset($status['status']))
+		{
+			return true;
+		}
+		return $status['status'] === 'ready';
 	}
 }

@@ -11,7 +11,6 @@ return array(
 	'code' => 'store-instagram/mainpage',
 	'name' => Loc::getMessage('LANDING_DEMO_STORE_INSTAGRAM--MAINPAGE--NAME'),
 	'description' => Loc::getMessage('LANDING_DEMO_STORE_INSTAGRAM--MAINPAGE--DESC'),
-	'active' => true,
 	'preview' => '',
 	'preview2x' => '',
 	'preview3x' => '',
@@ -26,7 +25,7 @@ return array(
 			'VIEW_USE' => 'N',
 			'VIEW_TYPE' => 'no',
 			'THEME_CODE' => '1construction',
-
+			'METAOG_IMAGE' => 'https://cdn.bitrix24.site/bitrix/images/demo/page/store-instagram/preview@2x.jpg',
 		),
 	),
 	'layout' => array(
@@ -147,9 +146,13 @@ return array(
 			'nodes' => array(),
 			'style' => array(
 				'#wrapper' => array(
-					0 => 'g-pos-rel landing-block text-center g-py-80 g-bg-primary g-pb-40 g-pt-20',
+					0 => 'g-pos-rel landing-block g-py-80 g-bg-primary g-pb-40 g-pt-20',
 				),
 			),
 		),
 	),
+	'active' => \LandingSiteDemoComponent::checkActive([
+		'ONLY_IN' => [],
+		'EXCEPT' => ['ru'],
+	]),
 );
