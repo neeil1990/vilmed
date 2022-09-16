@@ -12,9 +12,9 @@ use Bitrix\Main\SystemException;
 //SET_CURRENCIES//
 if(!empty($templateData["CURRENCIES"])) {
 	$loadCurrency = Loader::includeModule("currency");
-	
+
 	CJSCore::Init(array("currency"));?>
-	
+
 	<script type="text/javascript">
 		BX.Currency.setCurrencies(<?=$templateData["CURRENCIES"]?>);
 	</script>
@@ -66,7 +66,7 @@ endif;
 if(empty($arResult["BACKGROUND_IMAGE"]) || empty($arResult["BACKGROUND_YOUTUBE"])):
 	foreach($arResult["SECTION"]["PATH"] as $arSectionPath):
 		$sectionPathIds[] = $arSectionPath["ID"];
-	endforeach;	
+	endforeach;
 	if(!empty($sectionPathIds)):
 		$arFilter = array(
 			"IBLOCK_ID" => $arResult["IBLOCK_ID"],
@@ -81,7 +81,7 @@ if(empty($arResult["BACKGROUND_IMAGE"]) || empty($arResult["BACKGROUND_YOUTUBE"]
 			$arCurSection = $obCache->GetVars();
 		} elseif($obCache->StartDataCache()) {
 			$rsSections = CIBlockSection::GetList(
-				array("DEPTH_LEVEL" => "DESC"),	
+				array("DEPTH_LEVEL" => "DESC"),
 				array("IBLOCK_ID" => $arResult["IBLOCK_ID"], "ACTIVE" => "Y", "GLOBAL_ACTIVE" => "Y", "ID" => $sectionPathIds),
 				false,
 				array("ID", "IBLOCK_ID", "DEPTH_LEVEL", "UF_BACKGROUND_IMAGE", "UF_YOUTUBE_BG")
@@ -137,9 +137,9 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 // if(($arParams["AJAX_OPTION_HISTORY"] !== "Y" && $arParams["AJAX_MODE"] == "Y") || $arParams["AJAX_MODE"] == "Y" || $arParams["AJAX_MODE"] !== "Y") {
 	//SUBSCRIBE//
 	if(isset($arResult["JS_OFFERS"]) && !empty($arResult["JS_OFFERS"])):
-		if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):		
+		if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):
 			$arOffer = $arResult["JS_OFFERS"][$arResult["OFFERS_SELECTED"]];
-			if(!$arOffer["CAN_BUY"] && $arResult["CATALOG_SUBSCRIBE"] == 'Y'):?>		
+			if(!$arOffer["CAN_BUY"] && $arResult["CATALOG_SUBSCRIBE"] == 'Y'):?>
 				<div id="catalog-subscribe-from" class="catalog-subscribe-from" style="display:none;">
 					<?$APPLICATION->includeComponent("bitrix:catalog.product.subscribe", "",
 						array(
@@ -179,7 +179,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 				if($arOffer["CAN_BUY"] && $arOffer["ITEM_PRICES"][$arOffer["ITEM_PRICE_SELECTED"]]["RATIO_PRICE"] > 0):?>
 					<div id="geolocation-delivery-from" class="geolocation-delivery-from" style="display:none;">
 						<?$APPLICATION->IncludeComponent("altop:geolocation.delivery", "",
-							array(			
+							array(
 								"ELEMENT_ID" => $arOffer["ID"],
 								"ELEMENT_COUNT" => $arOffer["ITEM_PRICES"][$arOffer["ITEM_PRICE_SELECTED"]]["MIN_QUANTITY"],
 								"CACHE_TYPE" => $arParams["CACHE_TYPE"],
@@ -193,9 +193,9 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 			endif;
 		else:
 			if($arResult["CAN_BUY"] && $arResult["MIN_PRICE"]["RATIO_PRICE"] > 0):?>
-				<div id="geolocation-delivery-from" class="geolocation-delivery-from" style="display:none;">		
+				<div id="geolocation-delivery-from" class="geolocation-delivery-from" style="display:none;">
 					<?$APPLICATION->IncludeComponent("altop:geolocation.delivery", "",
-						array(			
+						array(
 							"ELEMENT_ID" => $arResult["ID"],
 							"ELEMENT_COUNT" => $arResult["MIN_PRICE"]["MIN_QUANTITY"],
 							"CACHE_TYPE" => $arParams["CACHE_TYPE"],
@@ -203,7 +203,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 						),
 						false,
 						array("HIDE_ICONS" => "Y")
-					);?>	
+					);?>
 				</div>
 			<?endif;
 		endif;
@@ -211,14 +211,14 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 
 	//SET_CONSTRUCTOR//
 	if(isset($arResult["JS_OFFERS"]) && !empty($arResult["JS_OFFERS"])):
-		if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):		
-			$arOffer = $arResult["JS_OFFERS"][$arResult["OFFERS_SELECTED"]];?>		
+		if($arSetting["OFFERS_VIEW"]["VALUE"] != "LIST"):
+			$arOffer = $arResult["JS_OFFERS"][$arResult["OFFERS_SELECTED"]];?>
 			<div id="set-constructor-from" class="set-constructor-from" style="display:none;">
 				<?$APPLICATION->IncludeComponent("bitrix:catalog.set.constructor", "",
 					array(
 						"IBLOCK_TYPE_ID" => $arParams["IBLOCK_TYPE"],
-						"IBLOCK_ID" => $arResult["OFFERS_IBLOCK"],						
-						"ELEMENT_ID" => $arOffer["ID"],		
+						"IBLOCK_ID" => $arResult["OFFERS_IBLOCK"],
+						"ELEMENT_ID" => $arOffer["ID"],
 						"BASKET_URL" => $arParams["BASKET_URL"],
 						"PRICE_CODE" => $arParams["PRICE_CODE"],
 						"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"] == 1 ? "Y" : "N",
@@ -241,7 +241,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 				array(
 					"IBLOCK_TYPE_ID" => $arParams["IBLOCK_TYPE"],
 					"IBLOCK_ID" => $arParams["IBLOCK_ID"],
-					"ELEMENT_ID" => $arResult["ID"],		
+					"ELEMENT_ID" => $arResult["ID"],
 					"BASKET_URL" => $arParams["BASKET_URL"],
 					"PRICE_CODE" => $arParams["PRICE_CODE"],
 					"PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"] == 1 ? "Y" : "N",
@@ -273,8 +273,8 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 					"ELEMENT_SORT_FIELD2" => "SORT",
 					"ELEMENT_SORT_ORDER2" => "ASC",
 					"PROPERTY_CODE" => $arParams["PROPERTY_CODE"],
-					"SET_META_KEYWORDS" => "N",		
-					"SET_META_DESCRIPTION" => "N",		
+					"SET_META_KEYWORDS" => "N",
+					"SET_META_DESCRIPTION" => "N",
 					"SET_BROWSER_TITLE" => "N",
 					"SET_LAST_MODIFIED" => "N",
 					"INCLUDE_SUBSECTIONS" => "Y",
@@ -333,7 +333,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 					"CONVERT_CURRENCY" => $arParams["CONVERT_CURRENCY"],
 					"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 					"HIDE_NOT_AVAILABLE" => "N",
-					"ADD_SECTIONS_CHAIN" => "N",		
+					"ADD_SECTIONS_CHAIN" => "N",
 					"COMPARE_PATH" => $arParams["COMPARE_PATH"],
 					"BACKGROUND_IMAGE" => "",
 					"DISABLE_INIT_JS_IN_COMPONENT" => "",
@@ -356,7 +356,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 	<div id="accessories-from" class="accessories" style="display:none;">
 		<?if(!empty($arResult["PROPERTY_ACCESSORIES_ID"])):
 			global $arAcsPrFilter;
-			$arAcsPrFilter["ID"] = $arResult["PROPERTY_ACCESSORIES_ID"];?>		
+			$arAcsPrFilter["ID"] = $arResult["PROPERTY_ACCESSORIES_ID"];?>
 			<?$APPLICATION->IncludeComponent("bitrix:catalog.section", "filtered",
 				array(
 					"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
@@ -366,8 +366,8 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 					"ELEMENT_SORT_FIELD2" => "",
 					"ELEMENT_SORT_ORDER2" => "",
 					"PROPERTY_CODE" => "",
-					"SET_META_KEYWORDS" => "N",		
-					"SET_META_DESCRIPTION" => "N",		
+					"SET_META_KEYWORDS" => "N",
+					"SET_META_DESCRIPTION" => "N",
 					"SET_BROWSER_TITLE" => "N",
 					"SET_LAST_MODIFIED" => "N",
 					"INCLUDE_SUBSECTIONS" => "Y",
@@ -428,7 +428,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 					"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 					"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
 					"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
-					"ADD_SECTIONS_CHAIN" => "N",		
+					"ADD_SECTIONS_CHAIN" => "N",
 					"COMPARE_PATH" => "",
 					"BACKGROUND_IMAGE" => "",
 					"DISABLE_INIT_JS_IN_COMPONENT" => (isset($arParams["DISABLE_INIT_JS_IN_COMPONENT"]) ? $arParams["DISABLE_INIT_JS_IN_COMPONENT"] : ""),
@@ -459,7 +459,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 		);
 		$obCache = new CPHPCache();
 		if($obCache->InitCache($arParams["CACHE_TIME"], serialize($arFilter), "/catalog/comments")) {
-			$arResult["REVIEWS"]["IBLOCK_ID"] = $obCache->GetVars();		
+			$arResult["REVIEWS"]["IBLOCK_ID"] = $obCache->GetVars();
 		} elseif($obCache->StartDataCache()) {
 			$res = CIBlock::GetList(array(), $arFilter, true);
 			if($reviews_iblock = $res->Fetch()) {
@@ -500,7 +500,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 							"USE_STORE_PHONE" => $arParams["USE_STORE_PHONE"],
 							"SCHEDULE" => $arParams["USE_STORE_SCHEDULE"],
 							"USE_MIN_AMOUNT" => $arParams["USE_MIN_AMOUNT"],
-							"MIN_AMOUNT" => $arParams["MIN_AMOUNT"],									
+							"MIN_AMOUNT" => $arParams["MIN_AMOUNT"],
 							"STORES" => $arParams["STORES"],
 							"SHOW_EMPTY_STORE" => $arParams["SHOW_EMPTY_STORE"],
 							"SHOW_GENERAL_STORE_INFORMATION" => $arParams["SHOW_GENERAL_STORE_INFORMATION"],
@@ -534,7 +534,7 @@ if(!($arParams["AJAX_OPTION_HISTORY"] == "Y" && $arParams["AJAX_MODE"] == "Y")) 
 					false,
 					array("HIDE_ICONS" => "Y")
 				);?>
-			</div>						
+			</div>
 		<?endif;
 	endif;
 }?>
@@ -548,7 +548,7 @@ if($CurPageAr[1]=="catalog"){
 
 
     $parentSections = [];
- 
+
     $parentSectionIterator = SectionTable::getList([
         'select' => [
         	'NAME' => 'SECTION_SECTION.NAME',
@@ -571,10 +571,10 @@ if($CurPageAr[1]=="catalog"){
             ],
         ],
     ]);
- 
+
     while ($parentSection = $parentSectionIterator->fetch()) {
         if($parentSection["CODE"]){
         	$APPLICATION->AddChainItem($parentSection["NAME"], "/catalog/".$parentSection["CODE"]."/", true);
         }
     }
- 	$APPLICATION->AddChainItem($arResult["NAME"], "", true);
+ 	$APPLICATION->AddChainItem(html_entity_decode($arResult["NAME"]), "", true);

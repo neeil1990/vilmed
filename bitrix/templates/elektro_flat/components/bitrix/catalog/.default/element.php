@@ -13,7 +13,7 @@ Loc::loadMessages(__FILE__);
 
 $bxajaxid = $_REQUEST["bxajaxid"];
 if(!empty($bxajaxid)) {
-	//JS//?>	
+	//JS//?>
 	<script type="text/javascript">
 		//<![CDATA[
 		BX.ready(function() {
@@ -41,7 +41,7 @@ if($arParams["OFFERS_SORT_FIELD"] == "PRICE") {
 	    	break;
 	    }
 	}
-	
+
 	if(!$flag) {
 		$arPriceBase = CCatalogGroup::GetBaseGroup();
     	$arParams["OFFERS_SORT_FIELD_EL"] = "catalog_PRICE_".$arPriceBase['ID'];
@@ -117,12 +117,12 @@ if($arParams["OFFERS_SORT_FIELD"] == "PRICE") {
 		"MAIN_BLOCK_PROPERTY_CODE" => $arParams["DETAIL_MAIN_BLOCK_PROPERTY_CODE"],
 		"MAIN_BLOCK_OFFERS_PROPERTY_CODE" => $arParams["DETAIL_MAIN_BLOCK_OFFERS_PROPERTY_CODE"],
 		"ADD_SECTIONS_CHAIN" => (isset($arParams["ADD_SECTIONS_CHAIN"]) ? $arParams["ADD_SECTIONS_CHAIN"] : ""),
-		"ADD_ELEMENT_CHAIN" => (isset($arParams["ADD_ELEMENT_CHAIN"]) ? $arParams["ADD_ELEMENT_CHAIN"] : ""),		
+		"ADD_ELEMENT_CHAIN" => (isset($arParams["ADD_ELEMENT_CHAIN"]) ? $arParams["ADD_ELEMENT_CHAIN"] : ""),
 		"DISPLAY_COMPARE" => (isset($arParams["USE_COMPARE"]) ? $arParams["USE_COMPARE"] : ""),
 		"COMPARE_PATH" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["compare"],
 		"BACKGROUND_IMAGE" => (isset($arParams["DETAIL_BACKGROUND_IMAGE"]) ? $arParams["DETAIL_BACKGROUND_IMAGE"] : ""),
 		"DISABLE_INIT_JS_IN_COMPONENT" => (isset($arParams["DISABLE_INIT_JS_IN_COMPONENT"]) ? $arParams["DISABLE_INIT_JS_IN_COMPONENT"] : ""),
-		"SET_VIEWED_IN_COMPONENT" => (isset($arParams["DETAIL_SET_VIEWED_IN_COMPONENT"]) ? $arParams["DETAIL_SET_VIEWED_IN_COMPONENT"] : ""),	
+		"SET_VIEWED_IN_COMPONENT" => (isset($arParams["DETAIL_SET_VIEWED_IN_COMPONENT"]) ? $arParams["DETAIL_SET_VIEWED_IN_COMPONENT"] : ""),
 		"SHOW_MAX_QUANTITY" => $arParams["SHOW_MAX_QUANTITY"],
 		"MESS_SHOW_MAX_QUANTITY" => (isset($arParams["~MESS_SHOW_MAX_QUANTITY"]) ? $arParams["~MESS_SHOW_MAX_QUANTITY"] : ""),
 		"RELATIVE_QUANTITY_FACTOR" => (isset($arParams["RELATIVE_QUANTITY_FACTOR"]) ? $arParams["RELATIVE_QUANTITY_FACTOR"] : ""),
@@ -137,13 +137,13 @@ if($arParams["OFFERS_SORT_FIELD"] == "PRICE") {
 		"SHOW_EMPTY_STORE" => $arParams['SHOW_EMPTY_STORE'],
 		"SHOW_GENERAL_STORE_INFORMATION" => $arParams['SHOW_GENERAL_STORE_INFORMATION'],
 		"USER_FIELDS" => $arParams['USER_FIELDS'],
-		"FIELDS" => $arParams['FIELDS'],		
+		"FIELDS" => $arParams['FIELDS'],
 		"DISPLAY_IMG_WIDTH"	 =>	$arParams["DISPLAY_IMG_WIDTH"],
 		"DISPLAY_IMG_HEIGHT" =>	$arParams["DISPLAY_IMG_HEIGHT"],
 		"DISPLAY_DETAIL_IMG_WIDTH"	 =>	$arParams["DISPLAY_DETAIL_IMG_WIDTH"],
 		"DISPLAY_DETAIL_IMG_HEIGHT" =>	$arParams["DISPLAY_DETAIL_IMG_HEIGHT"],
 		"DISPLAY_MORE_PHOTO_WIDTH"	 =>	$arParams["DISPLAY_MORE_PHOTO_WIDTH"],
-		"DISPLAY_MORE_PHOTO_HEIGHT" =>	$arParams["DISPLAY_MORE_PHOTO_HEIGHT"],		
+		"DISPLAY_MORE_PHOTO_HEIGHT" =>	$arParams["DISPLAY_MORE_PHOTO_HEIGHT"],
 		"PROPERTY_CODE_MOD" => $arParams["PROPERTY_CODE_MOD"],
 		"IBLOCK_TYPE_REVIEWS" => $arParams["IBLOCK_TYPE_REVIEWS"],
 		"IBLOCK_ID_REVIEWS" => $arParams["IBLOCK_ID_REVIEWS"],
@@ -166,14 +166,18 @@ if($arParams["OFFERS_SORT_FIELD"] == "PRICE") {
 		"COUNT_REVIEW" => $arParams["COUNT_REVIEW"]
 	),
 	$component
-);?>
+);
+
+if($element = CIBlockElement::GetByID($ElementID)->GetNext())
+    $APPLICATION->SetTitle(html_entity_decode($element["NAME"]));
+?>
 
 <?//CURRENT_ELEMENT//
 $arCurElement = array();
 $arFilter = array("IBLOCK_ID" => $arParams["IBLOCK_ID"], "ID" => $ElementID);
 $obCache = new CPHPCache();
 if($obCache->InitCache($arParams["CACHE_TIME"], serialize($arFilter), "/catalog/element")) {
-	$arCurElement = $obCache->GetVars();	
+	$arCurElement = $obCache->GetVars();
 } elseif($obCache->StartDataCache()) {
 	$rsElement = CIBlockElement::GetList(array(), $arFilter, false, false, array("ID", "IBLOCK_ID", "IBLOCK_SECTION_ID", "PROPERTY_THIS_COLLECTION"));
 	if($arElement = $rsElement->GetNext()) {
@@ -188,7 +192,7 @@ unset($arFilter);
 
 if(!empty($arCurElement)) {
 	//RELATED_ITEMS//
-	if(!$arCurElement["IS_COLLECTION"] && $arParams["RELATED_PRODUCTS_SHOW"] !== "N") {	
+	if(!$arCurElement["IS_COLLECTION"] && $arParams["RELATED_PRODUCTS_SHOW"] !== "N") {
 		global $arRelPrFilter;
 		$arRelPrFilter = Array("!ID" => $ElementID, "PROPERTY_THIS_COLLECTION" => false);?>
 		<?$APPLICATION->IncludeComponent("bitrix:catalog.section", "filtered",
@@ -200,8 +204,8 @@ if(!empty($arCurElement)) {
 				"ELEMENT_SORT_FIELD2" => "",
 				"ELEMENT_SORT_ORDER2" => "",
 				"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
-				"SET_META_KEYWORDS" => "N",		
-				"SET_META_DESCRIPTION" => "N",		
+				"SET_META_KEYWORDS" => "N",
+				"SET_META_DESCRIPTION" => "N",
 				"SET_BROWSER_TITLE" => "N",
 				"SET_LAST_MODIFIED" => "N",
 				"INCLUDE_SUBSECTIONS" => $arParams["INCLUDE_SUBSECTIONS"],
@@ -260,7 +264,7 @@ if(!empty($arCurElement)) {
 				"CURRENCY_ID" => $arParams["CURRENCY_ID"],
 				"HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
 				"HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
-				"ADD_SECTIONS_CHAIN" => "N",		
+				"ADD_SECTIONS_CHAIN" => "N",
 				"COMPARE_PATH" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["compare"],
 				"BACKGROUND_IMAGE" => "",
 				"DISABLE_INIT_JS_IN_COMPONENT" => (isset($arParams["DISABLE_INIT_JS_IN_COMPONENT"]) ? $arParams["DISABLE_INIT_JS_IN_COMPONENT"] : ""),
@@ -280,14 +284,14 @@ if(!empty($arCurElement)) {
 			array("HIDE_ICONS" => "Y")
 		);
 	}
-	
+
 	//BIGDATA_ITEMS//
 	if(!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N") {
 		$arProperty = array();
 		$propCacheID = array("IBLOCK_ID" => $arParams["IBLOCK_ID"]);
 		$obCache = new CPHPCache();
 		if($obCache->InitCache($arParams["CACHE_TIME"], serialize($propCacheID), "/catalog/property")) {
-			$arProperty = $obCache->GetVars();	
+			$arProperty = $obCache->GetVars();
 		} elseif($obCache->StartDataCache()) {
 			$dbProperty = CIBlockProperty::GetPropertyEnum("THIS_COLLECTION", array(), array("IBLOCK_ID" => $arParams["IBLOCK_ID"]));
 			if($arProp = $dbProperty->GetNext()) {
@@ -311,11 +315,11 @@ if(!empty($arCurElement)) {
 				"ELEMENT_SORT_FIELD2" => "",
 				"ELEMENT_SORT_ORDER2" => "",
 				"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
-				"SET_META_KEYWORDS" => "N",		
-				"SET_META_DESCRIPTION" => "N",		
+				"SET_META_KEYWORDS" => "N",
+				"SET_META_DESCRIPTION" => "N",
 				"SET_BROWSER_TITLE" => "N",
 				"SET_LAST_MODIFIED" => "N",
-				"INCLUDE_SUBSECTIONS" => $arParams["INCLUDE_SUBSECTIONS"],				
+				"INCLUDE_SUBSECTIONS" => $arParams["INCLUDE_SUBSECTIONS"],
 				"CUSTOM_FILTER" => !empty($arProperty) ? "{\"CLASS_ID\":\"CondGroup\",\"DATA\":{\"All\":\"AND\",\"True\":\"True\"},\"CHILDREN\":[{\"CLASS_ID\":\"CondIBProp:".$arParams["IBLOCK_ID"].":".$arProperty["PROPERTY_ID"]."\",\"DATA\":{\"logic\":\"Not\",\"value\":".$arProperty["ID"]."}}]}" : "",
 				"BASKET_URL" => $arParams["BASKET_URL"],
 				"ACTION_VARIABLE" => $arParams["ACTION_VARIABLE"],
