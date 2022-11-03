@@ -64,6 +64,21 @@ if(isset($arResult['ITEM'])) {
 		//HIT//
 		if(array_key_exists("SALELEADER", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["SALELEADER"]["VALUE"] == false)
 			$sticker .= "<span class='hit'><span class='text'>".GetMessage("CT_BCS_ELEMENT_SALELEADER")."</span></span>";
+        //Снят с производства//
+        if(array_key_exists("TAKE_OFF_FLAG", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["TAKE_OFF_FLAG"]["VALUE"] == false)
+            $sticker .= "<span class='take-off'><span class='text'>".GetMessage("CT_BCS_ELEMENT_TAKE_OFF_FLAG")."</span></span>";
+        //Не поставляется//
+        if(array_key_exists("SUPPLIED_FLAG", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["SUPPLIED_FLAG"]["VALUE"] == false)
+            $sticker .= "<span class='supplied'><span class='text'>".GetMessage("CT_BCS_ELEMENT_SUPPLIED_FLAG")."</span></span>";
+        //Нет в наличии//
+        if(array_key_exists("NOT_AVAILABLE_FLAG", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["NOT_AVAILABLE_FLAG"]["VALUE"] == false)
+            $sticker .= "<span class='not-available'><span class='text'>".GetMessage("CT_BCS_ELEMENT_NOT_AVAILABLE_FLAG")."</span></span>";
+        //Есть РУ//
+        if(array_key_exists("IS_RU_FLAG", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["IS_RU_FLAG"]["VALUE"] == false)
+            $sticker .= "<span class='is-ru'><span class='text'>".GetMessage("CT_BCS_ELEMENT_IS_RU_FLAG")."</span></span>";
+        //Нет РУ//
+        if(array_key_exists("IS_NOT_RU_FLAG", $arElement["PROPERTIES"]) && !$arElement["PROPERTIES"]["IS_NOT_RU_FLAG"]["VALUE"] == false)
+            $sticker .= "<span class='is-not-ru'><span class='text'>".GetMessage("CT_BCS_ELEMENT_IS_NOT_RU_FLAG")."</span></span>";
 		//DISCOUNT//
 		if($haveOffers) {
 			if($arElement["TOTAL_OFFERS"]["MIN_PRICE"]["PERCENT"] > 0)
