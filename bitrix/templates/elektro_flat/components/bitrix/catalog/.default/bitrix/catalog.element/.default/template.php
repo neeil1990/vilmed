@@ -212,6 +212,21 @@ if(array_key_exists("PROPERTIES", $arResult) && is_array($arResult["PROPERTIES"]
 	//HIT//
 	if(array_key_exists("SALELEADER", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["SALELEADER"]["VALUE"] == false)
 		$sticker .= "<span class='hit'>".GetMessage("CATALOG_ELEMENT_SALELEADER")."</span>";
+    //Снят с производства//
+    if(array_key_exists("TAKE_OFF_FLAG", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["TAKE_OFF_FLAG"]["VALUE"] == false)
+        $sticker .= "<span class='take-off'>".GetMessage("CATALOG_ELEMENT_TAKE_OFF_FLAG")."</span>";
+    //Не поставляется//
+    if(array_key_exists("SUPPLIED_FLAG", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["SUPPLIED_FLAG"]["VALUE"] == false)
+        $sticker .= "<span class='supplied'>".GetMessage("CATALOG_ELEMENT_SUPPLIED_FLAG")."</span>";
+    //Нет в наличии//
+    if(array_key_exists("NOT_AVAILABLE_FLAG", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["NOT_AVAILABLE_FLAG"]["VALUE"] == false)
+        $sticker .= "<span class='not-available'>".GetMessage("CATALOG_ELEMENT_NOT_AVAILABLE_FLAG")."</span>";
+    //Есть РУ//
+    if(array_key_exists("IS_RU_FLAG", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["IS_RU_FLAG"]["VALUE"] == false)
+        $sticker .= "<span class='is-ru'>".GetMessage("CATALOG_ELEMENT_IS_RU_FLAG")."</span>";
+    //Нет РУ//
+    if(array_key_exists("IS_NOT_RU_FLAG", $arResult["PROPERTIES"]) && !$arResult["PROPERTIES"]["IS_NOT_RU_FLAG"]["VALUE"] == false)
+        $sticker .= "<span class='is-not-ru'>".GetMessage("CATALOG_ELEMENT_IS_NOT_RU_FLAG")."</span>";
 	//DISCOUNT//
 	if(isset($arResult["OFFERS"]) && !empty($arResult["OFFERS"])) {
 		if($arSetting["OFFERS_VIEW"]["VALUE"] == "LIST") {

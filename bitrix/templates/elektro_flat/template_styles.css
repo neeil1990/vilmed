@@ -5269,11 +5269,11 @@ a.catalog_item_toogle_filter_reset{
 }
 
 .catalog-detail-pictures .detail_picture .sticker > span{
-	width:42px;
+	width:auto;
 	height:22px;
 	display:block;
 	margin:0px 0px 2px 0px;
-	padding:0px;
+	padding:0px 10px;
 	position:relative;
 }
 

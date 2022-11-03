@@ -3763,6 +3763,26 @@ a.catalog_item_toogle_filter_reset:hover{
 	background:#13a4ff;
 }
 
+.catalog-detail-pictures .detail_picture .sticker .take-off{
+	background:#a1fcff;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .supplied{
+	background:#cfe2f3;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .not-available{
+	background:#f4cccc;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .is-ru{
+	background:#93c47d;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .is-not-ru{
+	background:#ea9999;
+}
+
 .catalog-detail-pictures .detail_picture .sticker .discount{
 	background:#9d06d7;
 }
@@ -3779,6 +3799,26 @@ a.catalog_item_toogle_filter_reset:hover{
 
 .catalog-detail-pictures .detail_picture .sticker .hit:before{
 	border-color:#13a4ff #13a4ff #13a4ff transparent;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .take-off:before{
+	border-color:#a1fcff #a1fcff #a1fcff transparent;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .supplied:before{
+	border-color:#cfe2f3 #cfe2f3 #cfe2f3 transparent;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .not-available:before{
+	border-color:#f4cccc #f4cccc #f4cccc transparent;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .is-ru:before{
+	border-color:#93c47d #93c47d #93c47d transparent;
+}
+
+.catalog-detail-pictures .detail_picture .sticker .is-not-ru:before{
+	border-color:#ea9999 #ea9999 #ea9999 transparent;
 }
 
 .catalog-detail-pictures .detail_picture .sticker .discount:before{
