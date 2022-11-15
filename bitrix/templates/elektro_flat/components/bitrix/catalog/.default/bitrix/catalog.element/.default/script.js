@@ -4,10 +4,10 @@
 	}
 
 	var BasketButton = function(params) {
-		BasketButton.superclass.constructor.apply(this, arguments);		
+		BasketButton.superclass.constructor.apply(this, arguments);
 		this.buttonNode = BX.create("button", {
 			text: params.text,
-			attrs: { 
+			attrs: {
 				name: params.name,
 				className: params.className
 			},
@@ -43,8 +43,8 @@
 		this.currentPriceSelected = 0;
 		this.currentQuantityRanges = [];
 		this.currentQuantityRangeSelected = 0;
-		this.currentPriceMatrix = [];					   
-		this.currentPriceMatrixOffer = [];					   
+		this.currentPriceMatrix = [];
+		this.currentPriceMatrixOffer = [];
 
 		this.precision = 6;
 		this.precisionFactor = Math.pow(10, this.precision);
@@ -69,7 +69,7 @@
 			id: 0,
 			pict: {}
 		};
-		
+
 		this.offersView = null;
 		this.offersLinkShow = null;
 		this.offers = [];
@@ -79,7 +79,7 @@
 		this.selectedValues = {};
 		this.selectProps = [];
 		this.obSelectRows = [];
-		
+
 		this.obProduct = null;
 		this.obPict = null;
 		this.obPrice = null;
@@ -93,10 +93,10 @@
 		this.obTree = null;
 		this.obSelect = null;
 		this.obBuyBtn = null;
-		this.obPriceMatrix = null					
+		this.obPriceMatrix = null
 		this.obConstructor = null;
 		this.obStore = null;
-		
+
 		this.viewedCounter = {
 			path: "/bitrix/components/bitrix/catalog.element/ajax.php",
 			params: {
@@ -117,7 +117,7 @@
 			this.params = arParams;
 			this.initConfig();
 
-			switch(this.productType) {				
+			switch(this.productType) {
 				case 1://product
 				case 2://set
 					this.initProductData();
@@ -145,7 +145,7 @@
 	};
 
 	window.JCCatalogElement.prototype.onSaleProductIsNotGift = function(productId, offerId) {
-		if(offerId && this.offers && this.offers[this.offerNum].ID == offerId) {			
+		if(offerId && this.offers && this.offers[this.offerNum].ID == offerId) {
 			this.isGift = false;
 			this.setPrice();
 		}
@@ -160,17 +160,17 @@
 		}
 	};
 
-	window.JCCatalogElement.prototype.setGift = function() {		
-		switch(this.productType) {				
+	window.JCCatalogElement.prototype.setGift = function() {
+		switch(this.productType) {
 			case 1://product
-			case 2://set				
+			case 2://set
 			case 3://sku
 				this.isGift = true;
 				break;
 			default:
 				this.isGift = false;
 		}
-		
+
 		this.reloadGiftInfo();
 	};
 
@@ -185,7 +185,7 @@
 		if(!this.obProduct) {
 			this.errorCode = -1;
 		}
-		
+
 		if(3 === this.productType) {
 			if("LIST" !== this.offersView) {
 				this.obPict = BX(this.visual.PICT_ID);
@@ -231,7 +231,7 @@
 				}
 
 				this.obProperties = BX(this.visual.PROPERTIES_ID);
-				
+
 				this.obConstructor = BX(this.visual.CONSTRUCTOR_ID);
 				if(!this.obConstructor && this.config.useCatalog) {
 					this.errorCode = -16;
@@ -279,20 +279,20 @@
 			}
 		}
 
-		if(!!this.visual.BTN_BUY_ID) {			
-			this.obBuyBtn = BX(this.visual.BTN_BUY_ID);			
+		if(!!this.visual.BTN_BUY_ID) {
+			this.obBuyBtn = BX(this.visual.BTN_BUY_ID);
 		}
-		
+
 		if(!!this.visual.PRICE_MATRIX_BTN_ID) {
 			for(var key in this.visual.PRICE_MATRIX_BTN_ID) {
 				this.obPriceMatrix = BX(this.visual.PRICE_MATRIX_BTN_ID[key]);
 				BX.bind(this.obPriceMatrix, "click", BX.delegate(this.OpenPriceMatrixPopup, this));
 			}
-						
+
 		}
-		
+
 		if(0 === this.errorCode) {
-			switch(this.productType) {				
+			switch(this.productType) {
 				case 1://product
 				case 2://set
 					if(!!this.obSelect) {
@@ -302,7 +302,7 @@
 								BX.bind(SelectItems[i], "click", BX.delegate(this.SelectProp, this));
 							}
 							this.SetSelectCurrent();
-						}						
+						}
 					}
 					break;
 				case 3://sku
@@ -315,7 +315,7 @@
 						}
 						this.SetCurrent();
 					}
-					
+
 					if(!!this.obSelect) {
 						SelectItems = BX.findChildren(this.obSelect, {tagName: "li"}, true);
 						if(!!SelectItems && 0 < SelectItems.length) {
@@ -323,19 +323,19 @@
 								BX.bind(SelectItems[i], "click", BX.delegate(this.SelectProp, this));
 							}
 							this.SetSelectCurrent();
-						}						
-					}						 
+						}
+					}
 					break;
 			}
 		}
 
-		switch(this.productType) {			
+		switch(this.productType) {
 			case 1://product
 			case 2://set
 				this.obQuantityUp = BX("quantity_plus_" + this.visual.ID);
 				if(!!this.obQuantityUp)
 					BX.bind(this.obQuantityUp, "click", BX.delegate(this.QuantityUp, this));
-				
+
 				this.obQuantityDown = BX("quantity_minus_" + this.visual.ID);
 				if(!!this.obQuantityDown)
 					BX.bind(this.obQuantityDown, "click", BX.delegate(this.QuantityDown, this));
@@ -374,7 +374,7 @@
 							for(i = 0; i < priceRangesItems.length; i++) {
 								BX.bind(priceRangesItems[i], "click", BX.delegate(this.OpenPriceRangesPopup, this));
 							}
-						}						
+						}
 						quantityUpItems = BX.findChildren(this.obProduct, {tagName: "a", className: "plus"}, true);
 						quantityDownItems = BX.findChildren(this.obProduct, {tagName: "a", className: "minus"}, true);
 						quantityItems = BX.findChildren(this.obProduct, {tagName: "input", className: "quantity"}, true);
@@ -390,7 +390,7 @@
 						BX.bind(quantityUpItems[i], "click", BX.delegate(this.QuantityUp, this));
 					}
 				}
-				
+
 				if(!!quantityDownItems && 0 < quantityDownItems.length) {
 					for(i = 0; i < quantityDownItems.length; i++) {
 						BX.bind(quantityDownItems[i], "click", BX.delegate(this.QuantityDown, this));
@@ -402,35 +402,35 @@
 						BX.bind(quantityItems[i], "change", BX.delegate(this.QuantityChange, this));
 					}
 				}
-				
+
 				if(!!popupBtnItems && 0 < popupBtnItems.length) {
 					for(i = 0; i < popupBtnItems.length; i++) {
 						BX.bind(popupBtnItems[i], "click", BX.delegate(this.OpenFormPopup, this));
 					}
 				}
-				
+
 				if(!!zoomItems && 0 < zoomItems.length) {
 					for(i = 0; i < zoomItems.length; i++) {
 						var zoom = BX.findChildren(BX(zoomItems[i]),{className:"zoom"},true);
 						BX.bind(BX(zoom[0]), "click", BX.delegate(this.pictZoom, this));
 					}
 				}
-				
+
 				if(!!this.visual.PRICE_MATRIX_BTN_ID) {
 					for(var key in this.visual.PRICE_MATRIX_BTN_ID) {
 						for(var j in this.visual.PRICE_MATRIX_BTN_ID[key]) {
 							this.obPriceMatrix = BX(this.visual.PRICE_MATRIX_BTN_ID[key][j]);
 							BX.bind(this.obPriceMatrix, "click", BX.delegate(this.OpenPriceMatrixPopup, this));
 						}
-					}		
-				}	
-				
+					}
+				}
+
 				if(!!buyBtnItems && 0 < buyBtnItems.length) {
 					for(i = 0; i < buyBtnItems.length; i++) {
 						BX.bind(buyBtnItems[i], "click", BX.delegate(this.Add2Basket, this));
 					}
 				}
-					
+
 				break;
 		}
 	};
@@ -444,7 +444,7 @@
 			if(!!this.params.CONFIG.USE_SUBSCRIBE && this.params.CONFIG.USE_SUBSCRIBE != "Y")
 				this.config.useSubscribe = false;
 			if(!!this.params.CONFIG.USE_CAPTCHA && this.params.CONFIG.USE_CAPTCHA != "Y")
-				this.config.useCaptcha = false;			
+				this.config.useCaptcha = false;
 			if(!!this.params.CONFIG.USE_STORE && this.params.CONFIG.USE_STORE != "Y")
 				this.config.useStore = false;
 			if(!!this.params.CONFIG.REFERENCE_PRICE_COEF)
@@ -483,13 +483,13 @@
 			this.product.id = this.params.PRODUCT.ID;
 			this.product.name = this.params.PRODUCT.NAME;
 			this.product.pict = this.params.PRODUCT.PICT;
-			
+
 			this.currentPriceMode = this.params.PRODUCT.ITEM_PRICE_MODE;
 			this.currentPrices = this.params.PRODUCT.ITEM_PRICES;
 			this.currentPriceSelected = this.params.PRODUCT.ITEM_PRICE_SELECTED;
 			this.currentQuantityRanges = this.params.PRODUCT.ITEM_QUANTITY_RANGES;
 			this.currentQuantityRangeSelected = this.params.PRODUCT.ITEM_QUANTITY_RANGE_SELECTED;
-			this.currentPriceMatrix = this.params.PRODUCT.PRICE_MATRIX;												  
+			this.currentPriceMatrix = this.params.PRODUCT.PRICE_MATRIX;
 
 			this.checkQuantity = this.params.PRODUCT.CHECK_QUANTITY;
 			this.isDblQuantity = this.params.PRODUCT.QUANTITY_FLOAT;
@@ -542,18 +542,18 @@
 					this.selectProps = this.params.SELECT_PROPS;
 				}
 			}
-			
+
 			for(var k in this.offers) {
 				this.currentPriceMatrixOffer[k] = this.offers[k].PRICE_MATRIX;
 			}
-			
+
 			var paramsUrl = window.location.search,
 				pidRegExp = new RegExp(/[?&]offer=(\d+)/),
 				pid = pidRegExp.exec(paramsUrl);
-			
+
 			if("LIST" !== this.offersView) {
 				this.initOffersQuantityData(this.offerNum);
-			
+
 				if(this.offersLinkShow) {
 					this.setUrlOffer(this.offers[this.offerNum].ID);
 				}
@@ -561,10 +561,10 @@
 				var objUrlParam = urlInit();
 				if('offer' in objUrlParam && parseInt(objUrlParam.offer)>0) {
 					var elOfferItem = $("div.catalog-item[data-link='"+parseInt(objUrlParam.offer)+"']");
-					
+
 					if(elOfferItem.length > 0) {
 						var intScrollOfferItemHeight = elOfferItem.offset().top - elOfferItem.innerHeight() * 2;
-					
+
 						elOfferItem.addClass("hover__offer__list").delay(10000).queue(function(){
 							elOfferItem.removeClass("hover__offer__list").dequeue();
 						});
@@ -574,7 +574,7 @@
 						}
 					}
 				}
-			} 
+			}
 		} else {
 			this.errorCode = -1;
 		}
@@ -589,7 +589,7 @@
 		this.currentPriceSelected = this.offers[offerNum].ITEM_PRICE_SELECTED;
 		this.currentQuantityRanges = this.offers[offerNum].ITEM_QUANTITY_RANGES;
 		this.currentQuantityRangeSelected = this.offers[offerNum].ITEM_QUANTITY_RANGE_SELECTED;
-		
+
 		this.checkQuantity = this.offers[offerNum].CHECK_QUANTITY;
 		this.isDblQuantity = this.offers[offerNum].QUANTITY_FLOAT;
 		if(this.checkQuantity)
@@ -612,12 +612,12 @@
 		var curValue = 0,
 			boolSet = true;
 
-		switch(this.productType) {			
+		switch(this.productType) {
 			case 1://product
-			case 2://set				
+			case 2://set
 				break;
 			case 3://sku
-				if("LIST" == this.offersView) {					
+				if("LIST" == this.offersView) {
 					var target = BX.proxy_context,
 						offerItem = BX.findParent(target, {className: "catalog-item"});
 					if(!!offerItem)
@@ -625,8 +625,8 @@
 					this.initOffersQuantityData(this.offerNum);
 				}
 				break;
-		}		
-		
+		}
+
 		curValue = this.isDblQuantity ? parseFloat(this.obQuantity.value) : parseInt(this.obQuantity.value, 10);
 
 
@@ -643,22 +643,22 @@
 					curValue = Math.round(curValue * this.precisionFactor) / this.precisionFactor;
 				}
 				this.obQuantity.value = curValue;
-				
+
 				this.SetPrice();
 			}
-		}		
+		}
 	};
 
 	window.JCCatalogElement.prototype.QuantityDown = function() {
 		var curValue = 0,
 			boolSet = true;
 
-		switch(this.productType) {			
+		switch(this.productType) {
 			case 1://product
-			case 2://set				
+			case 2://set
 				break;
 			case 3://sku
-				if("LIST" == this.offersView) {					
+				if("LIST" == this.offersView) {
 					var target = BX.proxy_context,
 						offerItem = BX.findParent(target, {className: "catalog-item"});
 					if(!!offerItem)
@@ -666,8 +666,8 @@
 					this.initOffersQuantityData(this.offerNum);
 				}
 				break;
-		}		
-		
+		}
+
 		curValue = this.isDblQuantity ? parseFloat(this.obQuantity.value) : parseInt(this.obQuantity.value, 10);
 		if(!isNaN(curValue)) {
 			curValue -= this.stepQuantity;
@@ -680,23 +680,23 @@
 					curValue = Math.round(curValue * this.precisionFactor) / this.precisionFactor;
 				}
 				this.obQuantity.value = curValue;
-				
+
 				this.SetPrice();
 			}
-		}		
+		}
 	};
-	
+
 	window.JCCatalogElement.prototype.QuantityChange = function() {
 		var curValue = 0,
 			intCount,
 			count;
 
-		switch(this.productType) {			
+		switch(this.productType) {
 			case 1://product
-			case 2://set				
+			case 2://set
 				break;
 			case 3://sku
-				if("LIST" == this.offersView) {					
+				if("LIST" == this.offersView) {
 					var target = BX.proxy_context,
 						offerItem = BX.findParent(target, {className: "catalog-item"});
 					if(!!offerItem)
@@ -725,7 +725,7 @@
 		} else {
 			this.obQuantity.value = this.minQuantity;
 		}
-		
+
 		this.SetPrice();
 	};
 
@@ -759,7 +759,7 @@
 				}
 			}
 		}
-	};	
+	};
 
 	window.JCCatalogElement.prototype.GetMinPriceRange = function() {
 		var range;
@@ -777,11 +777,11 @@
 
 	window.JCCatalogElement.prototype.SetPrice = function() {
 		var price, priceItem, oldPriceItem;
-		
+
 		if(this.obQuantity) {
 			this.CheckPriceRange(this.obQuantity.value);
 		}
-		
+
 		price = this.currentPrices[this.currentPriceSelected];
 
 		if(this.isGift) {
@@ -789,22 +789,22 @@
 			price.DISCOUNT = price.BASE_PRICE;
 			price.PERCENT = 100;
 		}
-		
-		switch(this.productType) {			
+
+		switch(this.productType) {
 			case 1://product
-			case 2://set				
-				priceItem = BX.findChild(this.obProduct, {className: "catalog-detail-item-price-current"}, true, false);		
+			case 2://set
+				priceItem = BX.findChild(this.obProduct, {className: "catalog-detail-item-price-current"}, true, false);
 				if(!!priceItem)
 					BX.adjust(priceItem, {html: price.PRINT_RATIO_PRICE});
-				
+
 				oldPriceItem = BX.findChild(this.obProduct, {className: "catalog-detail-item-price-old"}, true, false);
 				if(!!oldPriceItem)
 					BX.adjust(oldPriceItem, {html: price.PRINT_RATIO_BASE_PRICE});
 
 				percentPriceItem = BX.findChild(this.obProduct, {className: "catalog-detail-item-price-percent"}, true, false);
 				if(!!percentPriceItem)
-					BX.adjust(percentPriceItem, {html: BX.message("DETAIL_ELEMENT_SKIDKA") + " " + price.PRINT_RATIO_DISCOUNT});		
-				
+					BX.adjust(percentPriceItem, {html: BX.message("DETAIL_ELEMENT_SKIDKA") + " " + price.PRINT_RATIO_DISCOUNT});
+
 				referencePriceItem = BX.findChild(this.obProduct, {className: "catalog-detail-item-price-reference"}, true, false);
 				if(!!referencePriceItem && !!this.config.refPriceCoef)
 					BX.adjust(referencePriceItem, {html: BX.Currency.currencyFormat(price.RATIO_PRICE * this.config.refPriceCoef, price.CURRENCY, true)});
@@ -824,7 +824,7 @@
 						percentPriceItem = BX.findChild(priceItemCont, {className: "catalog-detail-item-price-percent"}, true, false);
 						if(!!percentPriceItem)
 							BX.adjust(percentPriceItem, {html: BX.message("DETAIL_ELEMENT_SKIDKA") + " " + price.PRINT_RATIO_DISCOUNT});
-						
+
 						referencePriceItem = BX.findChild(priceItemCont, {className: "catalog-detail-item-price-reference"}, true, false);
 						if(!!referencePriceItem && !!this.config.refPriceCoef)
 							BX.adjust(referencePriceItem, {html: BX.Currency.currencyFormat(price.RATIO_PRICE * this.config.refPriceCoef, price.CURRENCY, true)});
@@ -838,13 +838,13 @@
 		var i = 0,
 		RowItems = null,
 		ActiveItems = null,
-		selPropValueArr = [],		
+		selPropValueArr = [],
 		selPropValue = null,
 		selDelayOnclick = null,
 		selDelayOnclickArr = [],
 		selDelayOnclickNew = null,
 		target = BX.proxy_context;
-		
+
 		if(!!target && target.hasAttribute("data-select-onevalue")) {
 			RowItems = BX.findChildren(target.parentNode, {tagName: "li"}, false);
 			if(!!RowItems && 0 < RowItems.length) {
@@ -854,7 +854,7 @@
 			}
 			BX.addClass(target, "active");
 		}
-		
+
 		ActiveItems = BX.findChildren(this.obSelect, {tagName: "li", className: "active"}, true);
 		if(!!ActiveItems && 0 < ActiveItems.length) {
 			for(i = 0; i < ActiveItems.length; i++) {
@@ -862,12 +862,12 @@
 			}
 		}
 		selPropValue = selPropValueArr.join("||");
-		
+
 		if(!!this.offers && 0 < this.offers.length) {
 			for(i = 0; i < this.offers.length; i++) {
 				/*CART*/
 				if(!!BX("select_props_"+this.visual.ID+"_"+this.offers[i].ID))
-					BX("select_props_"+this.visual.ID+"_"+this.offers[i].ID).value = selPropValue;				
+					BX("select_props_"+this.visual.ID+"_"+this.offers[i].ID).value = selPropValue;
 				/*DELAY*/
 				if(!!BX("catalog-item-delay-"+this.visual.ID+"-"+this.offers[i].ID)) {
 					selDelayOnclick = BX("catalog-item-delay-"+this.visual.ID+"-"+this.offers[i].ID).getAttribute("onclick");
@@ -880,7 +880,7 @@
 		} else {
 			/*CART*/
 			if(!!BX("select_props_"+this.visual.ID))
-				BX("select_props_"+this.visual.ID).value = selPropValue;			
+				BX("select_props_"+this.visual.ID).value = selPropValue;
 			/*DELAY*/
 			if(!!BX("catalog-item-delay-"+this.visual.ID)) {
 				selDelayOnclick = BX("catalog-item-delay-"+this.visual.ID).getAttribute("onclick");
@@ -1049,8 +1049,8 @@
 			j = 0,
 			boolOneSearch = true,
 			boolSearch = false;
-		
-		for(i = 0; i < this.offers.length; i++) {			
+
+		for(i = 0; i < this.offers.length; i++) {
 			boolOneSearch = true;
 			for(j in arFilter) {
 				if(arFilter[j] !== this.offers[i].TREE[j]) {
@@ -1075,7 +1075,7 @@
 		selPropValue = null,
 		selDelayOnclick = null,
 		selDelayOnclickArr = [],
-		selDelayOnclickNew = null;		
+		selDelayOnclickNew = null;
 
 		for(i = 0; i < this.obSelectRows.length; i++) {
 			SelectItems = BX.findChildren(this.obSelectRows[i], {tagName: "li"}, true);
@@ -1085,12 +1085,12 @@
 			}
 		}
 		selPropValue = selPropValueArr.join("||");
-		
+
 		if(!!this.offers && 0 < this.offers.length) {
 			for(i = 0; i < this.offers.length; i++) {
 				/*CART*/
 				if(!!BX("select_props_"+this.visual.ID+"_"+this.offers[i].ID))
-					BX("select_props_"+this.visual.ID+"_"+this.offers[i].ID).value = selPropValue;				
+					BX("select_props_"+this.visual.ID+"_"+this.offers[i].ID).value = selPropValue;
 				/*DELAY*/
 				if(!!BX("catalog-item-delay-"+this.visual.ID+"-"+this.offers[i].ID)) {
 					selDelayOnclick = BX("catalog-item-delay-"+this.visual.ID+"-"+this.offers[i].ID).getAttribute("onclick");
@@ -1103,7 +1103,7 @@
 		} else {
 			/*CART*/
 			if(!!BX("select_props_"+this.visual.ID))
-				BX("select_props_"+this.visual.ID).value = selPropValue;			
+				BX("select_props_"+this.visual.ID).value = selPropValue;
 			/*DELAY*/
 			if(!!BX("catalog-item-delay-"+this.visual.ID)) {
 				selDelayOnclick = BX("catalog-item-delay-"+this.visual.ID).getAttribute("onclick");
@@ -1140,12 +1140,12 @@
 			 }
 		  }
 		}
-			
+
 		if(blFlag && this.offersLinkShow) {
 			var loc = '?offer=' + this.offers[currentID].ID;
 			history.pushState({}, '', loc);
 		}
-		
+
 		for(i = 0; i < this.treeProps.length; i++) {
 			strName = "PROP_"+this.treeProps[i].ID;
 			arShowValues = this.GetRowValues(arFilter, strName);
@@ -1182,7 +1182,7 @@
 			currentId: (this.offerNum > -1 ? this.offers[this.offerNum].ID : 0),
 			newId: 0
 		};
-		
+
 		for(i = 0; i < this.offers.length; i++) {
 			boolOneSearch = true;
 			for(j in this.selectedValues) {
@@ -1214,7 +1214,7 @@
 			this.setOfferMorePhoto(this.offers[index]);
 			this.offerNum = index;
 			this.incViewedCounter();
-			
+
 			eventData.newId = this.offers[this.offerNum].ID;
 			//only for compatible catalog.store.amount custom templates
 			BX.onCustomEvent("onCatalogStoreProductChange", [this.offers[this.offerNum].ID]);
@@ -1238,7 +1238,7 @@
 		var curPictItem = BX("detail_picture_" + this.visual.ID + "_" + offerId);
 		if(!!curPictItem)
 			BX.removeClass(curPictItem, "hidden");
-		
+
 		var pictItemsA = BX.findChildren(this.obPict, {tagName: "a", className: "catalog-detail-images"}, true);
 		if(!!pictItemsA && 0 < pictItemsA.length) {
 			for(i = 0; i < pictItemsA.length; i++) {
@@ -1278,7 +1278,7 @@
 		if(!!this.config.useSubscribe && !this.offers[offerNum].CAN_BUY) {
 			BX.ajax.post(
 				BX.message("DETAIL_COMPONENT_TEMPLATE") + "/popup.php",
-				{							
+				{
 					sessid: BX.bitrix_sessid(),
 					action: "subscribe",
 					arParams: BX.message("DETAIL_COMPONENT_PARAMS"),
@@ -1308,14 +1308,14 @@
 		if(!!curDelayItem)
 			BX.removeClass(curDelayItem, "hidden");
 	};
-	
+
 	window.JCCatalogElement.prototype.setOfferDelivery = function(offerNum) {
 		if(!!this.offers[offerNum].CAN_BUY && this.currentPrices[this.currentPriceSelected].RATIO_PRICE > 0 && this.config.useGeolocation == "Y" && this.config.useGeolocationDelivery == "Y") {
 			BX.ajax.post(
 				BX.message("DETAIL_COMPONENT_TEMPLATE") + "/popup.php",
-				{							
+				{
 					sessid: BX.bitrix_sessid(),
-					action: "delivery",					
+					action: "delivery",
 					arParams: BX.message("DETAIL_COMPONENT_PARAMS"),
 					ELEMENT_ID: this.offers[offerNum].ID,
 					ELEMENT_COUNT: this.minQuantity
@@ -1365,11 +1365,11 @@
 			}
 		}
 	};
-	
+
 	window.JCCatalogElement.prototype.setOfferConstructor = function(offerNum) {
 		BX.ajax.post(
 			BX.message("DETAIL_COMPONENT_TEMPLATE") + "/popup.php",
-			{							
+			{
 				sessid: BX.bitrix_sessid(),
 				action: "constructor",
 				arParams: BX.message("DETAIL_COMPONENT_PARAMS"),
@@ -1385,12 +1385,12 @@
 			this)
 		);
 	}
-	
+
 	window.JCCatalogElement.prototype.setOfferStore = function(offerId) {
 		if(!!this.config.useStore) {
 			BX.ajax.post(
 				BX.message("DETAIL_COMPONENT_TEMPLATE") + "/popup.php",
-				{							
+				{
 					sessid: BX.bitrix_sessid(),
 					action: "store",
 					arParams: BX.message("DETAIL_COMPONENT_PARAMS"),
@@ -1404,11 +1404,11 @@
 			);
 		}
 	}
-	
+
 	window.JCCatalogElement.prototype.setOfferMorePhoto = function(offer) {
 		var detailPicture = BX.findParent(BX(this.obPict)),
 			ulBlock, morePhoto, offerBlockMorePhoto, offerBlockMorePhotoUl, ulBlockLi, firstLi, liOfferMorePhoto;
-		
+
 		offerBlockMorePhoto = BX.findChild(BX(detailPicture),{className:"more_photo"});
 		offerBlockMorePhotoUl = BX.findChild(BX(offerBlockMorePhoto),{tag:"ul"});
 		liOfferMorePhoto = BX.findChildren(BX(offerBlockMorePhotoUl),{className:"offer_more_photo"});
@@ -1425,7 +1425,7 @@
 
 		if(offer.MORE_PHOTO.length > 0) {
 			ulBlock = BX.create("ul");
-			
+
 			for(var j in offer.MORE_PHOTO) {
 				BX.adjust(BX(ulBlock),{
 					children:[
@@ -1461,7 +1461,7 @@
 					]
 				})
 			};
-			
+
 			morePhoto = BX.findChildren(BX(ulBlock),{tag:"li"},true);
 			firstLi = BX.findChildren(BX(offerBlockMorePhotoUl),{tag:"li"})
 
@@ -1487,9 +1487,9 @@
 				"titlePosition": "over",
 				"onComplete": function() {
 					$("#fancybox-title").css({"top":"100%", "bottom":"auto"});
-				} 
+				}
 			});
-			
+
 		};
 	}
 
@@ -1499,34 +1499,34 @@
 			minPrice,
 			idPrice = Array(),
 			colPrice = 0;
-			
+
 		if(!!offerItem)
 			this.offerNum = offerItem.getAttribute("data-offer-num");
 		this.initOffersQuantityData(this.offerNum);
 
 		var visualId = "price_ranges_" + this.visual.ID + "_" + this.offers[this.offerNum].ID;
-		
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
 		this.obPopupWin = BX.PopupWindowManager.create(visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			draggable: false,
 			closeByEsc: false,
 			className: "pop-up price-ranges",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: false
 		});
-				
+
 		var content = BX.create("div", {
-			props: {					
+			props: {
 				className: "price-ranges__block"
 			}
 		});
 		for(var k in this.currentQuantityRanges) {
-			if(this.currentQuantityRanges[k].HASH !== "ZERO-INF") {				
+			if(this.currentQuantityRanges[k].HASH !== "ZERO-INF") {
 				for(var j in this.currentPrices) {
 					if(this.currentPrices[j].QUANTITY_HASH === this.currentQuantityRanges[k].HASH) {
 						break;
@@ -1534,7 +1534,7 @@
 				}
 				if(!!this.currentPrices[j]) {
 					content.appendChild(BX.create("div", {
-						props: {					
+						props: {
 							className: "price-ranges__row"
 						},
 						children: [
@@ -1560,27 +1560,27 @@
 				}
 			}
 		}
-	
+
 		for(var k in this.currentPriceMatrixOffer[this.offerNum].COLS) {
 			colPrice++;
 			idPrice[colPrice-1] = k;
 		}
-		
+
 		if(colPrice > 1) {
 			content.appendChild(BX.create("div", {
-				props: {					
+				props: {
 					className: "price-ranges__block__matrix"
 				}
 			}));
-			
+
 			var colRange = BX.findChildren(BX(content),{className:"price-ranges__row"});
-			
+
 			var blockMatrix = BX.findChild(BX(content),{className: "price-ranges__block__matrix"});
-			
+
 			if(colRange.length == 0) {
 				BX.adjust(BX(blockMatrix),{style:{"margin":"0"}});
 			}
-			
+
 			for(var k in this.currentPriceMatrixOffer[this.offerNum].ROWS) {
 				minPrice = k;
 			}
@@ -1588,7 +1588,7 @@
 			for(var k in this.currentPriceMatrixOffer[this.offerNum].COLS) {
 				blockMatrix.appendChild(
 					BX.create("div", {
-						props: {					
+						props: {
 							className: "price-ranges__row"
 						},
 						children: [
@@ -1626,14 +1626,14 @@
 				);
 			}
 		}
-		
+
 		if(colPrice) {
 			var matrixRange = BX.findChild(BX(blockMatrix),{className:"price-ranges__row"},true,true);
 			for(var k in matrixRange){
 				if(this.currentPriceMatrixOffer[this.offerNum][idPrice[k]].length > 1) {
 					matrixRange[k].appendChild(
 						BX.create("span", {
-							props: {					
+							props: {
 								className: "catalog-item-price-ranges-wrap"
 							},
 							children: [
@@ -1659,7 +1659,7 @@
 				}
 			}
 		}
-		
+
 		this.obPopupWin.setContent(content);
 
 		var btnRange = BX.findChildren(BX(blockMatrix),{className:"catalog-item-price-ranges"},true);
@@ -1672,10 +1672,10 @@
 
 		var close = BX.findChild(BX(visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
-			close.innerHTML = "<i class='fa fa-times'></i>";		
-		
+			close.innerHTML = "<i class='fa fa-times'></i>";
+
 		target.parentNode.appendChild(BX(visualId));
-		
+
 		this.obPopupWin.show();
 	};
 
@@ -1683,16 +1683,16 @@
 		var target = BX.proxy_context,
 			form = BX.findParent(target, {tagName: "form"}),
 			action = !!form ? BX.findChild(form, {tagName: "input", attribute: {name: "ACTION"}}, true, false).value : target.getAttribute("data-action");
-		
-		switch(this.productType) {			
+
+		switch(this.productType) {
 			case 1://product
 			case 2://set
 				var elementId = this.product.id,
 					elementName = this.product.name,
 					visualId = this.visual.ID;
 				break;
-			case 3://sku				
-				if("LIST" == this.offersView) {		
+			case 3://sku
+				if("LIST" == this.offersView) {
 					var offerItem = BX.findParent(target, {className: "catalog-item"});
 					if(!!offerItem)
 						this.offerNum = offerItem.getAttribute("data-offer-num");
@@ -1706,17 +1706,17 @@
 		}
 
 		var elementPrice = 0;
-		
+
 		if(action == 'cheaper')
 			elementPrice = this.currentPrices[this.currentPriceSelected].PRINT_RATIO_PRICE;
-		
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
 		this.obPopupWin = BX.PopupWindowManager.create(action + "_" + visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			overlay: {
 				opacity: 100
 			},
@@ -1724,26 +1724,26 @@
             zIndex: 999,
 			closeByEsc: false,
 			className: "pop-up forms full",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: true,
-			content: "<div class='popup-window-wait'><i class='fa fa-spinner fa-pulse'></i></div>",			
+			content: "<div class='popup-window-wait'><i class='fa fa-spinner fa-pulse'></i></div>",
 			events: {
 				onAfterPopupShow: function()
 				{
 					if(!BX(action + "_" + visualId + "_form")) {
 						BX.ajax.post(
 							BX.message("DETAIL_COMPONENT_TEMPLATE") + "/popup.php",
-							{							
+							{
 								sessid: BX.bitrix_sessid(),
 								action: action,
 								arParams: BX.message("DETAIL_COMPONENT_PARAMS"),
 								ELEMENT_ID: elementId,
-								ELEMENT_AREA_ID: visualId,									
+								ELEMENT_AREA_ID: visualId,
 								ELEMENT_NAME: elementName,
-								ELEMENT_PRICE: elementPrice								
+								ELEMENT_PRICE: elementPrice
 							},
 							BX.delegate(function(result)
-							{								
+							{
 								this.setContent(result);
 								var windowSize =  BX.GetWindowInnerSize(),
 								windowScroll = BX.GetWindowScrollPos(),
@@ -1772,21 +1772,21 @@
 							bocQntInput.value = parentQntInput.value;
 					}
 				}
-			}			
+			}
 		});
-		
+
 		var close = BX.findChild(BX(action + "_" + visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
 
-		this.obPopupWin.show();		
+		this.obPopupWin.show();
 	};
 
 	window.JCCatalogElement.prototype.Add2Basket = function() {
 		var target = BX.proxy_context,
 			form = BX.findParent(target, {"tag" : "form"}),
 			formInputs = BX.findChildren(form, {"tag" : "input"}, true);
-		
+
 		if(!!formInputs && 0 < formInputs.length) {
 			for(i = 0; i < formInputs.length; i++) {
 				this.basketParams[formInputs[i].getAttribute("name")] = formInputs[i].value;
@@ -1798,10 +1798,10 @@
 			if(!!offerItem)
 				this.offerNum = offerItem.getAttribute("data-offer-num");
 		}
-		
+
 		BX.ajax.post(
-			form.getAttribute("action"),			
-			this.basketParams,			
+			form.getAttribute("action"),
+			this.basketParams,
 			BX.delegate(function(result) {
 				BX.ajax.post(
 					BX.message("DETAIL_SITE_DIR") + "ajax/basket_line.php",
@@ -1826,8 +1826,8 @@
                 if(this.visual.ADD2BASKET_WINDOW=="Y") {
                     this.BasketResult();
                 }
-			}, this)			
-		);		
+			}, this)
+		);
 	};
 
 	window.JCCatalogElement.prototype.BasketResult = function() {
@@ -1841,7 +1841,7 @@
 		if(!!this.obPopupWin) {
 			this.obPopupWin.close();
 		}
-		
+
 		this.obPopupWin = BX.PopupWindowManager.create("addItemInCart", null, {
 			autoHide: true,
 			offsetLeft: 0,
@@ -1853,16 +1853,16 @@
 			closeByEsc: true,
 			className: "pop-up modal",
 			closeIcon: {top: "-10px", right: "-10px"},
-			titleBar: {content: BX.create("span", {html: BX.message("DETAIL_POPUP_WINDOW_TITLE")})}			
+			titleBar: {content: BX.create("span", {html: BX.message("DETAIL_POPUP_WINDOW_TITLE")})}
 		});
-		
+
 		close = BX.findChild(BX("addItemInCart"), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
 
-		switch(this.productType) {			
+		switch(this.productType) {
 			case 1://product
-			case 2://set			
+			case 2://set
 				strPictSrc = this.product.pict.SRC;
 				strPictWidth = this.product.pict.WIDTH;
 				strPictHeight = this.product.pict.HEIGHT;
@@ -1873,11 +1873,11 @@
 				strPictHeight = (!!this.offers[this.offerNum].PREVIEW_IMG ? this.offers[this.offerNum].PREVIEW_IMG.HEIGHT : this.product.pict.HEIGHT);
 				break;
 		}
-		
+
 		strContent = "<div class='cont'><div class='item_image_cont'><div class='item_image_full'><img src='" + strPictSrc + "' width='" + strPictWidth + "' height='" + strPictHeight + "' alt='"+ this.product.name +"' /></div></div><div class='item_title'>" + this.product.name + "</div></div>";
 
-		buttons = [			
-			new BasketButton({				
+		buttons = [
+			new BasketButton({
 				text: BX.message("DETAIL_POPUP_WINDOW_BTN_CLOSE"),
 				name: "close",
 				className: "btn_buy ppp close",
@@ -1885,7 +1885,7 @@
 					click: BX.delegate(this.obPopupWin.close, this.obPopupWin)
 				}
 			}),
-			new BasketButton({				
+			new BasketButton({
 				text: BX.message("DETAIL_POPUP_WINDOW_BTN_ORDER"),
 				name: "order",
 				className: "btn_buy popdef order",
@@ -1894,10 +1894,10 @@
 				}
 			})
 		];
-		
+
 		this.obPopupWin.setContent(strContent);
 		this.obPopupWin.setButtons(buttons);
-		this.obPopupWin.show();	
+		this.obPopupWin.show();
 	};
 
 	window.JCCatalogElement.prototype.BasketRedirect = function() {
@@ -1908,7 +1908,7 @@
 		if(this.currentIsSet && !this.updateViewedCount) {
 			switch(this.productType) {
 				case 1://product
-				case 2://set	
+				case 2://set
 					this.viewedCounter.params.PRODUCT_ID = this.product.id;
 					this.viewedCounter.params.PARENT_ID = this.product.id;
 					break;
@@ -1936,7 +1936,7 @@
 			this.incViewedCounter();
 		}
 	};
-	
+
 	// BUILDING AN URL OFFER WITH PARAMETERS //
 	window.JCCatalogElement.prototype.setUrlOffer = function(offerID){
 		var objUrlParam = urlInit(),
@@ -1952,7 +1952,7 @@
 			j++;
 		}
 		if(sQuery) {
-			sUrl = location.pathname+'?'+sQuery;			
+			sUrl = location.pathname+'?'+sQuery;
 		}
 		try {
 			history.pushState(null, null, sUrl);
@@ -1960,13 +1960,13 @@
 		} catch(e) {}
 		location.hash = '#' + sUrl.substr(1)
 	};
-	
+
 	window.JCCatalogElement.prototype.pictZoom = function() {
 		var target = BX.proxy_context,
 			items = BX.findChildren(this.obProduct, {className: "catalog-item"}, true),
 			parent = BX.findParent(BX(target),{className:"catalog-item"}),
 			lightBox, lightBoxDetail, morePhoto;
-			
+
 		if(this.offers[parent.getAttribute("data-offer-num")].MORE_PHOTO.length > 0) {
 			morePhoto = BX.create("div",{
 				props:{
@@ -1974,7 +1974,7 @@
 				}
 			});
 		}
-		
+
 		for(var i in items) {
 			if(items[i].getAttribute("data-offer-num") !== parent.getAttribute("data-offer-num")) {
 				lightBox = BX.findChildren(BX(items[i]),{className:"fancybox"},true);
@@ -2003,13 +2003,13 @@
 				});
 			}
 		}
-		
+
 		var detailPicture = BX.findChildren(BX(this.obProduct),{className:"catalog-detail-pictures"},true);
 		lightBoxDetail = BX.findChildren(BX(detailPicture[0]),{className:"fancybox"},true);
 		for(var k in lightBoxDetail) {
 			BX.adjust(BX(lightBoxDetail[k]),{props:{rel:""}});
 		}
-		
+
 		BX.bind(BX("fancybox-close"),"click",function(){
 			for(var i in items) {
 				if(items[i].getAttribute("data-offer-num") !== parent.getAttribute("data-offer-num")) {
@@ -2020,15 +2020,15 @@
 
 				}
 			}
-			
+
 			lightBoxDetail = BX.findChildren(BX(detailPicture[0]),{className:"fancybox"},true);
 			for(var k in lightBoxDetail) {
 				BX.adjust(BX(lightBoxDetail[k]),{props:{rel:"lightbox"}});
 			}
-			
+
 			BX.remove(BX(morePhoto));
 		})
-		
+
 		//FANCYBOX//
 		$(".fancybox").fancybox({
 			"transitionIn": "elastic",
@@ -2041,45 +2041,45 @@
 			"titlePosition": "over",
 			"onComplete": function() {
 				$("#fancybox-title").css({"top":"100%", "bottom":"auto"});
-			} 
+			}
 		});
 	};
-	
+
 	window.JCCatalogElement.prototype.OpenPriceMatrixPopup = function() {
 		var target = BX.proxy_context,
 			key = target.getAttribute("data-key"),
 			visualId;
-			
+
 		if(this.productType == "3") {
 			visualId = "price_matrix_" + this.visual.ID + "_" + this.offers[this.offerNum].ID + "_" + key;
 		} else {
 			visualId = "price_matrix_" + this.visual.ID + "_" + key;
-		}	
-		
+		}
+
 		if(!!this.obPopupWinMatrix)
 			this.obPopupWinMatrix.close();
 
 		this.obPopupWinMatrix = BX.PopupWindowManager.create(visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			draggable: false,
 			closeByEsc: false,
 			className: "pop-up price-ranges",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: false
 		});
-				
+
 		var content = BX.create("div", {
-			props: {					
+			props: {
 				className: "price-ranges__block"
 			}
 		});
-		
+
 		if(this.productType == "3") {
 			for(var j in this.currentPriceMatrixOffer[this.offerNum][key]) {
 				content.appendChild(BX.create("div", {
-					props: {					
+					props: {
 						className: "price-ranges__row"
 					},
 					children: [
@@ -2112,7 +2112,7 @@
 		} else {
 			for(var k in this.currentPriceMatrix[key]) {
 				content.appendChild(BX.create("div", {
-					props: {					
+					props: {
 						className: "price-ranges__row"
 					},
 					children: [
@@ -2143,15 +2143,15 @@
 				}));
 			}
 		}
-		
+
 		this.obPopupWinMatrix.setContent(content);
-		
+
 		var close = BX.findChild(BX(visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
-		
+
 		BX.adjust(BX(target.parentNode),{children:[BX(this.obPopupWinMatrix.popupContainer)]});
-		
+
 		BX.adjust(BX(visualId),{style : {"display" : "block"}});
 	};
 })(window);
