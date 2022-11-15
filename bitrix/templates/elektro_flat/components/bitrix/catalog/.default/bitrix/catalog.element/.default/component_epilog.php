@@ -577,4 +577,4 @@ if($CurPageAr[1]=="catalog"){
         	$APPLICATION->AddChainItem($parentSection["NAME"], "/catalog/".$parentSection["CODE"]."/", true);
         }
     }
- 	$APPLICATION->AddChainItem(html_entity_decode($arResult["NAME"]), "", true);
+ 	$APPLICATION->AddChainItem(str_replace(['&amp;', 'amp;', 'quot;'], '', html_entity_decode($arResult["NAME"])), "", true);
