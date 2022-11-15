@@ -8,8 +8,8 @@ $APPLICATION->SetPageProperty("description", "Купить медицинско�
 $APPLICATION->SetTitle("Каталог медицинского оборудования ");?>
 
 <?$APPLICATION->IncludeComponent(
-	"bitrix:catalog", 
-	".default", 
+	"bitrix:catalog",
+	".default",
 	array(
 		"1CB_FILE_FIELD_MAX_COUNT" => "5",
 		"1CB_FILE_FIELD_MULTIPLE" => "Y",
@@ -261,7 +261,7 @@ $APPLICATION->SetTitle("Каталог медицинского оборудов
 		),
 		"USE_ALSO_BUY" => "N",
 		"USE_BIG_DATA" => "Y",
-		"USE_COMPARE" => "Y",
+		"USE_COMPARE" => "N",
 		"USE_ELEMENT_COUNTER" => "Y",
 		"USE_FILTER" => "Y",
 		"USE_FILTER_SEO" => "Y",

@@ -3,7 +3,7 @@
 global $USER;
 if(!$USER->IsAuthorized())
 	return;
-	
+
 global $arSetting;
 
 if($_REQUEST["show_canceled"] == "Y")
@@ -24,7 +24,7 @@ else
 	<?if(!empty($arResult["ORDERS"])) {?>
 		<div class="cart-items">
 			<div class="equipment-order list">
-				<div class="thead">					
+				<div class="thead">
 					<div class="cart-item-number-date"><?=GetMessage("STPOL_ORDER_NUMBER_DATE")?></div>
 					<div class="cart-item-status"><?=GetMessage("STPOL_ORDER_STATUS")?></div>
 					<div class="cart-item-payment"><?=GetMessage("STPOL_ORDER_PAYMENT")?></div>
@@ -43,16 +43,16 @@ else
 												$("#plus-minus-<?=$accountHashNumber?>").click(function() {
 													var clickitem = $(this);
 													if(clickitem.hasClass("plus")) {
-														clickitem.removeClass().addClass("minus active");							
+														clickitem.removeClass().addClass("minus active");
 													} else {
-														clickitem.removeClass().addClass("plus");									
+														clickitem.removeClass().addClass("plus");
 													}
 													$(".cart-items.basket.<?=$accountHashNumber?>, .order-recipient.<?=$accountHashNumber?>, .order-item-actions.<?=$accountHashNumber?>").slideToggle();
 												});
 											});
 										</script>
 										<a href="javascript:void(0)" id="plus-minus-<?=$accountHashNumber?>" class="plus"><i class="fa fa-plus-circle"></i><i class="fa fa-minus-circle"></i></a>
-									</div>									
+									</div>
 									<div class="cart-item-number-date">
 										<span class="cart-item-number"><?=$val["ORDER"]["ACCOUNT_NUMBER"]?></span>
 										<?=$val["ORDER"]["DATE_INSERT_FORMATED"];?>
@@ -73,7 +73,7 @@ else
 										<div class="cart-item-payment-title">
 											<?=$payment['PAY_SYSTEM_NAME'];?>
 											<?if ($payment['PAID'] === 'N' && $payment['IS_CASH'] !== 'Y') {?>
-												<?if ($val['ORDER']['IS_ALLOW_PAY'] != 'N' && $page != 'cancel') {?>
+												<?if ($val['ORDER']['IS_ALLOW_PAY'] != 'N' && $page != 'cancel' && false) {?>
 													<?if($payment['NEW_WINDOW'] === 'Y'){?>
 														<a href="<?=htmlspecialcharsbx($payment['PSA_ACTION_FILE'])?>" target="_blank"><?=GetMessage("STPOL_REPEAT_PAY")?></a>
 													<?}else{?>
@@ -102,7 +102,7 @@ else
 										<?}?>
 									</div>
 								</div>
-								
+
 								<div class="cart-items basket <?=$accountHashNumber?>" style="display:none;">
 									<div class="equipment-order basket">
 										<div class="thead">
@@ -160,7 +160,7 @@ else
 														<div class="cart-item-summa">
 															<span class="sum">
 																<?=CCurrencyLang::CurrencyFormat($arBasketItems["PRICE"] * $arBasketItems["QUANTITY"], $arBasketItems["CURRENCY"], true);?>
-															</span>							
+															</span>
 															<?if($arSetting["REFERENCE_PRICE"]["VALUE"] == "Y" && !empty($arSetting["REFERENCE_PRICE_COEF"]["VALUE"])) {?>
 																<span class="reference-sum">
 																	<?=CCurrencyLang::CurrencyFormat($arBasketItems["PRICE"] * $arBasketItems["QUANTITY"] * $arSetting["REFERENCE_PRICE_COEF"]["VALUE"], $arBasketItems["CURRENCY"], true);?>
@@ -210,7 +210,7 @@ else
 								</div>
 
 								<table class="order-recipient <?=$accountHashNumber?>" style="display:none;">
-									<?if(!empty($val["ORDER"]["ORDER_PROPS"])) {										
+									<?if(!empty($val["ORDER"]["ORDER_PROPS"])) {
 										foreach($val["ORDER"]["ORDER_PROPS"] as $orderProps) {?>
 											<tr>
 												<td class="field-name"><?=$orderProps["NAME"]?>:</td>
@@ -248,9 +248,9 @@ else
 					<?}?>
 				</div>
 			</div>
-		</div>		
-	<?} else {		
-		echo ShowNote(GetMessage("STPOL_NO_ORDERS_NEW"), "infotext");	
+		</div>
+	<?} else {
+		echo ShowNote(GetMessage("STPOL_NO_ORDERS_NEW"), "infotext");
 	}?>
 </div>
 

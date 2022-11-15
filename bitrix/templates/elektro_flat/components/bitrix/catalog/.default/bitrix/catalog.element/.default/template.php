@@ -1218,7 +1218,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							}?>
 						</div>
 						<?//COMPARE_DELAY//?>
-						<?if(!$arResult["COLLECTION"]["THIS"]) {?>
+						<?if(!$arResult["COLLECTION"]["THIS"] && false) {?>
 							<div class="compare_delay">
 								<?//DETAIL_COMPARE//
 								if($arParams["DISPLAY_COMPARE"] == "Y") {?>
@@ -1302,6 +1302,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 							</div>
 						<?}
 						//DETAIL_GEOLOCATION_DELIVERY//?>
+                        <? if(false):?>
 						<div id="<?=$arItemIDs['DELIVERY']?>">
 							<?if($arParams["AJAX_MODE"] == "Y") {?>
 								<div id="delivery-to"></div>
@@ -1346,6 +1347,7 @@ $strTitle = (isset($arResult["IPROPERTY_VALUES"]["ELEMENT_DETAIL_PICTURE_FILE_TI
 								endif;
 							}?>
 						</div>
+                        <? endif; ?>
 						<?//DETAIL_BUTTONS//
 						if($inBtnDelivery) {?>
 							<div class="catalog-detail-buttons">
