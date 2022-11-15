@@ -140,8 +140,8 @@ $inQuickView = in_array("QUICK_VIEW", $arSetting["GENERAL_SETTINGS"]["VALUE"]);
 					</div>
 					<?//ITEM_TITLE//?>
 					<div class="item-all-title">
-						<a class="item-title" href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=$arElement['NAME']?>">
-							<?=$arElement['NAME']?>
+						<a class="item-title" href="<?=$arElement['DETAIL_PAGE_URL']?>" title="<?=str_replace(['&', ';', 'amp', 'quot'], '', html_entity_decode($arElement['NAME']))?>">
+							<?=str_replace(['&', ';', 'amp', 'quot'], '', html_entity_decode($arElement['NAME']))?>
 						</a>
 					</div>
 					<?//ARTICLE_RATING//
