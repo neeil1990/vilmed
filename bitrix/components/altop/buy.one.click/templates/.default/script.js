@@ -2,8 +2,8 @@ if(!window.BX.BocFormSubmit) {
 	BX.BocFormSubmit = function() {
 		var target = BX.proxy_context,
 			popup = BX.findParent(target, {"className" : "pop-up"}),
-			form = BX.findParent(target, {"tag" : "form"}),		
-			alert = BX.findChild(form, {"className": "alert"}, true, false),		
+			form = BX.findParent(target, {"tag" : "form"}),
+			alert = BX.findChild(form, {"className": "alert"}, true, false),
 			captchaWord = BX.findChild(form, {"attribute": {"name": "CAPTCHA_WORD"}}, true, false),
 			captchaImg = BX.findChild(form, {"tagName": "img"}, true, false),
 			captchaSid = BX.findChild(form, {"attribute": {"name": "CAPTCHA_SID"}}, true, false),
@@ -24,15 +24,16 @@ if(!window.BX.BocFormSubmit) {
 				data[formTextarea[i].getAttribute("name")] = formTextarea[i].value;
 			}
 		}
-		
+
 		var wait = BX.showWait(popup);
 		BX.ajax({
 			url: form.getAttribute("action"),
 			data: data,
 			method: "POST",
-			dataType: "json",		
+			dataType: "json",
 			onsuccess: function(data) {
 				if(!!data.success) {
+					ym(55225453,'reachGoal','Kupit_v_1_klik041022');
 					if(!!alert)
 						BX.adjust(alert, {html: "<span class='alertMsg good'><i class='fa fa-check'></i><span class='text'>" + data.success.text + "</span></span>"});
 					BX.adjust(target, {props: {disabled: true}});
@@ -47,7 +48,7 @@ if(!window.BX.BocFormSubmit) {
 						if(!!captchaSid)
 							captchaSid.value = data.error.captcha_code;
 					}
-				}		
+				}
 				BX.closeWait(popup, wait);
 			}
 		});
