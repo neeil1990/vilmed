@@ -169,7 +169,7 @@ if($arParams["OFFERS_SORT_FIELD"] == "PRICE") {
 );
 
 if($element = CIBlockElement::GetByID($ElementID)->GetNext())
-    $APPLICATION->SetTitle(html_entity_decode($element["NAME"]));
+    $APPLICATION->SetTitle(str_replace(['&amp;', 'amp;', 'quot;'], '', html_entity_decode($element["NAME"])));
 ?>
 
 <?//CURRENT_ELEMENT//
