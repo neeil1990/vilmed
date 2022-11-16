@@ -154,14 +154,14 @@ if (!empty($file) && Loader::IncludeModule("iblock")) {
     unset($arFile);
 }
 
-//USER//	
+//USER//
 if ($params["IS_AUTHORIZED"] != "Y") {
     $rsUser = $USER->GetByLogin("technical_boc");
     if ($arUser = $rsUser->Fetch()) {
         $registeredUserID = $arUser["ID"];
     } else {
         $newLogin = "technical_boc";
-        $newEmail = $newLogin . "@" . $newLogin . ".com";
+        $newEmail = $newLogin . "@mail.com";
         $newPass = randString(10);
 
         $arFields = Array(

@@ -15,26 +15,26 @@ if(!empty($arSetting["ORDER_MIN_PRICE"]["VALUE"])){
     $pageUrl = $APPLICATION->GetCurPageParam();
     $query_str = parse_url($pageUrl, PHP_URL_QUERY);
     parse_str($query_str, $query_params);
-    
+
     if ($price > $arSetting["ORDER_MIN_PRICE"]["VALUE"])
         $flag = true;
     else
         $flag = false;
-    
+
     if (array_key_exists('ORDER_ID', $query_params))
         $flag = true;
-    
-    
+
+
 }?>
 <?if($flag){?>
     <? $APPLICATION->IncludeComponent(
-	"bitrix:sale.order.ajax", 
-	".default", 
+	"bitrix:sale.order.ajax",
+	".default",
 	array(
 		"COMPONENT_TEMPLATE" => ".default",
 		"PAY_FROM_ACCOUNT" => "N",
 		"ONLY_FULL_PAY_FROM_ACCOUNT" => "N",
-		"ALLOW_AUTO_REGISTER" => "N",
+		"ALLOW_AUTO_REGISTER" => "Y",
 		"SEND_NEW_USER_NOTIFY" => "Y",
 		"DELIVERY_NO_AJAX" => "N",
 		"SHOW_NOT_CALCULATED_DELIVERIES" => "L",
