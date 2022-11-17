@@ -1824,7 +1824,7 @@
 					html: "<i class='fa fa-check'></i><span>" + BX.message("DETAIL_ADDITEMINCART_ADDED") + "</span>"
 				});
                 if(this.visual.ADD2BASKET_WINDOW=="Y") {
-                    this.BasketResult();
+					flyingCart($(target), $('.cart'), this);
                 }
 			}, this)
 		);
