@@ -217,3 +217,28 @@ $(function() {
 	}
 
 });
+
+function flyingCart(from, to, JCCatalogItem) {
+
+	let origin = from;
+	let block = $('<div></div>').append(origin.html());
+	block.css({
+		'z-index': 100500,
+		background: '#b21001',
+		top: origin.offset().top,
+		left: origin.offset().left,
+		width: origin.width()+'px',
+		height: origin.height()+'px',
+		position: 'absolute',
+		overflow: 'hidden'
+	}).appendTo('body').css({'padding':'10px','background':'#b21001','color':'#fff'}).animate({
+		top: to.offset().top,
+		left: to.offset().left,
+		width: '10px',
+		height: '10px',
+		opacity: 0.7
+	}, 600, function() {
+		$(this).remove();
+		JCCatalogItem.BasketResult();
+	});
+}

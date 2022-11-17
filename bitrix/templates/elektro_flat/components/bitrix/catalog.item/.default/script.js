@@ -587,6 +587,7 @@
     };
 
     window.JCCatalogItem.prototype.Add2Basket = function () {
+
         var target = BX.proxy_context,
             form = BX.findParent(target, {"tag": "form"}),
             formInputs = BX.findChildren(form, {"tag": "input"}, true);
@@ -622,7 +623,7 @@
                     html: "<i class='fa fa-check'></i><span>" + BX.message("ADDITEMINCART_ADDED") + "</span>"
                 });
                 if (this.visual.ADD2BASKET_WINDOW == "Y") {
-                    this.BasketResult();
+                    flyingCart($(target), $('.cart'), this);
                 }
             }, this)
         );

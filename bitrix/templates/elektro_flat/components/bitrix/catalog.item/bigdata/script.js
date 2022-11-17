@@ -2,13 +2,13 @@
 
 	if(!!window.JCCatalogBigdataItem) {
 		return;
-	}	
+	}
 
 	var BasketButton = function(params) {
-		BasketButton.superclass.constructor.apply(this, arguments);		
+		BasketButton.superclass.constructor.apply(this, arguments);
 		this.buttonNode = BX.create("button", {
 			text: params.text,
-			attrs: { 
+			attrs: {
 				name: params.name,
 				className: params.className
 			},
@@ -32,21 +32,21 @@
 		this.currentCurrency = "";
 		this.currentPriceSelected = 0;
 		this.currentQuantityRanges = [];
-		this.currentPriceMatrix = [];					   
-		
+		this.currentPriceMatrix = [];
+
 		this.precision = 6;
 		this.precisionFactor = Math.pow(10, this.precision);
 
 		this.visual = {
 			ID: ""
 		};
-		
-		this.product = {			
+
+		this.product = {
 			id: 0,
 			name: "",
 			pict: {}
 		};
-			
+
 		this.offer = {
 			id: 0
 		};
@@ -55,13 +55,13 @@
 		this.obPopupBtn = null;
 		this.obPropsBtn = null;
 		this.obBtnBuy = null;
-		this.obPriceMatrix = null	
+		this.obPriceMatrix = null
 		this.obPopupWin = null;
 		this.basketParams = {};
-			
+
 		this.errorCode = 0;
 
-		if("object" === typeof arParams) {			
+		if("object" === typeof arParams) {
 			this.visual = arParams.VISUAL;
 
 			if(!!arParams.PRODUCT && "object" === typeof(arParams.PRODUCT)) {
@@ -73,7 +73,7 @@
 				this.currentPrices = arParams.PRODUCT.ITEM_PRICES;
 				this.currentCurrency = arParams.PRODUCT.PRINT_CURRENCY;
 				this.currentPriceSelected = arParams.PRODUCT.ITEM_PRICE_SELECTED;
-				this.currentQuantityRanges = arParams.PRODUCT.ITEM_QUANTITY_RANGES;	
+				this.currentQuantityRanges = arParams.PRODUCT.ITEM_QUANTITY_RANGES;
 				this.currentPriceMatrix = arParams.PRODUCT.PRICE_MATRIX;
 
                 this.minQuantityPrice = arParams.PRODUCT.QUANTITY_FROM;
@@ -107,7 +107,7 @@
 		this.obQuantityUp = BX("quantity_plus_" + this.visual.ID);
 		if(!!this.obQuantityUp)
 			BX.bind(this.obQuantityUp, "click", BX.delegate(this.QuantityUp, this));
-				
+
 		this.obQuantityDown = BX("quantity_minus_" + this.visual.ID);
 		if(!!this.obQuantityDown)
 			BX.bind(this.obQuantityDown, "click", BX.delegate(this.QuantityDown, this));
@@ -120,34 +120,34 @@
 			this.obPopupBtn = BX(this.visual.POPUP_BTN_ID);
 			BX.bind(this.obPopupBtn, "click", BX.delegate(this.OpenFormPopup, this));
 		}
-		
+
 		if(!!this.visual.PROPS_BTN_ID) {
 			this.obPropsBtn = BX(this.visual.PROPS_BTN_ID);
 			BX.bind(this.obPropsBtn, "click", BX.delegate(this.OpenPropsPopup, this));
 		}
-		
+
 		if(!!this.visual.BTN_BUY_ID) {
 			this.obBtnBuy = BX(this.visual.BTN_BUY_ID);
 			BX.bind(this.obBtnBuy, "click", BX.delegate(this.Add2Basket, this));
 		}
-		
-		if(!!this.visual.QUICK_VIEW){	
+
+		if(!!this.visual.QUICK_VIEW){
 		    this.obPopupQuickView = BX(this.visual.QUICK_VIEW);
-		    BX.bind(this.obPopupQuickView, "click", BX.delegate(this.OpenFormPopupQuickView, this));				
+		    BX.bind(this.obPopupQuickView, "click", BX.delegate(this.OpenFormPopupQuickView, this));
 		}
-		
+
 		if(!!this.visual.PRICE_MATRIX_BTN_ID) {
 			for(var key in this.visual.PRICE_MATRIX_BTN_ID) {
 				this.obPriceMatrix = BX(this.visual.PRICE_MATRIX_BTN_ID[key]);
 				BX.bind(this.obPriceMatrix, "click", BX.delegate(this.OpenPriceMatrixPopup, this));
-			}	
+			}
 		}
 	};
 
 	window.JCCatalogBigdataItem.prototype.QuantityUp = function() {
 		var curValue = 0,
 			boolSet = true;
-		
+
 		curValue = (this.isDblQuantity ? parseFloat(this.obQuantity.value) : parseInt(this.obQuantity.value, 10));
 		if(!isNaN(curValue)) {
 			curValue += this.stepQuantity;
@@ -235,28 +235,28 @@
 	window.JCCatalogBigdataItem.prototype.OpenPriceRangesPopup = function() {
 		var target = BX.proxy_context,
 			visualId = "price_ranges_" + this.visual.ID;
-		
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
 		this.obPopupWin = BX.PopupWindowManager.create(visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			draggable: false,
 			closeByEsc: false,
 			className: "pop-up price-ranges",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: false
 		});
-				
+
 		var content = BX.create("div", {
-			props: {					
+			props: {
 				className: "price-ranges__block"
 			}
 		});
 		for(var k in this.currentQuantityRanges) {
-			if(this.currentQuantityRanges[k].HASH !== "ZERO-INF") {				
+			if(this.currentQuantityRanges[k].HASH !== "ZERO-INF") {
 				for(var j in this.currentPrices) {
 					if(this.currentPrices[j].QUANTITY_HASH === this.currentQuantityRanges[k].HASH) {
 						break;
@@ -264,7 +264,7 @@
 				}
 				if(!!this.currentPrices[j]) {
 					content.appendChild(BX.create("div", {
-						props: {					
+						props: {
 							className: "price-ranges__row"
 						},
 						children: [
@@ -297,44 +297,44 @@
 			}
 		}
 		this.obPopupWin.setContent(content);
-		
+
 		var close = BX.findChild(BX(visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
-		
+
 		target.parentNode.appendChild(BX(visualId));
-		
+
 		this.obPopupWin.show();
 	};
-	
+
 	window.JCCatalogBigdataItem.prototype.OpenPriceMatrixPopup = function() {
 		var target = BX.proxy_context,
 			key = target.getAttribute("data-key");
 			visualId = "price_matrix_" + this.visual.ID + "_" + key;
-		
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
 		this.obPopupWin = BX.PopupWindowManager.create(visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			draggable: false,
 			closeByEsc: false,
 			className: "pop-up price-ranges",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: false
 		});
-				
+
 		var content = BX.create("div", {
-			props: {					
+			props: {
 				className: "price-ranges__block"
 			}
 		});
-		
+
 		for(var k in this.currentPriceMatrix[key]) {
 			content.appendChild(BX.create("div", {
-				props: {					
+				props: {
 					className: "price-ranges__row"
 				},
 				children: [
@@ -364,23 +364,23 @@
 				]
 			}));
 		}
-		
+
 		this.obPopupWin.setContent(content);
-		
+
 		var close = BX.findChild(BX(visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
-		
+
 		target.parentNode.appendChild(BX(visualId));
-		
+
 		this.obPopupWin.show();
-	};																							
-																  
+	};
+
 	window.JCCatalogBigdataItem.prototype.OpenPropsPopup = function() {
 		var visualId = this.visual.ID+"1",
 			elementId = this.product.id,
 			offerId = this.offer.id;
-		
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
@@ -449,30 +449,30 @@
 			visualId = action + "_" + this.visual.ID,
 			elementId = this.product.id,
 			elementName = this.product.name;
-		
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
 		this.obPopupWin = BX.PopupWindowManager.create(visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			overlay: {
 				opacity: 100
 			},
 			draggable: false,
 			closeByEsc: false,
 			className: "pop-up forms full",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: true,
-			content: "<div class='popup-window-wait'><i class='fa fa-spinner fa-pulse'></i></div>",			
+			content: "<div class='popup-window-wait'><i class='fa fa-spinner fa-pulse'></i></div>",
 			events: {
 				onAfterPopupShow: function()
 				{
 					if(!BX(visualId + "_form")) {
 						BX.ajax.post(
 							BX.message("BIGDATA_COMPONENT_TEMPLATE") + "/popup.php",
-							{							
+							{
 								sessid: BX.bitrix_sessid(),
 								action: action,
 								arParams: {
@@ -491,41 +491,41 @@
 							},
 							this)
 						);
-					}					
+					}
 				}
-			}			
+			}
 		});
-		
+
 		var close = BX.findChild(BX(visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
 
-		this.obPopupWin.show();		
+		this.obPopupWin.show();
 	};
-	
-	window.JCCatalogBigdataItem.prototype.OpenFormPopupQuickView = function() {	
-	    
+
+	window.JCCatalogBigdataItem.prototype.OpenFormPopupQuickView = function() {
+
 		var target = BX.proxy_context,
 			action = target.getAttribute("data-action"),
 			visualId = action + "_" + this.visual.ID,
 			elementId = this.product.id,
-			elementName = this.product.name;	
-						
-	
+			elementName = this.product.name;
+
+
 		if(!!this.obPopupWin)
 			this.obPopupWin.close();
 
 		this.obPopupWin = BX.PopupWindowManager.create(visualId, null, {
 			autoHide: true,
 			offsetLeft: 0,
-			offsetTop: 0,			
+			offsetTop: 0,
 			overlay: {
 				opacity: 100
 			},
 			draggable: false,
 			closeByEsc: true,
 			className: "pop-up forms quick-view",
-			closeIcon: { right : "-10px", top : "-10px"},			
+			closeIcon: { right : "-10px", top : "-10px"},
 			titleBar: elementName,
 			content: "<div class='popup-window-wait'><i class='fa fa-spinner fa-pulse'></i></div>",
 			events: {
@@ -534,35 +534,35 @@
 					if(!BX(visualId + "_form")) {
 						BX.ajax.post(
 							BX.message("BIGDATA_COMPONENT_TEMPLATE") + "/popup.php",
-							{							
+							{
 								sessid: BX.bitrix_sessid(),
-								action: action,	
+								action: action,
 								arParams: BX.message("BIGDATA_COMPONENT_PARAMS"),
 								ELEMENT_ID: elementId,
-								STR_MAIN_ID: visualId								
+								STR_MAIN_ID: visualId
 							},
 							BX.delegate(function(result)
 							{
 								BX.addClass(BX("for-quick-view-header"),"shift");
 							    BX.addClass(BX("for-quick-view-footer"),"shift");
-							  
+
 								this.setContent(result);
 								var windowSize =  BX.GetWindowInnerSize(),
 								windowScroll = BX.GetWindowScrollPos(),
 								popupHeight = BX(visualId).offsetHeight;
-								
+
 								var contentHeight=((windowSize.innerHeight*80)/100);
-								BX(visualId).style.top = windowSize.innerHeight/2 - contentHeight/2 + windowScroll.scrollTop + "px";					
-							
-								$(".popup-window-content").height(contentHeight-52); 								
-							
+								BX(visualId).style.top = windowSize.innerHeight/2 - contentHeight/2 + windowScroll.scrollTop + "px";
+
+								$(".popup-window-content").height(contentHeight-52);
+
                                 BX.style(document.body, 'overflow', 'hidden');
 							},
 							this)
 						);
-					}					
+					}
 				},
-				onPopupClose : function(){                
+				onPopupClose : function(){
                     BX.style(document.body, 'overflow', 'visible');
 		            BX.removeClass(BX("for-quick-view-header"),"shift");
 				    BX.removeClass(BX("for-quick-view-footer"),"shift");
@@ -574,9 +574,9 @@
                     }
                     $.fancybox.close();
                 },
-			}			
+			}
 		});
-		
+
 		var close = BX.findChild(BX(visualId), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
@@ -584,21 +584,22 @@
 		this.obPopupWin.show();
 	};
 
-	
+
 	window.JCCatalogBigdataItem.prototype.Add2Basket = function() {
+
 		var target = BX.proxy_context,
 			form = BX.findParent(target, {"tag" : "form"}),
 			formInputs = BX.findChildren(form, {"tag" : "input"}, true);
-		
+
 		if(!!formInputs && 0 < formInputs.length) {
 			for(i = 0; i < formInputs.length; i++) {
 				this.basketParams[formInputs[i].getAttribute("name")] = formInputs[i].value;
 			}
 		}
-		
+
 		BX.ajax.post(
-			form.getAttribute("action"),			
-			this.basketParams,			
+			form.getAttribute("action"),
+			this.basketParams,
 			BX.delegate(function(result) {
 				if(location.pathname != BX.message("BIGDATA_SITE_DIR") + "personal/cart/") {
 					BX.ajax.post(
@@ -614,7 +615,7 @@
 						BX.delegate(function(data) {
 							var delayLine = BX.findChild(document.body, {className: "delay_line"}, true, false);
 							if(!!delayLine)
-							delayLine.innerHTML = data;							
+							delayLine.innerHTML = data;
 						}, this)
 					);
 				}
@@ -624,13 +625,13 @@
 				});
 				if(location.pathname != BX.message("BIGDATA_SITE_DIR") + "personal/cart/") {
                     if(this.visual.ADD2BASKET_WINDOW=="Y") {
-                        this.BasketResult();
+						flyingCart($(target), $('.cart'), this);
                     }
 				} else {
 					this.BasketRedirect();
 				}
-			}, this)			
-		);		
+			}, this)
+		);
 	};
 
 	window.JCCatalogBigdataItem.prototype.BasketResult = function() {
@@ -644,7 +645,7 @@
 		if(!!this.obPopupWin) {
 			this.obPopupWin.close();
 		}
-		
+
 		this.obPopupWin = BX.PopupWindowManager.create("addItemInCart", null, {
 			autoHide: true,
 			offsetLeft: 0,
@@ -653,12 +654,12 @@
 				opacity: 100
 			},
 			draggable: false,
-			closeByEsc: true,	
+			closeByEsc: true,
 			className: "pop-up modal",
 			closeIcon: {top: "-10px", right: "-10px"},
-			titleBar: {content: BX.create("span", {html: BX.message("BIGDATA_POPUP_WINDOW_TITLE")})}			
+			titleBar: {content: BX.create("span", {html: BX.message("BIGDATA_POPUP_WINDOW_TITLE")})}
 		});
-		
+
 		close = BX.findChild(BX("addItemInCart"), {className: "popup-window-close-icon"}, true, false);
 		if(!!close)
 			close.innerHTML = "<i class='fa fa-times'></i>";
@@ -666,11 +667,11 @@
 		strPictSrc = this.product.pict.SRC;
 		strPictWidth = this.product.pict.WIDTH;
 		strPictHeight = this.product.pict.HEIGHT;
-		
+
 		strContent = "<div class='cont'><div class='item_image_cont'><div class='item_image_full'><img src='" + strPictSrc + "' width='" + strPictWidth + "' height='" + strPictHeight + "' alt='"+ this.product.name +"' /></div></div><div class='item_title'>" + this.product.name + "</div></div>";
 
-		buttons = [			
-			new BasketButton({				
+		buttons = [
+			new BasketButton({
 				text: BX.message("BIGDATA_POPUP_WINDOW_BTN_CLOSE"),
 				name: "close",
 				className: "btn_buy ppp close",
@@ -678,7 +679,7 @@
 					click: BX.delegate(this.obPopupWin.close, this.obPopupWin)
 				}
 			}),
-			new BasketButton({				
+			new BasketButton({
 				text: BX.message("BIGDATA_POPUP_WINDOW_BTN_ORDER"),
 				name: "order",
 				className: "btn_buy popdef order",
@@ -687,10 +688,10 @@
 				}
 			})
 		];
-		
+
 		this.obPopupWin.setContent(strContent);
 		this.obPopupWin.setButtons(buttons);
-		this.obPopupWin.show();	
+		this.obPopupWin.show();
 	};
 
 	window.JCCatalogBigdataItem.prototype.BasketRedirect = function() {
