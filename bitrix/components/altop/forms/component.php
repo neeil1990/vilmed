@@ -56,32 +56,32 @@ $arParams["PARAMS_STRING"] = strtr(base64_encode(serialize($arParams["PARAMS_STR
 if($this->StartResultCache()) {
 	//IBLOCK//
 	$arIblock = CIBlock::GetList(array("SORT" => "ASC"), array("ID" => $arParams["IBLOCK_ID"], "ACTIVE" => "Y"))->Fetch();
-	
+
 	if(empty($arIblock)) {
 		$this->abortResultCache();
 		return;
 	}
-	
+
 	$arResult["IBLOCK"]["ID"] = $arIblock["ID"];
 	$arResult["IBLOCK"]["CODE"] = $arIblock["CODE"];
 	$arResult["IBLOCK"]["NAME"] = $arIblock["NAME"];
 
 	//ELEMENT_AREA_ID//
 	$arResult["ELEMENT_AREA_ID"] = !empty($arParams["ELEMENT_AREA_ID"]) ? $arParams["ELEMENT_AREA_ID"] : $arResult["IBLOCK"]["CODE"];
-	
+
 	//IBLOCK_PROPS//
 	$rsProps = CIBlock::GetProperties($arIblock["ID"], array("SORT" => "ASC", "NAME" => "ASC"), array("ACTIVE" => "Y", array("LOGIC" => "OR", array("PROPERTY_TYPE" => "S"), array("PROPERTY_TYPE" => "F"))));
 	while($arProps = $rsProps->fetch()) {
 		$arResult["IBLOCK"]["PROPERTIES"][] = $arProps;
 	}
-	
+
 	if(!isset($arResult["IBLOCK"]["PROPERTIES"]) || empty($arResult["IBLOCK"]["PROPERTIES"])) {
 		$this->abortResultCache();
 		return;
 	}
-	
+
 	$arResult["IBLOCK"]["STRING"] = strtr(base64_encode(serialize($arResult["IBLOCK"])), "+/=", "-_,");
-	
+
 	//ELEMENT//
 	if($arParams["ELEMENT_ID"] > 0) {
 		$arElement = CIBlockElement::GetList(
@@ -98,9 +98,9 @@ if($this->StartResultCache()) {
 			$this->abortResultCache();
 			return;
 		}
-		
+
 		$arResult["ELEMENT"]["ID"] = $arElement["ID"];
-		$arResult["ELEMENT"]["NAME"] = $arElement["NAME"];
+		$arResult["ELEMENT"]["NAME"] = $arParams["ELEMENT_NAME"] ?? $arElement["NAME"];
 
 		if($arElement["PREVIEW_PICTURE"] <= 0 && $arElement["DETAIL_PICTURE"] <= 0) {
 			$mxResult = CCatalogSku::GetProductInfo($arElement["ID"]);
@@ -124,7 +124,7 @@ if($this->StartResultCache()) {
 					array("width" => 178, "height" => 178),
 					BX_RESIZE_IMAGE_PROPORTIONAL,
 					true
-				);		
+				);
 				$arResult["ELEMENT"]["PREVIEW_PICTURE"] = array(
 					"SRC" => $arFileTmp["src"],
 					"WIDTH" => $arFileTmp["width"],
@@ -141,7 +141,7 @@ if($this->StartResultCache()) {
 					array("width" => 178, "height" => 178),
 					BX_RESIZE_IMAGE_PROPORTIONAL,
 					true
-				);		
+				);
 				$arResult["ELEMENT"]["PREVIEW_PICTURE"] = array(
 					"SRC" => $arFileTmp["src"],
 					"WIDTH" => $arFileTmp["width"],
@@ -158,7 +158,7 @@ if($this->StartResultCache()) {
 		$arResult["USER"]["NAME"] = $USER->GetFullName();
 		$arResult["USER"]["EMAIL"] = $USER->GetEmail();
 	}
-	
+
 	$this->setResultCacheKeys(array(
 		"ELEMENT_AREA_ID"
 	));

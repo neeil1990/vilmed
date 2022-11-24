@@ -17,8 +17,8 @@ if($arResult["ELEMENT"]["ID"] > 0):?>
 	</div>
 <?endif;?>
 <form action="<?=$this->__component->__path?>/script.php" id="<?=$arResult['ELEMENT_AREA_ID']?>_form" enctype="multipart/form-data">
-	<span class="alert"></span>	
-	<?foreach($arResult["IBLOCK"]["PROPERTIES"] as $arProp):		
+	<span class="alert"></span>
+	<?foreach($arResult["IBLOCK"]["PROPERTIES"] as $arProp):
 		if($arProp["CODE"] != "PRODUCT" && $arProp["CODE"] != "PRODUCT_PRICE"):?>
 			<div class="row">
 				<div class="span1"><?=($arProp["CODE"] == "PRICE" ? Loc::getMessage("FORMS_PRICE") : $arProp["NAME"]).($arProp["IS_REQUIRED"] == "Y" ? "<span class='mf-req'>*</span>" : "");?></div>
@@ -29,7 +29,7 @@ if($arResult["ELEMENT"]["ID"] > 0):?>
 						<?} else {?>
 							<textarea name="<?=$arProp['CODE']?>" rows="3" style="height:<?=$arProp['USER_TYPE_SETTINGS']['height']?>px; min-height:<?=$arProp['USER_TYPE_SETTINGS']['height']?>px; max-height:<?=$arProp['USER_TYPE_SETTINGS']['height']?>px;"></textarea>
 						<?}
-					} elseif($arProp["PROPERTY_TYPE"] == "F" && class_exists("Bitrix\Main\UI\FileInput", true)) {						
+					} elseif($arProp["PROPERTY_TYPE"] == "F" && class_exists("Bitrix\Main\UI\FileInput", true)) {
 						echo Bitrix\Main\UI\FileInput::createInstance(
 							array(
 								"name" => $arProp["CODE"]."[n#IND#]",
@@ -53,7 +53,7 @@ if($arResult["ELEMENT"]["ID"] > 0):?>
 	if($arParams["USE_CAPTCHA"] == "Y"):?>
 		<div class="row">
 			<div class="span1"><?=Loc::getMessage("FORMS_CAPTCHA")?><span class="mf-req">*</span></div>
-			<div class="span2">					
+			<div class="span2">
 				<input type="text" name="CAPTCHA_WORD" maxlength="5" value="" />
 				<img src="" width="127" height="30" alt="CAPTCHA" style="display:none;" />
 				<input type="hidden" name="CAPTCHA_SID" value="" />
@@ -68,7 +68,7 @@ if($arResult["ELEMENT"]["ID"] > 0):?>
 			<input type="hidden" name="PERSONAL_DATA" id="PERSONAL_DATA_<?=$arResult['ELEMENT_AREA_ID']?>" value="N">
 			<div class="checkbox">
 				<span class="input-checkbox" id="input-checkbox_<?=$arResult['ELEMENT_AREA_ID']?>"></span>
-			</div>	
+			</div>
 			<div class="label">
 				<?=$arParams["TEXT_PERSONAL_DATA"]?>
 			</div>
@@ -91,10 +91,10 @@ if($arResult["ELEMENT"]["ID"] > 0):?>
 				input.inputmask("<?=$arParams['PHONE_MASK']?>");
 		<?endif;
 	endforeach;?>
-	
+
 	//FORM_SUBMIT//
 	BX.bind(BX("<?=$arResult['ELEMENT_AREA_ID']?>_btn"), "click", BX.delegate(BX.PopupFormSubmit, BX));
-	
+
 	//CHEKED//
 	BX.bind(BX("input-checkbox_<?=$arResult['ELEMENT_AREA_ID']?>"),"click",function(){
 		if(!BX.hasClass(BX("input-checkbox_<?=$arResult['ELEMENT_AREA_ID']?>"),"cheked")){
