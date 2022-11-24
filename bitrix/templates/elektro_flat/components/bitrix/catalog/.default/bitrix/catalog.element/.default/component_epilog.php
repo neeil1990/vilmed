@@ -550,11 +550,13 @@ if($CurPageAr[1]=="catalog"){
     $parentSections = [];
 
     $parentSectionIterator = SectionTable::getList([
+        'order' => ['SECTION_SECTION.LEFT_MARGIN' => 'ASC'],
         'select' => [
         	'NAME' => 'SECTION_SECTION.NAME',
         	'CODE' => 'SECTION_SECTION.CODE',
             'SECTION_ID' => 'SECTION_SECTION.ID',
             'IBLOCK_SECTION_ID' => 'SECTION_SECTION.IBLOCK_SECTION_ID',
+            'DEPTH_LEVEL' => 'SECTION_SECTION.DEPTH_LEVEL',
         ],
         'filter' => [
             '=ID' => $arResult['IBLOCK_SECTION_ID'],
