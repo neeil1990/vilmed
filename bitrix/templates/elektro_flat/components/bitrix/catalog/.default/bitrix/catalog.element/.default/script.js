@@ -363,7 +363,8 @@
 						quantityDownItems = BX.findChildren(this.obBuy, {tagName: "a", className: "minus"}, true);
 						quantityItems = BX.findChildren(this.obBuy, {tagName: "input", className: "quantity"}, true);
 						if(!!this.visual.POPUP_BTN_ID)
-							popupBtnItems = BX.findChildren(this.obBuy, {attribute: {id: this.visual.POPUP_BTN_ID}}, true);
+							popupBtnItems = BX.findChildren(this.obBuy, {className: "btn_buy"}, true);
+
 						buyBtnItems = BX.findChildren(this.obBuy, {tagName: "button", attribute: {name: "add2basket"}}, true);
 						zoomItems = null;
 					}
