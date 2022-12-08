@@ -54,6 +54,8 @@ Disallow: /about/details/
 Disallow: /about/employees/
 Disallow: /about/responses/
 Disallow: /map/
+###############dubli razdely###################
+Disallow: /catalog/veterinarnye-oftalmoskopy-i-rukoyatki/
 #################################################
 Allow: /bitrix/components/
 Allow: /bitrix/cache/
