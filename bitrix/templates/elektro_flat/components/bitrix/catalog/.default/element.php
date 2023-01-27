@@ -172,6 +172,13 @@ if($element = CIBlockElement::GetByID($ElementID)->GetNext())
     $APPLICATION->SetTitle(str_replace(['&amp;', 'amp;', 'quot;'], '', html_entity_decode($element["NAME"])));
 ?>
 
+<?
+$APPLICATION->IncludeFile("/include/element_groups.php", ['ELEMENT_ID' => $ElementID], Array(
+    "MODE"      => "php",
+    "SHOW_BORDER" => false,
+));
+?>
+
 <?//CURRENT_ELEMENT//
 $arCurElement = array();
 $arFilter = array("IBLOCK_ID" => $arParams["IBLOCK_ID"], "ID" => $ElementID);
