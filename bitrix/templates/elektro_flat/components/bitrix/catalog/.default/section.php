@@ -36,7 +36,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 	$arCurSection = $obCache->GetVars();
 } elseif($obCache->StartDataCache()) {
 	$arCurSection = array();
-	$rsSections = CIBlockSection::GetList(array(), $arFilter, false, $arSelect);
+	$rsSections = CIBlockSection::GetList(array(), $arFilter, true, $arSelect);
 	global $CACHE_MANAGER;
 	$CACHE_MANAGER->StartTagCache($cache_dir);
 	$CACHE_MANAGER->RegisterTag("iblock_id_".$arParams["IBLOCK_ID"]);
@@ -55,6 +55,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["TAGS_LIST"] = ($arSection['UF_TAGS_LIST']) ?: false;
 			$arCurSection["TAGS_TITLE"] = ($arSection['UF_TAGS_TITLE']) ?: false;
 			$arCurSection["COUNT_ELEMENT_PAGE"] = ($arSection['UF_COUNT']) ?: false;
+			$arCurSection["ELEMENT_CNT"] = ($arSection['ELEMENT_CNT']);
 			if($arSection["PICTURE"] > 0)
 				$arCurSection["PICTURE"] = CFile::GetFileArray($arSection["PICTURE"]);
 			$arCurSection["DESCRIPTION"] = $arSection["DESCRIPTION"];
@@ -70,7 +71,7 @@ if($obCache->InitCache($arParams["CACHE_TIME"], $cache_id, $cache_dir)) {
 			$arCurSection["SECTION_TITLE_H1"] = $arSection["UF_SECTION_TITLE_H1"];
 
 			$arCurSection["RECOMMENDED_LIST"] = $arSection["UF_RECOMMENDED_LIST"];
-			
+
 			$arCurSection["DISABLE_ADDITIONAL_PRODUCT"] = ($arSection["UF_DISABLE_ADDITIONAL_P"]) ? false : true;
 
 			if(isset($arSection["UF_YOUTUBE_BG"]) && !empty($arSection["UF_YOUTUBE_BG"])) {
@@ -677,6 +678,7 @@ $arSectionParams = array(
     "BUTTON_CREDIT_HREF" => $arParams["BUTTON_CREDIT_HREF"],
     "BUTTON_DELIVERY_HREF" => $arParams["BUTTON_DELIVERY_HREF"],
 );
+
 $intSectionID = $APPLICATION->IncludeComponent("bitrix:catalog.section", "",
     $arSectionParams,
 	$component
@@ -756,7 +758,14 @@ if ($arParams["BY_LINK"] === 'Y')
 }
 ?>
 
-<?//DESCRIPTION//
+<?
+/* RECOMMENDED LIST */
+$APPLICATION->IncludeFile(SITE_TEMPLATE_PATH . "/include/recommended_list.php", Array("SECTION" => $arCurSection, "PARAMS" => $arSectionParams), Array(
+    "MODE" => "php",
+    "SHOW_BORDER" => false,
+));
+
+//DESCRIPTION//
 if(!$_REQUEST["PAGEN_1"] || empty($_REQUEST["PAGEN_1"]) || $_REQUEST["PAGEN_1"] <= 1) {?>
 	<div class="catalog_preview">
 	<?=(!empty($arCurSection["DESCRIPTION"]) && empty($pageSeo["SEO_TEXT"]) ? $arCurSection["DESCRIPTION"] : $pageSeo["SEO_TEXT"])?>
@@ -846,12 +855,6 @@ if($arParams["USE_GIFTS_SECTION"] == "Y" && ModuleManager::isModuleInstalled("sa
 		array("HIDE_ICONS" => "Y")
 	);?>
 <?}
-
-/* RECOMMENDED LIST */
-$APPLICATION->IncludeFile(SITE_TEMPLATE_PATH . "/include/recommended_list.php", Array("SECTION" => $arCurSection, "PARAMS" => $arSectionParams), Array(
-    "MODE" => "php",
-    "SHOW_BORDER" => false,
-));
 
 //BIGDATA_ITEMS//
 if(ModuleManager::isModuleInstalled("sale") && (!isset($arParams["USE_BIG_DATA"]) || $arParams["USE_BIG_DATA"] != "N")) {

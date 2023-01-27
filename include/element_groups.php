@@ -10,6 +10,10 @@ $db_old_groups = CIBlockElement::GetElementGroups($ElementID, true, ['NAME', 'CO
 <style>
     .catalog-detail-section {
         margin-top: 12px;
+        color: #a0a4bc;
+    }
+    .catalog-detail-section a {
+        color: #a0a4bc;
     }
 </style>
 
