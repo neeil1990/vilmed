@@ -178,6 +178,7 @@ if($elementId = $el->Add($arFields)) {
 
 	//SEND_MAIL//
 	$arPropsMess["FORM_NAME"] = $iblock["NAME"];
+	$arPropsMess["ROI_VISIT"] = $_COOKIE['roistat_visit'] ?: "";
 	$arPropsMess["EMAIL_TO"] = Option::get("main", "email_from");
 	
 	$arFiles = array();

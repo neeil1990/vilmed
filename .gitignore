@@ -11,6 +11,8 @@ access/*
 bitrix/html_pages/*
 bitrix/backup/*
 *.log
+*.tar
+*.tar.gz
 sitemap.xml
 sitemap-iblock-*.xml
 sitemap-files.xml

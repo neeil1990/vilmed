@@ -20,3 +20,10 @@ class IblockImportUpdate
         }
     }
 }
+
+AddEventHandler("sale", "OnOrderNewSendEmail", "bxModifySaleMails");
+function bxModifySaleMails($orderID, &$eventName, &$arFields)
+{	
+  if($_COOKIE['roistat_visit'])
+    $arFields["ROI_VISIT"] = $_COOKIE['roistat_visit'];
+}
