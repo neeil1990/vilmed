@@ -218,9 +218,9 @@ if(!empty($arCurElement)) {
         global $arCustomRecommendFilter;
         $arCustomRecommendFilter = Array("ID" => $arCurElement['RECOMMEND']);
 
-        $APPLICATION->IncludeComponent("bitrix:catalog.section", "recommended",
+        $APPLICATION->IncludeComponent("bitrix:catalog.section", "filtered",
             array(
-                "DATA_TITLE" => $arCurElement['TITLE_RECOMMEND'],
+                "PAGER_TITLE" => $arCurElement['TITLE_RECOMMEND'],
                 "SHOW_ALL_WO_SECTION" => "Y",
                 "IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
                 "IBLOCK_ID" => $arParams["IBLOCK_ID"],
@@ -263,7 +263,6 @@ if(!empty($arCurElement)) {
                 "PRODUCT_PROPERTIES" => $arParams["PRODUCT_PROPERTIES"],
                 "DISPLAY_TOP_PAGER" => "N",
                 "DISPLAY_BOTTOM_PAGER" => "N",
-                "PAGER_TITLE" => "",
                 "PAGER_SHOW_ALWAYS" => "N",
                 "PAGER_TEMPLATE" => "",
                 "PAGER_DESC_NUMBERING" => "N",
