@@ -186,11 +186,25 @@ $obCache = new CPHPCache();
 if($obCache->InitCache($arParams["CACHE_TIME"], serialize($arFilter), "/catalog/element")) {
 	$arCurElement = $obCache->GetVars();
 } elseif($obCache->StartDataCache()) {
-	$rsElement = CIBlockElement::GetList(array(), $arFilter, false, false, array("ID", "IBLOCK_ID", "IBLOCK_SECTION_ID", "PROPERTY_THIS_COLLECTION"));
-	if($arElement = $rsElement->GetNext()) {
+	$rsElement = CIBlockElement::GetList(array(), $arFilter, false, false,
+        array(
+            "ID",
+            "IBLOCK_ID",
+            "IBLOCK_SECTION_ID",
+            "PROPERTY_THIS_COLLECTION",
+            "PROPERTY_TITLE_RECOMMEND",
+            "PROPERTY_RECOMMEND",
+        )
+    );
+	if($ob = $rsElement->GetNextElement()) {
+        $arElement = $ob->GetFields();
+        $arProps = $ob->GetProperties();
+
 		$arCurElement = array(
 			"SECTION_ID" => $arElement["IBLOCK_SECTION_ID"],
-			"IS_COLLECTION" => $arElement["PROPERTY_THIS_COLLECTION_VALUE"] != false ? true : false
+			"IS_COLLECTION" => $arElement["PROPERTY_THIS_COLLECTION_VALUE"] != false ? true : false,
+			"TITLE_RECOMMEND" => $arElement["PROPERTY_TITLE_RECOMMEND_VALUE"],
+			"RECOMMEND" => $arProps["RECOMMEND"]["VALUE"],
 		);
 	}
 	$obCache->EndDataCache($arCurElement);
@@ -198,6 +212,109 @@ if($obCache->InitCache($arParams["CACHE_TIME"], serialize($arFilter), "/catalog/
 unset($arFilter);
 
 if(!empty($arCurElement)) {
+
+    //RECOMMENDED PRODUCT
+    if($arCurElement['RECOMMEND']){
+        global $arCustomRecommendFilter;
+        $arCustomRecommendFilter = Array("ID" => $arCurElement['RECOMMEND']);
+
+        $APPLICATION->IncludeComponent("bitrix:catalog.section", "recommended",
+            array(
+                "DATA_TITLE" => $arCurElement['TITLE_RECOMMEND'],
+                "SHOW_ALL_WO_SECTION" => "Y",
+                "IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
+                "IBLOCK_ID" => $arParams["IBLOCK_ID"],
+                "ELEMENT_SORT_FIELD" => "",
+                "ELEMENT_SORT_ORDER" => "",
+                "ELEMENT_SORT_FIELD2" => "",
+                "ELEMENT_SORT_ORDER2" => "",
+                "PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
+                "SET_META_KEYWORDS" => "N",
+                "SET_META_DESCRIPTION" => "N",
+                "SET_BROWSER_TITLE" => "N",
+                "SET_LAST_MODIFIED" => "N",
+                "INCLUDE_SUBSECTIONS" => $arParams["INCLUDE_SUBSECTIONS"],
+                "CUSTOM_FILTER" => "{\"CLASS_ID\":\"CondGroup\",\"DATA\":{\"All\":\"AND\",\"True\":\"True\"},\"CHILDREN\":[]}",
+                "BASKET_URL" => $arParams["BASKET_URL"],
+                "ACTION_VARIABLE" => $arParams["ACTION_VARIABLE"],
+                "PRODUCT_ID_VARIABLE" => $arParams["PRODUCT_ID_VARIABLE"],
+                "SECTION_ID_VARIABLE" => $arParams["SECTION_ID_VARIABLE"],
+                "PRODUCT_QUANTITY_VARIABLE" => $arParams["PRODUCT_QUANTITY_VARIABLE"],
+                "PRODUCT_PROPS_VARIABLE" => $arParams["PRODUCT_PROPS_VARIABLE"],
+                "FILTER_NAME" => "arCustomRecommendFilter",
+                "CACHE_TYPE" => $arParams["CACHE_TYPE"],
+                "CACHE_TIME" => $arParams["CACHE_TIME"],
+                "CACHE_FILTER" => $arParams["CACHE_FILTER"],
+                "CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
+                "SET_TITLE" => "N",
+                "MESSAGE_404" => "",
+                "SET_STATUS_404" => "N",
+                "SHOW_404" => "N",
+                "FILE_404" => "",
+                "DISPLAY_COMPARE" => $arParams["USE_COMPARE"],
+                "PAGE_ELEMENT_COUNT" => "30",
+                "PRICE_CODE" => $arParams["PRICE_CODE"],
+                "USE_PRICE_COUNT" => $arParams["USE_PRICE_COUNT"],
+                "SHOW_PRICE_COUNT" => $arParams["SHOW_PRICE_COUNT"],
+                "PRICE_VAT_INCLUDE" => $arParams["PRICE_VAT_INCLUDE"],
+                "USE_PRODUCT_QUANTITY" => $arParams["USE_PRODUCT_QUANTITY"],
+                "ADD_PROPERTIES_TO_BASKET" => isset($arParams["ADD_PROPERTIES_TO_BASKET"]) ? $arParams["ADD_PROPERTIES_TO_BASKET"] : "",
+                "PARTIAL_PRODUCT_PROPERTIES" => isset($arParams["PARTIAL_PRODUCT_PROPERTIES"]) ? $arParams["PARTIAL_PRODUCT_PROPERTIES"] : "",
+                "PRODUCT_PROPERTIES" => $arParams["PRODUCT_PROPERTIES"],
+                "DISPLAY_TOP_PAGER" => "N",
+                "DISPLAY_BOTTOM_PAGER" => "N",
+                "PAGER_TITLE" => "",
+                "PAGER_SHOW_ALWAYS" => "N",
+                "PAGER_TEMPLATE" => "",
+                "PAGER_DESC_NUMBERING" => "N",
+                "PAGER_DESC_NUMBERING_CACHE_TIME" => "",
+                "PAGER_SHOW_ALL" => "N",
+                "PAGER_BASE_LINK_ENABLE" => "N",
+                "PAGER_BASE_LINK" => "",
+                "PAGER_PARAMS_NAME" => "",
+                "OFFERS_CART_PROPERTIES" => $arParams["OFFERS_CART_PROPERTIES"],
+                "OFFERS_FIELD_CODE" => $arParams["LIST_OFFERS_FIELD_CODE"],
+                "OFFERS_PROPERTY_CODE" => $arParams["LIST_OFFERS_PROPERTY_CODE"],
+                "OFFERS_SORT_FIELD" => $arParams["OFFERS_SORT_FIELD"],
+                "OFFERS_SORT_ORDER" => $arParams["OFFERS_SORT_ORDER"],
+                "OFFERS_SORT_FIELD2" => $arParams["OFFERS_SORT_FIELD2"],
+                "OFFERS_SORT_ORDER2" => $arParams["OFFERS_SORT_ORDER2"],
+                "OFFERS_LIMIT" => $arParams["LIST_OFFERS_LIMIT"],
+                "SECTION_ID" => "",
+                "SECTION_CODE" => "",
+                "SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
+                "DETAIL_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["element"],
+                "USE_MAIN_ELEMENT_SECTION" =>"Y",
+                "CONVERT_CURRENCY" => $arParams["CONVERT_CURRENCY"],
+                "CURRENCY_ID" => $arParams["CURRENCY_ID"],
+                "HIDE_NOT_AVAILABLE" => $arParams["HIDE_NOT_AVAILABLE"],
+                "HIDE_NOT_AVAILABLE_OFFERS" => $arParams["HIDE_NOT_AVAILABLE_OFFERS"],
+                "ADD_SECTIONS_CHAIN" => "N",
+                "RCM_TYPE" => isset($arParams["BIG_DATA_RCM_TYPE"]) ? $arParams["BIG_DATA_RCM_TYPE"] : "",
+                "RCM_PROD_ID" => $ElementID,
+                "SHOW_FROM_SECTION" => !$arCurElement["IS_COLLECTION"] ? (isset($arParams["SHOW_FROM_SECTION"]) ? $arParams["SHOW_FROM_SECTION"] : "N") : "N",
+                "BIG_DATA_TITLE" => "Y",
+                "COMPARE_PATH" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["compare"],
+                "BACKGROUND_IMAGE" => "",
+                "DISABLE_INIT_JS_IN_COMPONENT" => isset($arParams["DISABLE_INIT_JS_IN_COMPONENT"]) ? $arParams["DISABLE_INIT_JS_IN_COMPONENT"] : "",
+                "PRODUCT_ROW_VARIANTS" => "[{'VARIANT':'3','BIG_DATA':true}]",
+                "DISPLAY_IMG_WIDTH"	 =>	$arParams["DISPLAY_IMG_WIDTH"],
+                "DISPLAY_IMG_HEIGHT" =>	$arParams["DISPLAY_IMG_HEIGHT"],
+                "PROPERTY_CODE_MOD" => $arParams["PROPERTY_CODE_MOD"],
+                "SHOW_MAX_QUANTITY" => $arParams["SHOW_MAX_QUANTITY"],
+                "MESS_SHOW_MAX_QUANTITY" => (isset($arParams["~MESS_SHOW_MAX_QUANTITY"]) ? $arParams["~MESS_SHOW_MAX_QUANTITY"] : ""),
+                "RELATIVE_QUANTITY_FACTOR" => (isset($arParams["RELATIVE_QUANTITY_FACTOR"]) ? $arParams["RELATIVE_QUANTITY_FACTOR"] : ""),
+                "MESS_RELATIVE_QUANTITY_MANY" => (isset($arParams["~MESS_RELATIVE_QUANTITY_MANY"]) ? $arParams["~MESS_RELATIVE_QUANTITY_MANY"] : ""),
+                "MESS_RELATIVE_QUANTITY_FEW" => (isset($arParams["~MESS_RELATIVE_QUANTITY_FEW"]) ? $arParams["~MESS_RELATIVE_QUANTITY_FEW"] : ""),
+                "BUTTON_PAYMENTS_HREF" => $arParams["BUTTON_PAYMENTS_HREF"],
+                "BUTTON_CREDIT_HREF" => $arParams["BUTTON_CREDIT_HREF"],
+                "BUTTON_DELIVERY_HREF" => $arParams["BUTTON_DELIVERY_HREF"],
+            ),
+            $component,
+            array("HIDE_ICONS" => "Y")
+        );
+    }
+
 	//RELATED_ITEMS//
 	if(!$arCurElement["IS_COLLECTION"] && $arParams["RELATED_PRODUCTS_SHOW"] !== "N") {
 		global $arRelPrFilter;
